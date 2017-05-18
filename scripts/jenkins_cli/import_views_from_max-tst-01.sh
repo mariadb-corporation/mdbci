@@ -23,11 +23,13 @@ if [ -z "$host" ] || [ -z "$port" ]; then
     exit 1
 fi
 
-path_to_views="max-tst-01_views"
+path_to_views="scripts/jenkins_cli/max-tst-01_views"
 max_tst_01_url="http://max-tst-01.mariadb.com"
 max_tst_01_port=8089
+views="axilary build env push_tests regular_test snapshot test upgrade_test"
 
 if [ ! -d "$path_to_views" ]; then
-   ./scripts/export_views.sh -s "$max_tst_01_url" -p "$max_tst_01_port" -d "$path_to_views" -v "axilary build env push_tests regular_test snapshot test upgrade_test"
+   ./scripts/jenkins_cli/export_views.sh -s "$max_tst_01_url" -p "$max_tst_01_port" -d "$path_to_views" -v "$views"
 fi
-./scripts/import_views.sh -s "$host" -p "$port" -d "$path_to_views"
+./scripts/jenkins_cli/import_views.sh -s "$host" -p "$port" -d "$path_to_views"
+
