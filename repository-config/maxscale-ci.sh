@@ -7,7 +7,7 @@ dest=$2
 ci=$1
 
 if [ -z $ci_url ]; then
-	export ci_url="http://maxscale-jenkins.mariadb.com/ci-repository/"
+	export ci_url="http://max-tst-01.mariadb.com/ci-repository/"
 fi
 
 #if [ -z $3 ]; then
