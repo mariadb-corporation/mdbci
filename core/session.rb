@@ -199,7 +199,7 @@ EOF
     params = args.split('/')
     dir = params[0]
     node_arg =  params[1]
-    
+
     # mdbci ppc64 boxes
     if File.exist?(dir+'/mdbci_template')
       loadMdbciNodes dir
@@ -775,7 +775,7 @@ EOF
     Dir.chdir pwd
     $out.info "Generating #{config_path}_network_settings file"
     if up_type == false
-      printConfigurationNetworkInfoToFile(config_path) 
+      printConfigurationNetworkInfoToFile(config_path)
     else
       printConfigurationNetworkInfoToFile(config_path,node)
     end
@@ -958,9 +958,9 @@ EOF
     end
 
   end
-  
+
   def checkRelevanceNetworkConfig(filename)
     system 'scripts/check_network_config.sh ' + filename
-  end  
+  end
 
 end
