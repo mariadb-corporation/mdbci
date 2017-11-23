@@ -2,10 +2,9 @@
 {
    "product":		"maxscale",
    "version":		"default",
-   "repo":		"${production_repo_prefix}/$version/rhel/${platform_version}/\$basearch",
+   "repo":		"${production_url}/$version/rhel/${platform_version}/\$basearch",
    "repo_key":		"${rpm_repo_key}",
    "platform":		"rhel",
    "platform_version":	"${platform_version}"
-}
 }
 ]

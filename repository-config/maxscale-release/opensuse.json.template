@@ -2,10 +2,9 @@
 {
    "product":		"maxscale",
    "version":		"default",
-   "repo":		"${production_repo_prefix}/$version/opensuse/${platform_version}/\$basearch",
+   "repo":		"${production_url}/$version/opensuse/${platform_version}/\$basearch",
    "repo_key":		"${rpm_repo_key}",
    "platform":		"opensuse",
    "platform_version":	"${platform_version}"
-}
 }
 ]
