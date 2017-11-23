@@ -34,6 +34,6 @@ end
 
 describe 'test_spec' do
   execute_shell_commands_and_test_exit_code ([
-      {'shell_command'=>'./mdbci show platforms', 'expectation'=>0},
+      {shell_command: './mdbci show platforms', exit_code: 0},
   ])
 end

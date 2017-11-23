@@ -22,9 +22,9 @@ end
 
 describe 'test_spec' do
   execute_shell_commands_and_test_exit_code ([
-    {'shell_command'=>pretest_command('mariadb', '10.0', "#{CONF_DOCKER}"), 'expectation'=>0},
-    {'shell_command'=>test_command('mariadb', nil, "#{CONF_DOCKER}"), 'expectation'=>0},
-    {'shell_command'=>pretest_command('mariadb', '10.0', "#{CONF_PPC}"), 'expectation'=>0},
-    {'shell_command'=>test_command('mariadb', nil, "#{CONF_PPC}"), 'expectation'=>0}
+    {shell_command: pretest_command('mariadb', '10.0', "#{CONF_DOCKER}"), exit_code: 0},
+    {shell_command: test_command('mariadb', nil, "#{CONF_DOCKER}"), exit_code: 0},
+    {shell_command: pretest_command('mariadb', '10.0', "#{CONF_PPC}"), exit_code: 0},
+    {shell_command: test_command('mariadb', nil, "#{CONF_PPC}"), exit_code: 0}
   ])
 end

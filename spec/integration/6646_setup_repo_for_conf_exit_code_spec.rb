@@ -16,7 +16,7 @@ end
 
 describe nil do
   execute_shell_commands_and_test_exit_code ([
-      {'shell_command' => test_command('mariadb', '10.0', CONF_PPC), 'expectation' => 0},
-      {'shell_command' => test_command('mariadb', '10.0', CONF_DOCKER), 'expectation' => 0}
+      {shell_command: test_command('mariadb', '10.0', CONF_PPC), exit_code: 0},
+      {shell_command: test_command('mariadb', '10.0', CONF_DOCKER), exit_code: 0}
   ])
 end

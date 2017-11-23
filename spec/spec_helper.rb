@@ -15,8 +15,8 @@ module ExecutionHelper
     def execute_shell_commands_and_test_exit_code(shell_commands_with_expectations)
       context 'shell command' do
         shell_commands_with_expectations.each do |shell_command_with_expectation|
-          shell_command = shell_command_with_expectation['shell_command']
-          expectation = shell_command_with_expectation['expectation']
+          shell_command = shell_command_with_expectation[:shell_command]
+          expectation = shell_command_with_expectation[:exit_code]
           it shell_command do
             _, _, _, wait_thr = Open3.popen3(shell_command)
             wait_thr.value.exitstatus.should(eql(expectation))
