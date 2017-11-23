@@ -13,7 +13,7 @@ describe 'test_spec' do
     FileUtils.rm_rf('default') if Dir.exists? 'default'
   end
 
-  executeShellCommandsAndTestExitCode ([
+  execute_shell_commands_and_test_exit_code ([
       {'shell_command' => test_command('', ''), 'expectation' => 1},
       {'shell_command' => test_command('spec/configs/template/centos_6_vbox_mariadb_10.0.json', ''), 'expectation' => 0},
       {'shell_command' => test_command('spec/configs/template/centos_6_vbox_mariadb_10.0.json', 'default'), 'expectation' => 0}

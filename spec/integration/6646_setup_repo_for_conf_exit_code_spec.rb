@@ -15,7 +15,7 @@ def test_command (product, product_version, config_path)
 end
 
 describe nil do
-  executeShellCommandsAndTestExitCode ([
+  execute_shell_commands_and_test_exit_code ([
       {'shell_command' => test_command('mariadb', '10.0', CONF_PPC), 'expectation' => 0},
       {'shell_command' => test_command('mariadb', '10.0', CONF_DOCKER), 'expectation' => 0}
   ])

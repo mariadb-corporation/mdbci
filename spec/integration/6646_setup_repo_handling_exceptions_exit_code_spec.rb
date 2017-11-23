@@ -15,7 +15,7 @@ def test_command (product, product_version, config_path)
 end
 
 describe nil do
-  executeShellCommandsAndTestExitCode ([
+  execute_shell_commands_and_test_exit_code ([
       {'shell_command' => test_command('mariadb', nil, "#{ENV['mdbci_param_conf_docker']}/node1"), 'expectation' => 1},
       {'shell_command' => test_command(nil, '10.0', ENV['mdbci_param_conf_docker']), 'expectation' => 1},
       {'shell_command' => test_command('mariadb', '10.0', nil), 'expectation' => 1},

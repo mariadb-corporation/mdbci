@@ -2,7 +2,7 @@ require 'rspec'
 require_relative '../spec_helper'
 
 describe 'test_spec' do
-  executeShellCommandsAndTestExitCode ([
+  execute_shell_commands_and_test_exit_code ([
     {'shell_command'=>'./mdbci show boxinfo --box-name ubuntu_trusty_vbox --field platform', 'expectation'=>0},
     {'shell_command'=>'./mdbci show boxinfo --box-name ubuntu_trusty_vbox', 'expectation'=>0},
     {'shell_command'=>'./mdbci show boxinfo --box-name ubuntu_trusty_vbox --field', 'expectation'=>1},
