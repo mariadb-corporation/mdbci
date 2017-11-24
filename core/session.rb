@@ -307,38 +307,37 @@ EOF
 
   # show boxes with platform and version
   def showBoxes
-    exit_code = 1
-
-    if $session.boxPlatform.nil?
-      $out.warning './mdbci show boxes --platform command option is not defined!'
-      exit_code = 1
-    elsif $session.boxPlatform.nil? and $session.boxPlatformVersion.nil?
-      $out.warning './mdbci show boxes --platform or --platform-version command parameters are not defined!'
-      exit_code = 1
+    if @boxPlatform.nil?
+      $out.warning 'Required parameter --platform is not defined.'
+      $out.info 'Full command specification:'
+      $out.info './mdbci show boxes --platform PLATFORM [--platform-version VERSION]'
+      return 1
     end
-    # check for undefined box
-    some_box = $session.boxes.boxesManager.find { |box| box[1]['platform'] == $session.boxPlatform }
+    # check for undefined box platform
+    some_box = @boxes.boxesManager.find { |box| box[1]['platform'] == @boxPlatform }
     if some_box.nil?
-      $out.warning 'Platform '+$session.boxPlatform+' is not supported!'
-      exit_code = 1
+      $out.warning "Platform #{@boxPlatform} is not supported!"
+      return 1
+    end
+    if @boxPlatformVersion.nil?
+      $out.warning 'Optional paremeter --platform-version is not defined'
     end
 
-    if !$session.boxPlatformVersion.nil?
-      $out.info 'List of boxes for the '+$session.boxPlatform+'^'+$session.boxPlatformVersion+' platform'
-    else
-      $out.info 'List of boxes for the '+$session.boxPlatform+' platform:'
-    end
-    $session.boxes.boxesManager.each do |box, params|
-      if params.has_value?($session.boxPlatform) and $session.boxPlatformVersion.nil?
-        $out.out box.to_s
-        exit_code = 0
-      elsif params.has_value?($session.boxPlatform) and params.has_value?($session.boxPlatformVersion)
-        $out.out box.to_s
-        exit_code = 0
+    platform_name = if @boxPlatformVersion.nil?
+                      @boxPlatform
+                    else
+                      "#{@boxPlatform}^#{@boxPlatformVersion}"
+                    end
+    $out.info "List of boxes for the #{platform_name} platform:"
+    boxes_found = false
+    @boxes.boxesManager.each do |box, params|
+      if params['platform'] == @boxPlatform && (
+           @boxPlatformVersion.nil? || params['platform_version'] == @boxPlatformVersion)
+        $out.out box
+        boxes_found = true
       end
     end
-
-    return exit_code
+    boxes_found ? 0 : 1
   end
 
   def showBoxField
@@ -480,7 +479,6 @@ EOF
     Clone.new.clone_nodes(path_to_nodes, new_path_to_nodes)
     return 0
   end
-
 
   # all mdbci commands swith
   def commands
