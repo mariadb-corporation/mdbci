@@ -280,18 +280,6 @@ EOF
     return 0
   end
 
-  def showBoxes
-    exit_code = 1
-    begin
-      $out.out JSON.pretty_generate(@boxes.boxesManager)
-      exit_code = 0
-    rescue
-      $out.error "check boxes configuration and try again"
-      exit_code = 1
-    end
-    return exit_code
-  end
-
   def getPlatfroms
     if !@boxes.boxesManager.empty?
       platforms = Array.new
