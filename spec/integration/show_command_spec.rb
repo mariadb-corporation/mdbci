@@ -5,6 +5,7 @@ describe 'Show command' do
     [
       { shell_command: './mdbci show', exit_code: 0 },
       { shell_command: './mdbci show help', exit_code: 0 },
-      { shell_command: './mdbci show UNREAL', exit_code: 1 }
+      { shell_command: './mdbci show UNREAL', exit_code: 2 },
+      { shell_command: './mdbci show box', exit_code: 2 }
     ])
 end

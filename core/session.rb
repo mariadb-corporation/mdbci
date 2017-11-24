@@ -376,9 +376,13 @@ EOF
 
 
   def showBoxNameByPath(path = nil)
+    if path.nil?
+      $out.warning 'Please specify the path to the nodes configuration as a parameter'
+      return 2
+    end
     boxName = $session.boxes.getBoxNameByPath(path)
     $out.out boxName
-    return 0
+    0
   end
 
   def validate_template
@@ -478,7 +482,7 @@ EOF
     if action.nil?
       $out.out "Unknown action for the show command: #{action_name}."
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
-      return 1
+      return 2
     end
     instance_exec(*action_parameters, &action[:action])
   end
