@@ -461,9 +461,9 @@ EOF
   # @param actions [Hash] list of commands that must be described
   def display_usage_info(base_command, actions)
     max_width = actions.keys.map(&:length).max
-    $out.out "List of commands for #{base_command}"
+    $out.info "List of subcommands for #{base_command}"
     actions.keys.sort.each do |action|
-      $out.out format("%-#{max_width}s %s", action, actions[action][:description])
+      $out.info format("%-#{max_width}s %s", action, actions[action][:description])
     end
     0
   end
@@ -473,14 +473,14 @@ EOF
   # @param parameters [Array] of parameters to the show command
   def show(parameters)
     if parameters.empty?
-      $out.out 'Please specify an action for show command.'
+      $out.warning 'Please specify an action for show command.'
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
       return 0
     end
     action_name, *action_parameters = *parameters
     action = SHOW_COMMAND_ACTIONS[action_name.to_sym]
     if action.nil?
-      $out.out "Unknown action for the show command: #{action_name}."
+      $out.warning "Unknown action for the show command: #{action_name}."
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
       return 2
     end
