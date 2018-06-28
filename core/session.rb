@@ -238,6 +238,15 @@ EOF
     return result
   end
 
+  def getVagrantParam(dir, node_name, param)
+    pwd = Dir.pwd
+    Dir.chdir dir
+    # vagrant ssh-config output a list of key-value pairs separated by whitespace
+    rval = `vagrant ssh-config #{node_name} | grep #{param}`.split[1]
+    Dir.chdir pwd
+    return rval
+  end
+
   def createCmd(params, node, pwd)
     dir = params[0]
     node_arg =  params[1]
