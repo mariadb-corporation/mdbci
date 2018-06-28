@@ -250,7 +250,6 @@ end
   # @param box information about the box
   # @return [String] pretty formated role description in JSON format
   def self.get_role_description(name, product, box)
-    error_text = "#NONE, due invalid repo name \n"
     role = {}
     product_config = {}
     repo = nil
@@ -259,7 +258,7 @@ end
       $out.info("Repo name: #{repo_name}")
       unless $session.repos.knownRepo?(repo_name)
         $out.warning("Unknown key for repo #{repoName} will be skipped")
-        return error_text
+        return nil
       end
       $out.info("Repo specified [#{repo_name}] (CORRECT), other product params will be ignored")
       repo = $session.repos.getRepo(repo_name)
@@ -273,7 +272,7 @@ end
         repo = $session.repos.findRepo(product_name, product, box)
       end
       if repo.nil?
-        return error_text
+        return nil
       end
       config = {
         'version' => repo['version'],
@@ -391,6 +390,10 @@ end
     if provisioned
       $out.info 'Machine '+name+' is provisioned by '+product.to_s
       role = get_role_description(name, product, box)
+      if role == nil
+        raise 'Invalid repository'
+      end
+
       IO.write(role_file_name(path, name), role)
       IO.write(node_config_file_name(path, name),
                JSON.pretty_generate({
