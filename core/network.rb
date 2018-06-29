@@ -358,6 +358,7 @@ def get_node_network_config(node, configuration, session)
     'keyfile' => Network.getKeyFile(node_path)[0]['key'],
     'private_ip' => Network.getIP(node_path)[0]['ip'],
     'whoami' => Network.get_ssh_user_name(node),
-    'hostname' => session.getSSH(node_path, COMMAND_HOSTNAME)[0].strip
+    'hostname' => session.getSSH(node_path, COMMAND_HOSTNAME)[0].strip,
+    'port' => session.getVagrantParam(configuration.path, node, "Port")
   }
 end

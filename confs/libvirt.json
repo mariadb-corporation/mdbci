@@ -7,7 +7,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "mariadb",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "server1.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -21,7 +21,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "mariadb",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "server2.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -34,7 +34,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "mariadb",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "server3.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -47,7 +47,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "mariadb",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "server4.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -60,7 +60,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "galera",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "galera_server1.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -73,7 +73,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "galera",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "galera_server2.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -86,7 +86,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "galera",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "galera_server3.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
@@ -99,7 +99,7 @@
     "memory_size" : "1024",
     "product" : {
       "name": "galera",
-      "version": "10.2",
+      "version": "10.3",
       "cnf_template" : "galera_server4.cnf",
       "cnf_template_path": "~/MaxScale/maxscale-system-test/mdbci/cnf"
     }
