@@ -196,9 +196,9 @@ end
   # @param repo [String] repo
   # @param error_text [String] error message in case of error
   # @return [Hash] pretty formatted role description in JSON format.
-  def make_product_config(product_name, product, box, repo, error_text)
+  def make_product_config(product_name, product, box, repo)
     repo = @env.repos.findRepo(product_name, product, box) if repo.nil?
-    return error_text if repo.nil?
+    raise "Repo for product #{product['name']} #{product['version']} for #{box} not found" if repo.nil?
 
     config = { 'version': repo['version'], 'repo': repo['repo'], 'repo_key': repo['repo_key'] }
     if !product['cnf_template'].nil? && !product['cnf_template_path'].nil?
@@ -257,7 +257,7 @@ end
     end
     recipe_name = @env.repos.recipe_name(product_name)
     product_config = if product_name != 'packages'
-                       make_product_config(product_name, product, box, repo, error_text)
+                       make_product_config(product_name, product, box, repo)
                      else
                        {}
                      end
@@ -447,6 +447,14 @@ end
       end
     end
     vagrant.puts vagrant_config_footer
+  rescue RuntimeError => e
+    @ui.error(e.message)
+    @ui.error('Configuration is invalid')
+    FileUtils.rm_rf(path)
+    ERROR_RESULT
+  else
+    SUCCESS_RESULT
+  ensure
     vagrant.close
   end
   # rubocop:enable Metrics/MethodLength
@@ -472,7 +480,7 @@ end
                     end
     @ui.info("Global cookbook_path = #{cookbook_path}")
     @ui.info("Nodes provider = #{provider}")
-    generate_vagrant_file(path, config, boxes, provider, cookbook_path)
+    return ERROR_RESULT if generate_vagrant_file(path, config, boxes, provider, cookbook_path) == ERROR_RESULT
     return SUCCESS_RESULT unless File.size?(File.join(path, 'Vagrantfile')).nil?
 
     @ui.error('Generated Vagrantfile is empty! Please check configuration file and regenerate it.')
