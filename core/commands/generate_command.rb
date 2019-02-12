@@ -446,6 +446,8 @@ end
       end
     end
     vagrant.puts vagrant_config_footer
+    vagrant.close
+    SUCCESS_RESULT
   rescue RuntimeError => e
     @ui.error(e.message)
     @ui.error('Configuration is invalid')
@@ -453,9 +455,6 @@ end
     vagrant.close
     FileUtils.rm_rf(path)
     ERROR_RESULT
-  else
-    vagrant.close
-    SUCCESS_RESULT
   end
   # rubocop:enable Metrics/MethodLength
 
