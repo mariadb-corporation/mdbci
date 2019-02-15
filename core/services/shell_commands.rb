@@ -5,6 +5,8 @@
 # rubocop:disable Metrics/ModuleLength
 module ShellCommands
   PREFIX = 'MDBCI_OLD_ENV_'
+  STANDARD_IDLE_TIMEOUT = 300
+  EXTRA_IDLE_TIMEOUT = 1800
 
   @env = if ENV['APPIMAGE'] != 'true'
            ENV
@@ -26,57 +28,102 @@ module ShellCommands
     @env
   end
 
+  # Log stdout and stderr
+  #
+  # @param logger [Out] logger to log information to
+  # @param stdout [IO] stdout stream
+  # @param stderr [IO] stderr stream
+  # @param stdout_text [String] string to save history of stdout stream
+  # @param stderr_text [String] string to save history of stderr stream
+  # @return [Array<IO>, String, String] array of streams (or nil if stream has ended), stdout history, stderr history.
+  def self.log_command_streams(logger, stdout, stderr, stdout_text, stderr_text)
+    wait_streams = []
+    wait_streams << read_stream(stdout) do |line|
+      logger.info(line)
+      stdout_text += line
+    end
+    wait_streams << read_stream(stderr) do |line|
+      logger.error(line)
+      stderr_text += line
+    end
+    [wait_streams.compact, stdout_text, stderr_text]
+  end
+
+  # Handle the command inactivity, log messages about it, kill command process if break_on_inactivity is true
+  #
+  # @param logger [Out] logger to log information to
+  # @param show_notifications [Boolean] show notifications when there is no
+  # @param command_inactivity_timeout [Number] the timeout after which the command is considered inactive
+  # @param command [String] running command
+  # @param command_was_inactive [Boolean] flag stating that the command is re-considered (timeout * 2) inactive
+  # @param pid [Number] pid of inactivity command
+  # @param break_on_inactivity [Boolean] flag to terminate command execution when it is idle
+  # @return [Boolean] true if command process was killed, otherwise - false
+  # rubocop:disable Metrics/ParameterLists
+  def self.handle_inactivity(logger, show_notifications, command_inactivity_timeout, command,
+                             command_was_inactive, pid, break_on_inactivity)
+    if show_notifications
+      logger.error("The running command was inactive for #{command_inactivity_timeout / 60} minutes.")
+      logger.error("The command is: '#{command}'.")
+    end
+    return false unless command_was_inactive && break_on_inactivity
+
+    logger.error("The command '#{command}' was terminated after timeout ending.") if show_notifications
+    Process.kill('KILL', pid)
+    true
+  end
+  # rubocop:enable Metrics/ParameterLists
+
   # Execute the command, log stdout and stderr
   #
   # @param logger [Out] logger to log information to
   # @param command [String] command to run
   # @param show_notifications [Boolean] show notifications when there is no
-  # @param options [Hash] options that are passed to popen3 command.
+  # @param open3_options [Hash] options that are passed to popen3 command.
+  # @param inactivity_options [Hash] options for handling command inactivity.
   # @param env [Hash] environment parameters that are passed to popen3 command.
   # @return [Process::Status] of the run command
   # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/BlockLength
-  def self.run_command_and_log(logger, command, show_notifications = false, options = {},
-                               env = ShellCommands.environment)
+  # rubocop:disable Metrics/ParameterLists
+  def self.run_command_and_log(logger, command, show_notifications = false, open3_options = {},
+                               inactivity_options = {}, env = ShellCommands.environment)
     logger.info "Invoking command: #{command}"
-    options[:unsetenv_others] = true
-    Open3.popen3(env, command, options) do |stdin, stdout, stderr, wthr|
+    open3_options[:unsetenv_others] = true
+    Open3.popen3(env, command, open3_options) do |stdin, stdout, stderr, wthr|
       stdin.close
       stdout_text = ''
       stderr_text = ''
-      loop do
-        wait_streams = []
-        wait_streams << read_stream(stdout) do |line|
-          logger.info(line)
-          stdout_text += line
-        end
-        wait_streams << read_stream(stderr) do |line|
-          logger.error(line)
-          stderr_text += line
-        end
-        alive_streams = wait_streams.reject(&:nil?)
-        break if alive_streams.empty?
+      command_inactivity_timeout = inactivity_options[:extra_timeout].nil? ? STANDARD_IDLE_TIMEOUT : EXTRA_IDLE_TIMEOUT
+      command_was_inactive = false
+      breaked_on_inactivity = loop do
+        alive_streams, stdout_text, stderr_text = log_command_streams(logger, stdout, stderr, stdout_text, stderr_text)
+        break false if alive_streams.empty?
 
-        result = IO.select(alive_streams, nil, nil, 300)
-        if result.nil? && show_notifications
-          logger.error('The running command was inactive for 5 minutes.')
-          logger.error("The command is: '#{command}'.")
+        result = IO.select(alive_streams, nil, nil, command_inactivity_timeout)
+        if result.nil?
+          command_killed = handle_inactivity(logger, show_notifications, command_inactivity_timeout, command,
+                                             command_was_inactive, wthr.pid, inactivity_options[:break_on_inactivity])
+          break true if command_killed
+
+          command_was_inactive = true
+        else
+          command_was_inactive = false
         end
+        false
       end
-      {
-        value: wthr.value,
-        output: stdout_text,
-        errors: stderr_text
-      }
+      { value: wthr.value, output: stdout_text, errors: stderr_text, breaked_on_inactivity: breaked_on_inactivity }
     end
   end
-  # rubocop:enable Metrics/BlockLength
   # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/ParameterLists
 
   # Wrapper method for the module method
-  def run_command_and_log(command, show_notifications = false, options = {}, logger = @ui, env = ShellCommands.environment)
-    ShellCommands.run_command_and_log(logger, command, show_notifications, options, env)
+  # rubocop:disable Metrics/ParameterLists
+  def run_command_and_log(command, show_notifications = false, options = {}, logger = @ui,
+                          inactivity_options = {}, env = ShellCommands.environment)
+    ShellCommands.run_command_and_log(logger, command, show_notifications, options, inactivity_options, env)
   end
+  # rubocop:enable Metrics/ParameterLists
 
   # Run the command, gather the standard output and save the process results
   # @param command [String] command to run

@@ -170,7 +170,9 @@ Labels should be separated with commas and should not contain any whitespaces.
   def bring_up_machine(provider, logger, node = '')
     logger.info("Bringing up #{(node.empty? ? 'configuration ' : 'node ')} #{@specification}")
     vagrant_flags = generate_vagrant_run_flags(provider)
-    run_command_and_log("vagrant up #{vagrant_flags} --provider=#{provider} #{node}", true, {}, logger)
+    extra_timeout_flag = @box_manager.getBox(@config.box_names(node).first)['extra_vagrant_output'] == 'true'
+    run_command_and_log("vagrant up #{vagrant_flags} --provider=#{provider} #{node}", true, {}, logger,
+                        break_on_inactivity: true, extra_timeout: extra_timeout_flag)
   end
 
   # Provide information for the end-user where to find the required information
