@@ -37,16 +37,18 @@ module ShellCommands
   # @param stderr_text [String] string to save history of stderr stream
   # @return [Array<IO>, String, String] array of streams (or nil if stream has ended), stdout history, stderr history.
   def self.log_command_streams(logger, stdout, stderr, stdout_text, stderr_text)
+    result_stdout_text = stdout_text
+    result_stderr_text = stderr_text
     wait_streams = []
     wait_streams << read_stream(stdout) do |line|
       logger.info(line)
-      stdout_text += line
+      result_stdout_text += line
     end
     wait_streams << read_stream(stderr) do |line|
       logger.error(line)
-      stderr_text += line
+      result_stderr_text += line
     end
-    [wait_streams.compact, stdout_text, stderr_text]
+    [wait_streams.compact, result_stdout_text, result_stderr_text]
   end
 
   # Handle the command inactivity, log messages about it, kill command process if break_on_inactivity is true
