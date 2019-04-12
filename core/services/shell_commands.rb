@@ -60,8 +60,8 @@ module ShellCommands
   # @param break_on_inactivity [Boolean] flag to terminate command execution when it is idle
   # @return [Boolean] true if command process was killed, otherwise - false
   # rubocop:disable Metrics/ParameterLists
-  def self.handle_inactivity(logger, show_notifications, command_inactivity_timeout, command,
-                             command_was_inactive, pid, break_on_inactivity)
+  def self.handle_command_process_inactivity(logger, show_notifications, command_inactivity_timeout, command,
+                                             command_was_inactive, pid, break_on_inactivity)
     if show_notifications
       logger.error("The running command was inactive for #{command_inactivity_timeout / 60} minutes.")
       logger.error("The command is: '#{command}'.")
@@ -101,8 +101,9 @@ module ShellCommands
 
         result = IO.select(alive_streams, nil, nil, command_inactivity_timeout)
         if result.nil?
-          command_killed = handle_inactivity(logger, show_notifications, command_inactivity_timeout, command,
-                                             command_was_inactive, wthr.pid, inactivity_options[:break_on_inactivity])
+          command_killed = handle_command_process_inactivity(logger, show_notifications, command_inactivity_timeout,
+                                                             command, command_was_inactive, wthr.pid,
+                                                             inactivity_options[:break_on_inactivity])
           break true if command_killed
 
           command_was_inactive = true
