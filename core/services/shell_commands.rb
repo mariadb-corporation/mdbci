@@ -66,7 +66,7 @@ module ShellCommands
       logger.error("The running command was inactive for #{command_inactivity_timeout / 60} minutes.")
       logger.error("The command is: '#{command}'.")
     end
-    return false unless command_was_inactive && break_on_inactivity
+    return false if !command_was_inactive || !break_on_inactivity
 
     logger.error("The command '#{command}' was terminated after timeout ending.") if show_notifications
     Process.kill('KILL', pid)
