@@ -231,6 +231,14 @@ class VagrantConfigurator
   end
   # rubocop:enable Style/IfUnlessModifier
 
+  # Update used in configuration vagrant boxes
+  def update_boxes
+    @ui.info('Update used vagrant boxes')
+    run_in_directory(@config.path) do
+      run_command_and_log('vagrant box update', true, {}, @ui)
+    end
+  end
+
   # Brings up nodes
   #
   # @return [Number] execution status
