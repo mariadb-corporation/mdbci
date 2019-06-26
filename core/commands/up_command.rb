@@ -56,7 +56,6 @@ Labels should be separated with commas and should not contain any whitespaces.
       configurator.configure
     else
       configurator = VagrantConfigurator.new(@specification, @config, @env, @ui)
-      configurator.update_boxes
       configurator.up
     end
   end
