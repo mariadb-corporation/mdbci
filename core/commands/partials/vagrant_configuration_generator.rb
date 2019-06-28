@@ -156,9 +156,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
         SCRIPT
 
         box.vm.provision "shell", inline: script
+        <% end %>
       end #  <-- End of Qemu definition for machine: <%= name %>
-
-      <% end %>
     LIBVIRT
     template.result(OpenStruct.new(node_params).instance_eval { binding })
   end
