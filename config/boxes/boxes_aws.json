@@ -138,9 +138,9 @@
   },
   "sles_12_aws" : {
     "provider": "aws",
-    "ami": "ami-185e0c6f",
+    "ami": "ami-1804aa6f",
     "user": "ec2-user",
-    "default_instance_type": "m1.medium",
+    "default_instance_type": "m3.medium",
     "platform": "sles",
     "platform_version": "12"
   },
