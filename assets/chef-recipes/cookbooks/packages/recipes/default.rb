@@ -24,7 +24,4 @@ include_recipe 'packages::configure_apt'
   end
 end
 
-platform_is_bionic = node['platform'] == 'ubuntu' && node['platform_version'].to_i == 18
-include_recipe 'packages::maxscale_build_deps' if platform_is_bionic
-
 include_recipe 'chrony::default'
