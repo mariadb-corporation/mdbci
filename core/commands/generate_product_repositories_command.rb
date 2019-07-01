@@ -265,9 +265,17 @@ In order to specify the number of retries for repository configuration use --att
     releases
   end
 
+  def replace_template_by_mdbe_private_key(path)
+    return path if @env.mdbe_private_key.nil?
+
+    path.sub('$PRIVATE_KEY$', @env.mdbe_private_key)
+  end
+
   def parse_mdbe_rpm_repository(config)
     parse_repository(
-      config['path'], config['key'], 'mdbe',
+      replace_template_by_mdbe_private_key(config['path']),
+      replace_template_by_mdbe_private_key(config['key']),
+      'mdbe',
       extract_field(:version, %r{^(\p{Digit}+\.\p{Digit}+)\/?$}),
       append_url(%w[yum]),
       save_as_field(:platform),
@@ -282,7 +290,9 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_mdbe_deb_repository(config)
     parse_repository(
-      config['path'], config['key'], 'mdbe',
+      replace_template_by_mdbe_private_key(config['path']),
+      replace_template_by_mdbe_private_key(config['key']),
+      'mdbe',
       extract_field(:version, %r{^(\p{Digit}+\.\p{Digit}+)\/?$}),
       append_url(%w[repo]),
       append_url(%w[debian ubuntu], :platform, true),
