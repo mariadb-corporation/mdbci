@@ -75,13 +75,8 @@ class InstallProduct < BaseCommand
     box = node['box'].to_s
     recipe_name = []
     recipe_name.push(@env.repos.recipe_name(@product))
-    product = node['product']
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
-    if product.nil?
-      product = { 'name' => @product, 'version' => @product_version.to_s }
-    else
-      product.merge!('name' => @product, 'version' => @product_version.to_s)
-    end
+    product = { 'name' => @product, 'version' => @product_version.to_s }
     product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
     role_json_file = ConfigurationGenerator.generate_json_format(@env.box_definitions, name, product_config,
                                                                  recipe_name, box, @env.rhel_credentials)
