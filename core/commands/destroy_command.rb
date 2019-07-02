@@ -123,6 +123,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       configurator.store_network_config
       Dir.chdir(current_dir)
       configurator.generate_config_information(Dir.pwd)
+      configurator.generate_label_information_file
       return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
 
       remove_files(configuration, @env.keep_template)
