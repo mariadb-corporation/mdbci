@@ -126,9 +126,11 @@ else
     if %w[rhel centos].include?(node[:platform_family])
       flush_cache [:before]
     end
+    action :upgrade
   end
   package 'maxscale-experimental' do
     ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
+    action :upgrade
   end
 end
 
