@@ -45,7 +45,6 @@ case node[:platform_family]
     end
 
   when "suse", "opensuse", "sles"
-
     # Add the repo
     template "/etc/zypp/repos.d/#{repo_file_name}.repo" do
       source "mdbci.maxscale.suse.erb"
