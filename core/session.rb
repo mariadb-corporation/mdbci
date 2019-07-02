@@ -119,7 +119,7 @@ EOF
       @aws_service = AwsService.new(@tool_config['aws'], $out)
     end
     @rhel_credentials = @tool_config['rhel']
-    @mdbe_private_key = @tool_config['mdbe']&.fetch('private_key', nil)
+    @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
     @box_definitions = BoxDefinitions.new(@boxes_location)
   end
 
