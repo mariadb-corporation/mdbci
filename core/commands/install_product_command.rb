@@ -80,7 +80,7 @@ class InstallProduct < BaseCommand
     if product.nil?
       product = { 'name' => @product, 'version' => @product_version.to_s }
     else
-      product.merge('name' => @product, 'version' => @product_version.to_s)
+      product.merge!('name' => @product, 'version' => @product_version.to_s)
     end
     product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
     role_json_file = ConfigurationGenerator.generate_json_format(@env.box_definitions, name, product_config,
