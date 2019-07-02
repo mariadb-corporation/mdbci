@@ -50,6 +50,11 @@ class InstallProduct < BaseCommand
 
     @product = @env.nodeProduct
     @product_version = @env.productVersion
+    if @product.nil? || @product_version.nil?
+      @ui.error('You must specify the name and version of the product')
+      return ARGUMENT_ERROR_RESULT
+    end
+
     @machine_configurator = MachineConfigurator.new(@ui)
 
     SUCCESS_RESULT
