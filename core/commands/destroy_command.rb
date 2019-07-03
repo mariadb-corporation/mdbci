@@ -91,17 +91,8 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle cases when command calling with --list or --node-name options.
   def destroy_by_node_name
-    p 'sdad'
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_cleaner.destroy_nodes_by_name
-    configuration = Configuration.new(@args.first, @env.labels)
-    network_config = NetworkConfig.new(configuration, @ui)
-    p configuration
-    p 'sss'
-    p network_config
-    File.write(configuration.network_settings_file, network_config.ini_format)
-    #generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
-    #configurator = VagrantConfigurator.new(@specification, @config, @env, @ui)
   end
 
   # Handle case when command calling with configuration.
