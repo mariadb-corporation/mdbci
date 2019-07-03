@@ -29,7 +29,7 @@ case node[:platform_family]
     apt_repository 'maxscale' do
       key node['maxscale']['repo_key']
       uri repository[0]
-      components repository.slice(1, repository.size)
+      components repository.slice(2, repository.size)
     end
 
     execute "update" do
