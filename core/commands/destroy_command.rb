@@ -115,11 +115,10 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   def update_configuration_files
     args = @args.first.split('/')
-    configuration_for_network = Configuration.new(args[0], @env.labels)
-    configuration_for_network.node_names.delete(args[1])
-    configurator = VagrantConfigurator.new(@specification, configuration_for_network, @env, @ui)
+    configuration = Configuration.new(args[0], @env.labels)
+    configurator = VagrantConfigurator.new(@specification, configuration, @env, @ui)
     current_dir = Dir.pwd
-    Dir.chdir(configuration_for_network.path)
+    Dir.chdir(configuration.path)
     configurator.store_network_config
     Dir.chdir(current_dir)
     configurator.generate_config_information(Dir.pwd)
