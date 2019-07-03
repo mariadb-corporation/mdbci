@@ -119,7 +119,7 @@ when "windows"
   end
 else
   package 'maxscale' do
-    if platform_family?('rhel', 'centos', 'suse', 'opensuse')
+    if platform_family?('rhel', 'centos')
       flush_cache [:before]
     end
     action :upgrade
