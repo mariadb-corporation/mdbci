@@ -97,9 +97,7 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle case when command calling with configuration.
   def destroy_by_configuration
-    args = @args.first.split('/')
     configuration = Configuration.new(@args.first, @env.labels)
-    configuration_for_network = Configuration.new(args[0], @env.labels)
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
@@ -107,19 +105,25 @@ Labels should be separated with commas, do not contain any whitespaces.
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
-      configuration_for_network.node_names.delete(args[1])
-      configurator = VagrantConfigurator.new(@specification, configuration_for_network, @env, @ui)
-      current_dir = Dir.pwd
-      Dir.chdir(configuration_for_network.path)
-      configurator.store_network_config
-      Dir.chdir(current_dir)
-      configurator.generate_config_information(Dir.pwd)
-      configurator.generate_label_information_file
+      update_configuration_files
       return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
 
       remove_files(configuration, @env.keep_template)
       vagrant_cleaner.destroy_aws_keypair(configuration)
     end
+  end
+
+  def update_configuration_files
+    args = @args.first.split('/')
+    configuration_for_network = Configuration.new(args[0], @env.labels)
+    configuration_for_network.node_names.delete(args[1])
+    configurator = VagrantConfigurator.new(@specification, configuration_for_network, @env, @ui)
+    current_dir = Dir.pwd
+    Dir.chdir(configuration_for_network.path)
+    configurator.store_network_config
+    Dir.chdir(current_dir)
+    configurator.generate_config_information(Dir.pwd)
+    configurator.generate_label_information_file
   end
 
   def execute
