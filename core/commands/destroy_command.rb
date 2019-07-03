@@ -113,6 +113,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
   end
 
+  # Update network_configuration and configured_labels files
   def update_configuration_files
     args = @args.first.split('/')
     configuration = Configuration.new(args[0], @env.labels)
