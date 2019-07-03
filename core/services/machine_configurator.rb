@@ -156,7 +156,7 @@ class MachineConfigurator
   def prepare_download_command(connection, logger)
     result = ssh_exec(connection, 'which curl', logger)
     if result.success?
-      'curl -L https://www.chef.io/chef/install.sh --output install.sh'
+      'curl -sS -L https://www.chef.io/chef/install.sh --output install.sh'
     else
       'wget https://www.chef.io/chef/install.sh --output-document install.sh'
     end
