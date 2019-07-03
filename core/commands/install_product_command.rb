@@ -23,9 +23,13 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
 
-    install_product(@mdbci_config.node_names[0])
+    result = install_product(@mdbci_config.node_names.first)
 
-    SUCCESS_RESULT
+    if result.success?
+      SUCCESS_RESULT
+    else
+      ERROR_RESULT
+    end
   end
 
   # Print brief instructions on how to use the command
