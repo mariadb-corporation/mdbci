@@ -138,13 +138,16 @@ class MachineConfigurator
     logger.info("Installing Chef #{chef_version} on the server.")
     download_command = prepare_download_command(connection, logger)
     chef_install_command = prepare_install_command(connection, chef_version, logger)
-    CHEF_INSTALLATION_ATTEMPTS.times do
-      return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
+    return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
 
+    CHEF_INSTALLATION_ATTEMPTS.times do
       ssh_exec(connection, download_command, logger).and_then do
         sudo_exec(connection, sudo_password, chef_install_command, logger)
       end
       ssh_exec(connection, 'rm -f install.sh', logger)
+      return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
+
+      sleep(rand(3))
     end
     Result.error('Unable to install Chef on the server')
   end
