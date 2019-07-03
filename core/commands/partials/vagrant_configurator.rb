@@ -83,7 +83,11 @@ class VagrantConfigurator
       [role_file, "roles/#{node}.json"],
       [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    return false if @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files).error?
+    configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
+    if configuration_status.error?
+      logger.error("Error during machine configuration: #{configuration_status.error}")
+      return false
+    end
 
     node_provisioned?(node, logger)
   end
