@@ -18,7 +18,7 @@ class NetworkConfig
   # @param node_names [Array<String>] of node to add
   def add_nodes(node_names)
     node_names.each do |name|
-      @nodes[name] = Node.new(@config, name) if @config.node_names.include?(name)
+      @nodes[name] = Node.new(@config, name) if @config.all_node_names.include?(name)
     end
   end
 
