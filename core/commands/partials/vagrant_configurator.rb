@@ -8,6 +8,7 @@ require_relative '../../services/network_config'
 require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
+require_relative '../../services/configuration_file_manager'
 
 # The configurator brings up the configuration for the Vagrant
 class VagrantConfigurator
@@ -74,15 +75,6 @@ class VagrantConfigurator
     end
   end
 
-  # Split list of nodes between running and halt ones
-  #
-  # @param nodes [Array<String] name of nodes to check
-  # @param logger [Out] logger to log information to.
-  # @return [Array<String>, Array<String>] nodes that are running and those that are not
-  def running_and_halt_nodes(nodes, logger)
-    nodes.partition { |node| VagrantCommands.node_running?(node, logger) }
-  end
-
   # Check that specified node is brought up.
   #
   # @param node [String] name of node that should be checked.
@@ -137,23 +129,6 @@ class VagrantConfigurator
     run_command_and_log("vagrant up #{vagrant_flags} --provider=#{provider} #{node}", true, {}, logger)
   end
 
-  # Provide information for the end-user where to find the required information
-  #
-  # @param working_directory [String] path to the current working directory
-  def generate_config_information(working_directory)
-    @ui.info('All nodes were brought up and configured.')
-    @ui.info("DIR_PWD=#{working_directory}")
-    @ui.info("CONF_PATH=#{@config.path}")
-    @ui.info("Generating #{@config.network_settings_file} file")
-    File.write(@config.network_settings_file, @network_config.ini_format)
-  end
-
-  # Provide information to the users about which labels are running right now
-  def generate_label_information_file
-    @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
-    File.write(@config.labels_information_file, @network_config.active_labels.sort.join(','))
-  end
-
   # Forcefully destroys given node
   #
   # @param node [String] name of node which needs to be destroyed
@@ -161,13 +136,6 @@ class VagrantConfigurator
   def destroy_node(node, logger)
     logger.info("Destroying '#{node}' node.")
     DestroyCommand.execute(["#{@config.path}/#{node}"], @env, logger, keep_template: true)
-  end
-
-  # Restores network configuration of nodes that were already brought up
-  def store_network_config
-    @network_config = NetworkConfig.new(@config, @ui)
-    running_nodes = running_and_halt_nodes(@config.node_names, @ui)[0]
-    @network_config.add_nodes(running_nodes)
   end
 
   # Switch to the working directory, so all Vagrant commands will
@@ -237,13 +205,14 @@ class VagrantConfigurator
   def up
     nodes = @config.node_names
     run_in_directory(@config.path) do
-      store_network_config
+      @network_config = ConfigurationFileManager.store_network_config(@config, @ui)
       up_results = Workers.map(nodes) { |node| up_node(node) }
       up_results.each { |up_result| up_result[1].print_to_stdout } if @env.threads_count > 1
       return ERROR_RESULT unless up_results.detect { |up_result| !up_result[0] }.nil?
+
     end
-    generate_config_information(Dir.pwd)
-    generate_label_information_file
+    ConfigurationFileManager.generate_config_information(@config, @network_config, Dir.pwd, @ui)
+    ConfigurationFileManager.generate_label_information_file(@config, @network_config, @ui)
     SUCCESS_RESULT
   end
 end
