@@ -25,6 +25,7 @@ class ConfigurationFileManager
     network_config = NetworkConfig.new(config, ui)
     running_nodes = running_and_halt_nodes(config.all_node_names, ui, config.path)[0]
     network_config.add_nodes(running_nodes)
+    network_config
   end
 
   # Split list of nodes between running and halt ones
