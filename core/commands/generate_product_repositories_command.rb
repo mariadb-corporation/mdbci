@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'open-uri'
+require 'uri'
 require 'optparse'
 require 'nokogiri'
 require 'pp'
@@ -271,38 +272,72 @@ In order to specify the number of retries for repository configuration use --att
     path.sub('$PRIVATE_KEY$', @env.mdbe_private_key)
   end
 
+  def generate_mdbe_repo_path(path, version)
+    replace_template_by_mdbe_private_key(path).sub('$MDBE_VERSION$', version)
+  end
+
+  def mdbe_release_link?(link)
+    link.content =~ /^MariaDB Enterprise Server [0-9]*\.?.*$/
+  end
+
+  # rubocop:disable Security/Open
+  def get_mdbe_release_links(path)
+    uri = path.gsub(%r{([^:])\/+}, '\1/')
+    doc = Nokogiri::HTML(open(uri))
+    all_links = doc.css('ul:not(.nav) a')
+    all_links.select do |link|
+      mdbe_release_link?(link)
+    end
+  end
+  # rubocop:enable Security/Open
+
+  def get_mdbe_release_versions(config)
+    path = replace_template_by_mdbe_private_key(config['path'])
+    path_uri = URI.parse(path)
+    major_release_links = get_mdbe_release_links(path)
+    minor_release_links = major_release_links.map do |major_release_link|
+      major_release_path = URI.parse(major_release_link.attribute('href').to_s).path
+      get_mdbe_release_links("#{path_uri.scheme}://#{path_uri.host}/#{major_release_path}")
+    end.flatten
+    (major_release_links + minor_release_links).map do |link|
+      link.content.match(/^MariaDB Enterprise Server (.*)$/).captures[0].lstrip
+    end
+  end
+
+  # rubocop:disable Metrics/ParameterLists
+  def generate_mdbe_release_info(baseurl, key, version, platform, platform_version, deb_repo = false)
+    repo_path = generate_mdbe_repo_path(baseurl, version)
+    repo_path = "#{repo_path} #{platform_version} main" if deb_repo
+    {
+      repo: repo_path,
+      repo_key: key,
+      platform: platform,
+      platform_version: platform_version,
+      product: 'mdbe',
+      version: version
+    }
+  end
+  # rubocop:enable Metrics/ParameterLists
+
   def parse_mdbe_rpm_repository(config)
-    parse_repository(
-      replace_template_by_mdbe_private_key(config['path']),
-      replace_template_by_mdbe_private_key(config['key']),
-      'mdbe',
-      extract_field(:version, %r{^(\p{Digit}+\.\p{Digit}+)\/?$}),
-      append_url(%w[yum]),
-      save_as_field(:platform),
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      append_url(%w[x86_64]),
-      lambda do |release, _|
-        release[:repo] = release[:url]
-        release
+    get_mdbe_release_versions(config).map do |version|
+      %w[centos rhel].map do |platform|
+        [6, 7, 8].map do |platform_version|
+          generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version)
+        end
       end
-    )
+    end.flatten
   end
 
   def parse_mdbe_deb_repository(config)
-    parse_repository(
-      replace_template_by_mdbe_private_key(config['path']),
-      replace_template_by_mdbe_private_key(config['key']),
-      'mdbe',
-      extract_field(:version, %r{^(\p{Digit}+\.\p{Digit}+)\/?$}),
-      append_url(%w[repo]),
-      append_url(%w[debian ubuntu], :platform, true),
-      append_url(%w[dists]),
-      save_as_field(:platform_version),
-      lambda do |release, _|
-        release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
-        release
+    get_mdbe_release_versions(config).map do |version|
+      [['debian', %w[jessie stretch]], ['ubuntu', %w[xenial bionic]]].map do |platform_and_version|
+        platform_and_version[1].map do |platform_version|
+          generate_mdbe_release_info(config['baseurl'], config['key'], version, platform_and_version[0],
+                                     platform_version, true)
+        end
       end
-    )
+    end.flatten
   end
 
   def parse_mariadb(config)

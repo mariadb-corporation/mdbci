@@ -51,11 +51,13 @@ maxscale:
 mdbe:
   repo:
     rpm:
-      path: http://downloads.mariadb.com/enterprise/$PRIVATE_KEY$/mariadb-enterprise/
-      key: https://downloads.mariadb.com/enterprise/$PRIVATE_KEY$/mariadb-enterprise/MariaDB-Enterprise-GPG-KEY
+      path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
+      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+      baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/rpm/rhel/$releasever/$basearch
     deb:
-      path: http://downloads.mariadb.com/enterprise/$PRIVATE_KEY$/mariadb-enterprise/
-      key: "0xF1656F24C74CD1D8"
+      path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
+      key: ["0x70E4618A8167EE24", "0xCE1A3DD5E3C94f49", "0xCBCB082A1BB943DB", "0xF1656F24C74CD1D8", "0x135659E928C12247"]
+      baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/deb
 mysql:
   repo:
     rpm:
