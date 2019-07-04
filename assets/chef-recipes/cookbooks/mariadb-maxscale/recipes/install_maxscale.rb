@@ -125,9 +125,6 @@ when "suse", "opensuse", nil # Enabling SLES 15 support
   end
 else
   package 'maxscale' do
-    if platform_family?('rhel', 'centos')
-      flush_cache [:before]
-    end
     action :upgrade
   end
   package 'maxscale-experimental' do
