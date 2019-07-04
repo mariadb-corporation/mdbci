@@ -23,7 +23,7 @@ class ConfigurationFileManager
   # Restores network configuration of nodes that were already brought up
   def self.store_network_config(config, ui)
     network_config = NetworkConfig.new(config, ui)
-    running_nodes = running_and_halt_nodes(config.node_names, ui)[0]
+    running_nodes = running_and_halt_nodes(config.node_configurations.keys, ui, config.path)[0]
     network_config.add_nodes(running_nodes)
   end
 
@@ -32,7 +32,7 @@ class ConfigurationFileManager
   # @param nodes [Array<String] name of nodes to check
   # @param logger [Out] logger to log information to.
   # @return [Array<String>, Array<String>] nodes that are running and those that are not
-  def self.running_and_halt_nodes(nodes, logger)
-    nodes.partition { |node| VagrantCommands.node_running?(node, logger) }
+  def self.running_and_halt_nodes(nodes, logger, path)
+    nodes.partition { |node| VagrantCommands.node_running?(node, logger, path) }
   end
 end
