@@ -3,18 +3,16 @@
   package pkg
 end
 
-node.set_unless['maria']['version'] = "10.0"
-
 case node[:platform_family]
 when "debian"
   # Add repo key
   execute "Key add" do
-    command "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xce1a3dd5e3c94f49"
+    command "apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys #{node['mariadb']['repo_key'].join(' ')}"
   end
   release_name = '$(lsb_release -cs)'
   # Add repo
   execute "Repository add" do
-    command 'echo "deb http://code.mariadb.com/mariadb-enterprise/'+ node['maria']['version'] + '/repo/' + node[:platform] + ' ' + release_name + ' main" > /etc/apt/sources.list.d/mariadb.list'
+    command "echo '#{node['mariadb']['repo']}' > /etc/apt/sources.list.d/mariadb.list"
   end
   execute "update" do
     command "apt-get update"
@@ -40,10 +38,10 @@ when "windows"
 
   md5sums_file = "#{Chef::Config[:file_cache_path]}/md5sums.txt"
   remote_file "#{md5sums_file}" do
-    source "https://code.mariadb.com/mariadb-enterprise/" + node['maria']['version'] + "/" + arch + "-packages/md5sums.txt"
+    source "https://code.mariadb.com/mariadb-enterprise/" + node['mariadb']['version'] + "/" + arch + "-packages/md5sums.txt"
   end
 
-  file_name = "mariadb-enterprise-" + node['maria']['version'] + "-" + arch + ".msi"
+  file_name = "mariadb-enterprise-" + node['mariadb']['version'] + "-" + arch + ".msi"
 
   if File.exists?("#{md5sums_file}")
     f = File.open("#{md5sums_file}")
@@ -58,6 +56,6 @@ when "windows"
   end
 
   remote_file "#{Chef::Config[:file_cache_path]}/mariadb.msi" do
-    source "https://code.mariadb.com/mariadb-enterprise/" + node['maria']['version'] + "/" + arch + "-packages/" + file_name
+    source "https://code.mariadb.com/mariadb-enterprise/" + node['mariadb']['version'] + "/" + arch + "-packages/" + file_name
   end
 end
