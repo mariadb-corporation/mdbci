@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 
-
+# Class for configuring network_config and configured_labels files
 class ConfigurationFileManager
 
   # Provide information to the users about which labels are running right now
@@ -26,8 +27,12 @@ class ConfigurationFileManager
     network_config.add_nodes(running_nodes)
   end
 
+  # Split list of nodes between running and halt ones
+  #
+  # @param nodes [Array<String] name of nodes to check
+  # @param logger [Out] logger to log information to.
+  # @return [Array<String>, Array<String>] nodes that are running and those that are not
   def self.running_and_halt_nodes(nodes, logger)
     nodes.partition { |node| VagrantCommands.node_running?(node, logger) }
   end
-
 end
