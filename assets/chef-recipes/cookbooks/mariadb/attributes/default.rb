@@ -14,3 +14,6 @@ default["mariadb"]["repo_key"] = " http://yum.mariadb.org/"
 
 # path for server.cnf file
 default["mariadb"]["cnf_template"] = " server1.cnf"
+
+# MariaDB repo file name
+default['mariadb']['repo_file_name'] = 'mariadb'
