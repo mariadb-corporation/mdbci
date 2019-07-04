@@ -105,7 +105,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
-      update_configuration_files
+      update_configuration_files(configuration)
       return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
 
       remove_files(configuration, @env.keep_template)
@@ -114,9 +114,10 @@ Labels should be separated with commas, do not contain any whitespaces.
   end
 
   # Update network_configuration and configured_labels files
-  def update_configuration_files
-    args = @args.first.split('/')
-    configuration = Configuration.new(args[0], @env.labels)
+  def update_configuration_files(configuration)
+    configuration.node_names = configuration.node_configurations.keys
+    #args = @args.first.split('/')
+    #configuration = Configuration.new(args[0], @env.labels)
     configurator = VagrantConfigurator.new(@specification, configuration, @env, @ui)
     current_dir = Dir.pwd
     Dir.chdir(configuration.path)
