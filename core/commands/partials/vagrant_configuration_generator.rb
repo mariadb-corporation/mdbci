@@ -133,16 +133,31 @@ end
           qemu.cpus = <%= vm_cpu %>
           qemu.memory = <%= vm_mem %>
         end
-      end #  <-- End of Qemu definition for machine: <%= name %>
-
-      <% if platform == 'ubuntu' && platform_version == 'bionic' %>
+        <% if platform == 'ubuntu' && platform_version == 'bionic' %>
         # Fix DNS bug
-        config.trigger.after :up do |trigger|
-          trigger.info = "Relink resolv.conf"
-          trigger.run_remote = { inline: "sudo rm /etc/resolv.conf" }
-          trigger.run_remote = { inline: "sudo echo -e 'nameserver 8.8.8.8\\nnameserver 8.8.4.4' > /etc/resolv.conf" }
-        end
-      <% end %>
+        script = <<-SCRIPT
+          echo Fixing the netplan configuration
+          sed -i '/nameservers:/d' /etc/netplan/01-netcfg.yaml
+          sed -i '/addresses:/d' /etc/netplan/01-netcfg.yaml
+          netplan apply
+          echo Fixing systemd-resolved configuration
+          echo "
+[Resolve]
+DNS=1.1.1.1
+FallbackDNS=
+Domains=
+LLMNR=no
+MulticastDNS=no
+DNSSEC=no
+Cache=no
+DNSStubListener=yes" > /etc/systemd/resolved.conf
+          systemctl restart systemd-resolved
+          systemd-resolve --status
+        SCRIPT
+
+        box.vm.provision "shell", inline: script
+        <% end %>
+      end #  <-- End of Qemu definition for machine: <%= name %>
     LIBVIRT
     template.result(OpenStruct.new(node_params).instance_eval { binding })
   end

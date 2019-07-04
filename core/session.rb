@@ -94,6 +94,7 @@ EOF
     @keep_template = false
     @list = false
     @threads_count = Concurrent.physical_processor_count
+    @cpu_count = determine_cpu_count
   end
 
   # Fill in paths based on the provided configuration if they were
@@ -146,11 +147,15 @@ EOF
 
   # Get the path to the user data directory
   # @param [String] name of the resource in data directory
-  # @param [String] full path to the data resource
   def data_path(name = '')
     data_dir = File.join(XDG['DATA_HOME'].to_s, 'mdbci')
     FileUtils.mkdir_p(data_dir)
     File.join(data_dir, name)
+  end
+
+  # Determine the number of cpus to assign to a VM by default
+  def determine_cpu_count
+    Concurrent.processor_count / 4 + 1
   end
 
   def setup(what)
@@ -180,7 +185,7 @@ EOF
   end
 
   # load template nodes
-  def loadTemplateNodes()
+  def loadTemplateNodes
     pwd = Dir.pwd
     instanceFile = $exception_handler.handle('INSTANCE configuration file not found') { IO.read(pwd+'/template') }
     $out.info 'Load nodes from template file ' + instanceFile.to_s

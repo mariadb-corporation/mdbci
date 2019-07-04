@@ -23,7 +23,9 @@ class VagrantConfigurator
     @ui = logger
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
-    Workers.pool.resize(@env.threads_count)
+    @recreate_nodes = @env.recreate
+    @threads_count = @env.threads_count
+    Workers.pool.resize(@threads_count)
   end
 
   # Generate flags based upon the configuration
@@ -34,25 +36,6 @@ class VagrantConfigurator
     flags = []
     flags.push(VAGRANT_NO_PARALLEL) if provider == 'aws'
     flags.uniq.join(' ')
-  end
-
-  # Check whether chef was successfully installed on the machine or not
-  #
-  # @param node [String] name of the node to check.
-  # @param logger [Out] logger to log information to
-  # @return [Boolean]
-  def chef_installed?(node, logger)
-    result = run_command("vagrant ssh #{node} -c "\
-                         '"test -e /var/chef/cache/chef-stacktrace.out && printf FOUND || printf NOT_FOUND"',
-                         {}, logger)
-    chef_stacktrace = result[:output]
-    if chef_stacktrace == 'FOUND'
-      logger.error("Chef on node '#{node}' was installed with error.")
-      false
-    else
-      logger.info("Chef on node '#{node}' was successfully installed.")
-      true
-    end
   end
 
   # Check whether chef have provisioned the server or not
@@ -83,26 +66,6 @@ class VagrantConfigurator
     nodes.partition { |node| VagrantCommands.node_running?(node, logger) }
   end
 
-  # Check that specified node is brought up.
-  #
-  # @param node [String] name of node that should be checked.
-  # @param logger [Out] logger to log information to.
-  # @return [Bool] true if node needs to be re-created.
-  def broken_node?(node, logger)
-    !(VagrantCommands.node_running?(node, logger) && chef_installed?(node, logger))
-  end
-
-  # Check that specified node is configured.
-  #
-  # @param node [String] name of node that should be checked.
-  # @param logger [Out] logger to log information to.
-  # @return [Bool] true if node needs to be re-provisioned.
-  def unconfigured_node?(node, logger)
-    return false if broken_node?(node, logger)
-
-    !node_provisioned?(node, logger)
-  end
-
   # Configure single node using the chef-solo respected role
   #
   # @param node [String] name of the node
@@ -120,7 +83,12 @@ class VagrantConfigurator
       [role_file, "roles/#{node}.json"],
       [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
+    configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
+    if configuration_status.error?
+      logger.error("Error during machine configuration: #{configuration_status.error}")
+      return false
+    end
+
     node_provisioned?(node, logger)
   end
 
@@ -188,17 +156,19 @@ class VagrantConfigurator
   # @param logger [Out] logger to log information to
   # @return [Bool] configuration result
   def bring_up_and_configure(node, logger)
-    force_recreate = false
     @attempts.times do |attempt|
       @ui.info("Bring up and configure node #{node}. Attempt #{attempt + 1}.")
-      destroy_node(node, logger) if force_recreate
-      bring_up_machine(@config.provider, logger, node) unless VagrantCommands.node_running?(node, logger)
-      unless VagrantCommands.node_running?(node, logger)
-        force_recreate = true
-        next
+      if @recreate_nodes || attempt.positive?
+        destroy_node(node, logger)
+        bring_up_machine(@config.provider, logger, node)
+      elsif !VagrantCommands.node_running?(node, logger)
+        bring_up_machine(@config.provider, logger, node)
       end
+      next unless VagrantCommands.node_running?(node, logger)
+
       return true if configure(node, logger)
     end
+    @ui.error("Node '#{node}' was not configured.")
     false
   end
 
@@ -206,30 +176,21 @@ class VagrantConfigurator
   #
   # @return [Out] logger.
   def retrieve_logger_for_node
-    @env.threads_count > 1 ? LogStorage.new(@env) : @ui
+    if use_log_storage?
+      LogStorage.new(@env)
+    else
+      @ui
+    end
   end
 
   # Brings up node.
   #
   # @param node [String] name of node which needs to be up
   # @return [Array<Bool, Out>] up result and log history.
-  # rubocop:disable Style/IfUnlessModifier
   def up_node(node)
     logger = retrieve_logger_for_node
-    if @env.recreate || !VagrantCommands.node_running?(node, logger)
-      bring_up_and_configure(node, logger)
-    end
-    if broken_node?(node, @ui)
-      @ui.error("Node '#{node}' was not brought up")
-      return [false, logger]
-    elsif unconfigured_node?(node, @ui)
-      @ui.error("Node '#{node}' was not configured")
-      return [false, logger]
-    end
-
-    [true, logger]
+    [bring_up_and_configure(node, logger), logger]
   end
-  # rubocop:enable Style/IfUnlessModifier
 
   # Brings up nodes
   #
@@ -239,11 +200,16 @@ class VagrantConfigurator
     run_in_directory(@config.path) do
       store_network_config
       up_results = Workers.map(nodes) { |node| up_node(node) }
-      up_results.each { |up_result| up_result[1].print_to_stdout } if @env.threads_count > 1
+      up_results.each { |up_result| up_result[1].print_to_stdout } if use_log_storage?
       return ERROR_RESULT unless up_results.detect { |up_result| !up_result[0] }.nil?
     end
     generate_config_information(Dir.pwd)
     generate_label_information_file
     SUCCESS_RESULT
+  end
+
+  # Checks whether to use log storage
+  def use_log_storage?
+    @threads_count > 1 && @config.node_names.size > 1
   end
 end
