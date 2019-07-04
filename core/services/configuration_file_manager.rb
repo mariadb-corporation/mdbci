@@ -23,7 +23,7 @@ class ConfigurationFileManager
   # Restores network configuration of nodes that were already brought up
   def self.store_network_config(config, ui)
     network_config = NetworkConfig.new(config, ui)
-    running_nodes = running_and_halt_nodes(config.node_configurations.keys, ui, config.path)[0]
+    running_nodes = running_and_halt_nodes(config.all_node_names, ui, config.path)[0]
     network_config.add_nodes(running_nodes)
   end
 
