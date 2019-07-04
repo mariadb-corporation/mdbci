@@ -6,6 +6,7 @@ require_relative '../models/command_result.rb'
 require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
+require_relative '../services/configuration_file_manager'
 
 require 'fileutils'
 
@@ -115,16 +116,9 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Update network_configuration and configured_labels files
   def update_configuration_files(configuration)
-    configuration.node_names = configuration.node_configurations.keys
-    #args = @args.first.split('/')
-    #configuration = Configuration.new(args[0], @env.labels)
-    configurator = VagrantConfigurator.new(@specification, configuration, @env, @ui)
-    current_dir = Dir.pwd
-    Dir.chdir(configuration.path)
-    configurator.store_network_config
-    Dir.chdir(current_dir)
-    configurator.generate_config_information(Dir.pwd)
-    configurator.generate_label_information_file
+    network_config = ConfigurationFileManager.store_network_config(configuration, @ui)
+    ConfigurationFileManager.generate_config_information(configuration, network_config, Dir.pwd, @ui)
+    ConfigurationFileManager.generate_label_information_file(configuration, network_config, @ui)
   end
 
   def execute
