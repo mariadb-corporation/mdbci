@@ -23,16 +23,20 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
 
-    install_product(@mdbci_config.node_names[0])
+    result = install_product(@mdbci_config.node_names.first)
 
-    SUCCESS_RESULT
+    if result.success?
+      SUCCESS_RESULT
+    else
+      ERROR_RESULT
+    end
   end
 
   # Print brief instructions on how to use the command
   def show_help
     info = <<~HELP
       'install_product' Install a product onto the configuration node.
-      mdbci install_product --product product --version-product version config/node
+      mdbci install_product --product product --product-version version config/node
     HELP
     @ui.info(info)
   end
@@ -50,6 +54,11 @@ class InstallProduct < BaseCommand
 
     @product = @env.nodeProduct
     @product_version = @env.productVersion
+    if @product.nil? || @product_version.nil?
+      @ui.error('You must specify the name and version of the product')
+      return ARGUMENT_ERROR_RESULT
+    end
+
     @machine_configurator = MachineConfigurator.new(@ui)
 
     SUCCESS_RESULT
@@ -75,13 +84,8 @@ class InstallProduct < BaseCommand
     box = node['box'].to_s
     recipe_name = []
     recipe_name.push(@env.repos.recipe_name(@product))
-    product = node['product']
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
-    if product.nil?
-      product = { 'name' => @product, 'version' => @product_version.to_s }
-    else
-      product.merge('name' => @product, 'version' => @product_version.to_s)
-    end
+    product = { 'name' => @product, 'version' => @product_version.to_s }
     product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
     role_json_file = ConfigurationGenerator.generate_json_format(@env.box_definitions, name, product_config,
                                                                  recipe_name, box, @env.rhel_credentials)

@@ -1,7 +1,7 @@
 #
-# Enshure that https transport is installed on debian
+# Ensure that https transport is installed on Debian-based distributions
 #
-if node[:platform_family] == 'debian' || node[:platform_family] == 'ubuntu'
+if platform_family?('debian', 'ubuntu')
   # Ensure that the machine is syncrhonized with the server
   apt_update 'update'
 

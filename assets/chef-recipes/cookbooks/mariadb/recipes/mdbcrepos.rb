@@ -1,14 +1,7 @@
 # frozen_string_literal: true
 
-include_recipe 'packages::configure_apt'
-
 # Install default packages
-%w[net-tools psmisc].each do |pkg|
-  package pkg do
-    retries 2
-    retry_delay 10
-  end
-end
+include_recipe 'packages::default'
 
 # Configure repository
 case node[:platform_family]

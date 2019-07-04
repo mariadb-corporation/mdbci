@@ -1,5 +1,5 @@
-include_recipe "chrony::default"
 include_recipe "mariadb-maxscale::maxscale_repos"
+include_recipe "chrony::default"
 
 # Turn off SElinux
 if node[:platform] == "centos" and node["platform_version"].to_f >= 6.0
@@ -29,7 +29,7 @@ when "debian", "ubuntu"
     command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
   end
 when "rhel", "fedora", "centos"
-  if ((node[:platform] == "centos" or node[:platform] == "rhel" or node[:platform] == "redhat") and node[:platform_version].to_f >= 7.0)
+  if node[:platform_version].to_f >= 7.0
     bash 'Install and configure iptables' do
       code <<-EOF
         yum --assumeyes install iptables-services
@@ -45,7 +45,7 @@ when "rhel", "fedora", "centos"
       EOF
     end
   end
-when "suse"
+when "suse", nil # nil stands for SLES 15
   execute "Install iptables and SuSEfirewall2" do
     command "zypper install -y iptables"
     command "zypper install -y SuSEfirewall2"
@@ -53,15 +53,13 @@ when "suse"
 end
 
 # iptables rules
-case node[:platform_family]
-when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "opensuse"
-  ["3306", "4006", "4008", "4009", "4016", "5306", "4442", "6444", "6603"].each do |port|
-    execute "Open port #{port}" do
-      command "iptables -I INPUT -p tcp -m tcp --dport "+ port +" -j ACCEPT"
-      command "iptables -I INPUT -p tcp --dport "+ port +" -j ACCEPT -m state --state NEW"
-    end
+[3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603].each do |port|
+  execute "Open port #{port}" do
+    command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
+    command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
   end
-end # iptables rules
+end
+# iptables rules
 
 # TODO: check saving iptables rules after reboot
 # save iptables rules
@@ -69,7 +67,6 @@ case node[:platform_family]
 when "debian", "ubuntu"
   execute "Save iptables rules" do
     command "iptables-save > /etc/iptables/rules.v4"
-    #command "/usr/sbin/service iptables-persistent save"
   end
 when "rhel", "centos", "fedora"
   if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
@@ -87,7 +84,7 @@ when "rhel", "centos", "fedora"
     end
   end
 # service iptables restart
-when "suse", "opensuse"
+when "suse", "opensuse", nil # nil stands for SLES 15
   execute "Save iptables rules" do
     command "iptables-save > /etc/sysconfig/iptables"
   end
@@ -103,7 +100,7 @@ when "debian", "ubuntu"
   execute "install dnsutils" do
     command "DEBIAN_FRONTEND=noninteractive apt-get -y install dnsutils"
   end
-when "suse", "opensuse"
+when "suse", "opensuse", nil # nil stands for SLES 15
   execute "install bind-utils" do
     command "zypper install -y bind-utils"
   end
@@ -111,24 +108,28 @@ end
 
 # Install packages
 case node[:platform_family]
-# when "suse"
-#   execute "install" do
-#     command "zypper -n install maxscale maxscale-experimental"
-#   end
 when "windows"
   windows_package "maxscale" do
     source "#{Chef::Config[:file_cache_path]}/maxscale.msi"
     installer_type :msi
     action :install
   end
+when "suse", "opensuse", nil # Enabling SLES 15 support
+  execute "Install MaxScale" do
+    command "zypper install -f -y maxscale"
+  end
+
+  execute "Install MaxScale experimental package" do
+    command "zypper install -f -y maxscale-experimental"
+    ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
+  end
 else
   package 'maxscale' do
-    if %w[rhel centos].include?(node[:platform_family])
-      flush_cache [:before]
-    end
+    action :upgrade
   end
   package 'maxscale-experimental' do
     ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
+    action :upgrade
   end
 end
 
@@ -136,7 +137,7 @@ end
 shadow_group = case node[:platform_family]
                when "rhel", "centos"
                  "root"
-               when "debian", "ubuntu", "suse", "opensuse"
+               when "debian", "ubuntu", "suse", "opensuse", nil # Enabling SLES support
                  "shadow"
                end
 
