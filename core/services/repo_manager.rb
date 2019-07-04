@@ -13,6 +13,11 @@ class RepoManager
       name: 'mariadb',
       repository: 'mariadb'
     },
+    'mdbe' => {
+      recipe: 'mariadb::install_enterprise',
+      name: 'mariadb',
+      repository: 'mdbe'
+    },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       name: 'maxscale',
