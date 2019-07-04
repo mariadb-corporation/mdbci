@@ -30,6 +30,8 @@ class ToolConfiguration
       file.write(YAML.dump(@config))
       file.close
       config_file = File.expand_path(CONFIG_FILE_NAME, XDG['CONFIG_HOME'].to_s)
+      FileUtils.mkpath(File.dirname(config_file)) unless Dir.exist?(File.dirname(config_file))
+
       FileUtils.cp(file.path, config_file)
     end
   end
