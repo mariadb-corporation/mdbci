@@ -66,6 +66,12 @@ class NetworkConfig
     }
   end
 
+  # Provide information to the users about which labels are running right now
+  def generate_label_information_file
+    @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
+    File.write(@config.labels_information_file, active_labels.sort.join(','))
+  end
+
   private
 
   # Get node public IP
