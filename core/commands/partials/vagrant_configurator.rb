@@ -8,7 +8,6 @@ require_relative '../../services/network_config'
 require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
-require_relative '../../services/configuration_file_manager'
 
 # The configurator brings up the configuration for the Vagrant
 class VagrantConfigurator
@@ -166,14 +165,14 @@ class VagrantConfigurator
   def up
     nodes = @config.node_names
     run_in_directory(@config.path) do
-      @network_config = ConfigurationFileManager.store_network_config(@config, @ui)
+      @network_config = NetworkConfig.new(@config, @ui)
+      @network_config.store_network_config
       up_results = Workers.map(nodes) { |node| up_node(node) }
       up_results.each { |up_result| up_result[1].print_to_stdout } if use_log_storage?
       return ERROR_RESULT unless up_results.detect { |up_result| !up_result[0] }.nil?
 
     end
-    ConfigurationFileManager.generate_config_information(@config, @network_config, Dir.pwd, @ui)
-    ConfigurationFileManager.generate_label_information_file(@config, @network_config, @ui)
+    @network_config.generate_config_information
     SUCCESS_RESULT
   end
 
