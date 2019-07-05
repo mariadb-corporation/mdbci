@@ -72,6 +72,16 @@ class NetworkConfig
     File.write(@config.labels_information_file, active_labels.sort.join(','))
   end
 
+  # Provide information for the end-user where to find the required information
+  #
+  # @param working_directory [String] path to the current working directory
+  def self.generate_config_information
+    @ui.info('All nodes were brought up and configured.')
+    @ui.info("CONF_PATH=#{@config.path}")
+    @ui.info("Generating #{@config.network_settings_file} file")
+    File.write(@config.network_settings_file, ini_format)
+  end
+
   private
 
   # Get node public IP
