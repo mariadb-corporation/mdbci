@@ -6,7 +6,6 @@ require_relative '../models/command_result.rb'
 require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
-require_relative '../services/configuration_file_manager'
 
 require 'fileutils'
 
