@@ -75,11 +75,17 @@ class NetworkConfig
   # Provide information for the end-user where to find the required information
   #
   # @param working_directory [String] path to the current working directory
-  def self.generate_config_information
+  def generate_config_information
     @ui.info('All nodes were brought up and configured.')
     @ui.info("CONF_PATH=#{@config.path}")
     @ui.info("Generating #{@config.network_settings_file} file")
     File.write(@config.network_settings_file, ini_format)
+  end
+
+  # Restores network configuration of nodes that were already brought up
+  def store_network_config
+    running_nodes = running_and_halt_nodes(@config.all_node_names, @ui, @config.path)[0]
+    add_nodes(running_nodes)
   end
 
   private
