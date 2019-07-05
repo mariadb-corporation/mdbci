@@ -116,9 +116,9 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Update network_configuration and configured_labels files
   def update_configuration_files(configuration)
-    network_config = ConfigurationFileManager.store_network_config(configuration, @ui)
-    ConfigurationFileManager.generate_config_information(configuration, network_config, Dir.pwd, @ui)
-    ConfigurationFileManager.generate_label_information_file(configuration, network_config, @ui)
+    network_config = NetworkConfig.new(configuration, @ui)
+    network_config.store_network_config
+    network_config.generate_label_information_file
   end
 
   def execute
