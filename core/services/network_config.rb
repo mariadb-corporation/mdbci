@@ -79,6 +79,8 @@ class NetworkConfig
     @ui.info("CONF_PATH=#{@config.path}")
     @ui.info("Generating #{@config.network_settings_file} file")
     File.write(@config.network_settings_file, ini_format)
+    @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
+    File.write(@config.labels_information_file, active_labels.sort.join(','))
   end
 
   # Restores network configuration of nodes that were already brought up
