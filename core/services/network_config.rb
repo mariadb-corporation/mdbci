@@ -79,7 +79,7 @@ class NetworkConfig
 
   # Restores network configuration of nodes that were already brought up
   def store_network_config
-    running_nodes = running_and_halt_nodes[0]
+    running_nodes = running_and_halt_nodes.first
     add_nodes(running_nodes)
   end
 
