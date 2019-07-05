@@ -67,12 +67,6 @@ class NetworkConfig
     }
   end
 
-  # Provide information to the users about which labels are running right now
-  def generate_label_information_file
-    @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
-    File.write(@config.labels_information_file, active_labels.sort.join(','))
-  end
-
   # Provide information for the end-user where to find the required information
   def generate_config_information
     @ui.info('All nodes were brought up and configured.')
