@@ -30,9 +30,19 @@ class ToolConfiguration
       file.write(YAML.dump(@config))
       file.close
       config_file = File.expand_path(CONFIG_FILE_NAME, XDG['CONFIG_HOME'].to_s)
-      FileUtils.mkpath(File.dirname(config_file)) unless Dir.exist?(File.dirname(config_file))
+      check_config_dir(config_file)
 
       FileUtils.cp(file.path, config_file)
+    end
+  end
+
+  # Checks the config directory and creates a directory if it is missing
+  def check_config_dir(config_file)
+    config_dir = File.dirname(config_file)
+    unless Dir.exist?(config_dir)
+      out = FileUtils.mkdir_p(config_dir)
+      raise "Cannot create directory for configuration file: #{out}" unless out.nil? || out[0] == config_dir
+
     end
   end
 
