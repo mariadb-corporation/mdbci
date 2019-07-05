@@ -58,26 +58,6 @@ class VagrantConfigurator
     end
   end
 
-  # Check that specified node is brought up.
-  #
-  # @param node [String] name of node that should be checked.
-  # @param logger [Out] logger to log information to.
-  # @return [Bool] true if node needs to be re-created.
-  def broken_node?(node, logger)
-    !(VagrantCommands.node_running?(node, logger) && chef_installed?(node, logger))
-  end
-
-  # Check that specified node is configured.
-  #
-  # @param node [String] name of node that should be checked.
-  # @param logger [Out] logger to log information to.
-  # @return [Bool] true if node needs to be re-provisioned.
-  def unconfigured_node?(node, logger)
-    return false if broken_node?(node, logger)
-
-    !node_provisioned?(node, logger)
-  end
-
   # Configure single node using the chef-solo respected role
   #
   # @param node [String] name of the node
