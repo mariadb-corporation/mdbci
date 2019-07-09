@@ -8,11 +8,6 @@ include_recipe 'packages::default'
   end
 end
 
-# MDBE package attributes
-system "echo MDBE version: #{node['mariadb']['version']}"
-system "echo MDBE repo: #{node['mariadb']['repo']}"
-system "echo MDBE repo key: #{node['mariadb']['repo_key']}"
-
 repo_file_name = node['mariadb']['repo_file_name']
 
 # MDBE repos
