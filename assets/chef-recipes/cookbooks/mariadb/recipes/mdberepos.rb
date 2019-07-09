@@ -1,4 +1,4 @@
-include_recipe 'packages::configure_apt'
+include_recipe 'packages::default'
 
 # Install default packages
 %w[net-tools psmisc].each do |pkg|
