@@ -19,3 +19,5 @@ supports 'ubuntu'
 
 chef_version '>= 12.15'
 gem 'docker-api', '~> 1.34.0'
+
+depends 'packages'
