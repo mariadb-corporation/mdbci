@@ -31,6 +31,7 @@ require_relative 'services/repo_manager'
 require_relative 'services/aws_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
+require_relative 'commands/remove_product_command'
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
 # These responsibilites should be split between several classes.
@@ -504,6 +505,9 @@ EOF
       exit_code = command.execute
     when 'install_product'
       command = InstallProduct.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'remove_product'
+      command = RemoveProductCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)
