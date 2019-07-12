@@ -2,11 +2,11 @@
 
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
-
   def self.synopsis
     'Installs the product on selected node.'
   end
 
+  # This method is called whenever the command is executed
   def execute
     if @env.show_help
       show_help
@@ -28,6 +28,7 @@ class RemoveProductCommand < BaseCommand
     end
   end
 
+  # Print brief instructions on how to use the command
   def show_help
     info = <<~HELP
       'install_product' Install a product onto the configuration node.
