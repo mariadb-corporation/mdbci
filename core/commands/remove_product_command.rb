@@ -58,4 +58,17 @@ class RemoveProductCommand < BaseCommand
     SUCCESS_RESULT
   end
 
+  # Remove product on server
+  # param node_name [String] name of the node
+  def remove_product(name)
+    role_file_path = generate_role_file(name)
+    target_path = "roles/#{name}.json"
+    role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
+    target_path_config = "configs/#{name}-config.json"
+    extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
+    @network_config.add_nodes([name])
+    @machine_configurator.configure(@network_config[name], "#{name}-config.json",
+                                    @ui, extra_files)
+  end
+
 end
