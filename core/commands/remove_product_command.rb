@@ -71,4 +71,19 @@ class RemoveProductCommand < BaseCommand
                                     @ui, extra_files)
   end
 
+  # Create a role file to install the product from the chef
+  # @param name [String] node name
+  def generate_role_file(name)
+    node = @mdbci_config.node_configurations[name]
+    box = node['box'].to_s
+    recipe_name = []
+    recipe_name.push(@env.repos.recipe_name(@product))
+    role_file_path = "#{@mdbci_config.path}/#{name}.json"
+    product = { 'name' => @product, 'version' => @product_version.to_s }
+    product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
+    role_json_file = ConfigurationGenerator.generate_json_format(@env.box_definitions, name, product_config,
+                                                                 recipe_name, box, @env.rhel_credentials)
+    IO.write(role_file_path, role_json_file)
+    role_file_path
+  end
 end
