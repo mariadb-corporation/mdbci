@@ -36,4 +36,25 @@ class RemoveProductCommand < BaseCommand
     @ui.info(info)
   end
 
+  # Initializes the command variable
+  def init
+    if @args.first.nil?
+      @ui.error('Please specify the node')
+      return ARGUMENT_ERROR_RESULT
+    end
+    @mdbci_config = Configuration.new(@args.first, @env.labels)
+    @network_config = NetworkConfig.new(@mdbci_config, @ui)
+
+    @product = @env.nodeProduct
+    @product_version = @env.productVersion
+    if @product.nil? || @product_version.nil?
+      @ui.error('You must specify the name and version of the product')
+      return ARGUMENT_ERROR_RESULT
+    end
+
+    @machine_configurator = MachineConfigurator.new(@ui)
+
+    SUCCESS_RESULT
+  end
+
 end
