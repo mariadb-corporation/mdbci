@@ -3,7 +3,7 @@
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
   def self.synopsis
-    'Installs the product on selected node.'
+    'Remove the product on selected node.'
   end
 
   # This method is called whenever the command is executed
@@ -31,8 +31,8 @@ class RemoveProductCommand < BaseCommand
   # Print brief instructions on how to use the command
   def show_help
     info = <<~HELP
-      'install_product' Install a product onto the configuration node.
-      mdbci install_product --product product --product-version version config/node
+      'install_product' Remove a product onto the configuration node.
+      mdbci remove_product --product product --product-version version config/node
     HELP
     @ui.info(info)
   end
