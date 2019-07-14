@@ -1,0 +1,7 @@
+name             'clustrix'
+maintainer       'mariadb-corporation'
+maintainer_email 'evgeny.vlasov@fruct.org'
+license          'All rights reserved'
+description      'Install ClustrixDB'
+version          '0.1.0'
+depends          'packages'
