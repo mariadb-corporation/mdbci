@@ -68,3 +68,8 @@ mysql:
     deb:
       path: http://repo.mysql.com/apt/
       key: "5072E1F5"
+clustrix:
+  releases:
+    9.1.4:
+      path: http://files.clustrix.com/releases/software/clustrix-9.1.4.el7.tar.bz2
+      platforms: ["centos_7"]
