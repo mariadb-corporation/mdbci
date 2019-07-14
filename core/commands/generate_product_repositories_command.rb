@@ -60,11 +60,7 @@ In orded to generate configuration for a specific product use --product option.
 
   mdbci #{COMMAND_NAME} --product mdbe
 
-<<<<<<< HEAD
-Currently supported products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
-=======
 MDBCI currently supports the following products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
->>>>>>> origin/integration
 
 In order to generate configuration for a specific product version use --product-version option. You must also specify the name of the product to generate configuration for.
 
