@@ -321,21 +321,18 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_mdbe_rpm_repository(config)
     get_mdbe_release_versions(config).map do |version|
-      %w[centos rhel].map do |platform|
-        [6, 7, 8].map do |platform_version|
-          generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version)
-        end
+      config['platforms'].map do |platform_and_version|
+        platform, platform_version = platform_and_version.split('_')
+        generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version)
       end
     end.flatten
   end
 
   def parse_mdbe_deb_repository(config)
     get_mdbe_release_versions(config).map do |version|
-      [['debian', %w[jessie stretch]], ['ubuntu', %w[xenial bionic]]].map do |platform_and_version|
-        platform_and_version[1].map do |platform_version|
-          generate_mdbe_release_info(config['baseurl'], config['key'], version, platform_and_version[0],
-                                     platform_version, true)
-        end
+      config['platforms'].map do |platform_and_version|
+        platform, platform_version = platform_and_version.split('_')
+        generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version, true)
       end
     end.flatten
   end
