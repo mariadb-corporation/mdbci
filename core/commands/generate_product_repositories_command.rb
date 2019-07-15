@@ -261,8 +261,8 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_mdbe(config)
     releases = []
-    releases.concat(parse_mdbe_rpm_repository(config['repo']['rpm']))
-    releases.concat(parse_mdbe_deb_repository(config['repo']['deb']))
+    releases.concat(parse_mdbe_repository(config['repo']['rpm']))
+    releases.concat(parse_mdbe_repository(config['repo']['deb'], true))
     releases
   end
 
@@ -307,7 +307,7 @@ In order to specify the number of retries for repository configuration use --att
   # rubocop:disable Metrics/ParameterLists
   def generate_mdbe_release_info(baseurl, key, version, platform, platform_version, deb_repo = false)
     repo_path = generate_mdbe_repo_path(baseurl, version)
-    repo_path = "#{repo_path} #{platform_version} main" if deb_repo
+    repo_path = "#{repo_path} #{platform_version}" if deb_repo
     {
       repo: repo_path,
       repo_key: key,
@@ -319,20 +319,11 @@ In order to specify the number of retries for repository configuration use --att
   end
   # rubocop:enable Metrics/ParameterLists
 
-  def parse_mdbe_rpm_repository(config)
+  def parse_mdbe_repository(config, deb_repo = false)
     get_mdbe_release_versions(config).map do |version|
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
-        generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version)
-      end
-    end.flatten
-  end
-
-  def parse_mdbe_deb_repository(config)
-    get_mdbe_release_versions(config).map do |version|
-      config['platforms'].map do |platform_and_version|
-        platform, platform_version = platform_and_version.split('_')
-        generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version, true)
+        generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version, deb_repo)
       end
     end.flatten
   end

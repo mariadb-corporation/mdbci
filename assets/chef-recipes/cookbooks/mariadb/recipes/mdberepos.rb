@@ -14,11 +14,11 @@ repo_file_name = node['mariadb']['repo_file_name']
 case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
-  repository = node['mariadb']['repo'].split(/\s+/)
+  repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
   apt_repository repo_file_name do
-    uri repository[0]
-    distribution repository[1]
-    components repository.slice(2, repository.size)
+    uri repo_uri
+    distribution repo_distribution
+    components node['mariadb']['deb_components']
     keyserver 'keyserver.ubuntu.com'
     key node['mariadb']['repo_key']
     sensitive true
