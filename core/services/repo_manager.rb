@@ -56,6 +56,11 @@ class RepoManager
     'docker' => {
       recipe: 'docker',
       name: 'docker'
+    },
+    'clustrix' => {
+      recipe: 'clustrix',
+      name: 'clustrix',
+      repository: 'clustrix'
     }
   }
 

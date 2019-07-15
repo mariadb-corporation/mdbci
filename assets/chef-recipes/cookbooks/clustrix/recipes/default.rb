@@ -1,3 +1,8 @@
+include_recipe 'packages::default'
+
+# Add EPEL
+yum_package 'epel-release'
+
 # Install Operating System Dependent Packages
 case node[:platform_family]
 when 'rhel', 'fedora', 'centos'
@@ -12,15 +17,19 @@ when 'rhel', 'fedora', 'centos'
 end
 
 # Download ClustrixDB installer
-remote_file './clustrix-installer.tar.bz2' do
-  source node[:repo]
+remote_file '/home/vagrant/clustrix-installer.tar.bz2' do
+  source node['clustrix']['repo']
   action :create
 end
 
+# Create directory to unpack clustrix-installer
+directory '/home/vagrant/clustrix-installer'
+
 execute 'Unpack ClustrixDB installer' do
-  command 'tar xvjf clustrix-installer.tar.bz2'
+  command 'tar xvjf /home/vagrant/clustrix-installer.tar.bz2 -C /home/vagrant/clustrix-installer --strip-components=1'
 end
 
 execute 'Install ClustrixDB via unpacked installer' do
-  command 'clustrix-installer/clxnode_install.py --yes --force'
+  command './clxnode_install.py --yes --force'
+  cwd '/home/vagrant/clustrix-installer/'
 end
