@@ -172,5 +172,6 @@ class DockerSwarmConfigurator
                                                                    'docker_container_id' => task[:container_id])
     end
     network_settings.store_network_configuration(@config)
+    SUCCESS_RESULT
   end
 end
