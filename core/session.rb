@@ -269,7 +269,8 @@ EOF
     raise "Box: #{box} is empty" if box.empty?
 
     box_params = $session.box_definitions.get_box(box)
-    cmd = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ' + $mdbci_exec_dir.to_s+'/KEYS/'+box_params['keyfile'].to_s + " "\
+    cmd = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ' + mdbci_dir + '/KEYS/'
+                    + box_params['keyfile'].to_s + " "\
                     + box_params['user'].to_s + "@"\
                     + box_params['IP'].to_s + " "\
                     + "'" + $session.command + "'"

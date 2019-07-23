@@ -37,14 +37,12 @@ opts = GetoptLong.new(
   ['--template', '-t', GetoptLong::REQUIRED_ARGUMENT],
 )
 
-$mdbci_exec_dir = File.expand_path(File.dirname(File.realpath(__FILE__)))
-$LOAD_PATH.unshift($mdbci_exec_dir) unless $LOAD_PATH.include?($mdbci_exec_dir)
+$mdbci_exec_dir = File.expand_path(__dir__)
 
-require 'core/session'
-
-require 'core/out'
-require 'core/exception_handler'
-require 'core/services/version'
+require_relative 'core/session'
+require_relative 'core/out'
+require_relative 'core/exception_handler'
+require_relative 'core/services/version'
 
 session = Session.new
 $session = session
