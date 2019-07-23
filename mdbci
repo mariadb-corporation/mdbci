@@ -160,9 +160,9 @@ begin
       out.error 'Option is not supported: ' + opt
     end
   end
-rescue GetoptLong::MissingArgument => error
-  out.error error.backtrace.join("\n")
-  out.error error.to_s
+rescue GetoptLong::MissingArgument => e
+  out.error e.backtrace.join("\n")
+  out.error e.to_s
   exit 1
 end
 
@@ -183,9 +183,9 @@ end
 begin
   session.initialize_services
   exit_code = session.commands
-rescue StandardError => error
-  out.error error.backtrace.join("\n")
-  out.error error.to_s
+rescue StandardError => e
+  out.error e.backtrace.join("\n")
+  out.error e.to_s
   exit_code = 1
 end
 exit exit_code
