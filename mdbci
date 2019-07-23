@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'English'
 require 'getoptlong'
 
 
@@ -168,6 +169,15 @@ end
 # Putting the information about the
 out.info "MariaDB CI CLI, version: #{Version.version(session.mdbci_dir, out)}"
 out.info "mdbci called with: #{initial_arguments}"
+
+at_exit do
+  if $ERROR_INFO.nil? || $ERROR_INFO.is_a?(SystemExit) && $ERROR_INFO.success?
+    out.debug('MDBCI success with code: 0')
+  else
+    code = $ERROR_INFO.is_a?(SystemExit) ? $ERROR_INFO.status : 1
+    out.debug("MDBCI failure with code: #{code}")
+  end
+end
 
 # run commands and return 0 for success, 1 for error
 begin
