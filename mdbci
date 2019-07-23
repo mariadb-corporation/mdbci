@@ -61,7 +61,6 @@ Dir.chdir ENV['MDBCI_VM_PATH'] unless ENV['MDBCI_VM_PATH'].nil?
 $work_dir = Dir.pwd
 
 session.mdbci_dir = $mdbci_exec_dir
-session.starting_dir = $current_dir
 session.working_dir = $work_dir
 
 # Storing argument for the further processing

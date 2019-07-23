@@ -53,7 +53,6 @@ class Session
   attr_accessor :attempts
   attr_accessor :mdbciDir
   attr_accessor :mdbci_dir
-  attr_accessor :starting_dir
   attr_accessor :working_dir
   attr_accessor :nodeProduct
   attr_accessor :productVersion
@@ -102,7 +101,6 @@ EOF
   def fill_paths
     @mdbci_dir = __dir__ unless @mdbci_dir
     @working_dir = Dir.pwd unless @working_dir
-    @starting_dir = @working_dir unless @starting_dir
     @configuration_directories = [
       File.join(XDG['CONFIG_HOME'].to_s, 'mdbci'),
       File.join(@mdbci_dir, 'config')
