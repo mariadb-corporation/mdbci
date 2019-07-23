@@ -3,6 +3,7 @@
 require_relative '../../services/shell_commands'
 require_relative '../../models/return_codes'
 require_relative '../../models/network_settings'
+require_relative '../../services/docker_commands'
 
 # The configurator that is able to bring up the Docker swarm cluster
 class DockerSwarmConfigurator
@@ -13,6 +14,7 @@ class DockerSwarmConfigurator
     @config = config
     @ui = logger
     @attempts = env.attempts&.to_i || 1
+    @docker_commands = DockerCommands.new(@ui)
   end
 
   def configure(generate_partial: true)
@@ -56,13 +58,14 @@ class DockerSwarmConfigurator
     result = bring_up_docker_stack(config_file)
     return result unless result == SUCCESS_RESULT
 
-    result = run_command("docker stack ps --format '{{.ID}}' #{@config.name}")
-    unless result[:value].success?
-      @ui.error('Unable to get the list of tasks')
-      return ERROR_RESULT
+    result = @docker_commands.retrieve_task_list(@config.name)
+    if result.success?
+      @tasks = result.value
+      SUCCESS_RESULT
+    else
+      @ui.error(result.error)
+      ERROR_RESULT
     end
-    @tasks = result[:output].each_line.map { |task_id| { task_id: task_id } }
-    SUCCESS_RESULT
   end
 
   # Bring up the stack, perform it several times if necessary
