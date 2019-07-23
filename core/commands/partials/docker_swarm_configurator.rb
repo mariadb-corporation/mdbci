@@ -63,7 +63,6 @@ class DockerSwarmConfigurator
       @tasks = result.value
       SUCCESS_RESULT
     else
-      @ui.error(result.error)
       ERROR_RESULT
     end
   end
@@ -87,9 +86,8 @@ class DockerSwarmConfigurator
       @tasks.each do |task|
         next if task.key?(:ip_address)
 
-        status, task_info = get_task_information(task[:task_id])
-
-        task.merge!(task_info) unless status == ERROR_RESULT
+        result = @docker_commands.get_task_information(task[:task_id])
+        task.merge!(result.value) if result.success?
       end
       @tasks.delete_if { |task| task.key?(:desired_state) && task[:desired_state] == 'shutdown' }
       return SUCCESS_RESULT if @tasks.all? { |task| task.key?(:ip_address) }
@@ -97,72 +95,6 @@ class DockerSwarmConfigurator
       sleep(2)
     end
     ERROR_RESULT
-  end
-
-  # Get the IP address for the task
-  # @param task_id [String] the task to get the IP address for
-  def get_task_information(task_id)
-    result = run_command("docker inspect #{task_id}")
-    unless result[:value].success?
-      @ui.warning("Unable to get information about the task '#{task_id}'")
-      return ERROR_RESULT, ''
-    end
-    task_data = JSON.parse(result[:output])[0]
-    if task_data['Status']['State'] == 'running'
-      process_task_data(task_data)
-    else
-      [NO_RESULT, { desired_state: task_data['DesiredState'] }]
-    end
-  end
-
-  # Convert task description into correct description, get all required ip addresses
-  def process_task_data(task_data)
-    private_ip_address = task_data['NetworksAttachments'][0]['Addresses'][0].split('/')[0]
-    container_id = task_data['Status']['ContainerStatus']['ContainerID']
-    result, ip_address = get_service_public_ip(container_id, private_ip_address)
-    return ERROR_RESULT, '' if result == ERROR_RESULT
-
-    task_info = {
-      ip_address: ip_address,
-      container_id: container_id,
-      private_ip_address: private_ip_address,
-      node_name: task_data['Spec']['Networks'][0]['Aliases'][0],
-      desired_state: task_data['DesiredState']
-    }
-    [SUCCESS_RESULT, task_info]
-  end
-
-  # Get the ip address of the docker swarm service that is located on the current machine
-  # @param container_id [String] the name of the container to get data from
-  # @param private_ip_address [String] the private IP address
-  def get_service_public_ip(container_id, private_ip_address)
-    result = run_command("docker exec #{container_id} cat /proc/net/fib_trie")
-    unless result[:value].success?
-      @ui.error("Unable to determine the IP address of the container #{container_id}")
-      return ERROR_RESULT, ''
-    end
-
-    addresses = extract_ip_addresses(result[:output])
-    addresses.each do |address|
-      next if ['127.0.0.1', private_ip_address].include?(address)
-
-      return [SUCCESS_RESULT, address]
-    end
-
-    [ERROR_RESULT, '']
-  end
-
-  # Process /proc/net/fib_trie contents file and extract the ip addresses
-  # @param fib_contents [String] contents of the file
-  def extract_ip_addresses(fib_contents)
-    addresses = fib_contents.lines.each_with_object(last: '', result: []) do |line, acc|
-      if line.include?('host LOCAL')
-        address = acc[:last].scan(/\d+\.\d+\.\d+\.\d+/)
-        acc[:result].push(address.first) unless address.empty?
-      end
-      acc[:last] = line
-    end
-    addresses[:result]
   end
 
   # Put the network settings information into the files
