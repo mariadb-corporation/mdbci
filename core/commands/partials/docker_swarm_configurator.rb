@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../services/shell_commands'
-require_relative '../../models/return_codes'
+require_relative 'docker_swarm_cleaner'
 require_relative '../../models/network_settings'
+require_relative '../../models/result'
+require_relative '../../models/return_codes'
 require_relative '../../services/docker_commands'
+require_relative '../../services/shell_commands'
 
 # The configurator that is able to bring up the Docker swarm cluster
 class DockerSwarmConfigurator
@@ -15,26 +17,31 @@ class DockerSwarmConfigurator
     @ui = logger
     @attempts = env.attempts&.to_i || 1
     @docker_commands = DockerCommands.new(@ui)
+    @recreate_nodes = env.recreate
+    @docker_swarm_cleaner = DockerSwarmCleaner.new(env, logger)
   end
 
   def configure(generate_partial: true)
     @ui.info('Bringing up docker nodes')
-    return SUCCESS_RESULT unless @config.docker_configuration?
+    return ERROR_RESULT unless @config.docker_configuration?
 
-    if generate_partial
-      extract_node_configuration
-      if @configuration['services'].empty?
-        @ui.info('No Docker services are configured to be brought up')
-        return SUCCESS_RESULT
-      end
+    result = Result.ok('')
+    result = result.and_then { extract_node_configuration } if generate_partial
+    result = result.and_then { destroy_existing_stack } if @recreate_nodes
+    result = result.and_then do
+      bring_up_nodes
+    end.and_then do
+      wait_for_services
+    end.and_then do
+      store_network_settings
     end
-    result = bring_up_nodes
-    return result unless result == SUCCESS_RESULT
+    result.success? ? SUCCESS_RESULT : ERROR_RESULT
+  end
 
-    result = wait_for_services
-    return result unless result == SUCCESS_RESULT
-
-    store_network_settings
+  # Method destroys the existing stack
+  # @return SUCCESS_RESULT if the operation was successful
+  def destroy_existing_stack
+    @docker_swarm_cleaner.destroy_stack(@config)
   end
 
   # Extract only the required node configuration from the whole configuration
@@ -48,6 +55,11 @@ class DockerSwarmConfigurator
     end
     config_file = @config.docker_partial_configuration
     File.write(config_file, YAML.dump(@configuration))
+    if @configuration['services'].empty?
+      @ui.info('No Docker services are configured to be brought up')
+      return Result.error('No Docker services were selected')
+    end
+    Result.ok('Services selected')
   end
 
   # Create the extract of the services that must be brought up and
@@ -55,15 +67,11 @@ class DockerSwarmConfigurator
   def bring_up_nodes
     @ui.info('Bringing up the Docker Swarm stack')
     config_file = @config.docker_partial_configuration
-    result = bring_up_docker_stack(config_file)
-    return result unless result == SUCCESS_RESULT
-
-    result = @docker_commands.retrieve_task_list(@config.name)
-    if result.success?
-      @tasks = result.value
-      SUCCESS_RESULT
-    else
-      ERROR_RESULT
+    bring_up_docker_stack(config_file).and_then do
+      @docker_commands.retrieve_task_list(@config.name)
+    end.and_then do |tasks|
+      @tasks = tasks
+      Result.ok('Nodes brought up')
     end
   end
 
@@ -71,12 +79,12 @@ class DockerSwarmConfigurator
   def bring_up_docker_stack(config_file)
     (@attempts + 1).times do
       result = run_command_and_log("docker stack deploy -c #{config_file} #{@config.name}")
-      return SUCCESS_RESULT if result[:value].success?
+      return Result.ok('Docker stack is brought up') if result[:value].success?
 
-      @ui.error('Unable to deploy the docker stack!')
+      @ui.error('Unable to deploy the Docker stack!')
       sleep(1)
     end
-    ERROR_RESULT
+    Result.error('Unable to deploy the Docker Stack')
   end
 
   # Wait for services to start and acquire the IP-address
@@ -90,11 +98,11 @@ class DockerSwarmConfigurator
         task.merge!(result.value) if result.success?
       end
       @tasks.delete_if { |task| task.key?(:desired_state) && task[:desired_state] == 'shutdown' }
-      return SUCCESS_RESULT if @tasks.all? { |task| task.key?(:ip_address) }
+      return Result.ok('All nodes are running') if @tasks.all? { |task| task.key?(:ip_address) }
 
       sleep(2)
     end
-    ERROR_RESULT
+    Result.error('Not all nodes were successfully started')
   end
 
   # Put the network settings information into the files
@@ -107,6 +115,6 @@ class DockerSwarmConfigurator
                                                                    'docker_container_id' => task[:container_id])
     end
     network_settings.store_network_configuration(@config)
-    SUCCESS_RESULT
+    Result.ok('')
   end
 end

@@ -21,6 +21,13 @@ class DockerSwarmCleaner
       return Result.error("Unable to remove the Docker swarm stack #{stack_name}")
     end
 
+    wait_for_termination(stack_name)
+  end
+
+  private
+
+  # Wait for the Docker to remove the specified task
+  def wait_for_termination(stack_name)
     100.times do
       result = run_command("docker stack ps #{stack_name}")
       unless result[:value].success?
@@ -32,5 +39,6 @@ class DockerSwarmCleaner
     end
 
     @ui.error('Did not manage to wait for the Docker Swarm stack removal')
+    Result.error('Did not manage to wait for the Docker Swarm stack removal')
   end
 end
