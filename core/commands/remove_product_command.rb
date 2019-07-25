@@ -117,4 +117,11 @@ class RemoveProductCommand < BaseCommand
              run_list: run_list }
     JSON.pretty_generate(role)
   end
+
+  # Check whether box needs to be subscribed or not
+  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
+  # @param box [String] name of the box
+  def check_subscription_manager(box_definitions, box)
+    box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
+  end
 end
