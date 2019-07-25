@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require_relative '../services/machine_configurator'
+require_relative '../models/configuration'
+require_relative '../services/configuration_generator'
+
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
   def self.synopsis
