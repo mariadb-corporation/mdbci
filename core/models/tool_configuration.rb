@@ -39,11 +39,8 @@ class ToolConfiguration
   # Checks the config directory and creates a directory if it is missing
   def check_config_dir(config_file)
     config_dir = File.dirname(config_file)
-    unless Dir.exist?(config_dir)
-      out = FileUtils.mkdir_p(config_dir)
-      raise "Cannot create directory for configuration file: #{out}" unless out.nil? || out.first == config_dir
-
-    end
+    out = FileUtils.mkdir_p(config_dir)
+    raise "Cannot create directory for configuration file: #{out}" unless out.first == config_dir
   end
 
   # A proxy method to provide access to the values of underlying hash object
