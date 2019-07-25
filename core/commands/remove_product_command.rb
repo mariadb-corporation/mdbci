@@ -124,4 +124,32 @@ class RemoveProductCommand < BaseCommand
   def check_subscription_manager(box_definitions, box)
     box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
+
+  # Generate the list of the product parameters
+  # @param repos [RepoManager] for products
+  # @param product_name [String] name of the product for install
+  # @param product [Hash] parameters of the product to configure from configuration file
+  # @param box [String] name of the box
+  # @param repo [String] repo for product
+  def generate_product_config(repos, product_name, product, box, repo)
+    repo = repos.find_repository(product_name, product, box) if repo.nil?
+    raise "Repo for product #{product['name']} #{product['version']} for #{box} not found" if repo.nil?
+
+    config = { 'version': repo['version'], 'repo': repo['repo'], 'repo_key': repo['repo_key'] }
+    if check_product_availability(product)
+      config['cnf_template'] = product['cnf_template']
+      config['cnf_template_path'] = product['cnf_template_path']
+    end
+    repo_file_name = repos.repo_file_name(product_name)
+    config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
+    config['node_name'] = product['node_name'] unless product['node_name'].nil?
+    attribute_name = repos.attribute_name(product_name)
+    { "#{attribute_name}": config }
+  end
+
+  # Checks the availability of product information.
+  # @param product [Hash] parameters of the product to configure from configuration file
+  def self.check_product_availability(product)
+    !product['cnf_template'].nil? && !product['cnf_template_path'].nil?
+  end
 end
