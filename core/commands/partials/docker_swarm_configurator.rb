@@ -33,6 +33,8 @@ class DockerSwarmConfigurator
     end.and_then do
       wait_for_services
     end.and_then do
+      wait_for_applications
+    end.and_then do
       store_network_settings
     end
     result.success? ? SUCCESS_RESULT : ERROR_RESULT
@@ -103,6 +105,32 @@ class DockerSwarmConfigurator
       sleep(2)
     end
     Result.error('Not all nodes were successfully started')
+  end
+
+  # Wait for applications to start up and be ready to accept incoming connections
+  def wait_for_applications
+    @ui.info('Waiting for applications to become available')
+    60.times do
+      @tasks.each do |task|
+        next if task[:running]
+
+        task[:running] = check_application_status(task[:container_id], task[:product_name])
+      end
+      return Result.ok('All applications are running') if @tasks.all? { |task| task[:running] }
+
+      sleep(2)
+    end
+    Result.ok('All applications have started')
+  end
+
+  def check_application_status(container_id, product_name)
+    case product_name
+    when 'mariadb'
+      @docker_commands.run_in_container("mysql -h localhost -e 'select 1'", container_id)
+                      .success?
+    else
+      true
+    end
   end
 
   # Put the network settings information into the files

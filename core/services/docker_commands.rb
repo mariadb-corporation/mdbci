@@ -28,56 +28,77 @@ class DockerCommands
   # Get the task information
   # @param task_id [String] the task to get the IP address for
   def get_task_information(task_id)
-    result = run_command("docker inspect #{task_id}")
-    unless result[:value].success?
-      @ui.warning("Unable to get information about the task '#{task_id}'")
-      return Result.error("Error with task '#{task_id}'")
+    docker_inspect(task_id).and_then do |task_data|
+      if task_data['Status']['State'] == 'running'
+        process_task_data(task_data)
+      else
+        Result.ok(desired_state: task_data['DesiredState'])
+      end
     end
-    task_data = JSON.parse(result[:output])[0]
-    if task_data['Status']['State'] == 'running'
-      process_task_data(task_data)
+  end
+
+  # Method executes the command inside the container
+  def run_in_container(command, container)
+    result = run_command("docker exec #{container} #{command}")
+    if result[:value].success?
+      Result.ok(result[:output])
     else
-      Result.ok({ desired_state: task_data['DesiredState'] })
+      @ui.warning("Execution of command '#{command}' was not successful")
+      Result.error(result[:output])
     end
   end
 
   private
 
+  # Run the inspect on the specified Docker object
+  # @param id [String] identifier of the object
+  # @return [Hash] the parsed JSON object wrapped in the Result
+  def docker_inspect(id)
+    result = run_command("docker inspect #{id}")
+    unless result[:value].success?
+      @ui.warning("Unable to get information about the task '#{id}'")
+      return Result.error("Error with task '#{id}'")
+    end
+    Result.ok(JSON.parse(result[:output])[0])
+  end
+
   # Convert task description into correct description, get all required ip addresses
   def process_task_data(task_data)
-    private_ip_address = task_data['NetworksAttachments'][0]['Addresses'][0].split('/')[0]
-    container_id = task_data['Status']['ContainerStatus']['ContainerID']
-    result = get_service_public_ip(container_id, private_ip_address)
-    return result if result.error?
-
     task_info = {
-      ip_address: result.value,
-      container_id: container_id,
-      private_ip_address: private_ip_address,
+      container_id: task_data['Status']['ContainerStatus']['ContainerID'],
+      private_ip_address: task_data['NetworksAttachments'][0]['Addresses'][0].split('/')[0],
       node_name: task_data['Spec']['Networks'][0]['Aliases'][0],
       desired_state: task_data['DesiredState']
     }
-    Result.ok(task_info)
+    get_service_public_ip(task_info[:container_id], task_info[:private_ip_address]).and_then do |ip_address|
+      task_info[:ip_address] = ip_address
+      get_product_name(task_data['ServiceID'])
+    end.and_then do |product_name|
+      task_info[:product_name] = product_name
+      Result.ok(task_info)
+    end
   end
 
   # Get the ip address of the docker swarm service that is located on the current machine
   # @param container_id [String] the name of the container to get data from
   # @param private_ip_address [String] the private IP address
   def get_service_public_ip(container_id, private_ip_address)
-    result = run_command("docker exec #{container_id} cat /proc/net/fib_trie")
-    unless result[:value].success?
-      @ui.error("Unable to determine the IP address of the container #{container_id}")
-      return Result.error('Error with IP address determination')
+    run_in_container('cat /proc/net/fib_trie', container_id).and_then do |output|
+      addresses = extract_ip_addresses(output)
+      addresses.each do |address|
+        next if ['127.0.0.1', private_ip_address].include?(address)
+
+        return Result.ok(address)
+      end
+      Result.error('No address has been detected')
     end
+  end
 
-    addresses = extract_ip_addresses(result[:output])
-    addresses.each do |address|
-      next if ['127.0.0.1', private_ip_address].include?(address)
-
-      return Result.ok(address)
+  # Determine the name of the product based on the
+  def get_product_name(service_id)
+    docker_inspect(service_id).and_then do |service_info|
+      Result.ok(service_info['Spec']['Labels']['org.mariadb.node.product'])
     end
-
-    Result.error('No address has been detected')
   end
 
   # Process /proc/net/fib_trie contents file and extract the ip addresses
