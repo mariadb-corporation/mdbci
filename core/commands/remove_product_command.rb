@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 require_relative '../services/configuration_generator'
 
@@ -23,10 +22,10 @@ class RemoveProductCommand < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
 
-    result = install_product(@mdbci_config.node_names.first)
+    result = remove_product(@mdbci_config.node_names.first)
 
     if result.success?
-      SUCCESS_RESULT
+     SUCCESS_RESULT
     else
       ERROR_RESULT
     end
@@ -81,12 +80,12 @@ class RemoveProductCommand < BaseCommand
     node = @mdbci_config.node_configurations[name]
     box = node['box'].to_s
     recipe_name = []
-    recipe_name.push(@env.repos.recipe_name(@product))
+    recipe_name.push(@env.repos.recipe_name("#{@product}_remove"))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
     product = { 'name' => @product, 'version' => @product_version.to_s }
     product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
     role_json_file = ConfigurationGenerator.generate_json_format(@env.box_definitions, name, product_config,
-                                                                 recipe_name, box, @env.rhel_credentials)
+                                                                recipe_name, box, @env.rhel_credentials)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end

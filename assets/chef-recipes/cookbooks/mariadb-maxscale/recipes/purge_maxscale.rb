@@ -1,7 +1,5 @@
 # Recipe removes maxscale and it's files from the system
 
-# Currently only will support ubuntu
-
 service 'maxscale' do
   action :stop
 end
