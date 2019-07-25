@@ -25,3 +25,8 @@ include_recipe 'packages::configure_apt'
 end
 
 include_recipe 'chrony::default'
+
+# Add a hack to keep connection to the default routers warm in Bionic
+if platform?('ubuntu') && node[:platform_version] == '18.04'
+  include_recipe 'packages::setup_connection_warmup'
+end

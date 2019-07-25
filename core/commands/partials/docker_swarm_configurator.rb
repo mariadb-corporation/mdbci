@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../../services/shell_commands'
-require_relative '../../models/return_codes'
+require_relative 'docker_swarm_cleaner'
 require_relative '../../models/network_settings'
+require_relative '../../models/result'
+require_relative '../../models/return_codes'
+require_relative '../../services/docker_commands'
+require_relative '../../services/shell_commands'
 
 # The configurator that is able to bring up the Docker swarm cluster
 class DockerSwarmConfigurator
@@ -13,26 +16,32 @@ class DockerSwarmConfigurator
     @config = config
     @ui = logger
     @attempts = env.attempts&.to_i || 1
+    @docker_commands = DockerCommands.new(@ui)
+    @recreate_nodes = env.recreate
+    @docker_swarm_cleaner = DockerSwarmCleaner.new(env, logger)
   end
 
   def configure(generate_partial: true)
     @ui.info('Bringing up docker nodes')
-    return SUCCESS_RESULT unless @config.docker_configuration?
+    return ERROR_RESULT unless @config.docker_configuration?
 
-    if generate_partial
-      extract_node_configuration
-      if @configuration['services'].empty?
-        @ui.info('No Docker services are configured to be brought up')
-        return SUCCESS_RESULT
-      end
+    result = Result.ok('')
+    result = result.and_then { extract_node_configuration } if generate_partial
+    result = result.and_then { destroy_existing_stack } if @recreate_nodes
+    result = result.and_then do
+      bring_up_nodes
+    end.and_then do
+      wait_for_services
+    end.and_then do
+      store_network_settings
     end
-    result = bring_up_nodes
-    return result unless result == SUCCESS_RESULT
+    result.success? ? SUCCESS_RESULT : ERROR_RESULT
+  end
 
-    result = wait_for_services
-    return result unless result == SUCCESS_RESULT
-
-    store_network_settings
+  # Method destroys the existing stack
+  # @return SUCCESS_RESULT if the operation was successful
+  def destroy_existing_stack
+    @docker_swarm_cleaner.destroy_stack(@config)
   end
 
   # Extract only the required node configuration from the whole configuration
@@ -46,6 +55,11 @@ class DockerSwarmConfigurator
     end
     config_file = @config.docker_partial_configuration
     File.write(config_file, YAML.dump(@configuration))
+    if @configuration['services'].empty?
+      @ui.info('No Docker services are configured to be brought up')
+      return Result.error('No Docker services were selected')
+    end
+    Result.ok('Services selected')
   end
 
   # Create the extract of the services that must be brought up and
@@ -53,28 +67,24 @@ class DockerSwarmConfigurator
   def bring_up_nodes
     @ui.info('Bringing up the Docker Swarm stack')
     config_file = @config.docker_partial_configuration
-    result = bring_up_docker_stack(config_file)
-    return result unless result == SUCCESS_RESULT
-
-    result = run_command("docker stack ps --format '{{.ID}}' #{@config.name}")
-    unless result[:value].success?
-      @ui.error('Unable to get the list of tasks')
-      return ERROR_RESULT
+    bring_up_docker_stack(config_file).and_then do
+      @docker_commands.retrieve_task_list(@config.name)
+    end.and_then do |tasks|
+      @tasks = tasks
+      Result.ok('Nodes brought up')
     end
-    @tasks = result[:output].each_line.map { |task_id| { task_id: task_id } }
-    SUCCESS_RESULT
   end
 
   # Bring up the stack, perform it several times if necessary
   def bring_up_docker_stack(config_file)
     (@attempts + 1).times do
       result = run_command_and_log("docker stack deploy -c #{config_file} #{@config.name}")
-      return SUCCESS_RESULT if result[:value].success?
+      return Result.ok('Docker stack is brought up') if result[:value].success?
 
-      @ui.error('Unable to deploy the docker stack!')
+      @ui.error('Unable to deploy the Docker stack!')
       sleep(1)
     end
-    ERROR_RESULT
+    Result.error('Unable to deploy the Docker Stack')
   end
 
   # Wait for services to start and acquire the IP-address
@@ -84,82 +94,15 @@ class DockerSwarmConfigurator
       @tasks.each do |task|
         next if task.key?(:ip_address)
 
-        status, task_info = get_task_information(task[:task_id])
-
-        task.merge!(task_info) unless status == ERROR_RESULT
+        result = @docker_commands.get_task_information(task[:task_id])
+        task.merge!(result.value) if result.success?
       end
       @tasks.delete_if { |task| task.key?(:desired_state) && task[:desired_state] == 'shutdown' }
-      return SUCCESS_RESULT if @tasks.all? { |task| task.key?(:ip_address) }
+      return Result.ok('All nodes are running') if @tasks.all? { |task| task.key?(:ip_address) }
 
       sleep(2)
     end
-    ERROR_RESULT
-  end
-
-  # Get the IP address for the task
-  # @param task_id [String] the task to get the IP address for
-  def get_task_information(task_id)
-    result = run_command("docker inspect #{task_id}")
-    unless result[:value].success?
-      @ui.warning("Unable to get information about the task '#{task_id}'")
-      return ERROR_RESULT, ''
-    end
-    task_data = JSON.parse(result[:output])[0]
-    if task_data['Status']['State'] == 'running'
-      process_task_data(task_data)
-    else
-      [NO_RESULT, { desired_state: task_data['DesiredState'] }]
-    end
-  end
-
-  # Convert task description into correct description, get all required ip addresses
-  def process_task_data(task_data)
-    private_ip_address = task_data['NetworksAttachments'][0]['Addresses'][0].split('/')[0]
-    container_id = task_data['Status']['ContainerStatus']['ContainerID']
-    result, ip_address = get_service_public_ip(container_id, private_ip_address)
-    return ERROR_RESULT, '' if result == ERROR_RESULT
-
-    task_info = {
-      ip_address: ip_address,
-      container_id: container_id,
-      private_ip_address: private_ip_address,
-      node_name: task_data['Spec']['Networks'][0]['Aliases'][0],
-      desired_state: task_data['DesiredState']
-    }
-    [SUCCESS_RESULT, task_info]
-  end
-
-  # Get the ip address of the docker swarm service that is located on the current machine
-  # @param container_id [String] the name of the container to get data from
-  # @param private_ip_address [String] the private IP address
-  def get_service_public_ip(container_id, private_ip_address)
-    result = run_command("docker exec #{container_id} cat /proc/net/fib_trie")
-    unless result[:value].success?
-      @ui.error("Unable to determine the IP address of the container #{container_id}")
-      return ERROR_RESULT, ''
-    end
-
-    addresses = extract_ip_addresses(result[:output])
-    addresses.each do |address|
-      next if ['127.0.0.1', private_ip_address].include?(address)
-
-      return [SUCCESS_RESULT, address]
-    end
-
-    [ERROR_RESULT, '']
-  end
-
-  # Process /proc/net/fib_trie contents file and extract the ip addresses
-  # @param fib_contents [String] contents of the file
-  def extract_ip_addresses(fib_contents)
-    addresses = fib_contents.lines.each_with_object(last: '', result: []) do |line, acc|
-      if line.include?('host LOCAL')
-        address = acc[:last].scan(/\d+\.\d+\.\d+\.\d+/)
-        acc[:result].push(address.first) unless address.empty?
-      end
-      acc[:last] = line
-    end
-    addresses[:result]
+    Result.error('Not all nodes were successfully started')
   end
 
   # Put the network settings information into the files
@@ -172,5 +115,6 @@ class DockerSwarmConfigurator
                                                                    'docker_container_id' => task[:container_id])
     end
     network_settings.store_network_configuration(@config)
+    Result.ok('')
   end
 end

@@ -154,11 +154,11 @@ class MachineConfigurator
 
   # Determine the method to download Chef installation script: wget or curl
   def prepare_download_command(connection, logger)
-    result = ssh_exec(connection, 'which curl', logger)
+    result = ssh_exec(connection, 'which wget', logger)
     if result.success?
-      'curl -sS -L https://www.chef.io/chef/install.sh --output install.sh'
+      'wget -q https://www.chef.io/chef/install.sh --output-document install.sh'
     else
-      'wget https://www.chef.io/chef/install.sh --output-document install.sh'
+      'curl -sS -L https://www.chef.io/chef/install.sh --output install.sh'
     end
   end
 
