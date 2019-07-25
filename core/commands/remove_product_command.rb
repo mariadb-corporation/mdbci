@@ -24,11 +24,11 @@ class RemoveProductCommand < BaseCommand
 
     result = remove_product(@mdbci_config.node_names.first)
 
-    if result.success?
-     SUCCESS_RESULT
-    else
-      ERROR_RESULT
-    end
+    #if result.success?
+      SUCCESS_RESULT
+    #else
+      #ERROR_RESULT
+    #end
   end
 
   # Print brief instructions on how to use the command
@@ -48,6 +48,8 @@ class RemoveProductCommand < BaseCommand
     end
     @mdbci_config = Configuration.new(@args.first, @env.labels)
     @network_config = NetworkConfig.new(@mdbci_config, @ui)
+
+    @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
 
     @product = @env.nodeProduct
     @product_version = @env.productVersion
@@ -69,68 +71,54 @@ class RemoveProductCommand < BaseCommand
     role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
     target_path_config = "configs/#{name}-config.json"
     extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
+    machine = setup_ssh_key(name)
+    @machine_configurator.within_ssh_session(machine) do |ssh|
+      out = ssh.exec!('maxscale -v')
+      p out
+    end
     @network_config.add_nodes([name])
     @machine_configurator.configure(@network_config[name], "#{name}-config.json",
                                     @ui, extra_files)
+    @machine_configurator.within_ssh_session(machine) do |ssh|
+      out = ssh.exec!('maxscale -v')
+      p out
+    end
+  end
+
+  def setup_ssh_key(node_name)
+    network_settings = @network_settings.node_settings(node_name)
+    { 'whoami' => network_settings['whoami'],
+      'network' => network_settings['network'],
+      'keyfile' => network_settings['keyfile'],
+      'name' => node_name }
   end
 
   # Create a role file to install the product from the chef
   # @param name [String] node name
   def generate_role_file(name)
-    node = @mdbci_config.node_configurations[name]
-    box = node['box'].to_s
     recipe_name = []
     recipe_name.push(@env.repos.recipe_name("#{@product}_remove"))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
-    product = { 'name' => @product, 'version' => @product_version.to_s }
-    product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
-    role_json_file = ConfigurationGenerator.generate_json_format(@env.box_definitions, name, product_config,
-                                                                recipe_name, box, @env.rhel_credentials)
+    role_json_file = generate_json_format(name, recipe_name)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end
 
   # Generate a list of role parameters in JSON format
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param name [String] node name
-  # @param product_config [Hash] list of the product parameters
   # @param recipe_name [String] name of the recipe
-  # @param box [String] name of the box
-  # @param rhel_credentials redentials for subscription manager
-  def generate_json_format(box_definitions, name, product_configs, recipes_names, box, rhel_credentials)
+  def generate_json_format(name, recipes_names)
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
     role = { name: name,
              default_attributes: {},
-             override_attributes: product_configs,
+             override_attributes: {},
              json_class: 'Chef::Role',
              description: '',
              chef_type: 'role',
              run_list: run_list }
     JSON.pretty_generate(role)
-  end
-
-  # Generate the list of the product parameters
-  # @param repos [RepoManager] for products
-  # @param product_name [String] name of the product for install
-  # @param product [Hash] parameters of the product to configure from configuration file
-  # @param box [String] name of the box
-  # @param repo [String] repo for product
-  def generate_product_config(repos, product_name, product, box, repo)
-    repo = repos.find_repository(product_name, product, box) if repo.nil?
-    raise "Repo for product #{product['name']} #{product['version']} for #{box} not found" if repo.nil?
-
-    config = { 'version': repo['version'], 'repo': repo['repo'], 'repo_key': repo['repo_key'] }
-    if check_product_availability(product)
-      config['cnf_template'] = product['cnf_template']
-      config['cnf_template_path'] = product['cnf_template_path']
-    end
-    repo_file_name = repos.repo_file_name(product_name)
-    config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
-    config['node_name'] = product['node_name'] unless product['node_name'].nil?
-    attribute_name = repos.attribute_name(product_name)
-    { "#{attribute_name}": config }
   end
 
   # Checks the availability of product information.
