@@ -6,6 +6,7 @@ require_relative '../models/command_result.rb'
 require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
+require_relative '../services/network_config'
 
 require 'fileutils'
 
@@ -105,11 +106,21 @@ Labels should be separated with commas, do not contain any whitespaces.
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
-      return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
+      unless @env.labels.nil? && Configuration.config_directory?(@args.first)
+        update_configuration_files(configuration)
+        return
+      end
 
       remove_files(configuration, @env.keep_template)
       vagrant_cleaner.destroy_aws_keypair(configuration)
     end
+  end
+
+  # Update network_configuration and configured_labels files
+  def update_configuration_files(configuration)
+    network_config = NetworkConfig.new(configuration, @ui)
+    network_config.store_network_config
+    network_config.generate_config_information
   end
 
   def execute

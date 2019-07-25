@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../node'
+require_relative 'vagrant_commands'
 require 'stringio'
 
 # Network configurator for vagrant nodes
@@ -18,7 +19,7 @@ class NetworkConfig
   # @param node_names [Array<String>] of node to add
   def add_nodes(node_names)
     node_names.each do |name|
-      @nodes[name] = Node.new(@config, name) if @config.node_names.include?(name)
+      @nodes[name] = Node.new(@config, name)
     end
   end
 
@@ -66,7 +67,30 @@ class NetworkConfig
     }
   end
 
+  # Provide information for the end-user where to find the required information
+  def generate_config_information
+    @ui.info('All nodes were brought up and configured.')
+    @ui.info("CONF_PATH=#{@config.path}")
+    @ui.info("Generating #{@config.network_settings_file} file")
+    File.write(@config.network_settings_file, ini_format)
+    @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
+    File.write(@config.labels_information_file, active_labels.sort.join(','))
+  end
+
+  # Restores network configuration of nodes that were already brought up
+  def store_network_config
+    running_nodes = running_and_halt_nodes.first
+    add_nodes(running_nodes)
+  end
+
   private
+
+  # Split list of nodes between running and halt ones
+  #
+  # @return [Array<String>, Array<String>] nodes that are running and those that are not
+  def running_and_halt_nodes
+    @config.all_node_names.partition { |node| VagrantCommands.node_running?(node, @ui, @config.path) }
+  end
 
   # Get node public IP
   #

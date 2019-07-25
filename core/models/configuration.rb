@@ -31,6 +31,11 @@ class Configuration
       )
   end
 
+  # Returns all nodes for configuration.
+  def all_node_names
+    @node_configurations.keys
+  end
+
   # Gets the path to the Vagrant configuration file that resides
   # in the configuration specified by the path
   #
