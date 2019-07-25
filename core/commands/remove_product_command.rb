@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
-require_relative '../services/configuration_generator'
 
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
@@ -50,7 +50,7 @@ class RemoveProductCommand < BaseCommand
     @network_config = NetworkConfig.new(@mdbci_config, @ui)
 
     @product = @env.nodeProduct
-    if @product.nil??
+    if @product.nil?
       @ui.error('You must specify the name of the product')
       return ARGUMENT_ERROR_RESULT
     end
