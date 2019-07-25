@@ -24,11 +24,11 @@ class RemoveProductCommand < BaseCommand
 
     result = remove_product(@mdbci_config.node_names.first)
 
-    #if result.success?
+    if result.success?
       SUCCESS_RESULT
-    #else
-      #ERROR_RESULT
-    #end
+    else
+      ERROR_RESULT
+    end
   end
 
   # Print brief instructions on how to use the command
@@ -49,12 +49,9 @@ class RemoveProductCommand < BaseCommand
     @mdbci_config = Configuration.new(@args.first, @env.labels)
     @network_config = NetworkConfig.new(@mdbci_config, @ui)
 
-    @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
-
     @product = @env.nodeProduct
-    @product_version = @env.productVersion
-    if @product.nil? || @product_version.nil?
-      @ui.error('You must specify the name and version of the product')
+    if @product.nil??
+      @ui.error('You must specify the name of the product')
       return ARGUMENT_ERROR_RESULT
     end
 
@@ -71,26 +68,9 @@ class RemoveProductCommand < BaseCommand
     role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
     target_path_config = "configs/#{name}-config.json"
     extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-    machine = setup_ssh_key(name)
-    @machine_configurator.within_ssh_session(machine) do |ssh|
-      out = ssh.exec!('maxscale -v')
-      p out
-    end
     @network_config.add_nodes([name])
     @machine_configurator.configure(@network_config[name], "#{name}-config.json",
                                     @ui, extra_files)
-    @machine_configurator.within_ssh_session(machine) do |ssh|
-      out = ssh.exec!('maxscale -v')
-      p out
-    end
-  end
-
-  def setup_ssh_key(node_name)
-    network_settings = @network_settings.node_settings(node_name)
-    { 'whoami' => network_settings['whoami'],
-      'network' => network_settings['network'],
-      'keyfile' => network_settings['keyfile'],
-      'name' => node_name }
   end
 
   # Create a role file to install the product from the chef
@@ -106,7 +86,7 @@ class RemoveProductCommand < BaseCommand
 
   # Generate a list of role parameters in JSON format
   # @param name [String] node name
-  # @param recipe_name [String] name of the recipe
+  # @param recipes_names [Array] array with names of the recipes
   def generate_json_format(name, recipes_names)
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
@@ -119,11 +99,5 @@ class RemoveProductCommand < BaseCommand
              chef_type: 'role',
              run_list: run_list }
     JSON.pretty_generate(role)
-  end
-
-  # Checks the availability of product information.
-  # @param product [Hash] parameters of the product to configure from configuration file
-  def self.check_product_availability(product)
-    !product['cnf_template'].nil? && !product['cnf_template_path'].nil?
   end
 end
