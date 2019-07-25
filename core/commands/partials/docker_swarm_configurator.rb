@@ -123,14 +123,32 @@ class DockerSwarmConfigurator
     Result.ok('All applications have started')
   end
 
+  # Check that application is running or not
+  # @return [Boolean] true if the application is ready to accept connections
   def check_application_status(container_id, product_name)
     case product_name
     when 'mariadb'
       @docker_commands.run_in_container("mysql -h localhost -e 'select 1'", container_id)
                       .success?
+    when 'maxscale'
+      check_maxsacle_status(container_id)
     else
       true
     end
+  end
+
+  # Check that MaxScale is running and accepting connections
+  # @return [Boolean] true if the MaxScale uptime is positive
+  def check_maxsacle_status(container_id)
+    @docker_commands.run_in_container('maxctrl show maxscale', container_id).and_then do |output|
+      uptime_info = output.each_line.select { |line| line.include?('Uptime') }.first
+      time = uptime_info.scan(/\d+/).map(&:to_i)
+      if !time.empty? && time.first.positive?
+        Result.ok('MaxCtrl is running')
+      else
+        Result.error('MaxCtrl is not running')
+      end
+    end.success?
   end
 
   # Put the network settings information into the files
