@@ -33,6 +33,8 @@ class DockerSwarmConfigurator
     end.and_then do
       wait_for_services
     end.and_then do
+      wait_for_applications
+    end.and_then do
       store_network_settings
     end
     result.success? ? SUCCESS_RESULT : ERROR_RESULT
@@ -103,6 +105,50 @@ class DockerSwarmConfigurator
       sleep(2)
     end
     Result.error('Not all nodes were successfully started')
+  end
+
+  # Wait for applications to start up and be ready to accept incoming connections
+  def wait_for_applications
+    @ui.info('Waiting for applications to become available')
+    60.times do
+      @tasks.each do |task|
+        next if task[:running]
+
+        task[:running] = check_application_status(task[:container_id], task[:product_name])
+      end
+      return Result.ok('All applications are running') if @tasks.all? { |task| task[:running] }
+
+      sleep(2)
+    end
+    Result.ok('All applications have started')
+  end
+
+  # Check that application is running or not
+  # @return [Boolean] true if the application is ready to accept connections
+  def check_application_status(container_id, product_name)
+    case product_name
+    when 'mariadb'
+      @docker_commands.run_in_container("mysql -h localhost -e 'select 1'", container_id)
+                      .success?
+    when 'maxscale'
+      check_maxsacle_status(container_id)
+    else
+      true
+    end
+  end
+
+  # Check that MaxScale is running and accepting connections
+  # @return [Boolean] true if the MaxScale uptime is positive
+  def check_maxsacle_status(container_id)
+    @docker_commands.run_in_container('maxctrl show maxscale', container_id).and_then do |output|
+      uptime_info = output.each_line.select { |line| line.include?('Uptime') }.first
+      time = uptime_info.scan(/\d+/).map(&:to_i)
+      if !time.empty? && time.first.positive?
+        Result.ok('MaxCtrl is running')
+      else
+        Result.error('MaxCtrl is not running')
+      end
+    end.success?
   end
 
   # Put the network settings information into the files

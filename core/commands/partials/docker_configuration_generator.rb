@@ -112,6 +112,7 @@ class DockerConfigurationGenerator
     }
     @configuration['services'][node_name]['deploy']['labels'] = {
       'org.mariadb.node.name' => node_name,
+      'org.mariadb.node.product' => product['name'],
       'org.mariadb.node.config_version' => 0
     }
     if ENVIRONMENT_OPTIONS.key?(product['name'])
