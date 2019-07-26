@@ -28,12 +28,16 @@ class DockerCommands
   # Get the task information
   # @param task_id [String] the task to get the IP address for
   def get_task_information(task_id)
-    docker_inspect(task_id, 'task').and_then do |task_data|
-      if task_data['Status']['State'] == 'running'
-        process_task_data(task_data)
-      else
-        Result.ok(desired_state: task_data['DesiredState'])
-      end
+    result = docker_inspect(task_id, 'task')
+    return Result.ok(irrelevant_task: true) if result.error?
+
+    task_data = result.value
+    if task_data['Status']['State'] == 'running'
+      process_task_data(task_data)
+    elsif task_data['DesiredState'] == 'shutdown'
+      Result.ok(irrelevant_task: true)
+    else
+      Result.error('Task is not ready yet')
     end
   end
 

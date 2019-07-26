@@ -99,7 +99,7 @@ class DockerSwarmConfigurator
         result = @docker_commands.get_task_information(task[:task_id])
         task.merge!(result.value) if result.success?
       end
-      @tasks.delete_if { |task| task.key?(:desired_state) && task[:desired_state] == 'shutdown' }
+      @tasks.delete_if { |task| task.key?(:irrelevant_task) }
       return Result.ok('All nodes are running') if @tasks.all? { |task| task.key?(:ip_address) }
 
       sleep(2)
