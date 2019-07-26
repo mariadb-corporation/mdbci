@@ -1,43 +1,29 @@
 # Recipe removes maxscale and it's files from the system
 
+service 'maxscale' do
+  action :stop
+end
 
-case node[:platform]
-when "debian", "ubuntu", "centos"
-  service 'maxscale' do
-    action :stop
-  end
-
+case node[:platform_family]
+when "debian", "ubuntu", "centos", "rhel"
   package 'maxscale' do
     action :purge
   end
 
-  %w(/var/log/maxscale /run/maxscale /etc/maxscale.modules.d/).each do |path|
-    directory path do
-      action :delete
-      recursive true
-    end
+when "suse", "opensuse", nil
+  execute 'zypper remove maxscale' do
+    command "zypper --non-interactive remove -u maxscale"
   end
+end
 
-  file '/etc/maxscale.cnf' do
+
+%w(/var/log/maxscale /run/maxscale /etc/maxscale.modules.d/).each do |path|
+  directory path do
     action :delete
+    recursive true
   end
-when "suse", nil
-  service 'maxscale' do
-    action :stop
-  end
+end
 
-  package 'maxscale' do
-    action :purge
-  end
-
-  %w(/var/log/maxscale /run/maxscale /etc/maxscale.modules.d/).each do |path|
-    directory path do
-      action :delete
-      recursive true
-    end
-  end
-
-  file '/etc/maxscale.cnf' do
-    action :delete
-  end
+file '/etc/maxscale.cnf' do
+  action :delete
 end
