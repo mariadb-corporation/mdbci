@@ -120,7 +120,7 @@ class DockerSwarmConfigurator
 
       sleep(2)
     end
-    Result.ok('All applications have started')
+    Result.error('Could not wait for applications to start up')
   end
 
   # Check that application is running or not
