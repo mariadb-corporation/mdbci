@@ -128,8 +128,8 @@ class DockerSwarmConfigurator
   def check_application_status(container_id, product_name)
     case product_name
     when 'mariadb'
-      @docker_commands.run_in_container("mysql -h localhost -e 'select 1'", container_id)
-                      .success?
+      @docker_commands.run_in_container("mysql -h localhost -u repl -p repl -e 'select 1'",
+                                        container_id).success?
     when 'maxscale'
       check_maxsacle_status(container_id)
     else
