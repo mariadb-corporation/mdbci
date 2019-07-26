@@ -21,7 +21,7 @@ class DockerCommands
       @ui.error('Unable to get the list of tasks')
       return Result.error('Unable to get the list of tasks')
     end
-    tasks = result[:output].each_line.map { |task_id| { task_id: task_id } }
+    tasks = result[:output].each_line.map { |task_id| { task_id: task_id.strip } }
     Result.ok(tasks)
   end
 
