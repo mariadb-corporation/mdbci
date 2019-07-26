@@ -28,7 +28,7 @@ class DockerCommands
   # Get the task information
   # @param task_id [String] the task to get the IP address for
   def get_task_information(task_id)
-    docker_inspect(task_id).and_then do |task_data|
+    docker_inspect(task_id, 'task').and_then do |task_data|
       if task_data['Status']['State'] == 'running'
         process_task_data(task_data)
       else
@@ -51,13 +51,14 @@ class DockerCommands
   private
 
   # Run the inspect on the specified Docker object
-  # @param id [String] identifier of the object
+  # @param object_id [String] identifier of the object
+  # @param object_name [String] name of the object to be identified
   # @return [Hash] the parsed JSON object wrapped in the Result
-  def docker_inspect(id)
-    result = run_command("docker inspect #{id}")
+  def docker_inspect(object_id, object_name)
+    result = run_command("docker inspect #{object_id}")
     unless result[:value].success?
-      @ui.warning("Unable to get information about the task '#{id}'")
-      return Result.error("Error with task '#{id}'")
+      @ui.warning("Unable to get information about the #{object_name} '#{object_id}'")
+      return Result.error("Error with task '#{object_id}'")
     end
     Result.ok(JSON.parse(result[:output])[0])
   end
@@ -96,7 +97,7 @@ class DockerCommands
 
   # Determine the name of the product based on the
   def get_product_name(service_id)
-    docker_inspect(service_id).and_then do |service_info|
+    docker_inspect(service_id, 'service').and_then do |service_info|
       Result.ok(service_info['Spec']['Labels']['org.mariadb.node.product'])
     end
   end
