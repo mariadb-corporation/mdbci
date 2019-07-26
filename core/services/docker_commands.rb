@@ -77,9 +77,9 @@ class DockerCommands
     }
     get_service_public_ip(task_info[:container_id], task_info[:private_ip_address]).and_then do |ip_address|
       task_info[:ip_address] = ip_address
-      get_product_name(task_data['ServiceID'])
-    end.and_then do |product_name|
-      task_info[:product_name] = product_name
+      get_service_description(task_data['ServiceID'])
+    end.and_then do |service_description|
+      task_info.merge!(service_description)
       Result.ok(task_info)
     end
   end
@@ -100,9 +100,12 @@ class DockerCommands
   end
 
   # Determine the name of the product based on the
-  def get_product_name(service_id)
+  def get_service_description(service_id)
     docker_inspect(service_id, 'service').and_then do |service_info|
-      Result.ok(service_info['Spec']['Labels']['org.mariadb.node.product'])
+      Result.ok(
+        product_name: service_info['Spec']['Labels']['org.mariadb.node.product'],
+        service_name: service_info['Spec']['Labels']['org.mariadb.node.name']
+      )
     end
   end
 
