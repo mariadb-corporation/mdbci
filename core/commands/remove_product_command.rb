@@ -35,7 +35,7 @@ class RemoveProductCommand < BaseCommand
   def show_help
     info = <<~HELP
       'remove_product' Remove a product onto the configuration node.
-      mdbci remove_product --product product --product-version version config/node
+      mdbci remove_product --product product config/node
     HELP
     @ui.info(info)
   end
