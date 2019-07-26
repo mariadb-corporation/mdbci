@@ -21,19 +21,23 @@ class DockerCommands
       @ui.error('Unable to get the list of tasks')
       return Result.error('Unable to get the list of tasks')
     end
-    tasks = result[:output].each_line.map { |task_id| { task_id: task_id } }
+    tasks = result[:output].each_line.map { |task_id| { task_id: task_id.strip } }
     Result.ok(tasks)
   end
 
   # Get the task information
   # @param task_id [String] the task to get the IP address for
   def get_task_information(task_id)
-    docker_inspect(task_id).and_then do |task_data|
-      if task_data['Status']['State'] == 'running'
-        process_task_data(task_data)
-      else
-        Result.ok(desired_state: task_data['DesiredState'])
-      end
+    result = docker_inspect(task_id, 'task')
+    return Result.ok(irrelevant_task: true) if result.error?
+
+    task_data = result.value
+    if task_data['Status']['State'] == 'running'
+      process_task_data(task_data)
+    elsif task_data['DesiredState'] == 'shutdown'
+      Result.ok(irrelevant_task: true)
+    else
+      Result.error('Task is not ready yet')
     end
   end
 
@@ -51,13 +55,14 @@ class DockerCommands
   private
 
   # Run the inspect on the specified Docker object
-  # @param id [String] identifier of the object
+  # @param object_id [String] identifier of the object
+  # @param object_name [String] name of the object to be identified
   # @return [Hash] the parsed JSON object wrapped in the Result
-  def docker_inspect(id)
-    result = run_command("docker inspect #{id}")
+  def docker_inspect(object_id, object_name)
+    result = run_command("docker inspect #{object_id}")
     unless result[:value].success?
-      @ui.warning("Unable to get information about the task '#{id}'")
-      return Result.error("Error with task '#{id}'")
+      @ui.warning("Unable to get information about the #{object_name} '#{object_id}'")
+      return Result.error("Error with task '#{object_id}'")
     end
     Result.ok(JSON.parse(result[:output])[0])
   end
@@ -72,9 +77,9 @@ class DockerCommands
     }
     get_service_public_ip(task_info[:container_id], task_info[:private_ip_address]).and_then do |ip_address|
       task_info[:ip_address] = ip_address
-      get_product_name(task_data['ServiceID'])
-    end.and_then do |product_name|
-      task_info[:product_name] = product_name
+      get_service_description(task_data['ServiceID'])
+    end.and_then do |service_description|
+      task_info.merge!(service_description)
       Result.ok(task_info)
     end
   end
@@ -95,9 +100,12 @@ class DockerCommands
   end
 
   # Determine the name of the product based on the
-  def get_product_name(service_id)
-    docker_inspect(service_id).and_then do |service_info|
-      Result.ok(service_info['Spec']['Labels']['org.mariadb.node.product'])
+  def get_service_description(service_id)
+    docker_inspect(service_id, 'service').and_then do |service_info|
+      Result.ok(
+        product_name: service_info['Spec']['Labels']['org.mariadb.node.product'],
+        service_name: service_info['Spec']['Labels']['org.mariadb.node.name']
+      )
     end
   end
 
