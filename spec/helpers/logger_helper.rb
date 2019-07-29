@@ -9,7 +9,7 @@ require 'logger'
 module LoggerHelper
   # Get access to the logger. Configure it if necessary.
   def logger
-    configure_logger if @logger.nil?
+    configure_logger unless instance_variable_defined?('@logger')
     @logger
   end
 
