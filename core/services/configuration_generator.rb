@@ -36,6 +36,35 @@ class ConfigurationGenerator
     box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
 
+  # Generate a list of role parameters in JSON format
+  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
+  # @param name [String] node name
+  # @param product_config [Hash] list of the product parameters
+  # @param recipe_name [String] name of the recipe
+  # @param box [String] name of the box
+  # @param rhel_credentials redentials for subscription manager
+  def self.generate_json_format_new(name, product_configs, recipes_names, sub_manager)
+    run_list = ['recipe[mdbci_provision_mark::remove_mark]',
+                *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
+                'recipe[mdbci_provision_mark::default]']
+    unless sub_manager.nil?
+      if check_subscription_manager_new(sub_manager)
+        raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if sub_manager['rhel_credentials'].nil?
+
+        run_list.insert(1, 'recipe[subscription-manager]')
+        product_configs = product_configs.merge('subscription-manager': sub_manager['rhel_credentials'])
+      end
+    end
+    role = { name: name,
+             default_attributes: {},
+             override_attributes: product_configs,
+             json_class: 'Chef::Role',
+             description: '',
+             chef_type: 'role',
+             run_list: run_list }
+    JSON.pretty_generate(role)
+  end
+
   # Generate the list of the product parameters
   # @param repos [RepoManager] for products
   # @param product_name [String] name of the product for install
