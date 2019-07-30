@@ -84,21 +84,4 @@ class RemoveProductCommand < BaseCommand
     IO.write(role_file_path, role_json_file)
     role_file_path
   end
-
-  # Generate a list of role parameters in JSON format
-  # @param name [String] node name
-  # @param recipes_names [Array] array with names of the recipes
-  def generate_json_format(name, recipes_names)
-    run_list = ['recipe[mdbci_provision_mark::remove_mark]',
-                *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
-                'recipe[mdbci_provision_mark::default]']
-    role = { name: name,
-             default_attributes: {},
-             override_attributes: {},
-             json_class: 'Chef::Role',
-             description: '',
-             chef_type: 'role',
-             run_list: run_list }
-    JSON.pretty_generate(role)
-  end
 end
