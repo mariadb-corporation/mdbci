@@ -3,12 +3,10 @@
 # The class provides methods for generating the role of the file.
 class ConfigurationGenerator
   # Generate a list of role parameters in JSON format
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param name [String] node name
   # @param product_config [Hash] list of the product parameters
   # @param recipe_name [String] name of the recipe
-  # @param box [String] name of the box
-  # @param rhel_credentials redentials for subscription manager
+  # @oaram sub_manager [Hash] information for subscription manager: box, rhel_credentials, box_definitions
   def self.generate_json_format(name, recipes_names, sub_manager = nil, product_configs = {})
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
@@ -32,8 +30,7 @@ class ConfigurationGenerator
   end
 
   # Check whether box needs to be subscribed or not
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
-  # @param box [String] name of the box
+  # @oaram sub_manager [Hash] information for subscription manager: box, rhel_credentials, box_definitions
   def self.check_subscription_manager(sub_manager)
     sub_manager['box_definitions'].get_box(sub_manager['box'])['configure_subscription_manager'] == 'true'
   end
