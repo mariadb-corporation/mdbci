@@ -37,6 +37,7 @@ Or you can configure only AWS or only RHEL credentials (for example, AWS):
 
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
+    #configure_results << configure_docker if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('docker').zero?
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
@@ -47,6 +48,14 @@ Or you can configure only AWS or only RHEL credentials (for example, AWS):
   # rubocop:enable Metrics/CyclomaticComplexity
 
   private
+
+  def configure_docker
+    docker_credentials = input_docker_credentials
+    return ERROR_RESULT if docker_credentials.nil?
+
+    @configuration['docker'] = docker_credentials
+    SUCCESS_RESULT
+  end
 
   def configure_aws
     aws_credentials = input_aws_credentials
@@ -65,6 +74,8 @@ Or you can configure only AWS or only RHEL credentials (for example, AWS):
     @configuration['rhel'] = rhel_credentials
     SUCCESS_RESULT
   end
+
+
 
   def input_rhel_subscription_credentials
     {
