@@ -79,7 +79,8 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
     {
       'username' => read_topic('Please input username for Docker Registry'),
       'password' => read_topic('Please input password for Docker Registry'),
-      'ci-server' => 'https://maxscale-docker-registry.mariadb.net:5000/'
+      'ci-server' => read_topic('Please input url ci-server for Docker Registry',
+                                'https://maxscale-docker-registry.mariadb.net:5000/')
     }
   end
 
