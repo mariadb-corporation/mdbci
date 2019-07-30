@@ -37,7 +37,7 @@ Or you can configure only AWS or only RHEL credentials (for example, AWS):
 
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
-    #configure_results << configure_docker if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('docker').zero?
+
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
@@ -75,12 +75,18 @@ Or you can configure only AWS or only RHEL credentials (for example, AWS):
     SUCCESS_RESULT
   end
 
-
+  def input_docker_credentials
+    {
+      'username' => read_topic('Please input username for Docker Registry'),
+      'password' => read_topic('Please input password for Docker Registry')
+    }
+  end
 
   def input_rhel_subscription_credentials
     {
       'username' => read_topic('Please input username for Red Hat Subscription-Manager'),
-      'password' => read_topic('Please input password for Red Hat Subscription-Manager')
+      'password' => read_topic('Please input password for Red Hat Subscription-Manager'),
+      'ci-server' => ' https://maxscale-docker-registry.mariadb.net:5000/'
     }
   end
 
