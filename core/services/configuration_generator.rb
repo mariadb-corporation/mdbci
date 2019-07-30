@@ -2,13 +2,6 @@
 
 # The class provides methods for generating the role of the file.
 class ConfigurationGenerator
-  # Check whether box needs to be subscribed or not
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
-  # @param box [String] name of the box
-  def self.check_subscription_manager(box_definitions, box)
-    box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
-  end
-
   # Generate a list of role parameters in JSON format
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param name [String] node name
@@ -21,7 +14,7 @@ class ConfigurationGenerator
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
     unless sub_manager.nil?
-      if check_subscription_manager_new(sub_manager)
+      if check_subscription_manager(sub_manager)
         raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if sub_manager['rhel_credentials'].nil?
 
         run_list.insert(1, 'recipe[subscription-manager]')
@@ -41,7 +34,7 @@ class ConfigurationGenerator
   # Check whether box needs to be subscribed or not
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param box [String] name of the box
-  def self.check_subscription_manager_new(sub_manager)
+  def self.check_subscription_manager(sub_manager)
     sub_manager['box_definitions'].get_box(sub_manager['box'])['configure_subscription_manager'] == 'true'
   end
   # Generate the list of the product parameters
