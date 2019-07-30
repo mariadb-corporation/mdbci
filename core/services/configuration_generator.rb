@@ -65,6 +65,12 @@ class ConfigurationGenerator
     JSON.pretty_generate(role)
   end
 
+  # Check whether box needs to be subscribed or not
+  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
+  # @param box [String] name of the box
+  def self.check_subscription_manager_new(sub_manager)
+    sub_manager['box_definitions'].get_box(sub_manager['box'])['configure_subscription_manager'] == 'true'
+  end
   # Generate the list of the product parameters
   # @param repos [RepoManager] for products
   # @param product_name [String] name of the product for install
