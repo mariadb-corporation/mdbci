@@ -16,12 +16,12 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS and RHEL subscription.
+'configure' command creates configuration for MDBCI to use AWS, RHEL and Docker subscription.
 
-You can configure AWS and RHEL credentials:
+You can configure AWS, RHEL and Docker credentials:
   mdbci configure
 
-Or you can configure only AWS or only RHEL credentials (for example, AWS):
+Or you can configure only AWS, only RHEL or only Docker credentials (for example, AWS):
   mdbci configure --product aws
     HELP
     @ui.info(info)
