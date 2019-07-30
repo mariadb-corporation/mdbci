@@ -2,33 +2,6 @@
 
 # The class provides methods for generating the role of the file.
 class ConfigurationGenerator
-  # Generate a list of role parameters in JSON format
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
-  # @param name [String] node name
-  # @param product_config [Hash] list of the product parameters
-  # @param recipe_name [String] name of the recipe
-  # @param box [String] name of the box
-  # @param rhel_credentials redentials for subscription manager
-  def self.generate_json_format(box_definitions, name, product_configs, recipes_names, box, rhel_credentials)
-    run_list = ['recipe[mdbci_provision_mark::remove_mark]',
-                *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
-                'recipe[mdbci_provision_mark::default]']
-    if check_subscription_manager(box_definitions, box)
-      raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
-
-      run_list.insert(1, 'recipe[subscription-manager]')
-      product_configs = product_configs.merge('subscription-manager': rhel_credentials)
-    end
-    role = { name: name,
-             default_attributes: {},
-             override_attributes: product_configs,
-             json_class: 'Chef::Role',
-             description: '',
-             chef_type: 'role',
-             run_list: run_list }
-    JSON.pretty_generate(role)
-  end
-
   # Check whether box needs to be subscribed or not
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param box [String] name of the box
@@ -43,7 +16,7 @@ class ConfigurationGenerator
   # @param recipe_name [String] name of the recipe
   # @param box [String] name of the box
   # @param rhel_credentials redentials for subscription manager
-  def self.generate_json_format_new(name, recipes_names, sub_manager = nil, product_configs = {})
+  def self.generate_json_format(name, recipes_names, sub_manager = nil, product_configs = {})
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']

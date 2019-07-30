@@ -89,7 +89,7 @@ class InstallProduct < BaseCommand
     sub_manager = { 'box_definitions' => @env.box_definitions, 'box' => box,
                     'rhel_credentials' => @env.rhel_credentials }
     product_config = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
-    role_json_file = ConfigurationGenerator.generate_json_format_new(name, recipe_names, sub_manager, product_config)
+    role_json_file = ConfigurationGenerator.generate_json_format(name, recipe_names, sub_manager, product_config)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end
