@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../services/configuration_generator'
 require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 
@@ -79,7 +80,7 @@ class RemoveProductCommand < BaseCommand
     recipe_name = []
     recipe_name.push(@env.repos.recipe_name("#{@product}_remove"))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
-    role_json_file = generate_json_format(name, recipe_name)
+    role_json_file = ConfigurationGenerator.generate_json_format_new(name, recipe_name)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end

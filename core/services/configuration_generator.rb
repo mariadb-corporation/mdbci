@@ -43,7 +43,7 @@ class ConfigurationGenerator
   # @param recipe_name [String] name of the recipe
   # @param box [String] name of the box
   # @param rhel_credentials redentials for subscription manager
-  def self.generate_json_format_new(name, product_configs, recipes_names, sub_manager)
+  def self.generate_json_format_new(name, recipes_names, sub_manager = nil, product_configs = {})
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
