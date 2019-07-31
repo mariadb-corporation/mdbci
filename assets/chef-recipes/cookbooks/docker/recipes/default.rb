@@ -47,5 +47,10 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
   service 'docker' do
     action :start
   end
+elsif node[:platform_family] == 'debian'
+  docker_installation_package 'default' do
+    version node['docker']['version']
+    action :create
+  end
 end
 
