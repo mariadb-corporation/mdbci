@@ -1,6 +1,3 @@
-# install default packages
-include_recipe 'packages::default'
-
 # Install Docker
 if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 7) || node[:platform_family] == 'debian'
   docker_installation_package 'default' do

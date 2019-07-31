@@ -370,8 +370,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param cnf_template_path [String] path to the products configurations directory
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node, cnf_template_path)
-    products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
-    products << { 'name' => 'packages' } if products.empty?
+    products = [{ 'name' => 'packages' }].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
     unless cnf_template_path.nil?
       products.each { |product| product['cnf_template_path'] = cnf_template_path if product['cnf_template'] }
     end
