@@ -86,7 +86,7 @@ class DockerSwarmConfigurator
     if leftover_services.empty?
       Result.ok('All nodes are brought up')
     else
-      @ui.error("Services #{leftover_services.join(', ')} ")
+      @ui.error("Services #{leftover_services.join(', ')} are not running")
       Result.error('Not all required services were brought up')
     end
   end
