@@ -2,7 +2,12 @@
 include_recipe 'packages::default'
 
 # Install Docker
-if node[:platform_family] == 'rhel' && [7, 8].include?(node[:platform_version].to_i)
+if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 7) || node[:platform_family] == 'debian'
+  docker_installation_package 'default' do
+    version node['docker']['version']
+    action :create
+  end
+elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
   yum_repository 'name' do
     description 'Docker CE Stable'
     baseurl 'https://download.docker.com/linux/centos/7/$basearch/stable'
@@ -10,19 +15,12 @@ if node[:platform_family] == 'rhel' && [7, 8].include?(node[:platform_version].t
     gpgcheck true
     enabled true
   end
-  if node[:platform] == 'redhat' && node[:platform_version].to_i == 8
-    # Hack for rhel 8, Chef on rhel 8 throw exception on yum_package resource
-    # https://github.com/chef/chef/issues/7988
-    # python3 installation does not solve this problem
-    # The current version is always installed, since non-standard version numbering in the repository
-    execute 'Install docker-ce package' do
-      command 'sudo yum install docker-ce -y --nobest --skip-broken'
-    end
-  else
-    yum_package 'docker-ce' do
-      version node['docker']['version']
-      action :install
-    end
+  # Hack for rhel 8, Chef on rhel 8 throw exception on yum_package resource
+  # https://github.com/chef/chef/issues/7988
+  # python3 installation does not solve this problem
+  # The current version is always installed, since non-standard version numbering in the repository
+  execute 'Install docker-ce package' do
+    command 'sudo yum install docker-ce -y --nobest --skip-broken'
   end
   service 'docker' do
     action :enable
@@ -47,10 +45,13 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
   service 'docker' do
     action :start
   end
-elsif node[:platform_family] == 'debian'
-  docker_installation_package 'default' do
-    version node['docker']['version']
-    action :create
+elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on OpenSuse 15
+  execute 'Install Docker CE' do
+    # The current version is always installed
+    command 'sudo zypper install -y docker'
+  end
+  execute 'Enable and start Docker service' do
+    command 'sudo systemctl enable docker'
+    command 'sudo systemctl start docker'
   end
 end
-
