@@ -22,7 +22,6 @@ class DockerSwarmConfigurator
     @tasks = {}
   end
 
-  # rubocop:disable Metrics/MethodLength
   def configure(generate_partial: true)
     @ui.info('Bringing up docker nodes')
     return ERROR_RESULT unless @config.docker_configuration?
@@ -35,15 +34,12 @@ class DockerSwarmConfigurator
     end.and_then do
       wait_for_services
     end.and_then do
-      check_required_services_available
-    end.and_then do
       wait_for_applications
     end.and_then do
       store_network_settings
     end
     result.success? ? SUCCESS_RESULT : ERROR_RESULT
   end
-  # rubocop:enable Metrics/MethodLength
 
   # Method destroys the existing stack
   # @return SUCCESS_RESULT if the operation was successful
@@ -90,12 +86,13 @@ class DockerSwarmConfigurator
     if leftover_services.empty?
       Result.ok('All nodes are brought up')
     else
-      @ui.error("Services #{leftover_services.join(', ')} ")
+      @ui.error("Services #{leftover_services.join(', ')} are not running")
       Result.error('Not all required services were brought up')
     end
   end
 
   # Wait for services to start and acquire the IP-address
+  # rubocop:disable Metrics/MethodLength
   def wait_for_services
     @ui.info('Waiting for stack services to become ready')
     60.times do
@@ -107,12 +104,15 @@ class DockerSwarmConfigurator
           result = @docker_commands.get_task_information(task_id)
           task.merge!(result.value) if result.success?
         end
+        check_required_services_available
+      end.and_then do
         return Result.ok('All nodes are running') if @tasks.all? { |_, task| task.key?(:ip_address) }
       end
       sleep(2)
     end
     Result.error('Not all nodes were successfully started')
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Wait for applications to start up and be ready to accept incoming connections
   def wait_for_applications
