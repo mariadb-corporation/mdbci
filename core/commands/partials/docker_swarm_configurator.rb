@@ -83,7 +83,7 @@ class DockerSwarmConfigurator
   # Check that all services that were requested are brought up
   def check_required_services_available
     @ui.info('Checking that all required services are running')
-    docker_services = @tasks.map { |task| task[:service_name] }
+    docker_services = @tasks.map { |_, task| task[:service_name] }
     leftover_services = @config.node_names.clone.delete_if do |service_name|
       docker_services.include?(service_name)
     end
