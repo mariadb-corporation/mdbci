@@ -40,7 +40,8 @@ Or you can configure only AWS or only RHEL credentials (for example, AWS):
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
-    @configuration.save
+    return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
+
     SUCCESS_RESULT
   end
   # rubocop:enable Metrics/CyclomaticComplexity

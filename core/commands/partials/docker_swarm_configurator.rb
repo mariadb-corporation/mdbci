@@ -22,6 +22,7 @@ class DockerSwarmConfigurator
     @tasks = {}
   end
 
+  # rubocop:disable Metrics/MethodLength
   def configure(generate_partial: true)
     @ui.info('Bringing up docker nodes')
     return ERROR_RESULT unless @config.docker_configuration?
@@ -34,12 +35,15 @@ class DockerSwarmConfigurator
     end.and_then do
       wait_for_services
     end.and_then do
+      check_required_services_available
+    end.and_then do
       wait_for_applications
     end.and_then do
       store_network_settings
     end
     result.success? ? SUCCESS_RESULT : ERROR_RESULT
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Method destroys the existing stack
   # @return SUCCESS_RESULT if the operation was successful
@@ -76,6 +80,21 @@ class DockerSwarmConfigurator
     Result.error('Unable to deploy the Docker Stack')
   end
 
+  # Check that all services that were requested are brought up
+  def check_required_services_available
+    @ui.info('Checking that all required services are running')
+    docker_services = @tasks.map { |task| task[:service_name] }
+    leftover_services = @config.node_names.clone.delete_if do |service_name|
+      docker_services.include?(service_name)
+    end
+    if leftover_services.empty?
+      Result.ok('All nodes are brought up')
+    else
+      @ui.error("Services #{leftover_services.join(', ')} ")
+      Result.error('Not all required services were brought up')
+    end
+  end
+
   # Wait for services to start and acquire the IP-address
   def wait_for_services
     @ui.info('Waiting for stack services to become ready')
@@ -108,7 +127,7 @@ class DockerSwarmConfigurator
 
       sleep(2)
     end
-    Result.ok('All applications have started')
+    Result.error('Could not wait for applications to start up')
   end
 
   # Check that application is running or not
@@ -116,8 +135,8 @@ class DockerSwarmConfigurator
   def check_application_status(container_id, product_name)
     case product_name
     when 'mariadb'
-      @docker_commands.run_in_container("mysql -h localhost -u repl -prepl -e 'select 1'", container_id)
-                      .success?
+      @docker_commands.run_in_container("mysql -h localhost -u repl -prepl -e 'select 1'",
+                                        container_id).success?
     when 'maxscale'
       check_maxsacle_status(container_id)
     else
@@ -144,9 +163,10 @@ class DockerSwarmConfigurator
     @ui.info('Generating network configuration file')
     network_settings = NetworkSettings.new
     @tasks.each_value do |task|
-      network_settings.add_network_configuration(task[:node_name], 'private_ip' => task[:private_ip_address],
-                                                                   'network' => task[:ip_address],
-                                                                   'docker_container_id' => task[:container_id])
+      network_settings.add_network_configuration(task[:service_name],
+                                                 'private_ip' => task[:private_ip_address],
+                                                 'network' => task[:ip_address],
+                                                 'docker_container_id' => task[:container_id])
     end
     network_settings.store_network_configuration(@config)
     Result.ok('')
