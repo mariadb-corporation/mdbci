@@ -151,10 +151,6 @@ In order to specify the number of retries for repository configuration use --att
 
   # Use data provided via constructor to configure the command.
   def configure_command
-    if @env.show_help
-      show_help
-      return false
-    end
     load_configuration_file
     return false unless determine_products_to_parse
     return false unless determine_product_version_to_parse
@@ -619,6 +615,10 @@ In order to specify the number of retries for repository configuration use --att
 
   # Starting point of the application
   def execute
+    if @env.show_help
+      show_help
+      return SUCCESS_RESULT
+    end
     return ARGUMENT_ERROR_RESULT unless configure_command
     remainning_products = @products.dup
     @attempts.times do
