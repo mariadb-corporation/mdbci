@@ -1,3 +1,6 @@
+WARN_ABOUT_CURRENT_VERSION = 'This version of the docker to the platform is not considered, '\
+                             'Always install the newest version!'
+
 # Install Docker
 if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 7) || node[:platform_family] == 'debian'
   docker_installation_package 'default' do
@@ -16,6 +19,7 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
   # https://github.com/chef/chef/issues/7988
   # python3 installation does not solve this problem
   # The current version is always installed, since non-standard version numbering in the repository
+  Chef::Log.warn(WARN_ABOUT_CURRENT_VERSION)
   execute 'Install docker-ce package' do
     command 'sudo yum install docker-ce -y --nobest --skip-broken'
   end
@@ -43,6 +47,7 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
     action :start
   end
 elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on OpenSuse 15
+  Chef::Log.warn(WARN_ABOUT_CURRENT_VERSION)
   execute 'Install Docker CE' do
     # The current version is always installed
     command 'sudo zypper install -y docker'
