@@ -5,6 +5,8 @@ require_relative '../services/aws_service'
 
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
+  CONFIG_FILE_NAME = 'mdbci/config.yaml'
+
   def self.synopsis
     'Creates configuration file for MDBCI'
   end
@@ -77,8 +79,8 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
 
   def input_docker_credentials
     {
-      'username' => read_topic('Please input username for Docker Registry'),
-      'password' => read_topic('Please input password for Docker Registry'),
+      'username' => read_topic('Please input username for Docker Registry', @configuration['docker']['username']),
+      'password' => read_topic('Please input password for Docker Registry', @configuration['docker']['password']),
       'ci-server' => read_topic('Please input url ci-server for Docker Registry',
                                 'https://maxscale-docker-registry.mariadb.net:5000/')
     }
