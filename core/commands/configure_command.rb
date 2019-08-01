@@ -16,7 +16,7 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS, RHEL and Docker subscription.
+'configure' command creates configuration for MDBCI to use AWS, RHEL and MaxScale CI Docker Registry subscription.
 
 You can configure AWS, RHEL and Docker credentials:
   mdbci configure
