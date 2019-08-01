@@ -88,8 +88,10 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
 
   def input_rhel_subscription_credentials
     {
-      'username' => read_topic('Please input username for Red Hat Subscription-Manager'),
-      'password' => read_topic('Please input password for Red Hat Subscription-Manager')
+      'username' => read_topic('Please input username for Red Hat Subscription-Manager',
+                               @configuration['rhel']['username']),
+      'password' => read_topic('Please input password for Red Hat Subscription-Manager',
+                               @configuration['rhel']['password'])
     }
   end
 
