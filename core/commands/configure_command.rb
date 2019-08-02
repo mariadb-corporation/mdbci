@@ -3,7 +3,6 @@
 require_relative 'base_command'
 require_relative '../services/aws_service'
 
-require 'httparty'
 require 'rest-client'
 
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
@@ -58,13 +57,13 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
     resource = RestClient::Resource.new(docker_credentials['ci-server'], docker_credentials['username'],
                                         docker_credentials['password'])
     begin
-      resource.get
-    rescue RestClient::Unauthorized, RestClient::Forbidden
-      @ui.error('Authorization failed')
-    rescue RestClient::ImATeapot
-      @ui.info('The server is a teapot! # RFC 2324')
+      response = resource.get
+    rescue RestClient::Unauthorized, RestClient::Forbidden => err
+      @ui.info("Authorization failed, code: #{err}")
+    rescue RestClient::ImATeapot => err
+      @ui.info("The server is a teapot, code: #{err}")
     else
-      @ui.info('Authorization completed successfull')
+      @ui.info("Authorization completed successfull, code: #{response.code}")
     end
   end
 
