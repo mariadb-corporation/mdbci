@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# Install default packages
-include_recipe 'packages::default'
-
 # Configure repository
 case node[:platform_family]
 when 'debian', 'ubuntu', 'mint'

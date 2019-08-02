@@ -1,9 +1,4 @@
 #
-# install default packages
-#
-include_recipe 'packages::default'
-
-#
 # Maxscale package attributes
 #
 system 'echo Maxscale version: ' + node['maxscale']['version']
