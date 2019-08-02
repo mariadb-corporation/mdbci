@@ -17,6 +17,12 @@
     "platform": "debian",
     "platform_version": "stretch"
   },
+  "debian_buster_libvirt": {
+    "provider": "libvirt",
+    "box": "generic/debian10",
+    "platform": "debian",
+    "platform_version": "buster"
+  },
   "ubuntu_trusty_libvirt": {
     "provider": "libvirt",
     "box": "baremettle/ubuntu-14.04",

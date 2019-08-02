@@ -7,6 +7,7 @@ require_relative 'logger_helper'
 # Module provides methods to test the execution of shell-commands.
 module ShellHelper
   TEMPLATE_FOLDER = File.absolute_path('spec/configs/template').freeze
+  CONFIG_FOLDER = File.absolute_path('spec/configs/template/configs').freeze
   MDBCI_EXECUTABLE = './mdbci'
 
   include LoggerHelper
@@ -18,13 +19,30 @@ module ShellHelper
   # @return [String] path to the created configuration
   # @raise [RuntimeError] if the command execution has failed.
   def mdbci_create_configuration(directory, template)
-    logger.info("Generating configuration for template #{template}")
-    template_source = "#{TEMPLATE_FOLDER}/#{template}.json"
-    template_file = "#{directory}/#{template}.json"
+    logger.info("Generating configuration for template '#{template}'")
+    template_source = File.join(TEMPLATE_FOLDER, "#{template}.json")
+    template_file = File.join(directory, "#{template}.json")
+    FileUtils.cp_r(CONFIG_FOLDER, directory)
     FileUtils.cp(template_source, template_file)
-    target_directory = "#{directory}/#{template}"
+    target_directory = File.join(directory, template)
     mdbci_check_command("generate --template #{template_file} #{target_directory}")
     target_directory
+  end
+
+  # Bring up the MDBCI configuration
+  # @param configuration [String] path to the configuration to bring up
+  # @param options [String] extra options that should be passed to the up command
+  # @return [CommandResult] containing information about the result
+  def mdbci_up_command(configuration, options = '')
+    mdbci_run_command("up #{options} #{configuration}")
+  end
+
+  # Destroy the MDBCI configuration
+  # @param configuration [String] path to the configuration to destroy
+  # @param options [String] extra options that should be passed to the destroy command
+  # @return [CommandResult] containing information about the result
+  def mdbci_destroy_command(configuration, options = '')
+    mdbci_run_command("destroy #{options} #{configuration}")
   end
 
   # Run mdbci command and return the exit code of the application.

@@ -47,6 +47,10 @@ class RepoManager
       recipe: 'galera',
       name: 'galera',
       repository: 'mariadb'
+    },
+    'docker' => {
+      recipe: 'docker',
+      name: 'docker'
     }
   }
 
@@ -88,6 +92,10 @@ class RepoManager
 
   def find_repository(product_name, product, box)
     @ui.info('Looking for repo')
+    if PRODUCT_ATTRIBUTES[product_name][:repository].nil?
+      @ui.warning('MDBCI cannot determine the existence/correctness of the specified version of the product!')
+      return { 'version' => product['version'] }
+    end
     version = product['version'].nil? ? 'default' : product['version']
     repository_key = $session.box_definitions.platform_key(box)
     repository_name = PRODUCT_ATTRIBUTES[product_name][:repository]
