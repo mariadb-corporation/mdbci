@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # The class provides methods for generating the role of the file.
-class ConfigurationGenerator
+module ConfigurationGenerator
   # Generate a list of role parameters in JSON format
   # @param name [String] node name
   # @param product_config [Hash] list of the product parameters
