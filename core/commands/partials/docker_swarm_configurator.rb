@@ -19,9 +19,9 @@ class DockerSwarmConfigurator
     @docker_commands = DockerCommands.new(@ui)
     @recreate_nodes = env.recreate
     @docker_swarm_cleaner = DockerSwarmCleaner.new(env, logger)
+    @tasks = {}
   end
 
-  # rubocop:disable Metrics/MethodLength
   def configure(generate_partial: true)
     @ui.info('Bringing up docker nodes')
     return ERROR_RESULT unless @config.docker_configuration?
@@ -30,11 +30,9 @@ class DockerSwarmConfigurator
     result = result.and_then { extract_node_configuration } if generate_partial
     result = result.and_then { destroy_existing_stack } if @recreate_nodes
     result = result.and_then do
-      bring_up_nodes
+      bring_up_docker_stack
     end.and_then do
       wait_for_services
-    end.and_then do
-      check_required_services_available
     end.and_then do
       wait_for_applications
     end.and_then do
@@ -42,7 +40,6 @@ class DockerSwarmConfigurator
     end
     result.success? ? SUCCESS_RESULT : ERROR_RESULT
   end
-  # rubocop:enable Metrics/MethodLength
 
   # Method destroys the existing stack
   # @return SUCCESS_RESULT if the operation was successful
@@ -51,7 +48,6 @@ class DockerSwarmConfigurator
   end
 
   # Extract only the required node configuration from the whole configuration
-  # @return [Hash] the Swarm configuration that should be brought up
   def extract_node_configuration
     @ui.info('Selecting Docker Swarm services to be brought up')
     node_names = @config.node_names
@@ -68,23 +64,10 @@ class DockerSwarmConfigurator
     Result.ok('Services selected')
   end
 
-  # Create the extract of the services that must be brought up and
-  # deploy the new configuration to the stack, record the service ids
-  def bring_up_nodes
-    @ui.info('Bringing up the Docker Swarm stack')
-    config_file = @config.docker_partial_configuration
-    bring_up_docker_stack(config_file).and_then do
-      @docker_commands.retrieve_task_list(@config.name)
-    end.and_then do |tasks|
-      @tasks = tasks
-      Result.ok('Nodes brought up')
-    end
-  end
-
   # Bring up the stack, perform it several times if necessary
-  def bring_up_docker_stack(config_file)
+  def bring_up_docker_stack
     (@attempts + 1).times do
-      result = run_command_and_log("docker stack deploy -c #{config_file} #{@config.name}")
+      result = run_command_and_log("docker stack deploy -c #{@config.docker_partial_configuration} #{@config.name}")
       return Result.ok('Docker stack is brought up') if result[:value].success?
 
       @ui.error('Unable to deploy the Docker stack!')
@@ -96,46 +79,51 @@ class DockerSwarmConfigurator
   # Check that all services that were requested are brought up
   def check_required_services_available
     @ui.info('Checking that all required services are running')
-    docker_services = @tasks.map { |task| task[:service_name] }
+    docker_services = @tasks.map { |_, task| task[:service_name] }
     leftover_services = @config.node_names.clone.delete_if do |service_name|
       docker_services.include?(service_name)
     end
     if leftover_services.empty?
       Result.ok('All nodes are brought up')
     else
-      @ui.error("Services #{leftover_services.join(', ')} ")
+      @ui.error("Services #{leftover_services.join(', ')} are not running")
       Result.error('Not all required services were brought up')
     end
   end
 
   # Wait for services to start and acquire the IP-address
+  # rubocop:disable Metrics/MethodLength
   def wait_for_services
     @ui.info('Waiting for stack services to become ready')
     60.times do
-      @tasks.each do |task|
-        next if task.key?(:ip_address)
+      @docker_commands.retrieve_task_list(@config.name).and_then do |tasks|
+        @tasks = tasks.merge(@tasks)
+        @tasks.each_pair do |task_id, task|
+          next if task.key?(:ip_address)
 
-        result = @docker_commands.get_task_information(task[:task_id])
-        task.merge!(result.value) if result.success?
+          result = @docker_commands.get_task_information(task_id)
+          task.merge!(result.value) if result.success?
+        end
+        check_required_services_available
+      end.and_then do
+        return Result.ok('All nodes are running') if @tasks.all? { |_, task| task.key?(:ip_address) }
       end
-      @tasks.delete_if { |task| task.key?(:irrelevant_task) }
-      return Result.ok('All nodes are running') if @tasks.all? { |task| task.key?(:ip_address) }
-
       sleep(2)
     end
     Result.error('Not all nodes were successfully started')
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Wait for applications to start up and be ready to accept incoming connections
   def wait_for_applications
     @ui.info('Waiting for applications to become available')
     60.times do
-      @tasks.each do |task|
+      @tasks.each_value do |task|
         next if task[:running]
 
         task[:running] = check_application_status(task[:container_id], task[:product_name])
       end
-      return Result.ok('All applications are running') if @tasks.all? { |task| task[:running] }
+      return Result.ok('All applications are running') if @tasks.all? { |_, task| task[:running] }
 
       sleep(2)
     end
@@ -174,7 +162,7 @@ class DockerSwarmConfigurator
   def store_network_settings
     @ui.info('Generating network configuration file')
     network_settings = NetworkSettings.new
-    @tasks.each do |task|
+    @tasks.each_value do |task|
       network_settings.add_network_configuration(task[:service_name],
                                                  'private_ip' => task[:private_ip_address],
                                                  'network' => task[:ip_address],

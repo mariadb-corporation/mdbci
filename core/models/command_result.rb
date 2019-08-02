@@ -19,11 +19,11 @@ class CommandResult
   # Creates new instance of the object
   #
   # @param command [String] command that was executed.
-  # @param stdout_all [String] list of stdout and stderr messages separated by '\n'
+  # @param messages [String] list of stdout and stderr messages separated by '\n'
   # @param result [Process::Status] status of running the code
-  def initialize(command, out_all, result)
+  def initialize(command, messages, result)
     @command = command
-    @messages = out_all
+    @messages = messages
     @result = result
   end
 

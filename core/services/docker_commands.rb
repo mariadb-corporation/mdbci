@@ -3,6 +3,7 @@
 require_relative '../models/result'
 require_relative '../models/return_codes'
 require_relative 'shell_commands'
+require 'json'
 
 # Class provides common methods for Docker Swarm related commands
 class DockerCommands
@@ -13,15 +14,21 @@ class DockerCommands
     @ui = logger
   end
 
+  STACK_FORMAT = '{ "id":"{{.ID}}", "desired_state":"{{.DesiredState}}" }'
+
   # Get the list of tasks that belong to the specified Docker stack
   # @param stack_name [String] name of the stack to inspect
   def retrieve_task_list(stack_name)
-    result = run_command("docker stack ps --format '{{.ID}}' #{stack_name}")
+    result = run_command("docker stack ps --format '#{STACK_FORMAT}' #{stack_name}")
     unless result[:value].success?
       @ui.error('Unable to get the list of tasks')
       return Result.error('Unable to get the list of tasks')
     end
-    tasks = result[:output].each_line.map { |task_id| { task_id: task_id.strip } }
+    tasks = result[:output].each_line.map do |task_description|
+      JSON.parse(task_description, symbolize_names: true)
+    end.select do |task|
+      task[:desired_state].casecmp?('running')
+    end.map { |task| [task[:id], {}] }.to_h
     Result.ok(tasks)
   end
 

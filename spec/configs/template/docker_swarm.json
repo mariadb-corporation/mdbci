@@ -1,0 +1,78 @@
+{
+  "node_000": {
+    "hostname": "mariadb-node-000",
+    "box": "docker",
+    "labels": [
+      "backend",
+      "first"
+    ],
+    "product": {
+      "name": "mariadb",
+      "version": "10.3",
+      "cnf_template": "configs/server1.cnf"
+    }
+  },
+  "node_001": {
+    "hostname": "mariadb-node-001",
+    "box": "docker",
+    "labels": [
+      "backend",
+      "first"
+    ],
+    "product": {
+      "name": "mariadb",
+      "version": "10.3",
+      "cnf_template": "configs/server2.cnf"
+    }
+  },
+  "node_002": {
+    "hostname": "mariadb-node-002",
+    "box": "docker",
+    "labels": [
+      "backend",
+      "second"
+    ],
+    "product": {
+      "name": "mariadb",
+      "version": "10.3",
+      "cnf_template": "configs/server3.cnf"
+    }
+  },
+  "node_003": {
+    "hostname": "mariadb-node-003",
+    "box": "docker",
+    "labels": [
+      "backend",
+      "second"
+    ],
+    "product": {
+      "name": "mariadb",
+      "version": "10.3",
+      "cnf_template": "configs/server4.cnf"
+    }
+  },
+  "maxscale_000": {
+    "hostname": "maxscale-000",
+    "box": "docker",
+    "labels": [
+      "maxscale",
+      "first"
+    ],
+    "product": {
+      "name": "maxscale",
+      "version": "2.3"
+    }
+  },
+  "maxscale_001": {
+    "hostname": "maxscale-001",
+    "box": "docker",
+    "labels": [
+      "maxscale",
+      "second"
+    ],
+    "product": {
+      "name": "maxscale",
+      "version": "2.3"
+    }
+  }
+}
