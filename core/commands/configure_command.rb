@@ -95,12 +95,23 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
   end
 
   def input_docker_credentials
-    {
-      'username' => read_topic('Please input username for Docker Registry', @configuration['docker']['username']),
-      'password' => read_topic('Please input password for Docker Registry', @configuration['docker']['password']),
-      'ci-server' => read_topic('Please input url ci-server for Docker Registry',
-                                @configuration['docker']['ci-server'])
-    }
+    if @configuration['docker'].nil?
+      {
+        'username' => read_topic('Please input username for Docker Registry'),
+        'password' => read_topic('Please input password for Docker Registry'),
+        'ci-server' => read_topic('Please input url ci-server for Docker Registry',
+                                  'https://maxscale-docker-registry.mariadb.net:5000/v2/')
+      }
+    else
+      {
+        'username' => read_topic('Please input username for Docker Registry',
+                                 @configuration['docker']['username']),
+        'password' => read_topic('Please input password for Docker Registry',
+                                 @configuration['docker']['password']),
+        'ci-server' => read_topic('Please input url ci-server for Docker Registry',
+                                  @configuration['docker']['ci-server'])
+      }
+    end
   end
 
   def input_rhel_subscription_credentials
