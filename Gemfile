@@ -13,6 +13,7 @@ gem 'workers'
 gem 'xdg'
 gem 'concurrent-ruby'
 gem 'iniparse'
+gem 'rest-client'
 
 group(:development) do
   gem 'pry'
