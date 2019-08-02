@@ -115,12 +115,19 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
   end
 
   def input_rhel_subscription_credentials
-    {
-      'username' => read_topic('Please input username for Red Hat Subscription-Manager',
-                               @configuration['rhel']['username']),
-      'password' => read_topic('Please input password for Red Hat Subscription-Manager',
-                               @configuration['rhel']['password'])
-    }
+    if @configuration['rhel'].nil?
+      {
+        'username' => read_topic('Please input username for Red Hat Subscription-Manager'),
+        'password' => read_topic('Please input password for Red Hat Subscription-Manager')
+      }
+    else
+      {
+        'username' => read_topic('Please input username for Red Hat Subscription-Manager',
+                                 @configuration['rhel']['username']),
+        'password' => read_topic('Please input password for Red Hat Subscription-Manager',
+                                 @configuration['rhel']['password'])
+      }
+    end
   end
 
   def input_or_create_security_group(credentials)
