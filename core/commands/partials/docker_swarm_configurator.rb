@@ -127,6 +127,7 @@ class DockerSwarmConfigurator
 
       sleep(2)
     end
+    show_error_container_info
     Result.error('Could not wait for applications to start up')
   end
 
@@ -156,6 +157,15 @@ class DockerSwarmConfigurator
         Result.error('MaxCtrl is not running')
       end
     end.success?
+  end
+
+  # Show debug information about all the containers that are not running
+  def show_error_container_info
+    broken_tasks = @tasks.values.delete_if { |task| task.key?(:running) }
+    broken_tasks.each do |task|
+      @ui.info("Information about the '#{task[:service_name]}' with product '#{task[:product_name]}'")
+      run_command_and_log("docker container logs #{task[:container_id]}")
+    end
   end
 
   # Put the network settings information into the files
