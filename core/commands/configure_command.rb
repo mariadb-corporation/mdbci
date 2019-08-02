@@ -59,11 +59,10 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
                                         docker_credentials['password'])
     begin
       resource.get
-    rescue RestClient::Unauthorized, RestClient::Forbidden => err
+    rescue RestClient::Unauthorized, RestClient::Forbidden
       @ui.error('Authorization failed')
-    rescue RestClient::ImATeapot => err
+    rescue RestClient::ImATeapot
       @ui.info('The server is a teapot! # RFC 2324')
-      return err.response
     else
       @ui.info('Authorization completed successfull')
     end
