@@ -44,7 +44,7 @@ class DockerCommands
     elsif task_data['DesiredState'] == 'shutdown'
       Result.ok(irrelevant_task: true)
     else
-      Result.error('Task is not ready yet')
+      Result.error("Desired task state: #{task_data['DesiredState']}")
     end
   end
 
@@ -69,7 +69,7 @@ class DockerCommands
     result = run_command("docker inspect #{object_id}")
     unless result[:value].success?
       @ui.warning("Unable to get information about the #{object_name} '#{object_id}'")
-      return Result.error("Error with task '#{object_id}'")
+      return Result.error("Error getting information about '#{object_name}' '#{object_id}'")
     end
     Result.ok(JSON.parse(result[:output])[0])
   end
@@ -84,10 +84,19 @@ class DockerCommands
     }
     get_service_public_ip(task_info[:container_id], task_info[:private_ip_address]).and_then do |ip_address|
       task_info[:ip_address] = ip_address
-      get_service_description(task_data['ServiceID'])
-    end.and_then do |service_description|
-      task_info.merge!(service_description)
-      Result.ok(task_info)
+      result = get_service_description(task_data['ServiceID'])
+      result.match(
+        ok: lambda do |service_description|
+          task_info.merge!(service_description)
+          Result.ok(task_info)
+        end,
+        error: lambda do |error|
+          @ui.warning('Could not retrieve data about service')
+          @ui.warning("Task data:\n#{JSON.pretty_generate(task_data)}")
+          run_command_and_log('docker service ls')
+          Result.error(error)
+        end
+      )
     end
   end
 
