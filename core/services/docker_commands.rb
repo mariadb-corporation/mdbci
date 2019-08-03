@@ -93,7 +93,10 @@ class DockerCommands
         error: lambda do |error|
           @ui.warning('Could not retrieve data about service')
           @ui.warning("Task data:\n#{JSON.pretty_generate(task_data)}")
+          @ui.warning('List of services')
           run_command_and_log('docker service ls')
+          @ui.warning('Container logs')
+          run_command_and_log("docker container logs #{task_info[:container_id]}")
           Result.error(error)
         end
       )
