@@ -108,7 +108,7 @@ class DockerSwarmConfigurator
       end.and_then do
         return Result.ok('All nodes are running') if @tasks.all? { |_, task| task.key?(:ip_address) }
       end
-      sleep(2)
+      sleep(10)
     end
     Result.error('Not all nodes were successfully started')
   end
@@ -125,7 +125,7 @@ class DockerSwarmConfigurator
       end
       return Result.ok('All applications are running') if @tasks.all? { |_, task| task[:running] }
 
-      sleep(2)
+      sleep(10)
     end
     show_error_container_info
     Result.error('Could not wait for applications to start up')
