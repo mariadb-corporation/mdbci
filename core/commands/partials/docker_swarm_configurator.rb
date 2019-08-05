@@ -170,7 +170,10 @@ class DockerSwarmConfigurator
 
   # Show debug information about all the containers that are not running
   def show_error_container_info
-    broken_tasks = @tasks.values.delete_if { |task| task.key?(:running) }
+    @ui.info('Showing information about broken services')
+    @ui.info('General information')
+    run_command_and_log("docker stack ps #{@config.name}")
+    broken_tasks = @tasks.values.delete_if { |task| task[:running] }
     broken_tasks.each do |task|
       @ui.info("Information about the '#{task[:service_name]}' with product '#{task[:product_name]}'")
       run_command_and_log("docker container logs #{task[:container_id]}")
