@@ -38,7 +38,16 @@ class DockerSwarmConfigurator
     end.and_then do
       store_network_settings
     end
-    result.success? ? SUCCESS_RESULT : ERROR_RESULT
+    result.match(
+      ok: lambda do |message|
+        @ui.info("Success with #{message}")
+        SUCCESS_RESULT
+      end,
+      error: lambda do |error|
+        @ui.error("Error with #{error}")
+        ERROR_RESULT
+      end
+    )
   end
 
   # Method destroys the existing stack
