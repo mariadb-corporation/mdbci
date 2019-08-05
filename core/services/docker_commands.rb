@@ -81,7 +81,7 @@ class DockerCommands
       node_name: task_data['Spec']['Networks'][0]['Aliases'][0],
       desired_state: task_data['DesiredState']
     }
-    result = get_service_description(task_data['ServiceID'] + '1').and_then do |service_description|
+    result = get_service_description(task_data['ServiceID']).and_then do |service_description|
       task_info.merge!(service_description)
       get_service_public_ip(task_info[:container_id], task_info[:private_ip_address])
     end.and_then do |ip_address|
