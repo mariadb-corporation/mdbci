@@ -133,7 +133,7 @@ class Configuration
 
   # Provide a path to the partial Docker configuration that can be used for swarm Management
   # @return [String] path to the partial configuration
-  def docker_partial_configuration
+  def docker_partial_configuration_path
     File.join(@path, 'docker-partial-configuration.yaml')
   end
 

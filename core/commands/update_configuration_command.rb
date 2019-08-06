@@ -16,8 +16,9 @@ class UpdateConfigurationCommand < BaseCommand
   def show_help
     info = <<~HELP
 
-      Command allows to update the configuration of the MaxScale and restart the service.
-      Currently the MDBCI supports only the Docker configuration.
+      Command allows to update the configuration of the MaxScale and restarts the service.
+      Currently the MDBCI supports only the Docker configuration. The consequent calls to the 
+      up command will use the initial definition of the swarm stack.
 
       When invoking the command you must provide the name of the node that must be updated.
       If you specify several nodes, then all the nodes will be updated.
@@ -38,10 +39,7 @@ class UpdateConfigurationCommand < BaseCommand
     result = setup_command
     return result unless result == SUCCESS_RESULT
 
-    result = update_master_docker_configuration
-    return result unless result == SUCCESS_RESULT
-
-    result = update_partial_configuration
+    result = update_docker_swarm_stack
     return result unless result == SUCCESS_RESULT
 
     SUCCESS_RESULT
@@ -78,12 +76,13 @@ class UpdateConfigurationCommand < BaseCommand
   end
   # rubocop:enable Metrics/MethodLength
 
-  def update_master_docker_configuration
+  def update_docker_swarm_stack
     @configuration.node_names.each do |node|
       update_node_configuration(node)
     end
-    File.write(@configuration.docker_configuration_path, YAML.dump(@docker_config))
-    SUCCESS_RESULT
+    update_partial_configuration
+    configurator = DockerSwarmConfigurator.new(@configuration, @env, @ui)
+    configurator.configure(generate_partial: false)
   end
 
   # Update the configuration of the specified node
@@ -123,19 +122,17 @@ class UpdateConfigurationCommand < BaseCommand
     configuration_file
   end
 
-  # Update the partial configuration according to the existing configuration.
-  # If the partial configuration is present, then update the Docker Stack
+  # Update the partial configuration
   def update_partial_configuration
-    partial_config_path = @configuration.docker_partial_configuration
-    return SUCCESS_RESULT unless File.exist?(partial_config_path)
-
-    partial_config = YAML.load_file(partial_config_path)
-    required_service_names = partial_config['services'].keys
+    if File.exist?(@configuration.docker_partial_configuration_path)
+      partial_config = YAML.load_file(@configuration.docker_partial_configuration_path)
+      required_service_names = partial_config['services'].keys.concat(@configuration.node_names).uniq
+    else
+      required_service_names = @configuration.node_names
+    end
 
     new_partial_config = Marshal.load(Marshal.dump(@docker_config))
     new_partial_config['services'].keep_if { |service_name, _| required_service_names.include?(service_name) }
-    File.write(partial_config_path, YAML.dump(new_partial_config))
-    configurator = DockerSwarmConfigurator.new(@configuration, @env, @ui)
-    configurator.configure(generate_partial: false)
+    File.write(@configuration.docker_partial_configuration_path, YAML.dump(new_partial_config))
   end
 end

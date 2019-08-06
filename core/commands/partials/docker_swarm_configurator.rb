@@ -55,7 +55,7 @@ class DockerSwarmConfigurator
     @configuration['services'].select! do |service_name, _|
       node_names.include?(service_name)
     end
-    config_file = @config.docker_partial_configuration
+    config_file = @config.docker_partial_configuration_path
     File.write(config_file, YAML.dump(@configuration))
     if @configuration['services'].empty?
       @ui.info('No Docker services are configured to be brought up')
@@ -67,7 +67,7 @@ class DockerSwarmConfigurator
   # Bring up the stack, perform it several times if necessary
   def bring_up_docker_stack
     (@attempts + 1).times do
-      result = run_command_and_log("docker stack deploy -c #{@config.docker_partial_configuration} #{@config.name}")
+      result = run_command_and_log("docker stack deploy -c #{@config.docker_partial_configuration_path} #{@config.name}")
       return Result.ok('Docker stack is brought up') if result[:value].success?
 
       @ui.error('Unable to deploy the Docker stack!')
