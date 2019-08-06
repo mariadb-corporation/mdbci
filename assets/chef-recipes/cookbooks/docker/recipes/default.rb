@@ -1,10 +1,12 @@
 WARN_ABOUT_CURRENT_VERSION = 'This version of the docker to the platform is not considered, '\
                              'Always install the newest version!'
 
+docker_version = node['docker']['version']
+
 # Install Docker
 if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 7) || node[:platform_family] == 'debian'
   docker_installation_package 'default' do
-    version node['docker']['version']
+    version docker_version unless docker_version.nil?
     action :create
   end
 elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
@@ -37,7 +39,7 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
     gpgkey 'https://yum.dockerproject.org/gpg'
   end
   yum_package 'docker-engine' do
-    version node['docker']['version']
+    version docker_version unless docker_version.nil?
     action :install
   end
   service 'docker' do
