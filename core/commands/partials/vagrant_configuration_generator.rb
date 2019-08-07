@@ -258,9 +258,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       products_configs.merge!(recipe_and_config[:config])
       recipes_names << recipe_and_config[:recipe]
     end
-    sub_manager = { 'box_definitions' => @env.box_definitions, 'box' => box,
-                    'rhel_credentials' => @env.rhel_credentials }
-    ConfigurationGenerator.generate_json_format(name, recipes_names, sub_manager, products_configs)
+    ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
+                                                box, @env.box_definitions, @env.rhel_credentials)
   end
 
   # Check for the existence of a path, create it if path is not exists or clear path
