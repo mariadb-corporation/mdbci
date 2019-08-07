@@ -44,7 +44,7 @@ class DockerCommands
     elsif task_data['DesiredState'] == 'shutdown'
       Result.ok(irrelevant_task: true)
     else
-      Result.error('Task is not ready yet')
+      Result.error("Desired task state: #{task_data['DesiredState']}")
     end
   end
 
@@ -64,12 +64,11 @@ class DockerCommands
   # Run the inspect on the specified Docker object
   # @param object_id [String] identifier of the object
   # @param object_name [String] name of the object to be identified
-  # @return [Hash] the parsed JSON object wrapped in the Result
   def docker_inspect(object_id, object_name)
     result = run_command("docker inspect #{object_id}")
     unless result[:value].success?
       @ui.warning("Unable to get information about the #{object_name} '#{object_id}'")
-      return Result.error("Error with task '#{object_id}'")
+      return Result.error("Error getting information about '#{object_name}' '#{object_id}'")
     end
     Result.ok(JSON.parse(result[:output])[0])
   end
@@ -82,13 +81,23 @@ class DockerCommands
       node_name: task_data['Spec']['Networks'][0]['Aliases'][0],
       desired_state: task_data['DesiredState']
     }
-    get_service_public_ip(task_info[:container_id], task_info[:private_ip_address]).and_then do |ip_address|
-      task_info[:ip_address] = ip_address
-      get_service_description(task_data['ServiceID'])
-    end.and_then do |service_description|
+    result = get_service_description(task_data['ServiceID']).and_then do |service_description|
       task_info.merge!(service_description)
+      get_service_public_ip(task_info[:container_id], task_info[:private_ip_address])
+    end.and_then do |ip_address|
+      task_info[:ip_address] = ip_address
       Result.ok(task_info)
     end
+    if result.error?
+      @ui.warning('Could not retrieve data about task')
+      @ui.warning("Error: #{result.error}")
+      @ui.warning("Task data:\n#{JSON.pretty_generate(task_data)}")
+      @ui.warning('List of services')
+      run_command_and_log('docker service ls')
+      @ui.warning('Service logs')
+      run_command_and_log("docker container logs #{task_info[:container_id]}")
+    end
+    result
   end
 
   # Get the ip address of the docker swarm service that is located on the current machine

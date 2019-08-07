@@ -38,7 +38,16 @@ class DockerSwarmConfigurator
     end.and_then do
       store_network_settings
     end
-    result.success? ? SUCCESS_RESULT : ERROR_RESULT
+    result.match(
+      ok: lambda do |message|
+        @ui.info("Success with #{message}")
+        SUCCESS_RESULT
+      end,
+      error: lambda do |error|
+        @ui.error("Error with #{error}")
+        ERROR_RESULT
+      end
+    )
   end
 
   # Method destroys the existing stack
@@ -55,7 +64,7 @@ class DockerSwarmConfigurator
     @configuration['services'].select! do |service_name, _|
       node_names.include?(service_name)
     end
-    config_file = @config.docker_partial_configuration
+    config_file = @config.docker_partial_configuration_path
     File.write(config_file, YAML.dump(@configuration))
     if @configuration['services'].empty?
       @ui.info('No Docker services are configured to be brought up')
@@ -67,7 +76,7 @@ class DockerSwarmConfigurator
   # Bring up the stack, perform it several times if necessary
   def bring_up_docker_stack
     (@attempts + 1).times do
-      result = run_command_and_log("docker stack deploy -c #{@config.docker_partial_configuration} #{@config.name}")
+      result = run_command_and_log("docker stack deploy -c #{@config.docker_partial_configuration_path} #{@config.name}")
       return Result.ok('Docker stack is brought up') if result[:value].success?
 
       @ui.error('Unable to deploy the Docker stack!')
@@ -108,7 +117,7 @@ class DockerSwarmConfigurator
       end.and_then do
         return Result.ok('All nodes are running') if @tasks.all? { |_, task| task.key?(:ip_address) }
       end
-      sleep(2)
+      sleep(10)
     end
     Result.error('Not all nodes were successfully started')
   end
@@ -125,7 +134,7 @@ class DockerSwarmConfigurator
       end
       return Result.ok('All applications are running') if @tasks.all? { |_, task| task[:running] }
 
-      sleep(2)
+      sleep(10)
     end
     show_error_container_info
     Result.error('Could not wait for applications to start up')
@@ -161,7 +170,10 @@ class DockerSwarmConfigurator
 
   # Show debug information about all the containers that are not running
   def show_error_container_info
-    broken_tasks = @tasks.values.delete_if { |task| task.key?(:running) }
+    @ui.info('Showing information about broken services')
+    @ui.info('General information')
+    run_command_and_log("docker stack ps #{@config.name}")
+    broken_tasks = @tasks.values.delete_if { |task| task[:running] }
     broken_tasks.each do |task|
       @ui.info("Information about the '#{task[:service_name]}' with product '#{task[:product_name]}'")
       run_command_and_log("docker container logs #{task[:container_id]}")
