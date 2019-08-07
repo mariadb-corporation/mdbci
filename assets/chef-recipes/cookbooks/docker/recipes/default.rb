@@ -63,10 +63,15 @@ elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on O
 end
 
 if node[:platform_family] == 'debian'
-  execute 'Chown /home/vagrant/.gnupg/ directory to vagrant user' do
-    command 'sudo chown vagrant:vagrant /home/vagrant/.gnupg'
+  user = ENV['SUDO_USER']
+  home_dir = Dir.home(user)
+  gnupg_dir = File.join(home_dir, '.gnupg')
+  execute 'Chown ~.gnupg/ directory to sudo user' do
+    command "sudo chown #{user}:#{user} #{gnupg_dir}"
+    only_if { Dir.exist?(gnupg_dir) }
   end
-  execute 'Chown /home/vagrant/.gnupg/ files to vagrant user' do
-    command 'sudo chown -R vagrant:vagrant /home/vagrant/.gnupg/*'
+  execute 'Chown ~/.gnupg/ files to sudo user' do
+    command "sudo chown -R #{user}:#{user} #{File.join(gnupg_dir, '*')}"
+    only_if { Dir.exist?(gnupg_dir) }
   end
 end
