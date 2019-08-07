@@ -54,8 +54,19 @@ elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on O
     # The current version is always installed
     command 'sudo zypper install -y docker'
   end
-  execute 'Enable and start Docker service' do
+  execute 'Enable Docker service' do
     command 'sudo systemctl enable docker'
+  end
+  execute 'Start Docker service' do
     command 'sudo systemctl start docker'
+  end
+end
+
+if node[:platform_family] == 'debian'
+  execute 'Chown /home/vagrant/.gnupg/ directory to vagrant user' do
+    command 'sudo chown vagrant:vagrant /home/vagrant/.gnupg'
+  end
+  execute 'Chown /home/vagrant/.gnupg/ files to vagrant user' do
+    command 'sudo chown -R vagrant:vagrant /home/vagrant/.gnupg/*'
   end
 end
