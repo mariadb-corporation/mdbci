@@ -9,11 +9,11 @@ module ConfigurationGenerator
   # @param box [String] name of the box
   # @param rhel_credentials redentials for subscription manager
   def self.generate_json_format(name, recipes_names, product_configs = {},
-                                box = nil, box_definitions = nil, rhel_credentials = nil, generate_low = false)
+                                box = nil, box_definitions = nil, rhel_credentials = nil)
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
-    unless generate_low
+    unless box_definitions.nil?
       result = generate_subscription_manager(box_definitions, box, rhel_credentials, product_configs, run_list)
       run_list = result['run_list']
       product_configs = result['product_configs']
@@ -28,9 +28,12 @@ module ConfigurationGenerator
     JSON.pretty_generate(role)
   end
 
-  # Check whether box needs to be subscribed or not
+  # Generate whether box needs to be subscribed or not
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param box [String] name of the box
+  # @param rhel_credentials redentials for subscription manager
+  # @param product_configs [Hash] list of the product parameters
+  # @param run_list [Array] array with recipes
   def self.generate_subscription_manager(box_definitions, box, rhel_credentials, product_configs, run_list)
     if box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
       raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
