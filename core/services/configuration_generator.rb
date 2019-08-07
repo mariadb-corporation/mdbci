@@ -32,8 +32,14 @@ module ConfigurationGenerator
   # Check whether box needs to be subscribed or not
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param box [String] name of the box
-  def self.check_subscription_manager(box_definitions, box)
-    box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
+  def self.generate_subscription_manager(box_definitions, box, rhel_credentials, product_configs, run_list)
+    if box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
+      raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
+
+      run_list.insert(1, 'recipe[subscription-manager]')
+      product_configs = product_configs.merge('subscription-manager': rhel_credentials)
+    end
+    { 'run_list' => run_list, 'product_configs' => product_configs }
   end
 
   # Make list of not-null product attributes
