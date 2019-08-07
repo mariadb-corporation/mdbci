@@ -2,22 +2,21 @@
 
 # The class provides methods for generating the role of the file.
 module ConfigurationGenerator
-  # Generate a list of role parameters in JSON format
+  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param name [String] node name
-  # @param product_config [Hash] list of the product parameters
-  # @param recipe_name [String] name of the recipe
-  # @oaram sub_manager [Hash] information for subscription manager: box, rhel_credentials, box_definitions
-  def self.generate_json_format(name, recipes_names, sub_manager = nil, product_configs = {})
+  # @param product_configs [Hash] list of the product parameters
+  # @param recipes_names [String] name of the recipe
+  # @param box [String] name of the box
+  # @param rhel_credentials redentials for subscription manager
+  def self.generate_json_format(name, recipes_names, product_configs = {},
+                                box = nil, box_definitions = nil, rhel_credentials = nil, generate_low = false)
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
-    unless sub_manager.nil?
-      if check_subscription_manager(sub_manager['box_definitions'], sub_manager['box'])
-        raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if sub_manager['rhel_credentials'].nil?
-
-        run_list.insert(1, 'recipe[subscription-manager]')
-        product_configs = product_configs.merge('subscription-manager': sub_manager['rhel_credentials'])
-      end
+    unless generate_low
+      result = generate_subscription_manager(box_definitions, box, rhel_credentials, product_configs, run_list)
+      run_list = result['run_list']
+      product_configs = result['product_configs']
     end
     role = { name: name,
              default_attributes: {},
