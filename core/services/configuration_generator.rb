@@ -14,7 +14,7 @@ module ConfigurationGenerator
                 *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
     unless box_definitions.nil?
-      if box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
+      if check_subscription_manager(box_definitions, box)
         raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
 
         run_list.insert(1, 'recipe[subscription-manager]')
@@ -37,7 +37,7 @@ module ConfigurationGenerator
   # @param rhel_credentials redentials for subscription manager
   # @param product_configs [Hash] list of the product parameters
   # @param run_list [Array] array with recipes
-  def self.generate_subscription_manager(box_definitions, box)
+  def self.check_subscription_manager(box_definitions, box)
     box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
 
