@@ -62,16 +62,10 @@ elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on O
   end
 end
 
-if node[:platform_family] == 'debian'
-  user = ENV['SUDO_USER']
-  home_dir = Dir.home(user)
-  gnupg_dir = File.join(home_dir, '.gnupg')
-  execute 'Chown ~.gnupg/ directory to sudo user' do
-    command "sudo chown #{user}:#{user} #{gnupg_dir}"
-    only_if { Dir.exist?(gnupg_dir) }
-  end
-  execute 'Chown ~/.gnupg/ files to sudo user' do
-    command "sudo chown -R #{user}:#{user} #{File.join(gnupg_dir, '*')}"
-    only_if { Dir.exist?(gnupg_dir) }
-  end
+user = ENV['SUDO_USER']
+home_dir = Dir.home(user)
+gnupg_dir = File.join(home_dir, '.gnupg')
+execute 'Chown ~.gnupg/ directory to sudo user' do
+  command "sudo chown -R #{user}:#{user} #{gnupg_dir}"
+  only_if { Dir.exist?(gnupg_dir) }
 end
