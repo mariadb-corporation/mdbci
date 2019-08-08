@@ -37,14 +37,8 @@ module ConfigurationGenerator
   # @param rhel_credentials redentials for subscription manager
   # @param product_configs [Hash] list of the product parameters
   # @param run_list [Array] array with recipes
-  def self.generate_subscription_manager(box_definitions, box, rhel_credentials, product_configs, run_list)
-    if box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
-      raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
-
-      run_list.insert(1, 'recipe[subscription-manager]')
-      product_configs = product_configs.merge('subscription-manager': rhel_credentials)
-    end
-    { 'run_list' => run_list, 'product_configs' => product_configs }
+  def self.generate_subscription_manager(box_definitions, box)
+    box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
 
   # Make list of not-null product attributes
