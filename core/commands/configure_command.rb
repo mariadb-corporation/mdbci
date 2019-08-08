@@ -3,8 +3,6 @@
 require_relative 'base_command'
 require_relative '../services/aws_service'
 
-require 'rest-client'
-
 require 'open3'
 
 
