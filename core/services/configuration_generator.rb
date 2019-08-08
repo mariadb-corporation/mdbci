@@ -36,6 +36,12 @@ class ConfigurationGenerator
     box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
 
+  # Make list of not-null product attributes
+  # @param repo [Hash] repository info
+  def self.make_product_attributes_hash(repo)
+    %w[version repo repo_key].map { |key| [key, repo[key]] unless repo[key].nil? }.compact.to_h
+  end
+
   # Generate the list of the product parameters
   # @param repos [RepoManager] for products
   # @param product_name [String] name of the product for install
@@ -46,7 +52,7 @@ class ConfigurationGenerator
     repo = repos.find_repository(product_name, product, box) if repo.nil?
     raise "Repo for product #{product['name']} #{product['version']} for #{box} not found" if repo.nil?
 
-    config = { 'version': repo['version'], 'repo': repo['repo'], 'repo_key': repo['repo_key'] }
+    config = make_product_attributes_hash(repo)
     if check_product_availability(product)
       config['cnf_template'] = product['cnf_template']
       config['cnf_template_path'] = product['cnf_template_path']
