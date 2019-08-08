@@ -54,8 +54,18 @@ elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on O
     # The current version is always installed
     command 'sudo zypper install -y docker'
   end
-  execute 'Enable and start Docker service' do
+  execute 'Enable Docker service' do
     command 'sudo systemctl enable docker'
+  end
+  execute 'Start Docker service' do
     command 'sudo systemctl start docker'
   end
+end
+
+user = ENV['SUDO_USER']
+home_dir = Dir.home(user)
+gnupg_dir = File.join(home_dir, '.gnupg')
+execute 'Chown ~.gnupg/ directory to sudo user' do
+  command "sudo chown -R #{user}: #{gnupg_dir}"
+  only_if { Dir.exist?(gnupg_dir) }
 end
