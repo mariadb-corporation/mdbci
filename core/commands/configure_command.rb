@@ -5,6 +5,10 @@ require_relative '../services/aws_service'
 
 require 'rest-client'
 
+require 'open3'
+
+
+
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
   CONFIG_FILE_NAME = 'mdbci/config.yaml'
@@ -54,17 +58,17 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
   private
 
   def check_dock_credentials(docker_credentials)
-    resource = RestClient::Resource.new(docker_credentials['ci-server'], docker_credentials['username'],
-                                        docker_credentials['password'])
-    begin
-      response = resource.get
-    rescue RestClient::Unauthorized, RestClient::Forbidden => err
-      @ui.info("Authorization failed, code: #{err}")
-    rescue RestClient::ImATeapot => err
-      @ui.info("The server is a teapot, code: #{err}")
+    cmd = "docker login --username #{docker_credentials['username']}" \
+          " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
+
+    stdin, stdout, stderr = Open3.popen3(cmd)
+    out = stdout.read
+    if out.empty?
+      @ui.info("Unauthorized")
     else
-      @ui.info("Authorization completed successfull, code: #{response.code}")
+      @ui.info(out)
     end
+    stdin.close; stdout.close; stderr.close
   end
 
   def configure_docker
@@ -100,7 +104,7 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
         'username' => read_topic('Please input username for Docker Registry'),
         'password' => read_topic('Please input password for Docker Registry'),
         'ci-server' => read_topic('Please input url ci-server for Docker Registry',
-                                  'https://maxscale-docker-registry.mariadb.net:5000/v2/')
+                                  'https://maxscale-docker-registry.mariadb.net:5000/v2')
       }
     else
       {
