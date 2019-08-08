@@ -66,6 +66,6 @@ user = ENV['SUDO_USER']
 home_dir = Dir.home(user)
 gnupg_dir = File.join(home_dir, '.gnupg')
 execute 'Chown ~.gnupg/ directory to sudo user' do
-  command "sudo chown -R #{user}:#{user} #{gnupg_dir}"
+  command "sudo chown -R #{user}: #{gnupg_dir}"
   only_if { Dir.exist?(gnupg_dir) }
 end
