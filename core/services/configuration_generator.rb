@@ -31,12 +31,9 @@ module ConfigurationGenerator
     JSON.pretty_generate(role)
   end
 
-  # Generate whether box needs to be subscribed or not
+  # Check whether box needs to be subscribed or not
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param box [String] name of the box
-  # @param rhel_credentials redentials for subscription manager
-  # @param product_configs [Hash] list of the product parameters
-  # @param run_list [Array] array with recipes
   def self.check_subscription_manager(box_definitions, box)
     box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
