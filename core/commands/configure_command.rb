@@ -2,10 +2,7 @@
 
 require_relative 'base_command'
 require_relative '../services/aws_service'
-
-require 'open3'
-
-
+require_relative '../services/shell_commands'
 
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
@@ -58,14 +55,7 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
     cmd = "docker login --username #{docker_credentials['username']}" \
           " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
 
-    stdin, stdout, stderr = Open3.popen3(cmd)
-    out = stdout.read
-    if out.empty?
-      @ui.info("Unauthorized")
-    else
-      @ui.info(out)
-    end
-    stdin.close; stdout.close; stderr.close
+    ShellCommands.run_command_and_log(@ui, cmd)
   end
 
   def configure_docker
