@@ -62,4 +62,8 @@ class ToolConfiguration
   def []=(key, value)
     @config[key] = value
   end
+
+  def dig(key, *smth)
+    @config.dig(key, *smth)
+  end
 end

@@ -43,7 +43,7 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
-    return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
+    #return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
 
     SUCCESS_RESULT
   end
@@ -86,39 +86,23 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
   end
 
   def input_docker_credentials
-    if @configuration['docker'].nil?
-      {
-        'username' => read_topic('Please input username for Docker Registry'),
-        'password' => read_topic('Please input password for Docker Registry'),
-        'ci-server' => read_topic('Please input url ci-server for Docker Registry',
-                                  'https://maxscale-docker-registry.mariadb.net:5000/v2')
-      }
-    else
-      {
-        'username' => read_topic('Please input username for Docker Registry',
-                                 @configuration['docker']['username']),
-        'password' => read_topic('Please input password for Docker Registry',
-                                 @configuration['docker']['password']),
-        'ci-server' => read_topic('Please input url ci-server for Docker Registry',
-                                  @configuration['docker']['ci-server'])
-      }
-    end
+    {
+      'username' => read_topic('Please input username for Docker Registry',
+                               @configuration.dig('docker', 'username')),
+      'password' => read_topic('Please input password for Docker Registry',
+                               @configuration.dig('docker', 'password')),
+      'ci-server' => read_topic('Please input url ci-server for Docker Registry',
+                                @configuration.dig('docker', 'ci-server'))
+    }
   end
 
   def input_rhel_subscription_credentials
-    if @configuration['rhel'].nil?
-      {
-        'username' => read_topic('Please input username for Red Hat Subscription-Manager'),
-        'password' => read_topic('Please input password for Red Hat Subscription-Manager')
-      }
-    else
-      {
-        'username' => read_topic('Please input username for Red Hat Subscription-Manager',
-                                 @configuration['rhel']['username']),
-        'password' => read_topic('Please input password for Red Hat Subscription-Manager',
-                                 @configuration['rhel']['password'])
-      }
-    end
+    {
+      'username' => read_topic('Please input username for Red Hat Subscription-Manager',
+                               @configuration['rhel']['username']),
+      'password' => read_topic('Please input password for Red Hat Subscription-Manager',
+                               @configuration['rhel']['password'])
+    }
   end
 
   def input_or_create_security_group(credentials)
