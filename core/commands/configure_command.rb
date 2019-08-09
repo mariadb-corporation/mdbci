@@ -118,7 +118,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
   end
 
   def input_mdbe_settings
-    { 'key' => read_topic('Please input the private key for MariaDB Enterprise') }
+    { 'key' => read_topic('Please input the private key for MariaDB Enterprise', @configuration.dig('mdbe', 'key')) }
   end
 
   def input_or_create_security_group(credentials)
