@@ -9,7 +9,6 @@ require 'open3'
 
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
-  CONFIG_FILE_NAME = 'mdbci/config.yaml'
 
   def self.synopsis
     'Creates configuration file for MDBCI'
