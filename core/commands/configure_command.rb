@@ -41,8 +41,8 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
 
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
-    configure_results << configure_docker if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('docker').zero?
     configure_results << configure_mdbe if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('mdbe').zero?
+    configure_results << configure_docker if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('docker').zero?
 
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
@@ -103,9 +103,9 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
   def input_rhel_subscription_credentials
     {
       'username' => read_topic('Please input username for Red Hat Subscription-Manager',
-                               @configuration['rhel']['username']),
+                               @configuration.dig('rhel', 'username')),
       'password' => read_topic('Please input password for Red Hat Subscription-Manager',
-                               @configuration['rhel']['password'])
+                               @configuration.dig('rhel', 'password'))
     }
   end
 
