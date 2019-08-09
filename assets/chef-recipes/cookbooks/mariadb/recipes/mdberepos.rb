@@ -1,5 +1,3 @@
-include_recipe 'packages::default'
-
 # Install default packages
 %w[net-tools psmisc].each do |pkg|
   package pkg do
@@ -30,7 +28,7 @@ when 'rhel', 'fedora', 'centos'
     gpgkey node['mariadb']['repo_key']
     sensitive true
   end
-when 'suse', 'opensuse', 'sles'
+when 'suse', 'opensuse', 'sles', nil
   # Add the repo
   template "/etc/zypp/repos.d/#{repo_file_name}.repo" do
     source 'mariadb.suse.erb'
