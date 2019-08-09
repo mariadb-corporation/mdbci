@@ -137,6 +137,7 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
 
   # Ask user to input non-empty string as value
   def read_topic(topic, default_value = '')
+    default_value = '' if default_value.nil?
     loop do
       $stdout.print("#{topic} [#{default_value}]: ")
       user_input = $stdin.gets.strip
