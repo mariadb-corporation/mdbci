@@ -18,13 +18,15 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS, RHEL and MaxScale CI Docker Registry subscription.
+'configure' command creates configuration for MDBCI to use AWS, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
 
-You can configure AWS, RHEL and Docker credentials:
+You can configure AWS, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
   mdbci configure
 
-Or you can configure only AWS, only RHEL or only Docker credentials (for example, AWS):
+Or you can configure only AWS, only RHEL credentials, only MariaDB Enterprise or only MaxScale CI Docker Registry subscription (for example, AWS):
   mdbci configure --product aws
+
+Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for MariaDB Enterprise and 'docker' for MaxScale CI Docker Registry subscription.
     HELP
     @ui.info(info)
   end
@@ -40,6 +42,8 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
     configure_results << configure_docker if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('docker').zero?
+    configure_results << configure_mdbe if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('mdbe').zero?
+
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
@@ -103,6 +107,18 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
       'password' => read_topic('Please input password for Red Hat Subscription-Manager',
                                @configuration['rhel']['password'])
     }
+  end
+
+  def configure_mdbe
+    mdbe_settings = input_mdbe_settings
+    return ERROR_RESULT if mdbe_settings.nil?
+
+    @configuration['mdbe'] = mdbe_settings
+    SUCCESS_RESULT
+  end
+
+  def input_mdbe_settings
+    { 'key' => read_topic('Please input the private key for MariaDB Enterprise') }
   end
 
   def input_or_create_security_group(credentials)

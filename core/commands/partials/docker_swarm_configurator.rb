@@ -104,7 +104,7 @@ class DockerSwarmConfigurator
   # rubocop:disable Metrics/MethodLength
   def wait_for_services
     @ui.info('Waiting for stack services to become ready')
-    60.times do
+    100.times do
       @docker_commands.retrieve_task_list(@config.name).and_then do |tasks|
         @tasks = tasks.merge(@tasks)
         @tasks.each_pair do |task_id, task|
@@ -117,7 +117,7 @@ class DockerSwarmConfigurator
       end.and_then do
         return Result.ok('All nodes are running') if @tasks.all? { |_, task| task.key?(:ip_address) }
       end
-      sleep(10)
+      sleep(1)
     end
     Result.error('Not all nodes were successfully started')
   end
@@ -126,7 +126,7 @@ class DockerSwarmConfigurator
   # Wait for applications to start up and be ready to accept incoming connections
   def wait_for_applications
     @ui.info('Waiting for applications to become available')
-    60.times do
+    100.times do
       @tasks.each_value do |task|
         next if task[:running]
 
@@ -134,7 +134,7 @@ class DockerSwarmConfigurator
       end
       return Result.ok('All applications are running') if @tasks.all? { |_, task| task[:running] }
 
-      sleep(10)
+      sleep(1)
     end
     show_error_container_info
     Result.error('Could not wait for applications to start up')
