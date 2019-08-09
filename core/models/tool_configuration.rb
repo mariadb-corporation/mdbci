@@ -63,6 +63,7 @@ class ToolConfiguration
     @config[key] = value
   end
 
+  # A proxy method to provide access to the values
   def dig(key, *smth)
     @config.dig(key, *smth)
   end
