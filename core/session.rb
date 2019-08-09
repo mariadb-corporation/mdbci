@@ -68,6 +68,7 @@ class Session
   attr_reader :aws_service
   attr_reader :tool_config
   attr_reader :rhel_credentials
+  attr_reader :mdbe_private_key
   attr_accessor :show_help
   attr_accessor :reinstall
   attr_accessor :recreate
@@ -118,6 +119,7 @@ EOF
       @aws_service = AwsService.new(@tool_config['aws'], $out)
     end
     @rhel_credentials = @tool_config['rhel']
+    @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
     @box_definitions = BoxDefinitions.new(@boxes_location)
   end
 
