@@ -59,14 +59,16 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     cmd = "docker login --username #{docker_credentials['username']}" \
           " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
 
-    ShellCommands.run_command_and_log(@ui, cmd)
+    out = ShellCommands.run_command_and_log(@ui, cmd)
+    out[:value].to_s.split(' ').last.to_i.zero?
   end
 
   def configure_docker
     docker_credentials = input_docker_credentials
     return ERROR_RESULT if docker_credentials.nil?
 
-    check_dock_credentials(docker_credentials)
+    return ERROR_RESULT unless check_dock_credentials(docker_credentials)
+
     @configuration['docker'] = docker_credentials
     SUCCESS_RESULT
   end
