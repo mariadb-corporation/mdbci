@@ -43,7 +43,7 @@ Or you can configure only AWS, only RHEL or only Docker credentials (for example
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
-    #return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
+    return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
 
     SUCCESS_RESULT
   end
