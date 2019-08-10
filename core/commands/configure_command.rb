@@ -60,7 +60,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
           " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
 
     out = ShellCommands.run_command_and_log(@ui, cmd)
-    out[:value].to_s.split(' ').last.to_i.zero?
+    out[:value].success?
   end
 
   def configure_docker
