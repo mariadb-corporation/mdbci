@@ -2,9 +2,11 @@
 
 require_relative 'base_command'
 require_relative '../services/aws_service'
+require_relative '../services/shell_commands'
 
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
+
   def self.synopsis
     'Creates configuration file for MDBCI'
   end
@@ -16,15 +18,15 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS, RHEL subscription and MariaDB Enterprise.
+'configure' command creates configuration for MDBCI to use AWS, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
 
-You can configure AWS, RHEL credentials and MariaDB Enterprise:
+You can configure AWS, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
   mdbci configure
 
-Or you can configure only AWS, only RHEL credentials or only MariaDB Enterprise (for example, AWS):
+Or you can configure only AWS, only RHEL credentials, only MariaDB Enterprise or only MaxScale CI Docker Registry subscription (for example, AWS):
   mdbci configure --product aws
 
-Use 'aws' as product option for AWS, 'rhel' for RHEL subscription and 'mdbe' for MariaDB Enterprise.
+Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for MariaDB Enterprise and 'docker' for MaxScale CI Docker Registry subscription.
     HELP
     @ui.info(info)
   end
@@ -40,6 +42,8 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription and 'mdbe' for
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
     configure_results << configure_mdbe if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('mdbe').zero?
+    configure_results << configure_docker if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('docker').zero?
+
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
@@ -50,6 +54,24 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription and 'mdbe' for
   # rubocop:enable Metrics/CyclomaticComplexity
 
   private
+
+  def check_dock_credentials(docker_credentials)
+    cmd = "docker login --username #{docker_credentials['username']}" \
+          " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
+
+    out = ShellCommands.run_command_and_log(@ui, cmd)
+    out[:value].success?
+  end
+
+  def configure_docker
+    docker_credentials = input_docker_credentials
+    return ERROR_RESULT if docker_credentials.nil?
+
+    return ERROR_RESULT unless check_dock_credentials(docker_credentials)
+
+    @configuration['docker'] = docker_credentials
+    SUCCESS_RESULT
+  end
 
   def configure_aws
     aws_credentials = input_aws_credentials
@@ -69,10 +91,23 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription and 'mdbe' for
     SUCCESS_RESULT
   end
 
+  def input_docker_credentials
+    {
+      'username' => read_topic('Please input username for Docker Registry',
+                               @configuration.dig('docker', 'username')),
+      'password' => read_topic('Please input password for Docker Registry',
+                               @configuration.dig('docker', 'password')),
+      'ci-server' => read_topic('Please input url ci-server for Docker Registry',
+                                @configuration.dig('docker', 'ci-server'))
+    }
+  end
+
   def input_rhel_subscription_credentials
     {
-      'username' => read_topic('Please input username for Red Hat Subscription-Manager'),
-      'password' => read_topic('Please input password for Red Hat Subscription-Manager')
+      'username' => read_topic('Please input username for Red Hat Subscription-Manager',
+                               @configuration.dig('rhel', 'username')),
+      'password' => read_topic('Please input password for Red Hat Subscription-Manager',
+                               @configuration.dig('rhel', 'password'))
     }
   end
 
@@ -85,7 +120,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription and 'mdbe' for
   end
 
   def input_mdbe_settings
-    { 'key' => read_topic('Please input the private key for MariaDB Enterprise') }
+    { 'key' => read_topic('Please input the private key for MariaDB Enterprise', @configuration.dig('mdbe', 'key')) }
   end
 
   def input_or_create_security_group(credentials)
@@ -120,6 +155,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription and 'mdbe' for
 
   # Ask user to input non-empty string as value
   def read_topic(topic, default_value = '')
+    default_value = '' if default_value.nil?
     loop do
       $stdout.print("#{topic} [#{default_value}]: ")
       user_input = $stdin.gets.strip
