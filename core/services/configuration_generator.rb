@@ -18,7 +18,7 @@ module ConfigurationGenerator
         raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
 
         run_list.insert(1, 'recipe[subscription-manager]')
-        product_configs = product_configs.merge('subscription-manager': rhel_credentials)
+        product_configs.merge!('subscription-manager': rhel_credentials)
       end
     end
     role = { name: name,
