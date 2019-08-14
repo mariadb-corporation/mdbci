@@ -35,8 +35,11 @@ class RemoveProductCommand < BaseCommand
   # Print brief instructions on how to use the command
   def show_help
     info = <<~HELP
-      'remove_product' Remove a product onto the configuration node.
-      mdbci remove_product --product product config/node
+      'remove_product' Removes the specified product on the selected node.
+
+      You can specify a product using --product, for example maxscale:
+      mdbci remove_product --product maxscale config/node
+
     HELP
     @ui.info(info)
   end
