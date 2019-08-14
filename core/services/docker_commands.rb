@@ -113,7 +113,7 @@ class DockerCommands
          container_id: task_data.dig('Status', 'ContainerStatus', 'ContainerID'),
          service_id: task_data.dig('ServiceID'),
          updated_at: task_data.dig('UpdatedAt'),
-         private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses', 0)&.split('/')[0],
+         private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses', 0)&.split('/')&.first,
          status_state: task_data.dig('Status', 'State')
       }
       if task_info.values.any? { |value| value.nil? }
