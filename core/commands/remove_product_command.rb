@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
+require_relative '../services/configuration_generator'
 require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
-require_relative '../services/configuration_generator'
 
-# This class installs the product on selected node
-class InstallProduct < BaseCommand
+# This class remove the product on selected node
+class RemoveProductCommand < BaseCommand
   def self.synopsis
-    'Installs the product on selected node.'
+    'Remove the product on selected node.'
   end
 
   # This method is called whenever the command is executed
@@ -23,7 +23,7 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
 
-    result = install_product(@mdbci_config.node_names.first)
+    result = remove_product(@mdbci_config.node_names.first)
 
     if result.success?
       SUCCESS_RESULT
@@ -35,13 +35,14 @@ class InstallProduct < BaseCommand
   # Print brief instructions on how to use the command
   def show_help
     info = <<~HELP
-      'install_product' Install a product onto the configuration node.
-      mdbci install_product --product product --product-version version config/node
+      'remove_product' Removes the specified product on the selected node.
+
+      You can specify a product using --product, for example maxscale:
+      mdbci remove_product --product maxscale config/node
+
     HELP
     @ui.info(info)
   end
-
-  private
 
   # Initializes the command variable
   def init
@@ -53,9 +54,8 @@ class InstallProduct < BaseCommand
     @network_config = NetworkConfig.new(@mdbci_config, @ui)
 
     @product = @env.nodeProduct
-    @product_version = @env.productVersion
-    if @product.nil? || @product_version.nil?
-      @ui.error('You must specify the name and version of the product')
+    if @product.nil?
+      @ui.error('You must specify the name of the product')
       return ARGUMENT_ERROR_RESULT
     end
 
@@ -64,9 +64,9 @@ class InstallProduct < BaseCommand
     SUCCESS_RESULT
   end
 
-  # Install product on server
+  # Remove product on server
   # param node_name [String] name of the node
-  def install_product(name)
+  def remove_product(name)
     role_file_path = generate_role_file(name)
     target_path = "roles/#{name}.json"
     role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
@@ -80,15 +80,10 @@ class InstallProduct < BaseCommand
   # Create a role file to install the product from the chef
   # @param name [String] node name
   def generate_role_file(name)
-    node = @mdbci_config.node_configurations[name]
-    box = node['box'].to_s
-    recipes_names = []
-    recipes_names.push(@env.repos.recipe_name(@product))
+    recipe_name = []
+    recipe_name.push(@env.repos.recipe_name("#{@product}_remove"))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
-    product = { 'name' => @product, 'version' => @product_version.to_s }
-    products_configs = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
-    role_json_file = ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
-                                                                 box, @env.box_definitions, @env.rhel_credentials)
+    role_json_file = ConfigurationGenerator.generate_json_format(name, recipe_name)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end

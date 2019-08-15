@@ -23,6 +23,11 @@ class RepoManager
       name: 'maxscale',
       repository: 'maxscale'
     },
+    'maxscale_remove' => {
+      recipe: 'mariadb-maxscale::purge_maxscale',
+      name: 'maxscale',
+      repository: 'maxscale'
+    },
     'maxscale_ci' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       name: 'maxscale',
