@@ -27,13 +27,13 @@ when 'rhel', 'fedora', 'centos'
     action :stop
   end
   execute 'Disable SELinux Temporarily' do
-    command 'echo 0 > /selinux/enforce'
+    command 'setenforce 0'
   end
   ruby_block 'Disable SELinux Permanently' do
     block do
       selinux = Chef::Util::FileEdit.new('/etc/sysconfig/selinux')
       selinux.search_file_replace_line(/^SELINUX=.+$/, 'SELINUX=disabled')
-      selinux.write_file
+      selinux.write_filentpd
     end
     only_if { File.exist?('/etc/sysconfig/selinux') }
   end
