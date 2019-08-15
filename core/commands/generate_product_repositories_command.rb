@@ -227,6 +227,12 @@ In order to specify the number of retries for repository configuration use --att
     names.dig('repositories').first
   end
 
+  def get_docker_tags(base_url, username, password, name_repo)
+    uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
+    doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
+    JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
+  end
+
   def parse_docker_repository
     config = @env.tool_config
     base_url = config.dig('docker', 'ci-server').to_s
@@ -234,9 +240,7 @@ In order to specify the number of retries for repository configuration use --att
     password = config.dig('docker', 'password').to_s
 
     name_repo = get_docker_name(base_url, username, password)
-    uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
-    doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
-    tags = JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
+    tags = get_docker_tags(base_url, username, password, name_repo)
     result = []
     tags.each do |tag|
       result << {
