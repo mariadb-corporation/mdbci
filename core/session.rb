@@ -31,6 +31,7 @@ require_relative 'services/repo_manager'
 require_relative 'services/aws_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
+require_relative 'commands/remove_product_command'
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
 # These responsibilites should be split between several classes.
@@ -68,6 +69,7 @@ class Session
   attr_reader :aws_service
   attr_reader :tool_config
   attr_reader :rhel_credentials
+  attr_reader :mdbe_private_key
   attr_accessor :show_help
   attr_accessor :reinstall
   attr_accessor :recreate
@@ -118,6 +120,7 @@ EOF
       @aws_service = AwsService.new(@tool_config['aws'], $out)
     end
     @rhel_credentials = @tool_config['rhel']
+    @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
     @box_definitions = BoxDefinitions.new(@boxes_location)
   end
 
@@ -503,6 +506,9 @@ EOF
       exit_code = command.execute
     when 'install_product'
       command = InstallProduct.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'remove_product'
+      command = RemoveProductCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)

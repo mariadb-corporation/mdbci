@@ -152,7 +152,7 @@ class DockerConfigurationGenerator
   end
 
   CONFIGURATION_LOCATIONS = {
-    'mariadb' => '/etc/mysql/my.cnf',
+    'mariadb' => '/etc/mysql/mariadb.conf.d/mariadb.cnf',
     'maxscale' => '/etc/maxscale.cnf'
   }.freeze
 

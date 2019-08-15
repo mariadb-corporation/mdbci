@@ -258,8 +258,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       products_configs.merge!(recipe_and_config[:config])
       recipes_names << recipe_and_config[:recipe]
     end
-    ConfigurationGenerator.generate_json_format(@env.box_definitions, name, products_configs, recipes_names,
-                                                box, @env.rhel_credentials)
+    ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
+                                                box, @env.box_definitions, @env.rhel_credentials)
   end
 
   # Check for the existence of a path, create it if path is not exists or clear path
@@ -370,8 +370,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param cnf_template_path [String] path to the products configurations directory
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node, cnf_template_path)
-    products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
-    products << { 'name' => 'packages' } if products.empty?
+    products = [{ 'name' => 'packages' }].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
     unless cnf_template_path.nil?
       products.each { |product| product['cnf_template_path'] = cnf_template_path if product['cnf_template'] }
     end

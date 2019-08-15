@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-include_recipe 'packages::configure_apt'
-
 %w[net-tools psmisc].each do |pkg|
   package pkg do
     retries 2

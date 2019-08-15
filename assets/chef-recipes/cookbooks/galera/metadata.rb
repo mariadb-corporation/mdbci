@@ -7,7 +7,6 @@ version           '0.0.1'
 recipe            'install_galera', 'Installs gallera'
 
 depends           'chrony'
-depends           'packages'
 
 supports          'redhat'
 supports          'centos'

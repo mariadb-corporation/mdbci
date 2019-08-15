@@ -1,65 +1,42 @@
-include_recipe 'packages::configure_apt'
-
-# install default packages
-[ "net-tools", "psmisc" ].each do |pkg|
-  package pkg
+# Install default packages
+%w[net-tools psmisc].each do |pkg|
+  package pkg do
+    retries 2
+    retry_delay 10
+  end
 end
 
-node.set_unless['maria']['version'] = "10.0"
+repo_file_name = node['mariadb']['repo_file_name']
 
+# MDBE repos
 case node[:platform_family]
-when "debian"
-  # Add repo key
-  execute "Key add" do
-    command "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xce1a3dd5e3c94f49"
+when 'debian', 'ubuntu'
+  # Split MaxScale repository information into parts
+  repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
+  apt_repository repo_file_name do
+    uri repo_uri
+    distribution repo_distribution
+    components node['mariadb']['deb_components']
+    keyserver 'keyserver.ubuntu.com'
+    key node['mariadb']['repo_key']
+    sensitive true
   end
-  release_name = '$(lsb_release -cs)'
-  # Add repo
-  execute "Repository add" do
-    command 'echo "deb http://code.mariadb.com/mariadb-enterprise/'+ node['maria']['version'] + '/repo/' + node[:platform] + ' ' + release_name + ' main" > /etc/apt/sources.list.d/mariadb.list'
+  apt_update
+when 'rhel', 'fedora', 'centos'
+  yum_repository repo_file_name do
+    baseurl node['mariadb']['repo']
+    gpgkey node['mariadb']['repo_key']
+    sensitive true
   end
-  execute "update" do
-    command "apt-get update"
-  end
-when "rhel", "fedora"
+when 'suse', 'opensuse', 'sles', nil
   # Add the repo
-  template "/etc/yum.repos.d/mariadb.repo" do
-    source "mariadb.rhel.erb"
+  template "/etc/zypp/repos.d/#{repo_file_name}.repo" do
+    source 'mariadb.suse.erb'
     action :create
-  end
-when "suse"
-  # Add the repo
-  template "/etc/zypp/repos.d/mariadb.repo.template" do
-    source "mariadb.suse.erb"
-    action :create
-  end
-  release_name = "test -f /etc/os-release && cat /etc/os-release | grep '^ID=' | sed s/'^ID='//g | sed s/'\"'//g || if cat /etc/SuSE-release | grep Enterprise &>/dev/null; then echo sles; else echo opensuse; fi"
-  execute "Change suse on sles repository" do
-    command "cat /etc/zypp/repos.d/mariadb.repo.template | sed s/PLATFORM/$(" + release_name + ")/g > /etc/zypp/repos.d/mariadb.repo"
-  end
-when "windows"
-  arch = node[:kernel][:machine] == "x86_64" ? "winx64" : "win32"
-
-  md5sums_file = "#{Chef::Config[:file_cache_path]}/md5sums.txt"
-  remote_file "#{md5sums_file}" do
-    source "https://code.mariadb.com/mariadb-enterprise/" + node['maria']['version'] + "/" + arch + "-packages/md5sums.txt"
+    sensitive true
   end
 
-  file_name = "mariadb-enterprise-" + node['maria']['version'] + "-" + arch + ".msi"
-
-  if File.exists?("#{md5sums_file}")
-    f = File.open("#{md5sums_file}")
-    f.each {|line|
-      match = line.split(" ")
-      if match[1].end_with?("msi")
-        file_name = match[1]
-        break
-      end
-    }
-    f.close
-  end
-
-  remote_file "#{Chef::Config[:file_cache_path]}/mariadb.msi" do
-    source "https://code.mariadb.com/mariadb-enterprise/" + node['maria']['version'] + "/" + arch + "-packages/" + file_name
+  execute 'Update zypper cache' do
+    command "zypper refresh"
   end
 end
