@@ -71,3 +71,5 @@ opensuse:
     '5.5': MariaDB-Galera-server
   maxscale: maxscale
   maxscale_ci: maxscale
+docker: 
+  maxscale: maxscale

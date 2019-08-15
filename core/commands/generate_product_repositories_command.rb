@@ -219,9 +219,22 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
+  CONFIG_FILE_NAME = 'mdbci/config.yaml'
+
+  def parse_docker_repository
+    config = @env.tool_config
+    uri = config.dig('docker', 'ci-sever')
+    doc = Nokogiri::HTML(open(uri, config.dig('docker', 'username'), config.dig('docker', 'password')))
+    p doc
+
+    #{}
+  end
+
   def parse_maxscale(config)
     releases = []
+    parse_maxscale_docker_repository
     releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm']))
+    #p releases
     releases.concat(parse_maxscale_deb_repository(config['repo']['deb']))
     releases
   end
