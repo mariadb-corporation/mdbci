@@ -32,4 +32,5 @@ end
 execute 'Install ClustrixDB via unpacked installer' do
   command './clxnode_install.py --yes --force'
   cwd '/home/vagrant/clustrix-installer/'
+  returns [0, 4]
 end
