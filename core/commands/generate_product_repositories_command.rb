@@ -224,18 +224,33 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_docker_repository
     config = @env.tool_config
-    uri = config.dig('docker', 'ci-sever')
-    doc = Nokogiri::HTML(open(uri, config.dig('docker', 'username'), config.dig('docker', 'password')))
-    p doc
-
-    #{}
+    base_url = config.dig('docker', 'ci-server').to_s
+    username = config.dig('docker', 'username').to_s
+    password = config.dig('docker', 'password').to_s
+    uri_with_names_repos = base_url + '/v2/_catalog'
+    doc = Nokogiri::HTML(open(uri_with_names_repos, http_basic_authentication: [username, password]))
+    names = JSON.parse(doc.css('p').children.to_s)
+    name_repo = names.dig('repositories').first
+    uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
+    doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
+    tags = JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
+    result = []
+    tags.each do |tag|
+      result << {
+        'platform' => 'docker',
+        'platform_version' => 'latest',
+        'product' => 'maxscale',
+        'version' => "#{tag}",
+        'repo' => "mariadb/maxscale:#{tag}"
+      }
+      result
+    end
   end
 
   def parse_maxscale(config)
     releases = []
-    parse_maxscale_docker_repository
+    parse_docker_repository
     releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm']))
-    #p releases
     releases.concat(parse_maxscale_deb_repository(config['repo']['deb']))
     releases
   end
