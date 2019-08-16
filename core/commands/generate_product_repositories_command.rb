@@ -185,8 +185,8 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale_ci(config)
     releases = []
-    releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
-    releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
+    #releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
+    #releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
     releases.concat(parse_maxscale_ci_repository_for_docker)
     releases
   end
@@ -239,8 +239,8 @@ In order to specify the number of retries for repository configuration use --att
   def get_maxscale_ci_release_version_for_docker(base_url, username, password, name_repo)
     uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
     begin
-      doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
-      JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
+      doc_tags = JSON.parse(open(uri_with_tags, http_basic_authentication: [username, password]).read)
+      doc_tags.dig('tags')
     rescue OpenURI::HTTPError => error
       @ui.error("Failed to get tags for docker from #{uri_with_tags}: #{error}")
       return ERROR_RESULT
