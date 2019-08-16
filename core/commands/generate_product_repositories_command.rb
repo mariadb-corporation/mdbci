@@ -152,10 +152,6 @@ In order to specify the number of retries for repository configuration use --att
 
   # Use data provided via constructor to configure the command.
   def configure_command
-    if @env.show_help
-      show_help
-      return false
-    end
     load_configuration_file
     return false unless determine_products_to_parse
     return false unless determine_product_version_to_parse
@@ -191,6 +187,7 @@ In order to specify the number of retries for repository configuration use --att
     releases = []
     releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
     releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
+    releases.concat(parse_maxscale_ci_repository_for_docker)
     releases
   end
 
@@ -222,6 +219,48 @@ In order to specify the number of retries for repository configuration use --att
         release
       end
     )
+  end
+
+  def get_maxscale_ci_release_version_for_docker(base_url, username, password)
+    uri_with_tags = URI.join(base_url, '/v2/mariadb/maxscale-ci/tags/list')
+    begin
+      doc_tags = JSON.parse(open(uri_with_tags, http_basic_authentication: [username, password]).read)
+      doc_tags.dig('tags')
+    rescue OpenURI::HTTPError => error
+      @ui.error("Failed to get tags for docker from #{uri_with_tags}: #{error}")
+      return ERROR_RESULT
+    rescue StandardError
+      @ui.error('Failed to get tags for docker')
+      return ERROR_RESULT
+    end
+  end
+
+  # Generate information about releases
+  def generate_maxscale_ci_releases_for_docker(tags)
+    result = []
+    tags.each do |tag|
+      result << {
+        :platform => 'docker',
+        :repo_key => '',
+        :platform_version => 'latest',
+        :product => 'maxscale_ci',
+        :version => "#{tag}",
+        :repo => "mariadb/maxscale-ci:#{tag}"
+      }
+    end
+    result
+  end
+
+  def parse_maxscale_ci_repository_for_docker
+    config = @env.tool_config
+    base_url = config.dig('docker', 'ci-server').to_s
+    username = config.dig('docker', 'username').to_s
+    password = config.dig('docker', 'password').to_s
+
+    tags = get_maxscale_ci_release_version_for_docker(base_url, username, password)
+    return [] if tags == ERROR_RESULT
+
+    generate_maxscale_ci_releases_for_docker(tags)
   end
 
   def parse_maxscale(config)
@@ -652,6 +691,10 @@ In order to specify the number of retries for repository configuration use --att
 
   # Starting point of the application
   def execute
+    if @env.show_help
+      show_help
+      return SUCCESS_RESULT
+    end
     return ARGUMENT_ERROR_RESULT unless configure_command
     remainning_products = @products.dup
     @attempts.times do
