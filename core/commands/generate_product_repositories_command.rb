@@ -185,8 +185,8 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale_ci(config)
     releases = []
-    #releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
-    #releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
+    releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
+    releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
     releases.concat(parse_maxscale_ci_repository_for_docker)
     releases
   end
@@ -221,23 +221,8 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
-  def get_maxscale_ci_repository_name_for_docker(base_url, username, password)
-    uri_with_names_repos = base_url + '/v2/_catalog'
-    begin
-      doc = Nokogiri::HTML(open(uri_with_names_repos, http_basic_authentication: [username, password]))
-      names = JSON.parse(doc.css('p').children.to_s)
-      names.dig('repositories').first
-    rescue OpenURI::HTTPError => error
-      @ui.error("Failed to get names repositories for docker from #{uri_with_names_repos}: #{error}")
-      return ERROR_RESULT
-    rescue StandardError
-      @ui.error('Failed to get names repositories for docker')
-      return ERROR_RESULT
-    end
-  end
-
-  def get_maxscale_ci_release_version_for_docker(base_url, username, password, name_repo)
-    uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
+  def get_maxscale_ci_release_version_for_docker(base_url, username, password)
+    uri_with_tags = base_url + '/v2/mariadb/maxscale-ci/tags/list'
     begin
       doc_tags = JSON.parse(open(uri_with_tags, http_basic_authentication: [username, password]).read)
       doc_tags.dig('tags')
@@ -251,7 +236,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Generate information about releases
-  def generate_maxscale_ci_releases_for_docker(tags, name_repo)
+  def generate_maxscale_ci_releases_for_docker(tags)
     result = []
     tags.each do |tag|
       result << {
@@ -260,7 +245,7 @@ In order to specify the number of retries for repository configuration use --att
         :platform_version => 'latest',
         :product => 'maxscale_ci',
         :version => "#{tag}",
-        :repo => "#{name_repo}:#{tag}"
+        :repo => "mariadb/maxscale-ci:#{tag}"
       }
     end
     result
@@ -271,13 +256,11 @@ In order to specify the number of retries for repository configuration use --att
     base_url = config.dig('docker', 'ci-server').to_s
     username = config.dig('docker', 'username').to_s
     password = config.dig('docker', 'password').to_s
-    name_repo = get_maxscale_ci_repository_name_for_docker(base_url, username, password)
-    return [] if name_repo == ERROR_RESULT
 
-    tags = get_maxscale_ci_release_version_for_docker(base_url, username, password, name_repo)
+    tags = get_maxscale_ci_release_version_for_docker(base_url, username, password)
     return [] if tags == ERROR_RESULT
 
-    generate_maxscale_ci_releases_for_docker(tags, name_repo)
+    generate_maxscale_ci_releases_for_docker(tags)
   end
 
   def parse_maxscale(config)
