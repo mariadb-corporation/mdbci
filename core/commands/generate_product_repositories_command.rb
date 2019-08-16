@@ -222,15 +222,31 @@ In order to specify the number of retries for repository configuration use --att
 
   def get_docker_name(base_url, username, password)
     uri_with_names_repos = base_url + '/v2/_catalog'
-    doc = Nokogiri::HTML(open(uri_with_names_repos, http_basic_authentication: [username, password]))
-    names = JSON.parse(doc.css('p').children.to_s)
-    names.dig('repositories').first
+    begin
+      doc = Nokogiri::HTML(open(uri_with_names_repos, http_basic_authentication: [username, password]))
+      names = JSON.parse(doc.css('p').children.to_s)
+      names.dig('repositories').first
+    rescue OpenURI::HTTPError => error
+      @ui.error("Failed to get names repositories for docker from #{uri_with_names_repos}: #{error}")
+      return ERROR_RESULT
+    rescue StandardError
+      @ui.error('Failed to get names repositories for docker')
+      return ERROR_RESULT
+    end
   end
 
   def get_docker_tags(base_url, username, password, name_repo)
     uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
-    doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
-    JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
+    begin
+      doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
+      JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
+    rescue OpenURI::HTTPError => error
+      @ui.error("Failed to get tags for docker from #{uri_with_tags}: #{error}")
+      return ERROR_RESULT
+    rescue StandardError
+      @ui.error('Failed to get tags for docker')
+      return ERROR_RESULT
+    end
   end
 
   def generate_docker_releases(tags)
@@ -253,7 +269,11 @@ In order to specify the number of retries for repository configuration use --att
     username = config.dig('docker', 'username').to_s
     password = config.dig('docker', 'password').to_s
     name_repo = get_docker_name(base_url, username, password)
+    return [] if name_repo == ERROR_RESULT
+
     tags = get_docker_tags(base_url, username, password, name_repo)
+    return [] if tags == ERROR_RESULT
+
     generate_docker_releases(tags)
   end
 
