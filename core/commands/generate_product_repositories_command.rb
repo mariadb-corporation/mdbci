@@ -252,10 +252,9 @@ In order to specify the number of retries for repository configuration use --att
     base_url = config.dig('docker', 'ci-server').to_s
     username = config.dig('docker', 'username').to_s
     password = config.dig('docker', 'password').to_s
-
     name_repo = get_docker_name(base_url, username, password)
     tags = get_docker_tags(base_url, username, password, name_repo)
-    write_docker_releases(tags)
+    generate_docker_releases(tags)
   end
 
   def parse_maxscale(config)
