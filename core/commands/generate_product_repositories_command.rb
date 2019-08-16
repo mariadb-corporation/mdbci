@@ -220,7 +220,7 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
-  def get_docker_name(base_url, username, password)
+  def get_maxscale_repository_name_for_docker(base_url, username, password)
     uri_with_names_repos = base_url + '/v2/_catalog'
     begin
       doc = Nokogiri::HTML(open(uri_with_names_repos, http_basic_authentication: [username, password]))
