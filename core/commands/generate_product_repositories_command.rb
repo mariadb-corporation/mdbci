@@ -235,7 +235,7 @@ In order to specify the number of retries for repository configuration use --att
     end
   end
 
-  def get_docker_tags(base_url, username, password, name_repo)
+  def get_maxscale_release_version_for_docker(base_url, username, password, name_repo)
     uri_with_tags = base_url + '/v2/' + name_repo + '/tags/list'
     begin
       doc_tags = Nokogiri::HTML(open(uri_with_tags, http_basic_authentication: [username, password]))
