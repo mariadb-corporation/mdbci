@@ -256,6 +256,7 @@ In order to specify the number of retries for repository configuration use --att
     tags.each do |tag|
       result << {
         :platform => 'docker',
+        :repo_key => '',
         :platform_version => 'latest',
         :product => 'maxscale_ci',
         :version => "#{tag}",
@@ -494,12 +495,9 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   STORED_KEYS = %i[repo repo_key platform platform_version product version].freeze
-  STORED_KEYS_DOCKER = %i[repo platform platform_version product version].freeze
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
-    keys = STORED_KEYS
-    keys = STORED_KEYS_DOCKER if release[:platform] == 'docker'
-    keys.each_with_object({}) do |key, sliced_hash|
+    STORED_KEYS.each_with_object({}) do |key, sliced_hash|
       raise "Unable to find key #{key} in repository_configuration #{release}." unless release.key?(key)
       sliced_hash[key] = release[key]
     end
