@@ -233,7 +233,7 @@ In order to specify the number of retries for repository configuration use --att
     JSON.parse(doc_tags.css('p').children.to_s).dig('tags')
   end
 
-  def write_docker_releases(tags)
+  def generate_docker_releases(tags)
     result = []
     tags.each do |tag|
       result << {
