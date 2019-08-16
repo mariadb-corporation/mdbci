@@ -249,7 +249,8 @@ In order to specify the number of retries for repository configuration use --att
     end
   end
 
-  def generate_docker_releases(tags)
+  # Generate information about releases
+  def generate_maxscale_releases_for_docker(tags)
     result = []
     tags.each do |tag|
       result << {
@@ -263,25 +264,25 @@ In order to specify the number of retries for repository configuration use --att
     result
   end
 
-  def parse_docker_repository
+  def parse_maxscale_repository_for_docker
     config = @env.tool_config
     base_url = config.dig('docker', 'ci-server').to_s
     username = config.dig('docker', 'username').to_s
     password = config.dig('docker', 'password').to_s
-    name_repo = get_docker_name(base_url, username, password)
+    name_repo = get_maxscale_repository_name_for_docker(base_url, username, password)
     return [] if name_repo == ERROR_RESULT
 
-    tags = get_docker_tags(base_url, username, password, name_repo)
+    tags = get_maxscale_release_version_for_docker(base_url, username, password, name_repo)
     return [] if tags == ERROR_RESULT
 
-    generate_docker_releases(tags)
+    generate_maxscale_releases_for_docker(tags)
   end
 
   def parse_maxscale(config)
     releases = []
     releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm']))
     releases.concat(parse_maxscale_deb_repository(config['repo']['deb']))
-    releases.concat(parse_docker_repository)
+    releases.concat(parse_maxscale_repository_for_docker)
     releases
   end
 
