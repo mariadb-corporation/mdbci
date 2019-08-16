@@ -237,11 +237,11 @@ In order to specify the number of retries for repository configuration use --att
     result = []
     tags.each do |tag|
       result << {
-        'platform' => 'docker',
-        'platform_version' => 'latest',
-        'product' => 'maxscale',
-        'version' => "#{tag}",
-        'repo' => "mariadb/maxscale:#{tag}"
+        :platform => 'docker',
+        :platform_version => 'latest',
+        :product => 'maxscale',
+        :version => "#{tag}",
+        :repo => "mariadb/maxscale:#{tag}"
       }
     end
     result
@@ -260,9 +260,9 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale(config)
     releases = []
-    parse_docker_repository
     releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm']))
     releases.concat(parse_maxscale_deb_repository(config['repo']['deb']))
+    releases.concat(parse_docker_repository)
     releases
   end
 
