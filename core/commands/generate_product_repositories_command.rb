@@ -222,7 +222,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def get_maxscale_ci_release_version_for_docker(base_url, username, password)
-    uri_with_tags = base_url + '/v2/mariadb/maxscale-ci/tags/list'
+    uri_with_tags = URI.join(base_url, '/v2/mariadb/maxscale-ci/tags/list')
     begin
       doc_tags = JSON.parse(open(uri_with_tags, http_basic_authentication: [username, password]).read)
       doc_tags.dig('tags')
