@@ -377,17 +377,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     products
   end
 
-  # Specify node parameters to product requirements, if they exist.
-  #
-  # @param node_params [Hash] list of the node parameters
-  # @param products [Array<Hash>] list of parameters of products to configure from configuration file
-  # @return [Hash] edited node params.
-  def specify_node_params_for_products(node_params, products)
-    return node_params.merge(vm_mem: 6144) unless products.find { |product| product['name'] == 'clustrix' }.nil?
-
-    node_params
-  end
-
   # Make a list of node parameters, create the role and node_config files, generate
   # node definition for the Vagrantfile.
   #
@@ -406,7 +395,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     cnf_template_path = parse_cnf_template_path(node)
     products = parse_products_info(node, cnf_template_path)
     node_params[:template_path] = cnf_template_path unless cnf_template_path.nil?
-    node_params = specify_node_params_for_products(node_params, products)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     role = get_role_description(node_params[:name], products, box)
     IO.write(self.class.role_file_name(path, node_params[:name]), role)

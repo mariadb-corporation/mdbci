@@ -27,6 +27,18 @@ class ToolConfiguration
     return ToolConfiguration.new
   end
 
+  # Load license file from the disk
+  # @param file_name [String] name of the license file
+  # @return [String] read from the file
+  def self.load_license_file(file_name)
+    XDG['CONFIG'].each do |config_dir|
+      path = File.expand_path(File.join('mdbci', file_name), config_dir)
+      next unless File.exist?(path)
+
+      return File.open(path, 'r', &:read)
+    end
+  end
+
   # Stores current state of the configuration in the file
   # @param logger [Out] logger to log information to
   def save(logger)

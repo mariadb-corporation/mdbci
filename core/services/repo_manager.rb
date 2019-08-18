@@ -1,5 +1,6 @@
 require 'json'
 require_relative '../models/return_codes'
+require_relative '../models/tool_configuration'
 
 class RepoManager
   include ReturnCodes
@@ -60,7 +61,8 @@ class RepoManager
     'clustrix' => {
       recipe: 'clustrix',
       name: 'clustrix',
-      repository: 'clustrix'
+      repository: 'clustrix',
+      license_file_name: 'clustrix_license'
     }
   }
 
@@ -98,6 +100,16 @@ class RepoManager
   # Get the attribute name for the product
   def attribute_name(product)
     PRODUCT_ATTRIBUTES[product][:name]
+  end
+
+  def product_license_exists?(product)
+    file_name = PRODUCT_ATTRIBUTES[product][:license_file_name]
+    !file_name.nil?
+  end
+
+  def product_license(product)
+    file_name = PRODUCT_ATTRIBUTES[product][:license_file_name]
+    ToolConfiguration.load_license_file(file_name)
   end
 
   def find_repository(product_name, product, box)
