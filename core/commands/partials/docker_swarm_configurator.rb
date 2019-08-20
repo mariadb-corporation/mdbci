@@ -76,7 +76,7 @@ class DockerSwarmConfigurator
   # Bring up the stack, perform it several times if necessary
   def bring_up_docker_stack
     (@attempts + 1).times do
-      result = run_command_and_log("docker stack deploy -c #{@config.docker_partial_configuration_path} #{@config.name}")
+      result = run_command_and_log("docker stack deploy --with-registry-auth -c #{@config.docker_partial_configuration_path} #{@config.name}")
       return Result.ok('Docker stack is brought up') if result[:value].success?
 
       @ui.error('Unable to deploy the Docker stack!')
