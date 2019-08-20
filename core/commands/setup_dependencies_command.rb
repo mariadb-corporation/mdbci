@@ -260,6 +260,9 @@ class CentosDependencyManager < DependencyManager
       unless installed?(package)
         result = run_command("sudo yum install -y #{package}")[:value]
         return BaseCommand::ERROR_RESULT unless result.success?
+
+        #run_command("yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
+        #run_command("sudo yum install docker-ce docker-ce-cli containerd.io")
       end
     end
     return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
@@ -306,7 +309,8 @@ end
 class DebianDependencyManager < DependencyManager
   def required_packages
     ['build-essential', 'cmake', 'git', 'libvirt-daemon-system',
-     'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget']
+     'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget',
+     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
   end
 
   def install_dependencies
