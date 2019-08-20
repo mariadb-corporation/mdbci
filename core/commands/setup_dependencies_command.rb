@@ -321,7 +321,13 @@ class DebianDependencyManager < DependencyManager
                           ])
     return result[:value].exitstatus unless result[:value].success?
 
+    install_docker
     install_vagrant
+  end
+
+  def install_docker
+    run_command("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
+    run_command("sudo add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable'")
   end
 
   def delete_dependencies
