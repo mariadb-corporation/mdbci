@@ -102,9 +102,8 @@ class RepoManager
     PRODUCT_ATTRIBUTES[product][:name]
   end
 
-  def product_license_exists?(product)
-    file_name = PRODUCT_ATTRIBUTES[product][:license_file_name]
-    !file_name.nil?
+  def need_product_license?(product)
+    !PRODUCT_ATTRIBUTES[product][:license_file_name].nil?
   end
 
   def product_license(product)

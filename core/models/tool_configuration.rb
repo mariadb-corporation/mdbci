@@ -37,6 +37,7 @@ class ToolConfiguration
 
       return File.open(path, 'r', &:read)
     end
+    nil
   end
 
   # Stores current state of the configuration in the file

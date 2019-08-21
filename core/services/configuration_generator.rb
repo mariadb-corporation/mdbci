@@ -62,7 +62,10 @@ module ConfigurationGenerator
     repo_file_name = repos.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
-    config['license'] = repos.product_license(product_name) if repos.product_license_exists?(product_name)
+    if repos.need_product_license?(product_name)
+      config['license'] = repos.product_license(product_name)
+      raise "License for product #{product['name']} not found" if config['license'].nil?
+    end
     attribute_name = repos.attribute_name(product_name)
     { "#{attribute_name}": config }
   end
