@@ -345,6 +345,8 @@ class DebianDependencyManager < DependencyManager
 
   def delete_dependencies
     run_command('sudo apt purge vagrant libvirt-dev')
+    run_command("sudo apt-get purge docker-ce")
+    run_command("sudo rm -rf /var/lib/docker")
   end
 
   def install_vagrant
