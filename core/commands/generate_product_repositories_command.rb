@@ -24,6 +24,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mdbe' => 'mdbe',
     'mysql' => 'mysql',
     'maxscale_ci_docker' => 'maxscale_ci_docker',
+    'clustrix' => 'clustrix'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -64,7 +65,7 @@ MDBCI currently supports the following products: #{PRODUCTS_DIR_NAMES.keys.join(
 
 In order to generate configuration for a specific product version use --product-version option. You must also specify the name of the product to generate configuration for.
 
-  mdbci #{COMMAND_NAME} --product maxscale_ci --product-version develop
+  mdbci #{COMMAND_NAME} --product maxscale-ci --product-version develop
 
 In order to specify the number of retries for repository configuration use --attempts option.
 
@@ -190,6 +191,7 @@ In order to specify the number of retries for repository configuration use --att
     releases = []
     releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
     releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
+    releases.concat(parse_maxscale_ci_repository_for_docker)
     releases
   end
 
@@ -223,12 +225,6 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
-  def parse_maxscale_ci_docker(_)
-    releases = []
-    releases.concat(parse_maxscale_ci_repository_for_docker)
-    releases
-  end
-
   def get_maxscale_ci_release_version_for_docker(base_url, username, password)
     uri_with_tags = URI.join(base_url, '/v2/mariadb/maxscale-ci/tags/list')
     begin
@@ -244,18 +240,16 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Generate information about releases
-  def generate_maxscale_ci_releases_for_docker(base_url, tags)
-    server_info = URI.parse(base_url)
-    package_path = "#{server_info.host}:#{server_info.port}/mariadb/maxscale-ci"
+  def generate_maxscale_ci_releases_for_docker(tags)
     result = []
     tags.each do |tag|
       result << {
-        platform: 'docker',
-        repo_key: '',
-        platform_version: 'latest',
-        product: 'maxscale_ci',
-        version: tag,
-        repo: "#{package_path}:#{tag}"
+        :platform => 'docker',
+        :repo_key => '',
+        :platform_version => 'latest',
+        :product => 'maxscale_ci',
+        :version => "#{tag}",
+        :repo => "mariadb/maxscale-ci:#{tag}"
       }
     end
     result
@@ -270,7 +264,7 @@ In order to specify the number of retries for repository configuration use --att
     tags = get_maxscale_ci_release_version_for_docker(base_url, username, password)
     return [] if tags == ERROR_RESULT
 
-    generate_maxscale_ci_releases_for_docker(base_url, tags)
+    generate_maxscale_ci_releases_for_docker(tags)
   end
 
   def parse_maxscale(config)
@@ -487,6 +481,23 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
+  def generate_clustrix_release_info(path, version, platform)
+    {
+      repo: path,
+      repo_key: nil,
+      platform: platform.split('_')[0],
+      platform_version: platform.split('_')[1],
+      product: 'clustrix',
+      version: version
+    }
+  end
+
+  def parse_clustrix(config)
+    config['releases'].map do |release, value|
+      value['platforms'].map { |platform| generate_clustrix_release_info(value['path'], release, platform) }
+    end.flatten
+  end
+
   STORED_KEYS = %i[repo repo_key platform platform_version product version].freeze
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
@@ -675,7 +686,7 @@ In order to specify the number of retries for repository configuration use --att
 
   # Create repository by calling appropriate method using reflection and writing results
   # @param product [String] name of the product to generate
-  # @returns [Boolean] whether generation was successful or not
+  # @returns [Boolean] whether generation was succesfull or not
   def create_repository(product)
     info_and_log("Generating repository configuration for #{product}")
     begin
