@@ -29,7 +29,7 @@ class ToolConfiguration
 
   # Load license file from the disk
   # @param file_name [String] name of the license file
-  # @return [String] read from the file
+  # @return [String] read from the file, or nil if file is not exists
   def self.load_license_file(file_name)
     XDG['CONFIG'].each do |config_dir|
       path = File.expand_path(File.join('mdbci', file_name), config_dir)
