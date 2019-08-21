@@ -38,6 +38,14 @@ sudo htpasswd -B /home/docker-registry/auth/docker-registry.htpasswd USER
 
 The password will be asked on the command prompt.
 
+### Adding new user to the list of authenticated ones
+
+Use the following line to create new user. The parameter `-B` is mandatory. Substitute the USER with required user name.
+
+```bash
+sudo htpasswd -B /home/docker-registry/auth/docker-registry.htpasswd USER
+```
+
 ## Docker registry
 
 In current MaxScale CI setup the Docker is running in the Swarm mode. This mode will be used to deploy the registry. See the docker-registry.yaml file for stack configuration.
