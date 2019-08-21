@@ -251,7 +251,8 @@ end
 class CentosDependencyManager < DependencyManager
   def required_packages
     ['ceph-common', 'gcc', 'git', 'libvirt', 'libvirt-client',
-     'libvirt-devel', 'qemu-img', 'qemu-kvm', 'rsync', 'wget']
+     'libvirt-devel', 'qemu-img', 'qemu-kvm', 'rsync', 'wget',
+     'yum-utils', 'device-mapper-persistent-data', 'lvm2']
   end
 
   def install_dependencies
@@ -264,7 +265,15 @@ class CentosDependencyManager < DependencyManager
     end
     return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
 
+    install_docker
     install_vagrant
+  end
+
+  def install_docker
+    run_command("sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
+    result = run_command("sudo yum install docker-ce docker-ce-cli containerd.io")
+    result = run_command("sudo systemctl start docker") if result[:value].success?
+    result[:value].success?
   end
 
   def delete_dependencies
