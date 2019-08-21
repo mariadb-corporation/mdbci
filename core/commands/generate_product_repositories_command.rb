@@ -23,11 +23,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'maxscale' => 'maxscale',
     'mdbe' => 'mdbe',
     'mysql' => 'mysql',
-<<<<<<< HEAD
-    'maxscale_ci_docker' => 'maxscale_ci_docker'
-=======
     'maxscale_ci_docker' => 'maxscale_ci_docker',
->>>>>>> origin/integration
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
