@@ -23,7 +23,11 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'maxscale' => 'maxscale',
     'mdbe' => 'mdbe',
     'mysql' => 'mysql',
+<<<<<<< HEAD
     'maxscale_ci_docker' => 'maxscale_ci_docker'
+=======
+    'maxscale_ci_docker' => 'maxscale_ci_docker',
+>>>>>>> origin/integration
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -60,7 +64,11 @@ In orded to generate configuration for a specific product use --product option.
 
   mdbci #{COMMAND_NAME} --product mdbe
 
+<<<<<<< HEAD
 Currently supported products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
+=======
+MDBCI currently supports the following products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
+>>>>>>> origin/integration
 
 In order to generate configuration for a specific product version use --product-version option. You must also specify the name of the product to generate configuration for.
 
@@ -245,17 +253,17 @@ In order to specify the number of retries for repository configuration use --att
 
   # Generate information about releases
   def generate_maxscale_ci_releases_for_docker(base_url, tags)
-    server = URI.parse(base_url)
-    repo_prefix = [server.hostname, server.port].join(':')
+    server_info = URI.parse(base_url)
+    package_path = "#{server_info.host}:#{server_info.port}/mariadb/maxscale-ci"
     result = []
     tags.each do |tag|
       result << {
-        :platform => 'docker',
-        :repo_key => '',
-        :platform_version => 'latest',
-        :product => 'maxscale_ci',
-        :version => "#{tag}",
-        :repo => "#{repo_prefix}/mariadb/maxscale-ci:#{tag}"
+        platform: 'docker',
+        repo_key: '',
+        platform_version: 'latest',
+        product: 'maxscale_ci',
+        version: tag,
+        repo: "#{package_path}:#{tag}"
       }
     end
     result
