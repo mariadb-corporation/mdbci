@@ -493,8 +493,11 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_clustrix(config)
-    config['releases'].map do |release, value|
-      value['platforms'].map { |platform| generate_clustrix_release_info(value['path'], release, platform) }
+    config['platforms'].map do |platform|
+      config['versions'].map do |version|
+        path = config['path'].sub('$VERSION$', version)
+        generate_clustrix_release_info(path, version, platform)
+      end
     end.flatten
   end
 
