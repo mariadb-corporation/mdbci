@@ -260,9 +260,6 @@ class CentosDependencyManager < DependencyManager
       unless installed?(package)
         result = run_command("sudo yum install -y #{package}")[:value]
         return BaseCommand::ERROR_RESULT unless result.success?
-
-        #run_command("yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
-        #run_command("sudo yum install docker-ce docker-ce-cli containerd.io")
       end
     end
     return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
@@ -310,7 +307,7 @@ class DebianDependencyManager < DependencyManager
   def required_packages
     ['build-essential', 'cmake', 'git', 'libvirt-daemon-system',
      'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget',
-     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
+     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'software-properties-common']
   end
 
   def install_dependencies
@@ -321,13 +318,16 @@ class DebianDependencyManager < DependencyManager
                           ])
     return result[:value].exitstatus unless result[:value].success?
 
-    install_docker
+    return ERROR_RESULT unless install_docker
     install_vagrant
   end
 
   def install_docker
-    run_command("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
-    run_command("sudo add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable'")
+    run_command("curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -")
+    run_command_and_log("sudo add-apt-repository deb [arch=amd64] https://download.docker.com/linux/debian  $(lsb_release -cs)  stable")
+    run_command("sudo apt-get update")
+    result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
+    result[:value].success?
   end
 
   def delete_dependencies
