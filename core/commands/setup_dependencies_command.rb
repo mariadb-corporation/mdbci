@@ -147,6 +147,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   # Ask user to confirm clean installation
   def ask_confirmation
     $stdout.print("This operation will uninstall following packages:
+  docker,
   vagrant,
   libvirt-client,
   libvirt-dev,
@@ -279,6 +280,8 @@ class CentosDependencyManager < DependencyManager
   def delete_dependencies
     run_command('sudo yum -y remove vagrant libvirt-client '\
                 'libvirt-devel libvirt-daemon libvirt')[:value].exitstatus
+    run_command("sudo yum remove docker-ce")
+    run_command("sudo rm -rf /var/lib/docker")
   end
 
   # Installs or updates Vagrant if installed version older than VAGRANT_VERSION
