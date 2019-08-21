@@ -319,12 +319,13 @@ class DebianDependencyManager < DependencyManager
     return result[:value].exitstatus unless result[:value].success?
 
     return ERROR_RESULT unless install_docker
+
     install_vagrant
   end
 
   def install_docker
     run_command("curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -")
-    run_command_and_log("sudo add-apt-repository deb [arch=amd64] https://download.docker.com/linux/debian  $(lsb_release -cs)  stable")
+    run_command("sudo add-apt-repository deb [arch=amd64] https://download.docker.com/linux/debian  $(lsb_release -cs)  stable")
     run_command("sudo apt-get update")
     result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
     result[:value].success?
@@ -351,6 +352,15 @@ end
 class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
     ['build-essential', 'cmake', 'dnsmasq', 'ebtables', 'git', 'libvirt-bin',
-     'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget']
+     'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget',
+     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
+  end
+
+  def install_docker
+    run_command("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
+    run_command("sudo add-apt-repository deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable")
+    run_command("sudo apt-get update")
+    result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
+    result[:value].success?
   end
 end
