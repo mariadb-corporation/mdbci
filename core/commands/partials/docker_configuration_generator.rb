@@ -153,7 +153,8 @@ class DockerConfigurationGenerator
 
   CONFIGURATION_LOCATIONS = {
     'mariadb' => '/etc/mysql/mariadb.conf.d/mariadb.cnf',
-    'maxscale' => '/etc/maxscale.cnf'
+    'maxscale' => '/etc/maxscale.cnf',
+    'maxscale_ci' => '/etc/maxscale.cnf'
   }.freeze
 
   def save_service_configuration_file(node_name, product, result_file)

@@ -43,6 +43,7 @@ require_relative 'core/session'
 require_relative 'core/out'
 require_relative 'core/exception_handler'
 require_relative 'core/services/version'
+require_relative 'core/models/result'
 
 session = Session.new
 $session = session
@@ -182,5 +183,15 @@ rescue StandardError => e
   out.error e.backtrace.join("\n")
   out.error e.to_s
   exit_code = 1
+end
+
+if exit_code.is_a?(Result::Base)
+  exit_code = exit_code.match(
+     ok: -> (_) { 0 },
+     error: -> (message) do
+       out.error(message)
+       1
+     end
+  )
 end
 exit exit_code

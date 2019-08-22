@@ -60,11 +60,15 @@ In orded to generate configuration for a specific product use --product option.
 
   mdbci #{COMMAND_NAME} --product mdbe
 
+<<<<<<< HEAD
+Currently supported products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
+=======
 MDBCI currently supports the following products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
+>>>>>>> origin/integration
 
 In order to generate configuration for a specific product version use --product-version option. You must also specify the name of the product to generate configuration for.
 
-  mdbci #{COMMAND_NAME} --product maxscale-ci --product-version develop
+  mdbci #{COMMAND_NAME} --product maxscale_ci --product-version develop
 
 In order to specify the number of retries for repository configuration use --attempts option.
 
@@ -675,7 +679,7 @@ In order to specify the number of retries for repository configuration use --att
 
   # Create repository by calling appropriate method using reflection and writing results
   # @param product [String] name of the product to generate
-  # @returns [Boolean] whether generation was succesfull or not
+  # @returns [Boolean] whether generation was successful or not
   def create_repository(product)
     info_and_log("Generating repository configuration for #{product}")
     begin
