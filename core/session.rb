@@ -16,6 +16,7 @@ require_relative 'commands/generate_product_repositories_command'
 require_relative 'commands/help_command'
 require_relative 'commands/configure_command'
 require_relative 'commands/public_keys_command'
+require_relative 'commands/provide_files'
 require_relative 'commands/deploy_command'
 require_relative 'commands/setup_dependencies_command'
 require_relative 'commands/show_network_config_command'
@@ -509,6 +510,9 @@ EOF
       exit_code = command.execute
     when 'remove_product'
       command = RemoveProductCommand.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'provide-files'
+      command = ProvideFiles.new(ARGV, self, $out)
       exit_code = command.execute
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)
