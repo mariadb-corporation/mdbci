@@ -272,7 +272,7 @@ class CentosDependencyManager < DependencyManager
 
   def install_docker
     run_command("sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
-    result = run_command("sudo yum install docker-ce docker-ce-cli containerd.io")
+    result = run_command("sudo yum install -y docker-ce docker-ce-cli containerd.io")
     result = run_command("sudo systemctl start docker") if result[:value].success?
     result[:value].success?
   end
@@ -280,7 +280,7 @@ class CentosDependencyManager < DependencyManager
   def delete_dependencies
     run_command('sudo yum -y remove vagrant libvirt-client '\
                 'libvirt-devel libvirt-daemon libvirt')[:value].exitstatus
-    run_command("sudo yum remove docker-ce")
+    run_command("sudo yum -y remove docker-ce")
     run_command("sudo rm -rf /var/lib/docker")
   end
 
