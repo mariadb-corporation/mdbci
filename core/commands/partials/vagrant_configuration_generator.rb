@@ -235,7 +235,11 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     end
     recipe_name = @env.repos.recipe_name(product_name)
     product_config = if product_name != 'packages'
-                       ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo)
+                       config = ConfigurationGenerator.generate_product_config(@env.repos, product_name,
+                                                                               product, box, repo)
+                       raise config.error if config.error?
+
+                       config.value
                      else
                        {}
                      end

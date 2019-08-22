@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../models/result'
+
 # The class provides methods for generating the role of the file.
 module ConfigurationGenerator
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
@@ -64,10 +66,10 @@ module ConfigurationGenerator
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
     if repos.need_product_license?(product_name)
       config['license'] = repos.product_license(product_name)
-      raise "License for product #{product['name']} not found" if config['license'].nil?
+      return Result.error("License for product #{product['name']} not found") if config['license'].nil?
     end
     attribute_name = repos.attribute_name(product_name)
-    { "#{attribute_name}": config }
+    Result.ok("#{attribute_name}": config)
   end
 
   # Checks the availability of product information.
