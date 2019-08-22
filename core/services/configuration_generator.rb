@@ -46,6 +46,21 @@ module ConfigurationGenerator
     %w[version repo repo_key].map { |key| [key, repo[key]] unless repo[key].nil? }.compact.to_h
   end
 
+  # Add product license to the list of the product parameters if it needed
+  # @param repos [RepoManager] for products
+  # @param product_config [Hash] parameters of the product
+  # @param product_name [String] name of the product for install
+  def self.setup_product_license_if_need(repos, product_config, product_name)
+    return Result.ok(product_config) unless repos.need_product_license?(product_name)
+
+    product_config['license'] = repos.product_license(product_name)
+    if product_config['license'].nil?
+      Result.error("License for product #{product['name']} not found")
+    else
+      Result.ok(product_config)
+    end
+  end
+
   # Generate the list of the product parameters
   # @param repos [RepoManager] for products
   # @param product_name [String] name of the product for install
@@ -64,12 +79,10 @@ module ConfigurationGenerator
     repo_file_name = repos.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
-    if repos.need_product_license?(product_name)
-      config['license'] = repos.product_license(product_name)
-      return Result.error("License for product #{product['name']} not found") if config['license'].nil?
+    setup_product_license_if_need(repos, config, product_name).and_then do |updated_config|
+      attribute_name = repos.attribute_name(product_name)
+      return Result.ok("#{attribute_name}": updated_config)
     end
-    attribute_name = repos.attribute_name(product_name)
-    Result.ok("#{attribute_name}": config)
   end
 
   # Checks the availability of product information.
