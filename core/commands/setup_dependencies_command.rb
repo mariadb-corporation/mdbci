@@ -350,7 +350,7 @@ class DebianDependencyManager < DependencyManager
   def install_docker
     run_command("sudo apt-get remove docker docker-engine docker.io containerd runc")
     run_command("curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -")
-    run_command("sudo add-apt-repository deb [arch=amd64] https://download.docker.com/linux/debian  $(lsb_release -cs)  stable")
+    run_command("sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/debian  $(lsb_release -cs)  stable\"")
     run_command("sudo apt-get update")
     result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
     result[:value].success?
