@@ -270,7 +270,19 @@ class CentosDependencyManager < DependencyManager
     install_vagrant
   end
 
+  def remove_old_version_docker
+    run_command("sudo yum remove docker
+                  docker-client
+                  docker-client-latest
+                  docker-common
+                  docker-latest
+                  docker-latest-logrotate
+                  docker-logrotate
+                  docker-engine")
+  end
+
   def install_docker
+    remove_old_version_docker
     run_command("sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
     result = run_command("sudo yum install -y docker-ce docker-ce-cli containerd.io")
     result = run_command("sudo systemctl start docker") if result[:value].success?
