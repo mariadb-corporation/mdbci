@@ -75,7 +75,6 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   def install
     result = @dependency_manager.install_dependencies
     result = add_user_to_usergroup if result == SUCCESS_RESULT
-    result = add_user_to_docker_usergroup if result == SUCCESS_RESULT
     result = install_vagrant_plugins if result == SUCCESS_RESULT
     result = create_libvirt_pool if result == SUCCESS_RESULT
     if result == SUCCESS_RESULT
@@ -97,24 +96,16 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
     end
   end
 
-  # Adds user to libvirt user group
+  # Adds user to libvirt and docker user group
   def add_user_to_usergroup
+    return ERROR_RESULT unless run_command('sudo usermod -a -G docker $(whoami)')[:value].success?
+
     libvirt_groups = `getent group | grep libvirt | cut -d ":" -f1`.split("\n").join(',')
     if libvirt_groups.empty?
       @ui.error('Cannot add user to libvirt group. Libvirt group not found')
       return ERROR_RESULT
     end
     run_command("sudo usermod -a -G #{libvirt_groups} $(whoami)")[:value].exitstatus
-  end
-
-  # Adds user to docker user group
-  def add_user_to_docker_usergroup
-    docker_groups = `getent group | grep docker | cut -d ":" -f1`.split("\n").join(',')
-    if docker_groups.empty?
-      @ui.error('Cannot add user to docker group. docker group not found')
-      return ERROR_RESULT
-    end
-    run_command("sudo usermod -a -G #{docker_groups} $(whoami)")[:value].exitstatus
   end
 
   # Install vagrant plugins and prepares mdbci environment
