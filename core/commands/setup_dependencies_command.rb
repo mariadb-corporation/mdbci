@@ -110,7 +110,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   # Adds user to docker user group
   def add_user_to_docker_usergroup
     docker_groups = `getent group | grep docker | cut -d ":" -f1`.split("\n").join(',')
-    if libvirt_groups.empty?
+    if docker_groups.empty?
       @ui.error('Cannot add user to docker group. docker group not found')
       return ERROR_RESULT
     end
