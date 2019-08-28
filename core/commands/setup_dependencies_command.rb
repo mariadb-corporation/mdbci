@@ -98,13 +98,15 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
 
   # Adds user to libvirt and docker user group
   def add_user_to_usergroup
-    return ERROR_RESULT unless run_command('sudo usermod -a -G docker $(whoami)')[:value].success?
-
+    docker_groups = `getent group | grep docker | cut -d ":" -f1`.split("\n").join(',')
     libvirt_groups = `getent group | grep libvirt | cut -d ":" -f1`.split("\n").join(',')
-    if libvirt_groups.empty?
-      @ui.error('Cannot add user to libvirt group. Libvirt group not found')
+    if libvirt_groups.empty? || docker_groups.empty?
+      @ui.error('Cannot add user to libvirt group. Libvirt group not found') if libvirt_groups.empty?
+      @ui.error('Cannot add user to docker group. Docker group not found') if docker_groups.empty?
       return ERROR_RESULT
     end
+    return ERROR_RESULT unless run_command('sudo usermod -a -G docker $(whoami)')[:value].success?
+
     run_command("sudo usermod -a -G #{libvirt_groups} $(whoami)")[:value].exitstatus
   end
 
