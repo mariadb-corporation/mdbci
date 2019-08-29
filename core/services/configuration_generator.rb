@@ -50,13 +50,12 @@ module ConfigurationGenerator
   # @param repos [RepoManager] for products
   # @param product_config [Hash] parameters of the product
   # @param product_name [String] name of the product for install
+  # @return [Result] product config
   def self.setup_product_license_if_need(repos, product_config, product_name)
     return Result.ok(product_config) unless repos.need_product_license?(product_name)
 
-    product_config['license'] = repos.product_license(product_name)
-    if product_config['license'].nil?
-      Result.error("License for product #{product['name']} not found")
-    else
+    repos.product_license(product_name).and_then do |license|
+      product_config['license'] = license
       Result.ok(product_config)
     end
   end
