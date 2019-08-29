@@ -218,14 +218,14 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   #
   # @param product [Hash] parameters of product to configure from configuration file
   # @param box [String] name of the box
-  # @return [Hash] recipe name and product config in format { recipe: String, config: Hash }.
+  # @return [Result<Hash>] recipe name and product config in format { recipe: String, config: Hash }.
   # rubocop:disable Metrics/MethodLength
   def make_product_config_and_recipe_name(product, box)
     repo = nil
     if !product['repo'].nil?
       repo_name = product['repo']
       @ui.info("Repo name: #{repo_name}")
-      raise "Unknown key for repo #{repo_name} will be skipped" unless @env.repos.knownRepo?(repo_name)
+      return Result.error("Unknown key for repo #{repo_name} will be skipped") unless @env.repos.knownRepo?(repo_name)
 
       @ui.info("Repo specified [#{repo_name}] (CORRECT), other product params will be ignored")
       repo = @env.repos.getRepo(repo_name)
@@ -234,17 +234,14 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       product_name = product['name']
     end
     recipe_name = @env.repos.recipe_name(product_name)
-    product_config = if product_name != 'packages'
-                       config = ConfigurationGenerator.generate_product_config(@env.repos, product_name,
-                                                                               product, box, repo)
-                       raise config.error if config.error?
-
-                       config.value
-                     else
-                       {}
-                     end
-    @ui.info("Recipe #{recipe_name}")
-    { recipe: recipe_name, config: product_config }
+    if product_name != 'packages'
+      ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo)
+    else
+      Result.ok({})
+    end.and_then do |product_config|
+      @ui.info("Recipe #{recipe_name}")
+      Result.ok(recipe: recipe_name, config: product_config)
+    end
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -253,17 +250,22 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param name [String] internal name of the machine specified in the template
   # @param products [Array<Hash>] list of parameters of products to configure from configuration file
   # @param box [String] name of the box
-  # @return [String] pretty formatted role description in JSON format
+  # @return [Result<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box)
     products_configs = {}
     recipes_names = []
     products.each do |product|
-      recipe_and_config = make_product_config_and_recipe_name(product, box)
-      products_configs.merge!(recipe_and_config[:config])
-      recipes_names << recipe_and_config[:recipe]
+      recipe_and_config_result = make_product_config_and_recipe_name(product, box)
+      return recipe_and_config_result if recipe_and_config_result.error?
+
+      recipe_and_config_result.and_then do |recipe_and_config|
+        products_configs.merge!(recipe_and_config[:config])
+        recipes_names << recipe_and_config[:recipe]
+      end
     end
-    ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
-                                                box, @env.box_definitions, @env.rhel_credentials)
+    role_description = ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
+                                                                   box, @env.box_definitions, @env.rhel_credentials)
+    Result.ok(role_description)
   end
 
   # Check for the existence of a path, create it if path is not exists or clear path
@@ -387,7 +389,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param node [Array] internal name of the machine specified in the template
   # @param path [String] path of the configuration file
   # @param cookbook_path [String] path of the cookbook
-  # @return [String] node definition for the Vagrantfile.
+  # @return [Result<String>] node definition for the Vagrantfile.
   # rubocop:disable Metrics/MethodLength
   # Further decomposition of the method will complicate the code.
   def node_definition(node, path, cookbook_path)
@@ -400,16 +402,17 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     products = parse_products_info(node, cnf_template_path)
     node_params[:template_path] = cnf_template_path unless cnf_template_path.nil?
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    role = get_role_description(node_params[:name], products, box)
-    IO.write(self.class.role_file_name(path, node_params[:name]), role)
-    IO.write(self.class.node_config_file_name(path, node_params[:name]),
-             JSON.pretty_generate('run_list' => ["role[#{node_params[:name]}]"]))
-    # generate node definition
-    if box_valid?(box)
-      generate_node_defenition(node_params, cookbook_path, path)
-    else
-      @ui.warning("Box #{box} is not installed or configured ->SKIPPING")
-      ''
+    get_role_description(node_params[:name], products, box).and_then do |role|
+      IO.write(self.class.role_file_name(path, node_params[:name]), role)
+      IO.write(self.class.node_config_file_name(path, node_params[:name]),
+               JSON.pretty_generate('run_list' => ["role[#{node_params[:name]}]"]))
+      # generate node definition
+      if box_valid?(box)
+        Result.ok(generate_node_defenition(node_params, cookbook_path, path))
+      else
+        @ui.warning("Box #{box} is not installed or configured ->SKIPPING")
+        Result.ok('')
+      end
     end
   end
   # rubocop:enable Metrics/MethodLength
@@ -447,10 +450,13 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       vagrant.puts provider_config
     end
     config.each do |node|
-      unless node[1]['box'].nil?
-        @ui.info("Generating node definition for [#{node[0]}]")
-        vagrant.puts node_definition(node, path, cookbook_path)
-      end
+      next if node[1]['box'].nil?
+
+      @ui.info("Generating node definition for [#{node[0]}]")
+      node_definition = node_definition(node, path, cookbook_path)
+      raise node_definition.error if node_definition.error?
+
+      vagrant.puts node_definition.value
     end
     vagrant.puts vagrant_config_footer
     vagrant.close
