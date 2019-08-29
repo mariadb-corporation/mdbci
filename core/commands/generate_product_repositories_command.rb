@@ -488,12 +488,13 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
-  def generate_clustrix_release_info(path, version, platform)
+  def generate_clustrix_release_info(path, version, platform_with_version)
+    platform, platform_version = platform_with_version.split('_')
     {
       repo: path,
       repo_key: nil,
-      platform: platform.split('_')[0],
-      platform_version: platform.split('_')[1],
+      platform: platform,
+      platform_version: platform_version,
       product: 'clustrix',
       version: version
     }
