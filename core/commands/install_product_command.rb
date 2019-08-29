@@ -74,8 +74,8 @@ class InstallProduct < BaseCommand
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
       @network_config.add_nodes([name])
-      return @machine_configurator.configure(@network_config[name], "#{name}-config.json",
-                                             @ui, extra_files)
+      @machine_configurator.configure(@network_config[name], "#{name}-config.json",
+                                      @ui, extra_files)
     end
   end
 
