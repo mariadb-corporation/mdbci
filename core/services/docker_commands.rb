@@ -116,7 +116,7 @@ class DockerCommands
          private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses', 0)&.split('/')&.first,
          status_state: task_data.dig('Status', 'State')
       }
-      if task_info.values.any? { |value| value.nil? }
+      if task_info.values.any? { |value| value.nil? || value.empty? }
         Result.error('Task has not been filled with data yet')
       else
         Result.ok(task_info)
@@ -146,7 +146,7 @@ class DockerCommands
         product_name: service_info.dig('Spec', 'Labels', 'org.mariadb.node.product'),
         service_name: service_info.dig('Spec', 'Labels', 'org.mariadb.node.name')
       }
-      if service_data.values.any? { |value| value.nil? }
+      if service_data.values.any? { |value| value.nil? || value.empty? }
         Result.error('Service data can not be determined')
       else
         Result.ok(service_data)
