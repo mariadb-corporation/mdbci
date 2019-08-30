@@ -28,6 +28,7 @@ class InstallProduct < BaseCommand
     if result.success?
       SUCCESS_RESULT
     else
+      @ui.error(result.error)
       ERROR_RESULT
     end
   end
@@ -67,14 +68,15 @@ class InstallProduct < BaseCommand
   # Install product on server
   # param node_name [String] name of the node
   def install_product(name)
-    role_file_path = generate_role_file(name)
-    target_path = "roles/#{name}.json"
-    role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
-    target_path_config = "configs/#{name}-config.json"
-    extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-    @network_config.add_nodes([name])
-    @machine_configurator.configure(@network_config[name], "#{name}-config.json",
-                                    @ui, extra_files)
+    generate_role_file(name).and_then do |role_file_path|
+      target_path = "roles/#{name}.json"
+      role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
+      target_path_config = "configs/#{name}-config.json"
+      extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
+      @network_config.add_nodes([name])
+      @machine_configurator.configure(@network_config[name], "#{name}-config.json",
+                                      @ui, extra_files)
+    end
   end
 
   # Create a role file to install the product from the chef
@@ -86,10 +88,11 @@ class InstallProduct < BaseCommand
     recipes_names.push(@env.repos.recipe_name(@product))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
     product = { 'name' => @product, 'version' => @product_version.to_s }
-    products_configs = ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil)
-    role_json_file = ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
-                                                                 box, @env.box_definitions, @env.rhel_credentials)
-    IO.write(role_file_path, role_json_file)
-    role_file_path
+    ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil).and_then do |configs|
+      role_json_file = ConfigurationGenerator.generate_json_format(name, recipes_names, configs,
+                                                                   box, @env.box_definitions, @env.rhel_credentials)
+      IO.write(role_file_path, role_json_file)
+      return Result.ok(role_file_path)
+    end
   end
 end
