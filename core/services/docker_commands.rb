@@ -34,6 +34,7 @@ class DockerCommands
       task[:finished] = true
       task[:ip_address] = result.value
     else
+      @ui.warning("Task #{task[:id]} has status '#{task[:status_state]}' and error message: '#{task[:status_error]}'")
       task[:finished] = false
     end
   end
@@ -119,6 +120,7 @@ class DockerCommands
       if task_info.values.any? { |value| value.nil? || value.empty? }
         Result.error('Task has not been filled with data yet')
       else
+        task_info[:status_error] = task_data.dig('Status', 'Err')
         Result.ok(task_info)
       end
     end
