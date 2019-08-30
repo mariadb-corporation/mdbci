@@ -157,13 +157,11 @@ class DockerCommands
   # Process /proc/net/fib_trie contents file and extract the ip addresses
   # @param fib_contents [String] contents of the file
   def extract_ip_addresses(fib_contents)
-    addresses = fib_contents.lines.each_with_object(last: '', result: []) do |line, acc|
-      if line.include?('host LOCAL')
-        address = acc[:last].scan(/\d+\.\d+\.\d+\.\d+/)
-        acc[:result].push(address.first) unless address.empty?
+    fib_contents.lines.each_cons(2).with_object([]) do |(first_line, second_line), result|
+      if second_line.include?('host LOCAL')
+        address = first_line.scan(/\d+\.\d+\.\d+\.\d+/)
+        result.push(address.first) unless address.empty?
       end
-      acc[:last] = line
     end
-    addresses[:result]
   end
 end
