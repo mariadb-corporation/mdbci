@@ -34,6 +34,7 @@ class DockerCommands
       task[:finished] = true
       task[:ip_address] = result.value
     else
+      @ui.warning("Task #{task[:id]} has status '#{task[:status_state]}' and error message: '#{task[:status_error]}'")
       task[:finished] = false
     end
   end
@@ -116,9 +117,10 @@ class DockerCommands
          private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses', 0)&.split('/')&.first,
          status_state: task_data.dig('Status', 'State')
       }
-      if task_info.values.any? { |value| value.nil? }
+      if task_info.values.any? { |value| value.nil? || value.empty? }
         Result.error('Task has not been filled with data yet')
       else
+        task_info[:status_error] = task_data.dig('Status', 'Err')
         Result.ok(task_info)
       end
     end
@@ -146,7 +148,7 @@ class DockerCommands
         product_name: service_info.dig('Spec', 'Labels', 'org.mariadb.node.product'),
         service_name: service_info.dig('Spec', 'Labels', 'org.mariadb.node.name')
       }
-      if service_data.values.any? { |value| value.nil? }
+      if service_data.values.any? { |value| value.nil? || value.empty? }
         Result.error('Service data can not be determined')
       else
         Result.ok(service_data)
@@ -157,13 +159,11 @@ class DockerCommands
   # Process /proc/net/fib_trie contents file and extract the ip addresses
   # @param fib_contents [String] contents of the file
   def extract_ip_addresses(fib_contents)
-    addresses = fib_contents.lines.each_with_object(last: '', result: []) do |line, acc|
-      if line.include?('host LOCAL')
-        address = acc[:last].scan(/\d+\.\d+\.\d+\.\d+/)
-        acc[:result].push(address.first) unless address.empty?
+    fib_contents.lines.each_cons(2).with_object([]) do |(first_line, second_line), result|
+      if second_line.include?('host LOCAL')
+        address = first_line.scan(/\d+\.\d+\.\d+\.\d+/)
+        result.push(address.first) unless address.empty?
       end
-      acc[:last] = line
     end
-    addresses[:result]
   end
 end
