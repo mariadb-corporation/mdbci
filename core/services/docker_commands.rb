@@ -74,9 +74,12 @@ class DockerCommands
   def remove_unnecessary_tasks(tasks)
     actual_tasks = {}
     tasks.each do |new_task|
-      prev_task = actual_tasks[new_task[:service_id]]
-      if prev_task.nil? || new_task[:updated_at] > prev_task[:updated_at]
-        actual_tasks[new_task[:service_id]] = new_task
+      actual_tasks.update(new_task[:service_id] => new_task) do |_, old, new|
+        if new[:updated_at] > old[:updated_at]
+          new
+        else
+          old
+        end
       end
     end
     Result.ok(actual_tasks.values)
