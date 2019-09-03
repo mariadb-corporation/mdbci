@@ -50,6 +50,33 @@ class DockerCommands
     end
   end
 
+  # Creates the bridge network for the containers to use
+  def create_bridge_network(network_name)
+    @ui.info('Checking the bridge network state')
+    result = run_command("docker network ls -f name=#{network_name} --format {{.Name}}")
+    return Result.error('Could not browse for the network name') unless result[:value].success?
+
+    if result[:output].empty? || result[:output].lines.any? { |line| line == network_name }
+      @ui.info("Creating the bridge network")
+      result = run_command("docker network create #{network_name}")
+      return Result.error('Could not create the bridge network') unless result[:value].success?
+    else
+      @ui.info("Network already exist: #{result[:output].strip}")
+    end
+    Result.ok('The network is up and running')
+  end
+
+  def list_containers_ip(network_name)
+    result = run_command("docker network inspect #{network_name}")
+    return Result.error("Unable to get information about the network #{network_name}") unless result[:value].success?
+
+    network_info = JSON.parse(result[:output])[0]
+    network_data = network_info['Containers'].map do |container_id, info|
+      [container_id, info['IPv4Address'].split('/')[0]]
+    end.to_h
+    Result.ok(network_data)
+  end
+
   private
 
   # Get the list of tasks for the specified stack
