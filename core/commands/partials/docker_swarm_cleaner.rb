@@ -22,7 +22,7 @@ class DockerSwarmCleaner
     end
 
     wait_for_termination(stack_name).and_then do
-      destroy_bridge_network(stack_name)
+      destroy_bridge_network(configuration.docker_network_name)
     end
   end
 
