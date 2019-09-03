@@ -79,7 +79,7 @@ class DockerSwarmConfigurator
 
   # Bring up the stack, perform it several times if necessary
   def bring_up_docker_stack
-    @docker_commands.create_bridge_network(@config.name).and_then do
+    @docker_commands.create_bridge_network(@config.docker_network_name).and_then do
       (@attempts + 1).times do
         result = run_command_and_log("docker stack deploy --with-registry-auth -c #{@config.docker_partial_configuration_path} #{@config.name}")
         return Result.ok('Docker stack is brought up') if result[:value].success?
@@ -190,14 +190,14 @@ class DockerSwarmConfigurator
 
   def attach_containers_to_network
     @ui.info('Attaching containers to network')
-    @docker_commands.list_containers_ip(@config.name).and_then do |known_networks|
+    @docker_commands.list_containers_ip(@config.docker_network_name).and_then do |known_networks|
       @tasks.each do |task|
         next if known_networks.key?(task[:container_id]) || !task.key?(:private_ip_address)
 
-        result = run_command("docker network connect #{@config.name} #{task[:container_id]}")
-        return Result.error("Unable to attach container #{task[:container_id]}") unless result[:value].success?
+        result = run_command("docker network connect #{@config.docker_network_name} #{task[:container_id]}")
+        return Result.error("Unable to attach container '#{task[:container_id]}'") unless result[:value].success?
       end
-      @docker_commands.list_containers_ip(@config.name)
+      @docker_commands.list_containers_ip(@config.docker_network_name)
     end.and_then do |known_networks|
       @tasks.each do |task|
         task[:bridge_ip] = known_networks[task[:container_id]]

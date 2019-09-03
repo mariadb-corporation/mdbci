@@ -3,7 +3,9 @@
 # Class represents the MDBCI configuration on the hard drive.
 class Configuration
   attr_reader :aws_keypair_name
+  attr_reader :docker_network_name
   attr_reader :labels
+  attr_reader :name
   attr_reader :node_configurations
   attr_reader :node_names
   attr_reader :path
@@ -58,6 +60,8 @@ class Configuration
     @path, node = parse_spec(spec)
     raise ArgumentError, "Invalid path to the MDBCI configuration: #{spec}" unless self.class.config_directory?(@path)
 
+    @name = File.basename(@path)
+    @docker_network_name = "#{@name}_mdbci_config_bridge_network"
     @provider = read_provider(@path)
     @template_path = read_template_path(@path)
     @node_configurations = extract_node_configurations(read_template(@template_path))
@@ -80,11 +84,6 @@ class Configuration
   # Check whether configuration has the keypair name or not.
   def aws_keypair_name?
     @provider == 'aws' && @aws_keypair_name != ''
-  end
-
-  # Get the name of the configuration we are working with
-  def name
-    File.basename(@path)
   end
 
   # Get the names of the boxes specified for this configuration
