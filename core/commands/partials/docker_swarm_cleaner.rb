@@ -21,10 +21,22 @@ class DockerSwarmCleaner
       return Result.error("Unable to remove the Docker swarm stack #{stack_name}")
     end
 
-    wait_for_termination(stack_name)
+    wait_for_termination(stack_name).and_then do
+      destroy_bridge_network(stack_name)
+    end
   end
 
   private
+
+  def destroy_bridge_network(network_name)
+    @ui.info('Destroying the bridge network')
+    result = run_command("docker network rm #{network_name}")
+    if result[:value].success?
+      Result.ok('Network has been removed')
+    else
+      Result.error("Network has not been removed, the error: #{result[:output]}")
+    end
+  end
 
   # Wait for the Docker to remove the specified task
   def wait_for_termination(stack_name)
