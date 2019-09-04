@@ -5,7 +5,7 @@ require_relative '../../services/shell_commands'
 require_relative '../../services/vagrant_commands'
 require_relative '../../services/machine_configurator'
 require_relative '../../services/network_config'
-require_relative 'vagrant_configuration_generator'
+require_relative 'vagrant_terraform_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
 
@@ -66,14 +66,14 @@ class VagrantConfigurator
   def configure(node, logger)
     @network_config.add_nodes([node])
     solo_config = "#{node}-config.json"
-    role_file = VagrantConfigurationGenerator.role_file_name(@config.path, node)
+    role_file = VagrantTerraformConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
       logger.info("Machine '#{node}' should not be configured. Skipping.")
       return true
     end
     extra_files = [
       [role_file, "roles/#{node}.json"],
-      [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
+      [VagrantTerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
     CHEF_CONFIGURATION_ATTEMPTS.times do
       configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)

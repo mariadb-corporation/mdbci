@@ -17,7 +17,7 @@ require_relative 'vagrantfile_generator'
 require_relative 'aws_terraform_generator'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant or Terraform backend
-class VagrantConfigurationGenerator < BaseCommand
+class VagrantTerraformConfigurationGenerator < BaseCommand
   def self.synopsis
     'Generate a configuration based on the template.'
   end
