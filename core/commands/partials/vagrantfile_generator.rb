@@ -1,18 +1,7 @@
 # frozen_string_literal: true
 
 require 'date'
-require 'fileutils'
-require 'json'
-require 'pathname'
-require 'securerandom'
-require 'socket'
 require 'erb'
-require 'set'
-require_relative '../base_command'
-require_relative '../../out'
-require_relative '../../models/configuration.rb'
-require_relative '../../services/shell_commands'
-require_relative '../../../core/services/configuration_generator'
 
 # The class generates the Vagrantfile content for MDBCI configuration
 class VagrantfileGenerator

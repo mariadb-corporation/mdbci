@@ -1,17 +1,10 @@
 # frozen_string_literal: true
 
-require 'date'
 require 'fileutils'
 require 'json'
-require 'pathname'
-require 'securerandom'
-require 'socket'
-require 'erb'
 require 'set'
 require_relative '../base_command'
-require_relative '../../out'
 require_relative '../../models/configuration.rb'
-require_relative '../../services/shell_commands'
 require_relative '../../../core/services/configuration_generator'
 require_relative 'vagrantfile_generator'
 require_relative 'aws_terraform_generator'
@@ -177,11 +170,10 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
   #
   # @param node [Array] internal name of the machine specified in the template
   # @param path [String] path of the configuration file
-  # @param cookbook_path [String] path of the cookbook
   # @return [Result<String>] node definition for the configuration file.
   # rubocop:disable Metrics/MethodLength
   # Further decomposition of the method will complicate the code.
-  def node_definition(node, path, cookbook_path)
+  def node_definition(node, path)
     box = node[1]['box'].to_s
     unless box.empty?
       node_params = make_node_params(node, @boxes.get_box(box))
@@ -210,10 +202,9 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
   #
   # @param path [String] path of the configuration file
   # @param config [Hash] value of the configuration file
-  # @param cookbook_path [String] path of the cookbook.
   # rubocop:disable Metrics/MethodLength
   # The method performs a single function; decomposition of the method will complicate the code.
-  def generate_configuration_file(path, config, cookbook_path)
+  def generate_configuration_file(path, config)
     file = File.open(File.join(path, @content_generator.configuration_file_name), 'w')
     file.puts @content_generator.file_header
     file.puts @content_generator.config_header
@@ -222,7 +213,7 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
       next if node[1]['box'].nil?
 
       @ui.info("Generating node definition for [#{node[0]}]")
-      node_definition = node_definition(node, path, cookbook_path)
+      node_definition = node_definition(node, path)
       raise node_definition.error if node_definition.error?
 
       file.puts node_definition.value
@@ -252,13 +243,7 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
     checks_result = check_path(path, override) && check_nodes_names(config)
     return ARGUMENT_ERROR_RESULT unless checks_result
 
-    cookbook_path = if config['cookbook_path'].nil?
-                      File.join(@env.mdbci_dir, 'assets', 'chef-recipes', 'cookbooks') # default cookbook path
-                    else
-                      config['cookbook_path']
-                    end
-    @ui.info("Global cookbook_path = #{cookbook_path}")
-    return ERROR_RESULT if generate_configuration_file(path, config, cookbook_path) == ERROR_RESULT
+    return ERROR_RESULT if generate_configuration_file(path, config) == ERROR_RESULT
     return SUCCESS_RESULT unless File.size?(File.join(path, @content_generator.configuration_file_name)).nil?
 
     @ui.error('Generated configuration file is empty! Please check configuration file and regenerate it.')
