@@ -24,6 +24,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mdbe' => 'mdbe',
     'mysql' => 'mysql',
     'maxscale_ci_docker' => 'maxscale_ci_docker',
+    'clustrix' => 'clustrix'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -60,11 +61,7 @@ In orded to generate configuration for a specific product use --product option.
 
   mdbci #{COMMAND_NAME} --product mdbe
 
-<<<<<<< HEAD
-Currently supported products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
-=======
 MDBCI currently supports the following products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}
->>>>>>> origin/integration
 
 In order to generate configuration for a specific product version use --product-version option. You must also specify the name of the product to generate configuration for.
 
@@ -489,6 +486,27 @@ In order to specify the number of retries for repository configuration use --att
         release
       end
     )
+  end
+
+  def generate_clustrix_release_info(path, version, platform_with_version)
+    platform, platform_version = platform_with_version.split('_')
+    {
+      repo: path,
+      repo_key: nil,
+      platform: platform,
+      platform_version: platform_version,
+      product: 'clustrix',
+      version: version
+    }
+  end
+
+  def parse_clustrix(config)
+    config['platforms'].map do |platform|
+      config['versions'].map do |version|
+        path = config['path'].sub('$VERSION$', version)
+        generate_clustrix_release_info(path, version, platform)
+      end
+    end.flatten
   end
 
   STORED_KEYS = %i[repo repo_key platform platform_version product version].freeze

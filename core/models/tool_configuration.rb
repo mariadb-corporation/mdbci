@@ -4,6 +4,7 @@ require 'xdg'
 require 'yaml'
 
 require_relative 'return_codes'
+require_relative 'result'
 
 # The class represents the tool configuration that can be read from the
 # hard drive, modified and then stored on the hard drive.
@@ -25,6 +26,19 @@ class ToolConfiguration
       return ToolConfiguration.new(YAML.load(File.read(path)))
     end
     return ToolConfiguration.new
+  end
+
+  # Load license file from the disk
+  # @param file_name [String] name of the license file
+  # @return [Result] read from the file
+  def self.load_license_file(file_name)
+    XDG['CONFIG'].each do |config_dir|
+      path = File.expand_path(File.join('mdbci', file_name), config_dir)
+      next unless File.exist?(path)
+
+      return Result.ok(File.open(path, 'r', &:read))
+    end
+    Result.error("License file #{file_name} is not exist")
   end
 
   # Stores current state of the configuration in the file

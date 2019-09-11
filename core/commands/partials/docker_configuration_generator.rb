@@ -13,12 +13,6 @@ class DockerConfigurationGenerator
     'mode' => 'global',
     'restart_policy' => {
       'condition' => 'none'
-    },
-    'resources' => {
-      'limits' => {
-        'cpus' => '2',
-        'memory' => '1024MB'
-      }
     }
   }.freeze
 

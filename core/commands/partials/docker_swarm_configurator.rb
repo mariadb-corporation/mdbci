@@ -22,6 +22,7 @@ class DockerSwarmConfigurator
     @tasks = []
   end
 
+  # rubocop:disable Metrics/MethodLength
   def configure(generate_partial: true)
     @ui.info('Bringing up docker nodes')
     return ERROR_RESULT unless @config.docker_configuration?
@@ -36,6 +37,8 @@ class DockerSwarmConfigurator
     end.and_then do
       wait_for_applications
     end.and_then do
+      attach_containers_to_network
+    end.and_then do
       store_network_settings
     end
     result.match(
@@ -49,6 +52,7 @@ class DockerSwarmConfigurator
       end
     )
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Method destroys the existing stack
   # @return SUCCESS_RESULT if the operation was successful
@@ -75,14 +79,16 @@ class DockerSwarmConfigurator
 
   # Bring up the stack, perform it several times if necessary
   def bring_up_docker_stack
-    (@attempts + 1).times do
-      result = run_command_and_log("docker stack deploy --with-registry-auth -c #{@config.docker_partial_configuration_path} #{@config.name}")
-      return Result.ok('Docker stack is brought up') if result[:value].success?
+    @docker_commands.create_bridge_network(@config.docker_network_name).and_then do
+      (@attempts + 1).times do
+        result = run_command_and_log("docker stack deploy --with-registry-auth -c #{@config.docker_partial_configuration_path} #{@config.name}")
+        return Result.ok('Docker stack is brought up') if result[:value].success?
 
-      @ui.error('Unable to deploy the Docker stack!')
-      sleep(1)
+        @ui.error('Unable to deploy the Docker stack!')
+        sleep(1)
+      end
+      Result.error('Unable to deploy the Docker Stack')
     end
-    Result.error('Unable to deploy the Docker Stack')
   end
 
   # Check that all services that were requested are brought up
@@ -101,7 +107,6 @@ class DockerSwarmConfigurator
   end
 
   # Wait for services to start and acquire the IP-address
-  # rubocop:disable Metrics/MethodLength
   def wait_for_services
     @ui.info('Waiting for stack services to become ready')
     100.times do
@@ -121,7 +126,6 @@ class DockerSwarmConfigurator
     end
     Result.error('Not all nodes were successfully started')
   end
-  # rubocop:enable Metrics/MethodLength
 
   # Wait for applications to start up and be ready to accept incoming connections
   def wait_for_applications
@@ -130,11 +134,11 @@ class DockerSwarmConfigurator
       @tasks.each do |task|
         next if task[:running]
 
-        if task.key?(:ip_address)
-          task[:running] = check_application_status(task[:container_id], task[:product_name])
-        else # If there is no ip-address, then the container did not start
-          task[:running] = true
-        end
+        task[:running] = if task.key?(:ip_address)
+                           check_application_status(task[:container_id], task[:product_name])
+                         else # If there is no ip-address, then the container did not start
+                           true
+                         end
       end
       return Result.ok('All applications are running') if @tasks.all? { |task| task[:running] }
 
@@ -184,14 +188,32 @@ class DockerSwarmConfigurator
     end
   end
 
+  def attach_containers_to_network
+    @ui.info('Attaching containers to network')
+    @docker_commands.list_containers_ip(@config.docker_network_name).and_then do |known_networks|
+      @tasks.each do |task|
+        next if known_networks.key?(task[:container_id]) || !task.key?(:private_ip_address)
+
+        result = run_command("docker network connect #{@config.docker_network_name} #{task[:container_id]}")
+        return Result.error("Unable to attach container '#{task[:container_id]}'") unless result[:value].success?
+      end
+      @docker_commands.list_containers_ip(@config.docker_network_name)
+    end.and_then do |known_networks|
+      @tasks.each do |task|
+        task[:bridge_ip] = known_networks[task[:container_id]]
+      end
+      Result.ok('All nodes have been attached to network')
+    end
+  end
+
   # Put the network settings information into the files
   def store_network_settings
     @ui.info('Generating network configuration file')
     network_settings = NetworkSettings.new
     @tasks.each do |task|
       network_settings.add_network_configuration(task[:service_name],
-                                                 'private_ip' => task[:private_ip_address],
-                                                 'network' => task[:ip_address],
+                                                 'private_ip' => task[:bridge_ip],
+                                                 'network' => task[:bridge_ip],
                                                  'docker_container_id' => task[:container_id])
     end
     network_settings.store_network_configuration(@config)

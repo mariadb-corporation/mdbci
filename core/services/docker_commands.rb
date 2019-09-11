@@ -34,6 +34,7 @@ class DockerCommands
       task[:finished] = true
       task[:ip_address] = result.value
     else
+      @ui.warning("Task #{task[:id]} has status '#{task[:status_state]}' and error message: '#{task[:status_error]}'")
       task[:finished] = false
     end
   end
@@ -47,6 +48,33 @@ class DockerCommands
       @ui.warning("Execution of command '#{command}' was not successful")
       Result.error(result[:output])
     end
+  end
+
+  # Creates the bridge network for the containers to use
+  def create_bridge_network(network_name)
+    @ui.info('Checking the bridge network state')
+    result = run_command("docker network ls -f name=#{network_name} --format {{.Name}}")
+    return Result.error('Could not browse for the network name') unless result[:value].success?
+
+    if result[:output].empty? || result[:output].lines.any? { |line| line == network_name }
+      @ui.info("Creating the bridge network")
+      result = run_command("docker network create #{network_name}")
+      return Result.error('Could not create the bridge network') unless result[:value].success?
+    else
+      @ui.info("Network already exist: #{result[:output].strip}")
+    end
+    Result.ok('The network is up and running')
+  end
+
+  def list_containers_ip(network_name)
+    result = run_command("docker network inspect #{network_name}")
+    return Result.error("Unable to get information about the network #{network_name}") unless result[:value].success?
+
+    network_info = JSON.parse(result[:output])[0]
+    network_data = network_info['Containers'].map do |container_id, info|
+      [container_id, info['IPv4Address'].split('/')[0]]
+    end.to_h
+    Result.ok(network_data)
   end
 
   private
@@ -73,9 +101,12 @@ class DockerCommands
   def remove_unnecessary_tasks(tasks)
     actual_tasks = {}
     tasks.each do |new_task|
-      prev_task = actual_tasks[new_task[:service_id]]
-      if prev_task.nil? || new_task[:updated_at] > prev_task[:updated_at]
-        actual_tasks[new_task[:service_id]] = new_task
+      actual_tasks.update(new_task[:service_id] => new_task) do |_, old, new|
+        if new[:updated_at] > old[:updated_at]
+          new
+        else
+          old
+        end
       end
     end
     Result.ok(actual_tasks.values)
@@ -116,9 +147,10 @@ class DockerCommands
          private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses', 0)&.split('/')&.first,
          status_state: task_data.dig('Status', 'State')
       }
-      if task_info.values.any? { |value| value.nil? }
+      if task_info.values.any? { |value| value.nil? || value.empty? }
         Result.error('Task has not been filled with data yet')
       else
+        task_info[:status_error] = task_data.dig('Status', 'Err')
         Result.ok(task_info)
       end
     end
@@ -146,7 +178,7 @@ class DockerCommands
         product_name: service_info.dig('Spec', 'Labels', 'org.mariadb.node.product'),
         service_name: service_info.dig('Spec', 'Labels', 'org.mariadb.node.name')
       }
-      if service_data.values.any? { |value| value.nil? }
+      if service_data.values.any? { |value| value.nil? || value.empty? }
         Result.error('Service data can not be determined')
       else
         Result.ok(service_data)
@@ -157,13 +189,11 @@ class DockerCommands
   # Process /proc/net/fib_trie contents file and extract the ip addresses
   # @param fib_contents [String] contents of the file
   def extract_ip_addresses(fib_contents)
-    addresses = fib_contents.lines.each_with_object(last: '', result: []) do |line, acc|
-      if line.include?('host LOCAL')
-        address = acc[:last].scan(/\d+\.\d+\.\d+\.\d+/)
-        acc[:result].push(address.first) unless address.empty?
+    fib_contents.lines.each_cons(2).with_object([]) do |(first_line, second_line), result|
+      if second_line.include?('host LOCAL')
+        address = first_line.scan(/\d+\.\d+\.\d+\.\d+/)
+        result.push(address.first) unless address.empty?
       end
-      acc[:last] = line
     end
-    addresses[:result]
   end
 end

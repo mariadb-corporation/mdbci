@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../models/result'
+
 # The class provides methods for generating the role of the file.
 module ConfigurationGenerator
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
@@ -44,6 +46,20 @@ module ConfigurationGenerator
     %w[version repo repo_key].map { |key| [key, repo[key]] unless repo[key].nil? }.compact.to_h
   end
 
+  # Add product license to the list of the product parameters if it needed
+  # @param repos [RepoManager] for products
+  # @param product_config [Hash] parameters of the product
+  # @param product_name [String] name of the product for install
+  # @return [Result] product config
+  def self.setup_product_license_if_need(repos, product_config, product_name)
+    return Result.ok(product_config) unless repos.need_product_license?(product_name)
+
+    repos.product_license(product_name).and_then do |license|
+      product_config['license'] = license
+      Result.ok(product_config)
+    end
+  end
+
   # Generate the list of the product parameters
   # @param repos [RepoManager] for products
   # @param product_name [String] name of the product for install
@@ -62,8 +78,10 @@ module ConfigurationGenerator
     repo_file_name = repos.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
-    attribute_name = repos.attribute_name(product_name)
-    { "#{attribute_name}": config }
+    setup_product_license_if_need(repos, config, product_name).and_then do |updated_config|
+      attribute_name = repos.attribute_name(product_name)
+      return Result.ok("#{attribute_name}": updated_config)
+    end
   end
 
   # Checks the availability of product information.
