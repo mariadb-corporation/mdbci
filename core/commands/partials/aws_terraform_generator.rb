@@ -69,7 +69,6 @@ class AwsTerraformGenerator
   def generate_node_defenition(node_params, path)
     tags = { hostname: Socket.gethostname, username: Etc.getlogin,
              full_config_path: File.expand_path(path), machinename: node_params[:name] }
-    node_params[:device_name] = @aws_service.device_name_for_ami(node_params[:ami])
     get_vms_definition(tags, node_params)
   end
 
@@ -135,12 +134,9 @@ class AwsTerraformGenerator
           <%= tag_key %> = "<%= tag_value %>"
         <% end %>
       }
-      <% if device_name %>
-        ebs_block_device {
-          device_name = "<%= device_name %>"
-          volume_size = "500"
-        }
-      <% end %>
+      root_block_device {
+        volume_size = "500"
+      }
       user_data = <<-EOT
       #!/bin/bash
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
