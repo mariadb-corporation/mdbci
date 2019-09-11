@@ -43,10 +43,13 @@ cp -r "runner" "$BUILD_DIR/"
 pushd ..
 version=$(git rev-parse HEAD)
 time=$(date +%F)
-echo "${BUILD_VERSION}, ${version}, ${time}" > $MDBCI_BUILD_DIR/version
+echo "${BUILD_VERSION}, ${version}, ${time}" > "$MDBCI_BUILD_DIR/version"
 popd
 
 # Start the build using ruby.appimage
-pushd $BUILD_DIR
-"$CURRENT_DIR/ruby.appimage/docker_build.sh" mdbci $BUILD_VERSION
+pushd "$BUILD_DIR"
+"$CURRENT_DIR/ruby.appimage/docker_build.sh" mdbci "$BUILD_VERSION"
 popd
+
+# Create a link to the previous result location, so it would be compatible
+ln -sf "$BUILD_DIR/result" "$BUILD_DIR/out"
