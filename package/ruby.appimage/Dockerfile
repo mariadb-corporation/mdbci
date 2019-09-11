@@ -2,51 +2,58 @@
 
 FROM ubuntu:14.04
 
-ARG UNAME=builduser
-ARG UID=1000
-ARG GID=1000
-
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
+ARG BUILD_JOBS=1
+ARG RUBY_VERSION=2.6.4
+ARG RUBY_INSTALL_VERSION=0.7.0
+
+# Please update the ENTRYPOINT if changing the WORKSPACE variable
 ENV DEBIAN_FRONTEND=noninteractive \
-    DOCKER_BUILD=1
+        DOCKER_BUILD=1 \
+        RUBY_DIR=/build/ruby-dir \
+        WORKSPACE=/build
 
-# Install all dependencies required by the ruby build
-# and wget required by the gen_appimage.sh
-RUN apt-get update && apt-get install -y \
-    autoconf \
-    bison \
-    build-essential \
-    libssl-dev \
-    libyaml-dev \
-    libreadline6-dev \
-    zlib1g-dev \
-    libncurses5-dev \
-    libffi-dev \
-    libgdbm3 \
-    libgdbm-dev \
-    liblzma-dev \
-    patch \
-    wget \
-    apt-transport-https \
-    libcairo2 \
-    sudo \
-    vim \
-    software-properties-common
+RUN apt-get update && \
+        apt-get install -y apt-transport-https software-properties-common
 
-# Install and configure GCC 8 to build ruby and packages
+# Install and configure GCC 9 to build ruby and packages
 # Inspiried by https://gist.github.com/application2000/73fd6f4bf1be6600a2cf9f56315a2d91
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
-    apt-get update && \
-    apt-get install gcc-8 g++-8 -y && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8;
+        apt-get update && \
+        apt-get install -y \
+        build-essential \
+        g++-9 \
+        g++-9 \
+        wget \
+        sudo \
+        vim && \
+        update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9 && \
+        wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmodern/ruby-install/archive/v$RUBY_INSTALL_VERSION.tar.gz && \
+        tar -xzvf ruby-install-$RUBY_INSTALL_VERSION.tar.gz && \
+        cd ruby-install-$RUBY_INSTALL_VERSION && \
+        make install && \
+        install -m 0755 -d $WORKSPACE && \
+        ruby-install --cleanup --jobs $BULID_JOBS --prefix $RUBY_DIR/usr ruby $RUBY_VERSION -- --disable-install-doc --disable-debug --disable-dependency-tracking --enable-shared --enable-load-relative
 
-# Create /workspace directory to use for mounting build environment
-RUN addgroup --gid $GID $UNAME
-RUN adduser --uid $UID --gid $GID --shell /bin/bash --home /workspace $UNAME
-COPY gen_appimage.sh /workspace
-RUN install -m 0755 -o $UID -g $GID -d /workspace/application
-# Allow to run sudo without password for this user
-RUN echo "$UNAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# Put gen_appimage.sh script into the root
+COPY gen_appimage.sh $WORKSPACE
 
-WORKDIR /workspace/application
+# Make the file executable
+RUN chmod +x $WORKSPACE/gen_appimage.sh
+
+# Allow to run sudo without password for all users
+# Create seveal users for common UIDs (need to fix it in the future)
+RUN echo "ALL ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+        groupadd -g 1000 group0 && \
+        useradd -u 1000 -g 1000 user0 && \
+        groupadd -g 1001 group1 && \
+        useradd -u 1001 -g 1001 user1 && \
+        groupadd -g 1002 group2 && \
+        useradd -u 1002 -g 1002 user2 && \
+        groupadd -g 1003 group3 && \
+        useradd -u 1003 -g 1003 user3 && \
+        groupadd -g 1004 group4 && \
+        useradd -u 1004 -g 1004 user4
+
+ENTRYPOINT ["/build/gen_appimage.sh"]
