@@ -269,14 +269,13 @@ class CentosDependencyManager < DependencyManager
       end
     end
     product = @env.nodeProduct
-    result = install_docker if product == 'docker' || product.nil?
-    return BaseCommand::ERROR_RESULT unless result
-
+    if product == 'docker' || product.nil?
+      return BaseCommand::ERROR_RESULT unless install_docker
+    end
     if product == 'libvirt' || product.nil?
       return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
       return BaseCommand::ERROR_RESULT unless install_vagrant
     end
-
     BaseCommand::SUCCESS_RESULT
   end
 
@@ -316,7 +315,7 @@ class CentosDependencyManager < DependencyManager
                             "sudo yum install -y #{downloaded_file}"
                           ])
     run_command("rm #{downloaded_file}")
-    result[:value].exitstatus
+    result[:value].success?
   end
 
   # Check if package is installed
@@ -350,15 +349,14 @@ class DebianDependencyManager < DependencyManager
                             "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
                             'sudo systemctl restart libvirtd.service'
                           ])
-    return result[:value].exitstatus unless result[:value].success?
-
     product = @env.nodeProduct
-    result = install_docker if product == 'docker' || product.nil?
-    return BaseCommand::ERROR_RESULT unless result
-
-    result = install_vagrant if product == 'libvirt' || product.nil?
-    return BaseCommand::ERROR_RESULT unless result
-
+    if product == 'docker' || product.nil?
+      return BaseCommand::ERROR_RESULT unless install_docker
+    end
+    if product == 'libvirt' || product.nil?
+      return result[:value].exitstatus unless result[:value].success?
+      return BaseCommand::ERROR_RESULT unless install_vagrant
+    end
     BaseCommand::SUCCESS_RESULT
   end
 
