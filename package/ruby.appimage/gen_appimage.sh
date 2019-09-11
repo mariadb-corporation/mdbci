@@ -26,6 +26,11 @@ HEADER
 APP=$1
 VERSION=$2
 
+# App arch, used by generate_appimage.
+if [ -z "$ARCH" ]; then
+    export ARCH="$(arch)"
+fi
+
 echo "--> creating AppDir directory"
 
 ROOT_DIR=$(pwd)
