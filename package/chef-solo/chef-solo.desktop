@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=chef-solo
+Exec=chef-solo
+Icon=chef-solo
+Type=Application
+Categories=Utility;
+Terminal=true
