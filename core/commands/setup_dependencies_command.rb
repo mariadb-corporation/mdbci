@@ -269,9 +269,11 @@ class CentosDependencyManager < DependencyManager
       end
     end
     return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
+    product = @env.nodeProduct
+    result = install_docker if product == 'docker' || product.nil?
+    return ERROR_RESULT unless result
 
-    install_docker
-    install_vagrant
+    install_vagrant if product == 'libvirt' || product.nil?
   end
 
   def remove_old_version_docker
@@ -346,9 +348,11 @@ class DebianDependencyManager < DependencyManager
                           ])
     return result[:value].exitstatus unless result[:value].success?
 
-    return ERROR_RESULT unless install_docker
+    product = @env.nodeProduct
+    result = install_docker if product == 'docker' || product.nil?
+    return ERROR_RESULT unless result
 
-    install_vagrant
+    install_vagrant if product == 'libvirt' || product.nil?
   end
 
   def install_docker
