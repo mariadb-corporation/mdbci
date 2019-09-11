@@ -10,29 +10,27 @@ require_relative '../models/result'
 module MachineCommands
   SSH_ATTEMPTS = 6
 
-  def self.node_running?(provider, aws_service, node, logger, nodes_path = Dir.pwd)
-    if provider == 'aws'
-      aws_service.instance_running?(aws_service.get_aws_instance_id_by_node_name(node))
-    else
-      VagrantService.node_running?(node, logger, nodes_path)
+  def self.node_running?(provider, aws_service, node, logger, path = Dir.pwd)
+    case provider
+    when 'aws' then aws_service.instance_running?(aws_service.get_aws_instance_id_by_node_name(node))
+    else VagrantService.node_running?(node, logger, path)
     end
   end
 
-  def self.bring_up_terraform_machine(provider, node, logger)
+  def self.bring_up_terraform_machine(provider, node, logger, path)
     TerraformService.init(logger)
-    resource_type = case provider
-                    when 'aws' then 'aws_instance'
-                    else
-                      logger.error("Unknown provider #{provider} of node #{node}")
-                      return
-                    end
-    TerraformService.apply("#{resource_type}.#{node}", logger)
+    resource_type = TerraformService.resource_type(provider)
+    if resource_type.nil?
+      logger.error("Unknown provider #{provider} of node #{node}")
+      return
+    end
+    TerraformService.apply("#{resource_type}.#{node}", logger, path)
   end
 
-  def self.bring_up_machine(provider, node, logger)
+  def self.bring_up_machine(provider, node, logger, path = Dir.pwd)
     case provider
-    when 'aws' then bring_up_terraform_machine(provider, node, logger)
-    else VagrantService.up(provider, node, logger)
+    when 'aws' then bring_up_terraform_machine(provider, node, logger, path)
+    else VagrantService.up(provider, node, logger, path)
     end
   end
 
@@ -42,9 +40,7 @@ module MachineCommands
 
   def self.ssh_command(provider, node, logger, command, node_network_params)
     case provider
-    when 'aws' then aws_ssh_command(node_network_params,
-                                    command,
-                                    logger)
+    when 'aws' then aws_ssh_command(node_network_params, command, logger)
     else
       result = VagrantService.ssh_command(node, logger, "\"#{command}\"")
       if result[:value].success?
@@ -66,5 +62,23 @@ module MachineCommands
       return true
     end
     false
+  end
+
+  def self.destroy_terraform_nodes(provider, node_names, logger, path)
+    resource_type = TerraformService.resource_type(provider)
+    if resource_type.nil?
+      logger.error("Unknown provider #{provider} of terraform nodes")
+      return
+    end
+    node_names.each do |node|
+      TerraformService.destroy("#{resource_type}.#{node}", logger, path)
+    end
+  end
+
+  def self.destroy_nodes(provider, node_names, logger, path = Dir.pwd)
+    case provider
+    when 'aws' then destroy_terraform_nodes(provider, node_names, logger, path)
+    else VagrantService.destroy_nodes(node_names, path)
+    end
   end
 end

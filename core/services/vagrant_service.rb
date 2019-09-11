@@ -4,18 +4,12 @@ require_relative 'shell_commands'
 
 # This class allows to execute commands of Terraform-cli
 module VagrantService
-  def self.up(provider, node, logger)
-    ShellCommands.run_command_and_log(logger, "vagrant up --provider=#{provider} #{node}", true, {})
+  def self.up(provider, node, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant up --provider=#{provider} #{node}", path)
   end
 
-  # Check whether node is running or not.
-  #
-  # @param node [String] name of the node to get status from
-  # @param logger [Out] logger to log information to
-  # @param nodes_path [String] path to the nodes directory
-  # @return [Boolean]
-  def self.node_running?(node, logger, nodes_path = Dir.pwd)
-    result = ShellCommands.run_command_in_dir(logger, "vagrant status #{node}", nodes_path, false)
+  def self.node_running?(node, logger, path = Dir.pwd)
+    result = ShellCommands.run_command_in_dir(logger, "vagrant status #{node}", path, false)
     status_regex = /^#{node}\s+(.+)\s+(\(.+\))?\s$/
     status = if result[:output] =~ status_regex
                result[:output].match(status_regex)[1]
@@ -32,7 +26,12 @@ module VagrantService
     end
   end
 
-  def self.ssh_command(node, logger, command)
-    ShellCommands.run_command("vagrant ssh #{node} -c #{command}", {}, logger)
+  def self.ssh_command(node, logger, command, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant ssh #{node} -c #{command}", path)
+  end
+
+  def self.destroy_nodes(node_names, path = Dir.pwd)
+    ShellCommands.check_command_in_dir("vagrant destroy -f #{node_names.join(' ')}", path,
+                                       'Vagrant was unable to destroy existing nodes')
   end
 end

@@ -4,14 +4,13 @@ require_relative '../../models/command_result.rb'
 require_relative '../../models/configuration'
 require_relative '../../models/return_codes'
 require_relative '../../services/shell_commands'
+require_relative '../../services/machine_commands'
 require 'fileutils'
 
-# Class allows to clean up the machines that were created by the Vagrant
-class VagrantCleaner
+# Class allows to clean up the machines that were created by the Vagrant or Terraform
+class VagrantTerraformCleaner
   include ReturnCodes
   include ShellCommands
-
-  INSTANCE_NOT_FOUND = 'instance-not-found'
 
   def initialize(env, logger)
     @env = env
@@ -87,9 +86,7 @@ class VagrantCleaner
   # @param configuration [Configuration] that we operate on
   def stop_machines(configuration)
     @ui.info 'Destroying the machines using vagrant'
-    check_command_in_dir("vagrant destroy -f #{configuration.node_names.join(' ')}",
-                         configuration.path,
-                         'Vagrant was unable to destroy existing nodes')
+    MachineCommands.destroy_nodes(configuration.provider, configuration.node_names, @ui, configuration.path)
   end
 
   # Destroy aws keypair specified in the configuration.
