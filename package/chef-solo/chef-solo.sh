@@ -2,10 +2,10 @@
 
 echo "--> installing Chef-bin and it's dependencies"
 gem install bundler --force --no-document
-gem install chef-bin -v "$VERSION" --no-document
+gem install chef -v "$VERSION" --no-document
 
 echo "--> fixing path to the Ruby interpreter"
-insert_run_header "$APP_DIR/usr/bin/chef-solo"
+install -m 0755 chef-solo.rb "$APP_DIR/usr/bin/chef-solo"
 
 echo "--> downloading certificates"
 wget -O "$APP_DIR/cacert.pem" https://curl.haxx.se/ca/cacert.pem

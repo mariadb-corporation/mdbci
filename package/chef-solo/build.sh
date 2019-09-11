@@ -26,7 +26,7 @@ cp -r "$CURRENT_DIR/../runner" "$BUILD_DIR/"
 
 # Copy all the files that should be present
 pushd "$CURRENT_DIR"
-for file in "chef-solo.desktop" "chef-solo.png" "chef-solo.sh"
+for file in "chef-solo.desktop" "chef-solo.png" "chef-solo.rb" "chef-solo.sh"
 do
   cp "$file" "$BUILD_DIR/"
 done
