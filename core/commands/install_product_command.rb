@@ -51,7 +51,7 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     @mdbci_config = Configuration.new(@args.first, @env.labels)
-    @network_config = NetworkConfig.new(@mdbci_config, @ui)
+    @network_config = NetworkConfig.new(@env.aws_service, @mdbci_config, @ui)
 
     @product = @env.nodeProduct
     @product_version = @env.productVersion
