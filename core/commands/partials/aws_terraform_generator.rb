@@ -7,6 +7,7 @@ require 'erb'
 # The class generates the Terraform configuration file content for MDBCI configuration
 class AwsTerraformGenerator
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
+  KEYFILE_NAME = 'maxscale.pem'
 
   # Initializer
   # @param aws_service [AwsService] service for execute commands in accordance to the AWS EC2
@@ -108,7 +109,7 @@ class AwsTerraformGenerator
   def generate_key_pair(path)
     full_path = File.expand_path(path)
     key_pair = @aws_service.generate_key_pair(full_path)
-    path_to_keyfile = File.join(full_path, 'maxscale.pem')
+    path_to_keyfile = File.join(full_path, KEYFILE_NAME)
     File.write(path_to_keyfile, key_pair.key_material)
     path_to_keypair_file = File.join(full_path, Configuration::AWS_KEYPAIR_NAME)
     File.write(path_to_keypair_file, key_pair.key_name)
@@ -145,7 +146,17 @@ class AwsTerraformGenerator
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
       provisioner "local-exec" {
-        command = "echo ${aws_instance.<%= name %>.public_ip} > ip_address_<%= name %>.txt"
+        command = "echo ${aws_instance.<%= name %>.public_ip} > public_ip_<%= name %>"
+      }
+      provisioner "local-exec" {
+        command = "echo ${aws_instance.<%= name %>.private_ip} > private_ip_<%= name %>"
+      }
+      provisioner "local-exec" {
+        command = "echo <%= user %> > user_<%= name %>"
+      }
+      provisioner "local-exec" {
+        when    = "destroy"
+        command = "rm public_ip_<%= name %> private_ip_<%= name %> user_<%= name %>"
       }
       <% if template_path %>
         provisioner "file" {

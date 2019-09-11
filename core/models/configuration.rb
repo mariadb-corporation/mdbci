@@ -29,7 +29,8 @@ class Configuration
       File.exist?(File.join(path, 'provider')) &&
       (
         File.exist?(vagrant_configuration(path)) ||
-        File.exist?(docker_configuration(path))
+        File.exist?(docker_configuration(path)) ||
+        File.exist?(terraform_configuration(path))
       )
   end
 
@@ -45,6 +46,15 @@ class Configuration
   # @return [String] path to the Vagrant configuration file
   def self.vagrant_configuration(path)
     File.join(path, 'Vagrantfile')
+  end
+
+  # Gets the path to the Terraform configuration file that resides
+  # in the configuration specified by the path
+  #
+  # @param path [String] path to the configuration
+  # @return [String] path to the Terraform configuration file
+  def self.terraform_configuration(path)
+    File.join(path, 'infrastructure.tf')
   end
 
   # Forms the path to the Docker configuration file that resides

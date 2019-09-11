@@ -79,6 +79,8 @@ class AwsService
   # @param [String] instance_id to check
   # @return [Boolean] true if it is running
   def instance_running?(instance_id)
+    return false if instance_id.nil?
+
     response = @client.describe_instance_status(instance_ids: [instance_id])
     response.instance_statuses.any? do |status|
       status.instance_id == instance_id &&
@@ -120,5 +122,14 @@ class AwsService
       ip_permissions: GROUP_PERMISSIONS
     )
     group_name
+  end
+
+  # Return instance id by node name.
+  #
+  # @param node_name [String] name of instance.
+  # @return [String] id of the instance.
+  def get_aws_instance_id_by_node_name(node_name)
+    found_instance = instances_list.find { |instance| instance[:node_name] == node_name }
+    found_instance.nil? ? nil : found_instance[:instance_id]
   end
 end

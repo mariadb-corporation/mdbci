@@ -189,7 +189,7 @@ class VagrantCleaner
   # @param aws_box_name [String] name of instance to destroy.
   def destroy_aws_machine(configuration, node, aws_box_name = nil)
     aws_box_name ||= "#{configuration.name}_#{node}"
-    instance_id = get_aws_instance_id_by_node_name(aws_box_name)
+    instance_id = @aws_service&.get_aws_instance_id_by_node_name(aws_box_name)
     if instance_id.nil?
       @ui.error("Unable to terminate #{aws_box_name} machine. Instance id does not exist.")
       return
@@ -204,14 +204,5 @@ class VagrantCleaner
   # Remember the instance id of aws virtual machines.
   def remember_aws_instance_id
     @aws_instance_ids = @aws_service&.instances_list || []
-  end
-
-  # Read the instance id of aws virtual machine from local vagrant directory.
-  #
-  # @param node_name [String] name of instance.
-  # @return [String] id of the instance.
-  def get_aws_instance_id_by_node_name(node_name)
-    found_instance = @aws_instance_ids.find { |instance| instance[:node_name] == node_name }
-    found_instance.nil? ? nil : found_instance[:instance_id]
   end
 end
