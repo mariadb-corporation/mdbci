@@ -74,13 +74,14 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   # @return [Integer] result of execution
   def install
     result = @dependency_manager.install_dependencies
-    result = add_user_to_usergroup if result == SUCCESS_RESULT
-    result = install_vagrant_plugins if result == SUCCESS_RESULT
-    result = create_libvirt_pool if result == SUCCESS_RESULT
-    if result == SUCCESS_RESULT
-      export_libvirt_default_uri
-      @ui.info('Dependencies successfully installed.')
-      @ui.info('Please restart your computer in order to apply changes.')
+    if @env.nodeProduct == 'libvirt'
+      result = install_vagrant_plugins if result == SUCCESS_RESULT
+      result = create_libvirt_pool if result == SUCCESS_RESULT
+      if result == SUCCESS_RESULT
+        export_libvirt_default_uri
+        @ui.info('Dependencies successfully installed.')
+        @ui.info('Please restart your computer in order to apply changes.')
+      end
     end
     result
   end
@@ -97,17 +98,13 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   end
 
   # Adds user to libvirt and docker user group
-  def add_user_to_usergroup
-    docker_groups = `getent group | grep docker | cut -d ":" -f1`.split("\n").join(',')
-    libvirt_groups = `getent group | grep libvirt | cut -d ":" -f1`.split("\n").join(',')
-    if libvirt_groups.empty? || docker_groups.empty?
-      @ui.error('Cannot add user to libvirt group. Libvirt group not found') if libvirt_groups.empty?
-      @ui.error('Cannot add user to docker group. Docker group not found') if docker_groups.empty?
+  def add_user_to_usergroup(group)
+    groups = `getent group | grep #{group} | cut -d ":" -f1`.split("\n").join(',')
+    if groups.empty?
+      @ui.error("Cannot add user to #{group} group. #{group} group not found") if groups.empty?
       return ERROR_RESULT
     end
-    return ERROR_RESULT unless run_command('sudo usermod -a -G docker $(whoami)')[:value].success?
-
-    run_command("sudo usermod -a -G #{libvirt_groups} $(whoami)")[:value].exitstatus
+    run_command("sudo usermod -a -G #{group} $(whoami)")[:value].success?
   end
 
   # Install vagrant plugins and prepares mdbci environment
@@ -271,10 +268,12 @@ class CentosDependencyManager < DependencyManager
     product = @env.nodeProduct
     if product == 'docker' || product.nil?
       return BaseCommand::ERROR_RESULT unless install_docker
+      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     if product == 'libvirt' || product.nil?
       return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
       return BaseCommand::ERROR_RESULT unless install_vagrant
+      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('libvirt')
     end
     BaseCommand::SUCCESS_RESULT
   end
