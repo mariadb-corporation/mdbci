@@ -5,6 +5,9 @@
 # applications will be started as the general applications.
 require 'chef/application/solo'
 
+# Changing the working directory to the one used to called the AppImage
+Dir.chdir(ENV['OLD_CWD'])
+
 # Removing the AppRun environment.
 PREFIX = 'MDBCI_OLD_ENV_'
 external_env = ENV.select { |name, _| name.start_with?(PREFIX) }
