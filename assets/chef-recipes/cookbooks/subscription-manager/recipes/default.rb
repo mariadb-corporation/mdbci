@@ -17,7 +17,22 @@ execute 'Attach a subscription' do
   returns [0, 70]
 end
 
-execute 'Enable available repositories' do
-  command 'subscription-manager repos --enable=*'
+execute 'Disable repositories' do
+  command 'subscription-manager repos --disable=*'
+  returns [0, 70]
+end
+
+execute 'Enable baseos repo' do
+  command 'subscription-manager repos --enable=rhel-8-for-x86_64-baseos-rpms'
+  returns [0, 70]
+end
+
+execute 'Enable supplementary repo' do
+  command 'subscription-manager repos --enable=rhel-8-for-x86_64-supplementary-rpms'
+  returns [0, 70]
+end
+
+execute 'Clean repo cache' do
+  command 'dnf clean all --enablerepo=* && yum clean all'
   returns [0, 70]
 end
