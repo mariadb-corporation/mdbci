@@ -29,6 +29,10 @@ ENABLE_REPOSITORIES.each do |repo|
   end
 end
 
+execute 'dnf clean packages' do
+  command 'dnf clean packages'
+end
+
 execute 'Clean repo cache' do
   command 'dnf clean all --enablerepo=* && yum clean all'
 end
