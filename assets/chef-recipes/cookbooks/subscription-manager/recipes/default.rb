@@ -9,30 +9,30 @@ end
 
 execute 'Setting a Service Level Preference' do
   command 'subscription-manager service-level --set=self-support'
-  returns [0, 70]
 end
 
 execute 'Attach a subscription' do
   command 'subscription-manager attach --auto'
-  returns [0, 70]
 end
 
 execute 'Disable repositories' do
   command 'subscription-manager repos --disable=*'
-  returns [0, 70]
 end
 
-execute 'Enable baseos repo' do
-  command 'subscription-manager repos --enable=rhel-8-for-x86_64-baseos-rpms'
-  returns [0, 70]
+ENABLE_REPOSITORIES = %w(rhel-8-for-x86_64-baseos-rpms
+                         rhel-8-for-x86_64-supplementary-rpms
+                         rhel-8-for-x86_64-appstream-rpms)
+
+ENABLE_REPOSITORIES.each do |repo|
+  execute "Enable #{repo} repo" do
+    command "subscription-manager repos --enable=#{repo}"
+  end
 end
 
-execute 'Enable supplementary repo' do
-  command 'subscription-manager repos --enable=rhel-8-for-x86_64-supplementary-rpms'
-  returns [0, 70]
+execute 'dnf clean packages' do
+  command 'dnf clean packages'
 end
 
 execute 'Clean repo cache' do
   command 'dnf clean all --enablerepo=* && yum clean all'
-  returns [0, 70]
 end
