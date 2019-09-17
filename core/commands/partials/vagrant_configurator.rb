@@ -77,10 +77,9 @@ class VagrantConfigurator
     ]
     CHEF_CONFIGURATION_ATTEMPTS.times do
       configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
-      if configuration_status.error?
-        logger.error("Error during machine configuration: #{configuration_status.error}")
-        next
-      end
+      break if configuration_status.success?
+
+      logger.error("Error during machine configuration: #{configuration_status.error}")
     end
     node_provisioned?(node, logger)
   end
