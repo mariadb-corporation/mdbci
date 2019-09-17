@@ -65,7 +65,7 @@ int main(int argc, char *argv[], char *envp[]) {
     strncpy(app_name_copy, argv[0], app_name_length);
     char *app_name = basename(app_name_copy);
     struct stat executable_info;
-    lstat(argv[0], &executable_info);
+    int app_search_result = lstat(argv[0], &executable_info);
 
     char *appdir = dirname(realpath("/proc/self/exe", NULL));
     if (!appdir)
@@ -246,7 +246,7 @@ int main(int argc, char *argv[], char *envp[]) {
     unsetenv("GEM_ROOT");
 
     /* Check that file was run from the link */
-    if (S_ISLNK(executable_info.st_mode)) {
+    if (S_ISLNK(executable_info.st_mode) || app_search_result == -1) {
       exe = app_name;
       outargptrs[0] = app_name;
     }
