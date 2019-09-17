@@ -51,9 +51,6 @@ session.template_file = 'instance.json'
 $exception_handler = ExceptionHandler.new
 session.ipv6 = false
 
-out = Out.new(session)
-$out = out
-
 Dir.chdir ENV['OLD_CWD'] unless ENV['OLD_CWD'].nil?
 
 Dir.chdir ENV['MDBCI_VM_PATH'] unless ENV['MDBCI_VM_PATH'].nil?
@@ -157,10 +154,13 @@ begin
     end
   end
 rescue GetoptLong::MissingArgument => e
-  out.error e.backtrace.join("\n")
-  out.error e.to_s
+  $stdout.puts(e.backtrace.join("\n"))
+  $stdout.puts(e.to_s)
   exit 1
 end
+
+out = Out.new(session.isSilent)
+$out = out
 
 # Putting the information about the
 out.info "MariaDB CI CLI, version: #{Version.version(session.mdbci_dir, out)}"
