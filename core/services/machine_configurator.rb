@@ -4,6 +4,7 @@ require 'io/console'
 require 'net/ssh'
 require 'net/scp'
 require_relative '../models/result'
+require_relative '../services/log_storage'
 
 # Class allows to configure a specified machine using the chef-solo,
 # MDBCI coockbooks and roles.
@@ -136,9 +137,45 @@ class MachineConfigurator
 
   def install_chef_on_server(connection, sudo_password, chef_version, logger)
     logger.info("Installing Chef #{chef_version} on the server.")
+    return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
+
+    result = install_appimage_chef(connection, sudo_password, chef_version, logger)
+    return result if result.success?
+
+    install_upstream_chef(connection, sudo_password, '14.13.11', logger)
+  end
+
+  def install_appimage_chef(connection, sudo_password, chef_version, logger)
+    download_command = prepare_appimage_download_command(connection, chef_version, logger)
+    CHEF_INSTALLATION_ATTEMPTS.times do
+      sudo_exec(connection, sudo_password, download_command, logger).and_then do
+        sudo_exec(connection, sudo_password, 'chmod 0755 /tmp/chef-solo', logger)
+      end.and_then do
+        sudo_exec(connection, sudo_password, '/tmp/chef-solo --appimage-extract', LogStorage.new)
+      end.and_then do
+        sudo_exec(connection, sudo_password,'./squashfs-root/install.sh', logger)
+      end
+      return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
+
+      sleep(rand(3))
+    end
+    Result.error('Unable to install appimage chef!')
+  end
+
+  # Determine the method to download Chef installation script: wget or curl
+  def prepare_appimage_download_command(connection, chef_version, logger)
+    appimage_url = "http://max-tst-01.mariadb.com/ci-repository/chef-solo-#{chef_version}.glibc-x86_64.AppImage"
+    result = ssh_exec(connection, 'which wget', logger)
+    if result.success?
+      "wget -q #{appimage_url} --output-document /tmp/chef-solo"
+    else
+      "curl -sS -L #{appimage_url} --output /tmp/chef-solo"
+    end
+  end
+
+  def install_upstream_chef(connection, sudo_password, chef_version, logger)
     download_command = prepare_download_command(connection, logger)
     chef_install_command = prepare_install_command(connection, chef_version, logger)
-    return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
 
     CHEF_INSTALLATION_ATTEMPTS.times do
       ssh_exec(connection, download_command, logger).and_then do
