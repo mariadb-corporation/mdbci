@@ -16,4 +16,4 @@ external_env = ENV.select { |name, _| name.start_with?(PREFIX) }
 ENV.replace(external_env)
 
 # Starting the Chef Solo application
-Chef::Application::Solo.new.run(enforce_license: false)
+Chef::Application::Solo.new.run
