@@ -19,6 +19,7 @@ insert_run_header() {
     local file="$1"
     read -d '' header <<'HEADER' || true
 #!./bin/ruby
+Dir.chdir(ENV['OLD_CWD']) if ENV.key?('OLD_CWD')
 HEADER
     ex -sc "1i|$header" -cx $file
 }

@@ -19,7 +19,7 @@ fi
 app=$1
 container_name=$app-appimage-build
 
-ruby_version=2.6.4
+ruby_version=2.6.3
 docker_image=ruby-appimage:$ruby_version
 
 script_dir="${0%/*}"
