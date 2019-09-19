@@ -13,7 +13,7 @@ class SetupDependenciesCommand < BaseCommand
   include ShellCommands
 
   def self.synopsis
-    'Install vagrant and its dependencies'
+    'Install vagrant, docker and its dependencies'
   end
 
   def show_help
@@ -25,6 +25,13 @@ First it installs Vagrant and suited libvirt development library using native di
 Then it installs 'vagrant-libvirt' and 'vagrant-aws' plugins for Vagrant.
 
 After that 'default' VM pool created for libvirt and the current user added to the libvirt user group.
+
+Then it installs Docker Engine and current user added to the docker user group.
+
+Or you can installs only libvirt or only Docker Engine (for example libvirt):
+  mdbci setup-dependencies --product libvirt
+
+Use 'libvirt' as product option for libvirt and 'docker' for Docker Engine.
 
 OPTIONS:
   --reinstall:
