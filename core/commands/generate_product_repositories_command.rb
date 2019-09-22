@@ -274,39 +274,77 @@ In order to specify the number of retries for repository configuration use --att
     generate_maxscale_ci_releases_for_docker(base_url, tags)
   end
 
+  # Examples: rhel/8/x86_64/maxscale-2.3.12-1.rhel.8.x86_64.rpm
+  # centos/8/x86_64/maxscale-experimental-2.3.12-1.rhel.8.x86_64.rpm
+  # Group 1: centos, Group 2:	8, Group 3:	experimental
+  MAXSCALE_RPM_PACKAGE_REGEX = /^([^\/]+)\/([^\/]+)\/[^\/]+\/maxscale-([a-zA-Z]*)?.+\.rpm$/
+  # Examples: debian/dists/stretch/main/binary-amd64/maxscale-2.3.12-1.debian.stretch.x86_64.deb
+  # ubuntu/dists/bionic/main/binary-amd64/maxscale-experimental-2.3.12-1.ubuntu.bionic.x86_64.deb
+  # Group 1: ubuntu, Group 2:	bionic, Group 3:	experimental
+  MAXSCALE_DEB_PACKAGE_REGEX = /^([^\/]+)\/dists\/([^\/]+)\/main\/[^\/]+\/maxscale-([a-zA-Z]*)?.+\.deb$/
+
+  # rubocop:disable Security/Open
+  def get_maxscale_links(path)
+    uri = path.gsub(%r{([^:])\/+}, '\1/')
+    doc = Nokogiri::HTML(open(uri))
+    all_links = doc.css('ul:not(.nav) a')
+    all_links.select { |link| yield(link) }
+  end
+  # rubocop:enable Security/Open
+
+  def get_maxscale_packages_links(path)
+    get_maxscale_links(path) do |link|
+      link.content =~ MAXSCALE_RPM_PACKAGE_REGEX || link.content =~ MAXSCALE_DEB_PACKAGE_REGEX
+    end
+  end
+
+  def get_maxscale_release_links(path)
+    get_maxscale_links(path) do |link|
+      link.content =~ /^MariaDB MaxScale [0-9]*\.?.*$/
+    end
+  end
+
+  def make_uri_path(path, href)
+    path_uri = URI.parse(path)
+    href_path = URI.parse(href).path
+    "#{path_uri.scheme}://#{path_uri.host}/#{href_path}"
+  end
+
+  def get_maxscale_release_versions(config)
+    path = config['path']
+    major_release_links = get_maxscale_release_links(path)
+    minor_release_links = major_release_links.map do |major_release_link|
+      major_release_path = major_release_link.attribute('href').to_s
+      get_maxscale_release_links(make_uri_path(path, major_release_path))
+    end.flatten
+    minor_release_links.map do |link|
+      minor_release_path = link.attribute('href').to_s
+      { release: link.content.match(/^MariaDB MaxScale (.*)$/).captures[0].lstrip,
+        packages_links: get_maxscale_packages_links(make_uri_path(path, minor_release_path)) }
+    end
+  end
+
+  def parse_maxscale_package_link(link, release)
+    regex = if link.content =~ /^.+\.rpm$/
+              MAXSCALE_RPM_PACKAGE_REGEX
+            else
+              MAXSCALE_DEB_PACKAGE_REGEX
+            end
+    captures = link.content.match(regex).captures
+    version = if captures[2].empty?
+                release
+              else
+                "#{captures[2]}-#{release}"
+              end
+    { repo: link.attribute('href').to_s, platform: captures[0], platform_version: captures[1], version: version }
+  end
+
   def parse_maxscale(config)
-    releases = []
-    releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm']))
-    releases.concat(parse_maxscale_deb_repository(config['repo']['deb']))
-    releases
-  end
-
-  def parse_maxscale_rpm_repository(config)
-    parse_repository(
-      config['path'], config['key'], 'maxscale',
-      save_as_field(:version),
-      split_rpm_platforms,
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      append_url(%w[x86_64]),
-      lambda do |release, _|
-        release[:repo] = release[:url]
-        release
+    get_maxscale_release_versions(config).map do |release|
+      release[:packages_links].map do |link|
+        parse_maxscale_package_link(link, release[:release]).merge(repo_key: nil, product: 'maxscale')
       end
-    )
-  end
-
-  def parse_maxscale_deb_repository(config)
-    parse_repository(
-      config['path'], config['key'], 'maxscale',
-      save_as_field(:version),
-      append_url(%w[debian ubuntu], :platform, true),
-      append_url(%w[dists]),
-      save_as_field(:platform_version),
-      lambda do |release, _|
-        release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
-        release
-      end
-    )
+    end.flatten
   end
 
   def parse_mdbe(config)
