@@ -1,4 +1,3 @@
-include_recipe "mariadb-maxscale::maxscale_repos"
 include_recipe "chrony::default"
 
 # Turn off SElinux
@@ -107,6 +106,11 @@ when "suse", "opensuse", nil # nil stands for SLES 15
 end
 
 # Install packages
+user = ENV['SUDO_USER']
+home_dir = Dir.home(user)
+
+maxscale_package_path = File.join(home_dir, 'maxscale-package')
+
 case node[:platform_family]
 when "windows"
   windows_package "maxscale" do
@@ -115,21 +119,32 @@ when "windows"
     action :install
   end
 when "suse", "opensuse", nil # Enabling SLES 15 support
-  execute "Install MaxScale" do
-    command "zypper install -f -y maxscale"
+  maxscale_package_rpm_file_name = "#{maxscale_package_path}.rpm"
+  remote_file maxscale_package_rpm_file_name do
+    source node['maxscale']['repo']
+    action :create
   end
-
-  execute "Install MaxScale experimental package" do
-    command "zypper install -f -y maxscale-experimental"
-    ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
+  execute 'install maxscale' do
+    command "zypper --no-gpg-checks install -f -y #{maxscale_package_rpm_file_name}"
   end
-else
-  package 'maxscale' do
-    action :upgrade
+  file maxscale_package_rpm_file_name do
+    action :delete
   end
-  package 'maxscale-experimental' do
-    ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
-    action :upgrade
+when "debian", "ubuntu"
+  maxscale_package_deb_file_name = "#{maxscale_package_path}.deb"
+  remote_file maxscale_package_deb_file_name do
+    source node['maxscale']['repo']
+    action :create
+  end
+  execute 'install maxscale' do
+    command "dpkg -i #{maxscale_package_deb_file_name}"
+  end
+  file maxscale_package_deb_file_name do
+    action :delete
+  end
+when "rhel", "fedora", "centos"
+  execute 'install maxscale' do
+    command "yum install -y #{node['maxscale']['repo']}"
   end
 end
 
