@@ -244,8 +244,9 @@ class DependencyManager
   def generate_downloaded_file_path(extension)
     "#{File.join(Dir.tmpdir, VAGRANT_PACKAGE)}.#{extension}"
   end
-  
+
   # Adds user to libvirt and docker user group
+  # @param group [String] the name of the group
   def add_user_to_usergroup(group)
     groups = `getent group | grep #{group} | cut -d ":" -f1`.split("\n").join(',')
     if groups.empty?
