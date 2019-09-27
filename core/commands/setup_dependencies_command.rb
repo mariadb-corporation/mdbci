@@ -104,16 +104,6 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
     end
   end
 
-  # Adds user to libvirt and docker user group
-  def add_user_to_usergroup(group)
-    groups = `getent group | grep #{group} | cut -d ":" -f1`.split("\n").join(',')
-    if groups.empty?
-      @ui.error("Cannot add user to #{group} group. #{group} group not found") if groups.empty?
-      return ERROR_RESULT
-    end
-    run_command("sudo usermod -a -G #{group} $(whoami)")[:value].success?
-  end
-
   # Install vagrant plugins and prepares mdbci environment
   def install_vagrant_plugins
     install_libvirt_plugin = "vagrant plugin install vagrant-libvirt --plugin-version #{VAGRANT_LIBVIRT_PLUGIN_VERSION}"
@@ -254,6 +244,16 @@ class DependencyManager
   def generate_downloaded_file_path(extension)
     "#{File.join(Dir.tmpdir, VAGRANT_PACKAGE)}.#{extension}"
   end
+  
+  # Adds user to libvirt and docker user group
+  def add_user_to_usergroup(group)
+    groups = `getent group | grep #{group} | cut -d ":" -f1`.split("\n").join(',')
+    if groups.empty?
+      @ui.error("Cannot add user to #{group} group. #{group} group not found") if groups.empty?
+      return ERROR_RESULT
+    end
+    run_command("sudo usermod -a -G #{group} $(whoami)")[:value].success?
+  end
 end
 
 # Class that manages CentOS specific packages
@@ -358,10 +358,12 @@ class DebianDependencyManager < DependencyManager
     product = @env.nodeProduct
     if product == 'docker' || product.nil?
       return BaseCommand::ERROR_RESULT unless install_docker
+      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     if product == 'libvirt' || product.nil?
       return result[:value].exitstatus unless result[:value].success?
       return BaseCommand::ERROR_RESULT unless install_vagrant
+      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('libvirt')
     end
     BaseCommand::SUCCESS_RESULT
   end
