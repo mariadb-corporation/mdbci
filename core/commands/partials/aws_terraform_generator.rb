@@ -3,6 +3,7 @@
 require 'date'
 require 'socket'
 require 'erb'
+require 'net/ssh'
 
 # The class generates the Terraform configuration file content for MDBCI configuration
 class AwsTerraformGenerator
@@ -12,11 +13,13 @@ class AwsTerraformGenerator
   # Initializer
   # @param aws_service [AwsService] service for execute commands in accordance to the AWS EC2
   # @param aws_config [Hash] AWS params (credentials etc.)
-  # @param logger [Out] logger.
-  def initialize(aws_service, aws_config, logger)
+  # @param logger [Out] logger
+  # @param configuration_path [String] path of the generated configuration.
+  def initialize(aws_service, aws_config, logger, configuration_path)
     @aws_service = aws_service
     @aws_config = aws_config
     @ui = logger
+    @configuration_path = configuration_path
   end
 
   def configuration_file_name
@@ -43,11 +46,10 @@ class AwsTerraformGenerator
   end
 
   # Generate and return provider configuration content for configuration file
-  # @param path [String] path of the generated configuration
   # @return [String] provider configuration content for configuration file
-  def generate_provider_config(path)
+  def generate_provider_config
     @ui.info('Generating AWS configuration')
-    @path_to_keyfile, @keypair_name = generate_key_pair(path)
+    generate_keypair
     provider_config
   end
 
@@ -83,10 +85,33 @@ class AwsTerraformGenerator
       secret_key = "#{@aws_config['secret_access_key']}"
     }
     locals {
-      key_name            = "#{@keypair_name}"
-      security_groups     = ["default", "#{@aws_config['security_group']}"]
+      security_groups = ["default", "#{@aws_config['security_group']}"]
     }
+    #{keypair_resource}
     PROVIDER
+  end
+
+  def generate_keypair
+    key = OpenSSL::PKey::RSA.new(2048)
+    type = key.ssh_type
+    data = [key.to_blob].pack('m0')
+    @public_key_value = "#{type} #{data}"
+    @path_to_keyfile = File.join(@configuration_path, KEYFILE_NAME)
+    File.open(@path_to_keyfile, 'w') { |file| file.write(key.to_pem) }
+    File.chmod(400, @path_to_keyfile)
+
+    hostname = Socket.gethostname
+    key_pair_name = File.basename(@configuration_path)
+    @key_name = "#{hostname}_#{key_pair_name}_#{Time.now.to_i}"
+  end
+
+  def keypair_resource
+    <<-KEYPAIR_RESOURCE
+    resource "aws_key_pair" "ec2key" {
+      key_name = "#{@key_name}"
+      public_key = "#{@public_key_value}"
+    }
+    KEYPAIR_RESOURCE
   end
 
   def connection_partial(user, name)
@@ -128,7 +153,7 @@ class AwsTerraformGenerator
       ami             = "<%= ami %>"
       instance_type   = "<%= default_instance_type %>"
       security_groups = local.security_groups
-      key_name = local.key_name
+      key_name = aws_key_pair.ec2key.key_name
       tags = {
         <% tags.each do |tag_key, tag_value| %>
           <%= tag_key %> = "<%= tag_value %>"

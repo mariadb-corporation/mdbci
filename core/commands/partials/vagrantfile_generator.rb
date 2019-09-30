@@ -46,9 +46,8 @@ end
   end
 
   # Generate and return provider configuration content for configuration file
-  # @param _path [String] path of the generated configuration
   # @return [String] provider configuration content for configuration file
-  def generate_provider_config(_path)
+  def generate_provider_config
     @ui.info('Generating libvirt/VirtualBox configuration')
     provider_config
   end

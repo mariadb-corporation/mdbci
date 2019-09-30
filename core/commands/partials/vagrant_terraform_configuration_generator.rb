@@ -208,7 +208,7 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
     file = File.open(File.join(path, @content_generator.configuration_file_name), 'w')
     file.puts @content_generator.file_header
     file.puts @content_generator.config_header
-    file.puts @content_generator.generate_provider_config(path)
+    file.puts @content_generator.generate_provider_config
     config.each do |node|
       next if node[1]['box'].nil?
 
@@ -287,12 +287,13 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
   # setup @content_generator to appropriate configuration file content generator.
   #
   # @param provider [String] name of the nodes provider
-  def setup_nodes_provider(provider)
+  # @param path [String] configuration directory.
+  def setup_nodes_provider(provider, path)
     @ui.info("Nodes provider = #{provider}")
     @nodes_provider = provider
     @content_generator = case provider
                          when 'libvirt', 'virtualbox' then VagrantfileGenerator.new(@ui, @env.ipv6)
-                         when 'aws' then AwsTerraformGenerator.new(@env.aws_service, @env.tool_config['aws'], @ui)
+                         when 'aws' then AwsTerraformGenerator.new(@env.aws_service, @env.tool_config['aws'], @ui, path)
                          end
   end
 
@@ -352,7 +353,7 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
     nodes_provider_result = load_nodes_provider_and_check_it(config)
     return ARGUMENT_ERROR_RESULT if nodes_provider_result.error?
 
-    setup_nodes_provider(nodes_provider_result.value)
+    setup_nodes_provider(nodes_provider_result.value, path)
     generate_result = generate(path, config, override)
     return generate_result unless generate_result == SUCCESS_RESULT
 
