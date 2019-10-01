@@ -16,5 +16,3 @@ aws --profile mdbci iam get-user
 if [[ $? != 0 ]]; then
   aws --profile mdbci configure
 fi
-# Create security group and update aws-config.yml file
-./update_aws_config_security_group.sh $(hostname)_$(date +%s)

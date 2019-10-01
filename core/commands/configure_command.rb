@@ -77,8 +77,6 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     aws_credentials = input_aws_credentials
     return ERROR_RESULT if aws_credentials.nil?
 
-    aws_security_group = input_or_create_security_group(aws_credentials)
-    aws_credentials['security_group'] = aws_security_group
     @configuration['aws'] = aws_credentials
     SUCCESS_RESULT
   end
@@ -121,19 +119,6 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
 
   def input_mdbe_settings
     { 'key' => read_topic('Please input the private key for MariaDB Enterprise', @configuration.dig('mdbe', 'key')) }
-  end
-
-  def input_or_create_security_group(credentials)
-    if read_topic('Create new AWS security group?', 'y').casecmp('y').zero?
-      aws_service = AwsService.new(credentials, @ui)
-      security_group = aws_service.create_security_group
-      return ERROR_RESULT if security_group.nil?
-
-      @ui.info("Created new security group: #{security_group}")
-      security_group
-    else
-      read_topic('Please input the name of AWS security group', '')
-    end
   end
 
   def input_aws_credentials

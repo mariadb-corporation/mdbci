@@ -84,10 +84,8 @@ class AwsTerraformGenerator
       access_key = "#{@aws_config['access_key_id']}"
       secret_key = "#{@aws_config['secret_access_key']}"
     }
-    locals {
-      security_groups = ["default", "#{@aws_config['security_group']}"]
-    }
     #{keypair_resource}
+    #{security_group_resource}
     PROVIDER
   end
 
@@ -127,6 +125,25 @@ class AwsTerraformGenerator
     PARTIAL
   end
 
+  def security_group_resource
+    group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
+    template = ERB.new <<-SECURITY_GROUP
+    resource "aws_security_group" "security_group" {
+      name = "<%= group_name %>"
+      description = "MDBCI <%= group_name %> auto generated"
+      <% %w[tcp udp icmp].each do |protocol| %>
+        ingress {
+          from_port   = 0
+          to_port     = <%= protocol == 'icmp' ? -1 : 65_535 %>
+          protocol    = "<%= protocol %>"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      <% end %>
+    }
+    SECURITY_GROUP
+    template.result(binding)
+  end
+
   # Generate the key pair for the AWS.
   # @param path [String] path of the configuration file
   # @return [Array[String, String]] path to .pem-file and key pair name.
@@ -152,8 +169,8 @@ class AwsTerraformGenerator
     resource "aws_instance" "<%= name %>" {
       ami             = "<%= ami %>"
       instance_type   = "<%= default_instance_type %>"
-      security_groups = local.security_groups
-      key_name = aws_key_pair.ec2key.key_name
+      security_groups = ["default", aws_security_group.security_group.name]
+      key_name        = aws_key_pair.ec2key.key_name
       tags = {
         <% tags.each do |tag_key, tag_value| %>
           <%= tag_key %> = "<%= tag_value %>"
