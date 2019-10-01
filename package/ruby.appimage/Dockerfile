@@ -25,6 +25,7 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
         build-essential \
         g++-9 \
         g++-9 \
+        curl \
         wget \
         sudo \
         vim && \
