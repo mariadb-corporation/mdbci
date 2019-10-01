@@ -32,7 +32,7 @@ if [ -z "${docker_image_id}" ]; then
     pushd $script_dir
 
     process_count=$(getconf _NPROCESSORS_ONLN)
-    docker image pull ubuntu:14.04
+    docker image pull ubuntu:12.04
     docker image build \
            --build-arg BUILD_JOBS=$process_count \
            --build-arg RUBY_VERSION=$ruby_version \

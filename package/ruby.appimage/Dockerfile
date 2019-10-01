@@ -1,6 +1,6 @@
 # Beware: only meant for use to build ruby appimages
 
-FROM ubuntu:14.04 as ruby-appimage-builder
+FROM ubuntu:12.04 as ruby-appimage-builder
 
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
@@ -15,7 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
         WORKSPACE=/build
 
 RUN apt-get update && \
-        apt-get install -y apt-transport-https software-properties-common
+        apt-get install -y apt-transport-https software-properties-common python-software-properties
 
 # Install and configure GCC 9 to build ruby and packages
 # Inspiried by https://gist.github.com/application2000/73fd6f4bf1be6600a2cf9f56315a2d91
