@@ -25,8 +25,18 @@ do
   chmod 755 "$executable"
 done
 
-# Making links to tool through the AppImage
+# Making chef-solo available system-wide
+# ln -sf "$app_run" "/usr/bin/chef-solo"
+ln -sf "$target_dir/usr/bin/chef-solo" "/usr/bin/chef-solo"
+
+# Making tools inside the squashfs-root via ruby-exec-wrapper tool
+insert_run_header() {
+  local file="$1"
+  header="#!${target_dir}/usr/bin/ruby-appimage-wrapper"
+  ex -sc "1i|$header" -cx $file
+}
 for executable in bundle bundler chef-solo gem ohai
 do
-  ln -sf "$app_run" "/usr/bin/$executable"
+  insert_run_header "$target_dir/usr/bin/$executable"
 done
+
