@@ -1,11 +1,11 @@
 # Beware: only meant for use to build ruby appimages
 
-FROM ubuntu:14.04
+FROM ubuntu:14.04 as ruby-appimage-builder
 
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
 ARG BUILD_JOBS=1
-ARG RUBY_VERSION=2.6.4
+ARG RUBY_VERSION=2.6.3
 ARG RUBY_INSTALL_VERSION=0.7.0
 
 # Please update the ENTRYPOINT if changing the WORKSPACE variable
@@ -35,6 +35,21 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
         make install && \
         install -m 0755 -d $WORKSPACE && \
         ruby-install --cleanup --jobs $BULID_JOBS --prefix $RUBY_DIR/usr ruby $RUBY_VERSION -- --disable-install-doc --disable-debug --disable-dependency-tracking --enable-shared --enable-load-relative
+
+# Install and configure the Rust compilation toolchain
+ENV RUSTUP_HOME=/opt/rustup \
+        PATH="/opt/cargo/bin:${PATH}" \
+        WRAPPER_BUILD_DIR="${WORPSPACE}/ruby-exec-wrapper"
+
+RUN wget https://sh.rustup.rs -O /tmp/install-rust.sh && \
+        sh /tmp/install-rust.sh -y --no-modify-path && \
+        mv /root/.cargo/ /opt/cargo
+
+# Build the appimage wrapper
+COPY ruby-exec-wrapper $WRAPPER_BUILD_DIR
+WORKDIR $WRAPPER_BUILD_DIR
+RUN cargo build --release && \
+        cp target/release/ruby-appimage-wrapper $RUBY_DIR/usr/bin/
 
 # Put gen_appimage.sh script into the root
 COPY gen_appimage.sh $WORKSPACE
