@@ -6,10 +6,10 @@
 require 'chef/application/solo'
 
 # Changing the working directory to the one used to called the AppImage
-Dir.chdir(ENV['OLD_CWD'])
+Dir.chdir(ENV['OLD_CWD']) if ENV.key?('OLD_CWD')
 
 # Removing the AppRun environment.
-PREFIX = 'MDBCI_OLD_ENV_'
+PREFIX = 'OS_ENV_'
 external_env = ENV.select { |name, _| name.start_with?(PREFIX) }
                   .map { |name, value| [name.sub(/^#{PREFIX}/, ''), value] }
                   .to_h

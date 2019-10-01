@@ -173,7 +173,7 @@ int main(int argc, char *argv[], char *envp[]) {
         die("Could not cd into %s\n", usr_in_appdir);
 
     // store environment variables for vagrant
-    const char *vagrant_prefix = "MDBCI_OLD_ENV_";
+    const char *vagrant_prefix = "OS_ENV_";
     size_t vagrant_prefix_size = strlen(vagrant_prefix);
     char **current_variable = envp;
     while(*current_variable) {
