@@ -20,6 +20,7 @@ class AwsTerraformGenerator
     @aws_config = aws_config
     @ui = logger
     @configuration_path = configuration_path
+    @vpc_generated = false
   end
 
   def configuration_file_name
@@ -84,8 +85,13 @@ class AwsTerraformGenerator
       access_key = "#{@aws_config['access_key_id']}"
       secret_key = "#{@aws_config['secret_access_key']}"
     }
+    locals {
+      cidr_vpc = "10.1.0.0/16" # CIDR block for the VPC
+      cidr_subnet = "10.1.0.0/24" # CIDR block for the subnet
+      availability_zone = "eu-west-1a" # availability zone to create subnet
+    }
     #{keypair_resource}
-    #{security_group_resource}
+    #{security_group_resource(false)}
     PROVIDER
   end
 
@@ -125,23 +131,61 @@ class AwsTerraformGenerator
     PARTIAL
   end
 
-  def security_group_resource
+  def security_group_resource(vpc)
     group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
     template = ERB.new <<-SECURITY_GROUP
-    resource "aws_security_group" "security_group" {
+    resource "aws_security_group" "security_group<%= vpc ? '_vpc' : '' %>" {
       name = "<%= group_name %>"
       description = "MDBCI <%= group_name %> auto generated"
-      <% %w[tcp udp icmp].each do |protocol| %>
-        ingress {
+      ingress {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+      }
+      <% if vpc %>
+        vpc_id = aws_vpc.vpc.id
+        egress {
           from_port   = 0
-          to_port     = <%= protocol == 'icmp' ? -1 : 65_535 %>
-          protocol    = "<%= protocol %>"
+          to_port     = 0
+          protocol    = "-1"
           cidr_blocks = ["0.0.0.0/0"]
         }
       <% end %>
     }
     SECURITY_GROUP
     template.result(binding)
+  end
+
+  def vpc_resources
+    <<-VPC_RESOURCES
+    resource "aws_vpc" "vpc" {
+      cidr_block = local.cidr_vpc
+      enable_dns_support   = true
+      enable_dns_hostnames = true
+    }
+    resource "aws_internet_gateway" "igw" {
+      vpc_id = aws_vpc.vpc.id
+    }
+    resource "aws_subnet" "subnet_public" {
+      vpc_id = aws_vpc.vpc.id
+      cidr_block = local.cidr_subnet
+      map_public_ip_on_launch = "true"
+      availability_zone = local.availability_zone
+    }
+    resource "aws_route_table" "rtb_public" {
+      vpc_id = aws_vpc.vpc.id
+      route {
+          cidr_block = "0.0.0.0/0"
+          gateway_id = aws_internet_gateway.igw.id
+      }
+    }
+    resource "aws_route_table_association" "rta_subnet_public" {
+      subnet_id      = aws_subnet.subnet_public.id
+      route_table_id = aws_route_table.rtb_public.id
+    }
+    #{security_group_resource(true)}
+    VPC_RESOURCES
   end
 
   # Generate the key pair for the AWS.
@@ -165,12 +209,22 @@ class AwsTerraformGenerator
   def get_vms_definition(tags, node_params)
     node_params = node_params.merge(tags: tags)
     connection_block = connection_partial(node_params[:user], node_params[:name])
+    vpc_resources_blocks = vpc_resources
     template = ERB.new <<-AWS
+    <% if vpc && !@vpc_generated %>
+      <%= vpc_resources_blocks %>
+    <% end %>
     resource "aws_instance" "<%= name %>" {
       ami             = "<%= ami %>"
       instance_type   = "<%= default_instance_type %>"
-      security_groups = ["default", aws_security_group.security_group.name]
       key_name        = aws_key_pair.ec2key.key_name
+      <% if vpc %>
+        vpc_security_group_ids = [aws_security_group.security_group_vpc.id]
+        subnet_id  = aws_subnet.subnet_public.id
+        depends_on = [aws_route_table_association.rta_subnet_public, aws_route_table.rtb_public]
+      <% else %>
+        security_groups = ["default", aws_security_group.security_group.name]
+      <% end %>
       tags = {
         <% tags.each do |tag_key, tag_value| %>
           <%= tag_key %> = "<%= tag_value %>"
@@ -212,7 +266,9 @@ class AwsTerraformGenerator
       <% end %>
     }
     AWS
-    template.result(OpenStruct.new(node_params).instance_eval { binding })
+    result = template.result(OpenStruct.new(node_params).instance_eval { binding })
+    @vpc_generated = true if node_params[:vpc]
+    result
   end
   # rubocop:enable Metrics/MethodLength
 end
