@@ -85,18 +85,20 @@ class VagrantTerraformCleaner
   #
   # @param configuration [Configuration] that we operate on
   def stop_machines(configuration)
-    @ui.info 'Destroying the machines using vagrant'
+    @ui.info 'Destroying the machines using vagrant and terraform'
     MachineCommands.destroy_nodes(configuration.provider, configuration.node_names, @ui, configuration.path)
+    destroy_additional_resources(configuration)
   end
 
-  # Destroy aws keypair specified in the configuration.
+  # Destroy all resources if all nodes are not running
+  # For example, for AWS will be destroyed vpc resources, security group, key_pair etc.
   #
-  # @param configuration [Configuration] that we operate on.
-  def destroy_aws_keypair(configuration)
-    return unless configuration.aws_keypair_name?
-
-    @ui.info "Destroying AWS key pair #{configuration.aws_keypair_name}"
-    @aws_service.delete_key_pair(configuration.aws_keypair_name)
+  # @param configuration [Configuration] that we operate on
+  def destroy_additional_resources(configuration)
+    running_nodes = configuration.all_node_names.select do |node|
+      MachineCommands.node_running?(configuration.provider, @aws_service, node, @ui, configuration.path)
+    end
+    MachineCommands.destroy_all(configuration.provider, @ui, configuration.path) if running_nodes.empty?
   end
 
   # Destroy the node if it was not destroyed by the vagrant.

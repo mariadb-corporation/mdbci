@@ -85,4 +85,8 @@ module MachineCommands
   def self.format_configuration_file(provider, logger, path = Dir.pwd)
     TerraformService.fmt(logger, path) if provider == 'aws'
   end
+
+  def self.destroy_all(provider, logger, path = Dir.pwd)
+    TerraformService.destroy_all(logger, path) if provider == 'aws'
+  end
 end
