@@ -80,8 +80,8 @@ class AwsTerraformGenerator
   def provider_config
     <<-PROVIDER
     provider "aws" {
-      profile    = "default"
-      region     = "#{@aws_config['region']}"
+      profile = "default"
+      region = "#{@aws_config['region']}"
       access_key = "#{@aws_config['access_key_id']}"
       secret_key = "#{@aws_config['secret_access_key']}"
     }
@@ -121,12 +121,12 @@ class AwsTerraformGenerator
   def connection_partial(user, name)
     <<-PARTIAL
     connection {
-      type        = "ssh"
+      type = "ssh"
       private_key = file("#{@path_to_keyfile}")
-      timeout     = "2m"
-      agent       = false
-      user        = "#{user}"
-      host        = aws_instance.#{name}.public_ip
+      timeout = "2m"
+      agent = false
+      user = "#{user}"
+      host = aws_instance.#{name}.public_ip
     }
     PARTIAL
   end
@@ -138,17 +138,17 @@ class AwsTerraformGenerator
       name = "<%= group_name %>"
       description = "MDBCI <%= group_name %> auto generated"
       ingress {
-        from_port   = 22
-        to_port     = 22
-        protocol    = "tcp"
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
       }
       <% if vpc %>
         vpc_id = aws_vpc.vpc.id
         egress {
-          from_port   = 0
-          to_port     = 0
-          protocol    = "-1"
+          from_port = 0
+          to_port = 0
+          protocol = -1
           cidr_blocks = ["0.0.0.0/0"]
         }
       <% end %>
@@ -161,7 +161,7 @@ class AwsTerraformGenerator
     <<-VPC_RESOURCES
     resource "aws_vpc" "vpc" {
       cidr_block = local.cidr_vpc
-      enable_dns_support   = true
+      enable_dns_support = true
       enable_dns_hostnames = true
     }
     resource "aws_internet_gateway" "igw" {
@@ -170,7 +170,7 @@ class AwsTerraformGenerator
     resource "aws_subnet" "subnet_public" {
       vpc_id = aws_vpc.vpc.id
       cidr_block = local.cidr_subnet
-      map_public_ip_on_launch = "true"
+      map_public_ip_on_launch = true
       availability_zone = local.availability_zone
     }
     resource "aws_route_table" "rtb_public" {
@@ -181,7 +181,7 @@ class AwsTerraformGenerator
       }
     }
     resource "aws_route_table_association" "rta_subnet_public" {
-      subnet_id      = aws_subnet.subnet_public.id
+      subnet_id = aws_subnet.subnet_public.id
       route_table_id = aws_route_table.rtb_public.id
     }
     #{security_group_resource(true)}
@@ -215,12 +215,12 @@ class AwsTerraformGenerator
       <%= vpc_resources_blocks %>
     <% end %>
     resource "aws_instance" "<%= name %>" {
-      ami             = "<%= ami %>"
-      instance_type   = "<%= default_instance_type %>"
-      key_name        = aws_key_pair.ec2key.key_name
+      ami = "<%= ami %>"
+      instance_type = "<%= default_instance_type %>"
+      key_name = aws_key_pair.ec2key.key_name
       <% if vpc %>
         vpc_security_group_ids = [aws_security_group.security_group_vpc.id]
-        subnet_id  = aws_subnet.subnet_public.id
+        subnet_id = aws_subnet.subnet_public.id
         depends_on = [aws_route_table_association.rta_subnet_public, aws_route_table.rtb_public]
       <% else %>
         security_groups = ["default", aws_security_group.security_group.name]
@@ -231,7 +231,7 @@ class AwsTerraformGenerator
         <% end %>
       }
       root_block_device {
-        volume_size = "500"
+        volume_size = 500
       }
       user_data = <<-EOT
       #!/bin/bash
@@ -252,7 +252,7 @@ class AwsTerraformGenerator
       }
       <% if template_path %>
         provisioner "file" {
-          source      = "<%=template_path %>"
+          source = "<%=template_path %>"
           destination = "/home/<%= user %>/cnf_templates"
           <%= connection_block %>
         }
