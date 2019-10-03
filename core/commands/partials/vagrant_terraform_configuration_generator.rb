@@ -8,6 +8,7 @@ require_relative '../../models/configuration.rb'
 require_relative '../../../core/services/configuration_generator'
 require_relative 'vagrantfile_generator'
 require_relative 'aws_terraform_generator'
+require_relative '../../../core/services/machine_commands'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant or Terraform backend
 class VagrantTerraformConfigurationGenerator < BaseCommand
@@ -220,6 +221,7 @@ class VagrantTerraformConfigurationGenerator < BaseCommand
     end
     file.puts @content_generator.config_footer
     file.close
+    MachineCommands.format_configuration_file(@nodes_provider, @ui, path)
     SUCCESS_RESULT
   rescue RuntimeError => e
     @ui.error(e.message)

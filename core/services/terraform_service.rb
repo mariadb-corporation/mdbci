@@ -25,4 +25,8 @@ module TerraformService
   def self.destroy_all(logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform destroy -auto-approve', path)
   end
+
+  def self.fmt(logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, 'terraform fmt', path)
+  end
 end

@@ -81,4 +81,8 @@ module MachineCommands
     else VagrantService.destroy_nodes(node_names, path)
     end
   end
+
+  def self.format_configuration_file(provider, logger, path = Dir.pwd)
+    TerraformService.fmt(logger, path) if provider == 'aws'
+  end
 end
