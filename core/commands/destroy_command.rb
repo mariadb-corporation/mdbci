@@ -101,7 +101,6 @@ Labels should be separated with commas, do not contain any whitespaces.
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
-      remove_files(configuration, @env.keep_template)
     else
       vagrant_terraform_cleaner = VagrantTerraformCleaner.new(@env, @ui)
       vagrant_terraform_cleaner.destroy_nodes_by_configuration(configuration)
@@ -109,10 +108,8 @@ Labels should be separated with commas, do not contain any whitespaces.
         update_configuration_files(configuration)
         return
       end
-
-      remove_files(configuration, @env.keep_template)
-      vagrant_terraform_cleaner.destroy_aws_keypair(configuration)
     end
+    remove_files(configuration, @env.keep_template)
   end
 
   # Update network_configuration and configured_labels files
