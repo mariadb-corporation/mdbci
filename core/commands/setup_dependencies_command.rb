@@ -256,6 +256,12 @@ class DependencyManager
     end
     run_command("sudo usermod -a -G #{group} $(whoami)")[:value].success?
   end
+
+  # Answers whether the installation is needed or not
+  # @param product [String] the name of the product
+  def should_install?(product)
+    product == @env.nodeProduct || @env.nodeProduct.nil?
+  end
 end
 
 # Class that manages CentOS specific packages
@@ -274,12 +280,11 @@ class CentosDependencyManager < DependencyManager
         return ERROR_RESULT unless result.success?
       end
     end
-    product = @env.nodeProduct
-    if product == 'docker' || product.nil?
+    if should_install?('docker')
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
-    if product == 'libvirt' || product.nil?
+    if should_install?('libvirt')
       return ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
@@ -357,12 +362,11 @@ class DebianDependencyManager < DependencyManager
                             "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
                             'sudo systemctl restart libvirtd.service'
                           ])
-    product = @env.nodeProduct
-    if product == 'docker' || product.nil?
+    if should_install?('docker')
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
-    if product == 'libvirt' || product.nil?
+    if should_install?('libvirt')
       return result[:value].exitstatus unless result[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
