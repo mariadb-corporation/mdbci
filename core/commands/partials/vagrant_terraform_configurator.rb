@@ -20,7 +20,19 @@ class VagrantTerraformConfigurator
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
-    @threads_count = @env.threads_count
+    setup_threads_count(@provider, @env.threads_count)
+  end
+
+  # Setup @threads_count variable to correct threads_count depending on the current provider, setup Workers pool size
+  #
+  # @param provider [String] name of the nodes provider
+  # @param recommended_threads_count [Integer] recommended threads count.
+  def setup_threads_count(provider, recommended_threads_count)
+    @threads_count = if provider == 'aws'
+                       1
+                     else
+                       recommended_threads_count
+                     end
     Workers.pool.resize(@threads_count)
   end
 
