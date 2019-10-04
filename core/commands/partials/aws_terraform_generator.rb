@@ -88,7 +88,7 @@ class AwsTerraformGenerator
     locals {
       cidr_vpc = "10.1.0.0/16" # CIDR block for the VPC
       cidr_subnet = "10.1.0.0/24" # CIDR block for the subnet
-      availability_zone = "eu-west-1a" # availability zone to create subnet
+      availability_zone = "#{@aws_config['availability_zone']}" # availability zone to create subnet
     }
     #{keypair_resource}
     #{security_group_resource(false)}

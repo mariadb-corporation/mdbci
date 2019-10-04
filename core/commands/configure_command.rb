@@ -125,17 +125,20 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     key_id = ''
     secret_key = ''
     region = 'eu-west-1'
+    availability_zone = 'eu-west-1a'
     loop do
       key_id = read_topic('Please input AWS key id', key_id)
       secret_key = read_topic('Please input AWS secret key', secret_key)
       region = read_topic('Please input AWS region', region)
+      availability_zone = read_topic('Please input AWS availability zone to create subnet', availability_zone)
       check_complete = AwsService.check_credentials(@ui, key_id, secret_key, region)
       break if check_complete
 
       @ui.error('You have provided inappropriate information.')
       return nil unless read_topic('Try again?', 'y').casecmp('y').zero?
     end
-    { 'access_key_id' => key_id, 'secret_access_key' => secret_key, 'region' => region }
+    { 'access_key_id' => key_id, 'secret_access_key' => secret_key,
+      'region' => region, 'availability_zone' => availability_zone }
   end
 
   # Ask user to input non-empty string as value
