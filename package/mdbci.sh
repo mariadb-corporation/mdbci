@@ -19,7 +19,7 @@ echo "--> downloading certificates to the "
 wget -O "$APP_DIR/cacert.pem" https://curl.haxx.se/ca/cacert.pem
 
 echo "--> creating and installing custom runner"
-sudo apt-get install -y cmake
+sudo yum install -y cmake
 pushd runner
 cmake .
 make
