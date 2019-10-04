@@ -210,8 +210,9 @@ class AwsTerraformGenerator
     node_params = node_params.merge(tags: tags)
     connection_block = connection_partial(node_params[:user], node_params[:name])
     vpc_resources_blocks = vpc_resources
+    vpc_generated_state = @vpc_generated
     template = ERB.new <<-AWS
-    <% if vpc && !@vpc_generated %>
+    <% if vpc && !vpc_generated_state %>
       <%= vpc_resources_blocks %>
     <% end %>
     resource "aws_instance" "<%= name %>" {
