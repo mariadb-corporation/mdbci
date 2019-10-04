@@ -209,6 +209,7 @@ end
 # Base class for a dependency manager for a specific linux distribution
 class DependencyManager
   include ShellCommands
+  include ReturnCodes
 
   VAGRANT_PACKAGE = "vagrant_#{VAGRANT_VERSION}_x86_64"
   VAGRANT_URL = "https://releases.hashicorp.com/vagrant/#{VAGRANT_VERSION}/#{VAGRANT_PACKAGE}"
@@ -270,20 +271,20 @@ class CentosDependencyManager < DependencyManager
     required_packages.each do |package|
       unless installed?(package)
         result = run_command("sudo yum install -y #{package}")[:value]
-        return BaseCommand::ERROR_RESULT unless result.success?
+        return ERROR_RESULT unless result.success?
       end
     end
     product = @env.nodeProduct
     if product == 'docker' || product.nil?
-      return BaseCommand::ERROR_RESULT unless install_docker
-      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('docker')
+      return ERROR_RESULT unless install_docker
+      return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     if product == 'libvirt' || product.nil?
-      return BaseCommand::ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
-      return BaseCommand::ERROR_RESULT unless install_vagrant
-      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('libvirt')
+      return ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
+      return ERROR_RESULT unless install_vagrant
+      return ERROR_RESULT unless add_user_to_usergroup('libvirt')
     end
-    BaseCommand::SUCCESS_RESULT
+    SUCCESS_RESULT
   end
 
   def remove_old_version_docker
@@ -314,7 +315,7 @@ class CentosDependencyManager < DependencyManager
 
   # Installs or updates Vagrant if installed version older than VAGRANT_VERSION
   def install_vagrant
-    return BaseCommand::SUCCESS_RESULT unless should_install_vagrant?
+    return SUCCESS_RESULT unless should_install_vagrant?
 
     downloaded_file = generate_downloaded_file_path('rpm')
     result = run_sequence([
@@ -331,14 +332,14 @@ class CentosDependencyManager < DependencyManager
   end
 
   def install_qemu
-    return BaseCommand::SUCCESS_RESULT if installed?('qemu')
+    return SUCCESS_RESULT if installed?('qemu')
 
     unless run_command('sudo yum install -y qemu')[:value].success?
       @ui.error("Cannot find whole package 'qemu'. Only 'qemu-img' and 'qemu-kvm' will be installed.")
       @ui.error("You can try running 'sudo yum install epel-release' and retrying this command.")
-      return BaseCommand::ERROR_RESULT
+      return ERROR_RESULT
     end
-    BaseCommand::SUCCESS_RESULT
+    SUCCESS_RESULT
   end
 end
 
@@ -358,15 +359,15 @@ class DebianDependencyManager < DependencyManager
                           ])
     product = @env.nodeProduct
     if product == 'docker' || product.nil?
-      return BaseCommand::ERROR_RESULT unless install_docker
-      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('docker')
+      return ERROR_RESULT unless install_docker
+      return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     if product == 'libvirt' || product.nil?
       return result[:value].exitstatus unless result[:value].success?
-      return BaseCommand::ERROR_RESULT unless install_vagrant
-      return BaseCommand::ERROR_RESULT unless add_user_to_usergroup('libvirt')
+      return ERROR_RESULT unless install_vagrant
+      return ERROR_RESULT unless add_user_to_usergroup('libvirt')
     end
-    BaseCommand::SUCCESS_RESULT
+    SUCCESS_RESULT
   end
 
   def install_docker
@@ -385,7 +386,7 @@ class DebianDependencyManager < DependencyManager
   end
 
   def install_vagrant
-    return BaseCommand::SUCCESS_RESULT unless should_install_vagrant?
+    return SUCCESS_RESULT unless should_install_vagrant?
 
     downloaded_file = generate_downloaded_file_path('deb')
     result = run_sequence([
