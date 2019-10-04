@@ -19,7 +19,7 @@ fi
 app=$1
 container_name=$app-appimage-build
 
-ruby_version=2.6.3
+ruby_version=2.6.5
 docker_image=ruby-appimage:$ruby_version
 
 script_dir="${0%/*}"
@@ -32,9 +32,9 @@ if [ -z "${docker_image_id}" ]; then
     pushd $script_dir
 
     process_count=$(getconf _NPROCESSORS_ONLN)
-    docker image pull ubuntu:12.04
+    docker image pull centos:6
     docker image build \
-           --build-arg BUILD_JOBS=$process_count \
+           --build-arg BUILD_JOBS="$process_count" \
            --build-arg RUBY_VERSION=$ruby_version \
            -t $docker_image .
     popd
@@ -44,7 +44,7 @@ docker container run \
        --user $(id -u):$(id -g) \
        --volume "${app_dir}":/build/application \
        -w /build/application \
-       --name $container_name \
+       --name "$container_name" \
        $docker_image "$@"
 
-docker container rm -v $container_name
+# docker container rm -v $container_name

@@ -41,16 +41,16 @@ APP_DIR=$WORKSPACE/nested/$APP.AppDir
 uid=$(id -u)
 gid=$(id -g)
 # Changing the ownership of all in worplace to that user
-sudo chown -R $uid:$gid $WORKSPACE
+sudo chown -R "$uid":"$gid" "$WORKSPACE"
 
 # Creating the AppImage directory
-mkdir -p $APP_DIR
-rmdir $APP_DIR
-ln -sf $RUBY_DIR $APP_DIR
+mkdir -p "$APP_DIR"
+rmdir "$APP_DIR"
+ln -sf "$RUBY_DIR" "$APP_DIR"
 
 # Creating the directory for the AppImage to put
-mkdir -p $ROOT_DIR/result
-ln -sf $ROOT_DIR/result $WORKSPACE/out
+mkdir -p "$ROOT_DIR/result"
+ln -sf "$ROOT_DIR/result" "$WORKSPACE/out"
 
 # Configuring PATH variables
 export CPPFLAGS="-I${APP_DIR}/usr/include -I${APP_DIR}/usr/include/libxml2"
@@ -66,13 +66,14 @@ echo "--> running the application build script"
 
 echo "--> remove unused files"
 # remove doc, man, ri
-rm -rf $APP_DIR/usr/share/{doc, man}
+rm -rf "$APP_DIR/usr/share/doc"
+rm -rf "$APP_DIR/usr/share/man"
 # remove ruby headers
-rm -rf $APP_DIR/usr/include
+rm -rf "$APP_DIR/usr/include"
 
 echo "--> creating the AppImage"
-wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O $WORKSPACE/functions.sh
-source $WORKSPACE/functions.sh
+wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
+source "$WORKSPACE/functions.sh"
 
 cd $APP_DIR
 
@@ -81,7 +82,7 @@ echo "--> getting the AppRun executable"
 get_stable_apprun()
 {
   TARGET_ARCH=${ARCH:-$SYSTEM_ARCH}
-  wget -c https://github.com/AppImage/AppImageKit/releases/download/10/AppRun-${TARGET_ARCH} -O AppRun
+  wget -c https://github.com/AppImage/AppImageKit/releases/download/10/AppRun-"${TARGET_ARCH}" -O AppRun
   chmod a+x AppRun
 }
 if [ ! -x AppRun ]; then
@@ -89,17 +90,18 @@ if [ ! -x AppRun ]; then
 fi
 
 echo "--> get desktop file and icon"
-cp $ROOT_DIR/$APP.desktop $ROOT_DIR/$APP.png .
+cp "$ROOT_DIR/$APP.desktop" "$ROOT_DIR/$APP.png" .
 
 echo "--> copy dependencies"
-copy_deps
-copy_deps # Double time to be sure
+sudo bash -c "source $WORKSPACE/functions.sh; copy_deps; copy_deps"
 
 echo "--> move the libraries to usr/lib"
-move_lib
+sudo bash -c "source $WORKSPACE/functions.sh; move_lib"
 
 echo "--> delete stuff that should not go into the AppImage."
-delete_blacklisted
+sudo bash -c "source $WORKSPACE/functions.sh; delete_blacklisted"
+
+sudo chown -R "$uid":"$gid" .
 
 cd ..
 
