@@ -124,15 +124,17 @@ class RepoManager
     repository_key = $session.box_definitions.platform_key(box)
     repository_name = PRODUCT_ATTRIBUTES[product_name][:repository]
     if product['version'].nil?
-      all_version = @repos.find_all do |elem|
+      all_available_repo = @repos.find_all do |elem|
         elem[1]['product'] == product['name'] &&
           elem[1]['platform'] + '^' + elem[1]['platform_version'] == repository_key
       end
-      version = all_version.delete_if { |elem| elem[1]['version'].include?('debug') }.last[1]['version']
-      version = all_version.last[1]['version'] if version.nil?
+      repo = all_available_repo.last[1]
+      all_available_repo.delete_if { |elem| elem[1]['version'].include?('debug') }
+      repo = all_available_repo.last[1] unless all_available_repo.nil?
+    else
+      repo_key = "#{repository_name}@#{version}+#{repository_key}"
+      repo = @repos[repo_key]
     end
-    repo_key = "#{repository_name}@#{version}+#{repository_key}"
-    repo = @repos[repo_key]
     @ui.info("Repo key is '#{repo_key}': #{repo.nil? ? 'Not found' : 'Found'}")
     repo
   end
