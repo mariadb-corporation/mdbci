@@ -4,7 +4,7 @@
 # Mixin depends on @ui instance variable that points to the logger.
 # rubocop:disable Metrics/ModuleLength
 module ShellCommands
-  PREFIX = 'MDBCI_OLD_ENV_'
+  PREFIX = 'OS_ENV_'
 
   @env = if ENV['APPIMAGE'] != 'true'
            ENV
