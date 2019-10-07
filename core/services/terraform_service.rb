@@ -7,6 +7,7 @@ module TerraformService
   def self.resource_type(provider)
     case provider
     when 'aws' then 'aws_instance'
+    else raise('Unknown Terraform service provider')
     end
   end
 
