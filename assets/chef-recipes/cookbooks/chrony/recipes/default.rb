@@ -1,16 +1,10 @@
 return if node[:platform_family] == 'suse' && node[:platform_version].to_i < 15
 
-if node[:platform] == 'linux'
-  zypper_package 'ntp' do
-    action :remove
-  end
-  zypper_package 'chrony'
-else
-  package 'ntp' do
-    action :remove
-  end
-  package 'chrony'
+package 'ntp' do
+  action :remove
 end
+package 'chrony'
+
 
 link '/etc/localtime' do
   to '/usr/share/zoneinfo/Europe/Paris'

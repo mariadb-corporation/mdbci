@@ -32,6 +32,8 @@ THE SOFTWARE.
 #include <dirent.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -49,7 +51,7 @@ THE SOFTWARE.
 #define false 0
 #define true -1
 
-#define LINE_SIZE 255
+#define LINE_SIZE 300
 
 int filter(const struct dirent *dir) {
     char *p = (char*) &dir->d_name;
@@ -58,6 +60,13 @@ int filter(const struct dirent *dir) {
 }
 
 int main(int argc, char *argv[], char *envp[]) {
+    size_t app_name_length = strlen(argv[0]) + 1;
+    char *app_name_copy = malloc(app_name_length);
+    strncpy(app_name_copy, argv[0], app_name_length);
+    char *app_name = basename(app_name_copy);
+    struct stat executable_info;
+    int app_search_result = lstat(argv[0], &executable_info);
+
     char *appdir = dirname(realpath("/proc/self/exe", NULL));
     if (!appdir)
         die("Could not access /proc/self/exe\n");
@@ -164,7 +173,7 @@ int main(int argc, char *argv[], char *envp[]) {
         die("Could not cd into %s\n", usr_in_appdir);
 
     // store environment variables for vagrant
-    const char *vagrant_prefix = "MDBCI_OLD_ENV_";
+    const char *vagrant_prefix = "OS_ENV_";
     size_t vagrant_prefix_size = strlen(vagrant_prefix);
     char **current_variable = envp;
     while(*current_variable) {
@@ -235,6 +244,12 @@ int main(int argc, char *argv[], char *envp[]) {
     unsetenv("GEM_PATH");
     unsetenv("GEM_HOME");
     unsetenv("GEM_ROOT");
+
+    /* Check that file was run from the link */
+    if (S_ISLNK(executable_info.st_mode) || app_search_result == -1) {
+      exe = app_name;
+      outargptrs[0] = app_name;
+    }
 
     /* Run */
     ret = execvp(exe, outargptrs);
