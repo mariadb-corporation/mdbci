@@ -81,7 +81,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   # @return [Integer] result of execution
   def install
     result = @dependency_manager.install_dependencies
-    if @env.nodeProduct == 'libvirt' || @env.nodeProduct.nil?
+    if @dependency_manager.should_install?('libvirt')
       result = install_vagrant_plugins if result == SUCCESS_RESULT
       result = create_libvirt_pool if result == SUCCESS_RESULT
       if result == SUCCESS_RESULT
