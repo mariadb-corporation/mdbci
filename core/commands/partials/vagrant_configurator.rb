@@ -15,6 +15,7 @@ class VagrantConfigurator
   include ShellCommands
 
   VAGRANT_NO_PARALLEL = '--no-parallel'
+  CHEF_CONFIGURATION_ATTEMPTS = 2
 
   def initialize(specification, config, env, logger)
     @specification = specification
@@ -74,12 +75,12 @@ class VagrantConfigurator
       [role_file, "roles/#{node}.json"],
       [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
-    if configuration_status.error?
-      logger.error("Error during machine configuration: #{configuration_status.error}")
-      return false
-    end
+    CHEF_CONFIGURATION_ATTEMPTS.times do
+      configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
+      break if configuration_status.success?
 
+      logger.error("Error during machine configuration: #{configuration_status.error}")
+    end
     node_provisioned?(node, logger)
   end
 
@@ -144,7 +145,7 @@ class VagrantConfigurator
   # @return [Out] logger.
   def retrieve_logger_for_node
     if use_log_storage?
-      LogStorage.new(@env)
+      LogStorage.new
     else
       @ui
     end

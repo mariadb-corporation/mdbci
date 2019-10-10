@@ -2,9 +2,9 @@
 
 # Class provides means to produce output to the application
 class Out
-  # @param configuration [Session] configuration object that can silence the output
-  def initialize(configuration)
-    @configuration = configuration
+  # @param silent [Boolean] whether the output should be suppressed or not
+  def initialize(silent = false)
+    @silent = silent
     @stream = $stdout
     @stream.sync = true
   end
@@ -32,7 +32,7 @@ class Out
   end
 
   def prompt(string)
-    return if @configuration.isSilent
+    return if @silent
 
     @stream.print("PROMPT: #{string} ")
     gets.strip
@@ -41,7 +41,7 @@ class Out
   private
 
   def print_line(level, string)
-    return if @configuration.isSilent || string.nil?
+    return if @silent || string.nil?
 
     timestamp = Time.now.strftime('%Y-%m-%dT%H:%M:%S')
     print_raw_line("#{timestamp} #{level}: #{string}")
