@@ -2,13 +2,11 @@
 
 require 'fileutils'
 require 'json'
-require 'set'
 require 'date'
 require 'socket'
 require 'erb'
 require 'net/ssh'
 require_relative '../base_command'
-require_relative '../../models/configuration.rb'
 require_relative '../../../core/services/configuration_generator'
 require_relative '../../../core/services/terraform_service'
 
@@ -18,10 +16,6 @@ class AwsTerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
   KEYFILE_NAME = 'maxscale.pem'
 
-  def self.synopsis
-    'Generate a configuration based on the template.'
-  end
-
   def self.role_file_name(path, role)
     "#{path}/#{role}.json"
   end
@@ -29,6 +23,31 @@ class AwsTerraformConfigurationGenerator < BaseCommand
   def self.node_config_file_name(path, role)
     "#{path}/#{role}-config.json"
   end
+
+  # Generate a configuration.
+  #
+  # @param name [String] name of the configuration file
+  # @param override [Bool] clean directory if it is already exists
+  # @return [Number] exit code for the command execution
+  def execute(name, override)
+    begin
+      setup_command(name, override)
+    rescue RuntimeError => e
+      @ui.error(e.message)
+      return ERROR_RESULT
+    end
+    return ARGUMENT_ERROR_RESULT unless check_nodes_boxes
+
+    @ui.info("Nodes provider = #{PROVIDER_NAME}")
+    generate_result = generate
+    return generate_result unless generate_result == SUCCESS_RESULT
+
+    @ui.info "Generating config in #{@configuration_path}"
+    generate_provider_and_template_files
+    SUCCESS_RESULT
+  end
+
+  private
 
   def file_header
     <<-HEADER
@@ -469,28 +488,5 @@ class AwsTerraformConfigurationGenerator < BaseCommand
     end
     @aws_config = @env.tool_config['aws']
     @override = override
-  end
-
-  # Generate a configuration.
-  #
-  # @param name [String] name of the configuration file
-  # @param override [Bool] clean directory if it is already exists
-  # @return [Number] exit code for the command execution
-  def execute(name, override)
-    begin
-      setup_command(name, override)
-    rescue RuntimeError => e
-      @ui.error(e.message)
-      return ERROR_RESULT
-    end
-    return ARGUMENT_ERROR_RESULT unless check_nodes_boxes
-
-    @ui.info("Nodes provider = #{PROVIDER_NAME}")
-    generate_result = generate
-    return generate_result unless generate_result == SUCCESS_RESULT
-
-    @ui.info "Generating config in #{@configuration_path}"
-    generate_provider_and_template_files
-    SUCCESS_RESULT
   end
 end

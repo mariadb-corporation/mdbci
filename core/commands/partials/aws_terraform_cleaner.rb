@@ -47,6 +47,8 @@ class AwsTerraformCleaner
     vm_list.select { |node| node =~ node_name_regexp }
   end
 
+  private
+
   # Destroy all resources if all nodes are not running
   # For example, for AWS will be destroyed vpc resources, security group, key_pair etc.
   #

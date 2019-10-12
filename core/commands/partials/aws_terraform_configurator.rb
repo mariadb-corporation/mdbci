@@ -27,6 +27,19 @@ class AwsTerraformConfigurator
                         end
   end
 
+  # Brings up nodes
+  #
+  # @return [Number] execution status
+  def up
+    nodes = @config.node_names
+    up_results = nodes.map { |node| bring_up_and_configure(node) }
+    return ERROR_RESULT unless up_results.detect(&:!).nil?
+
+    SUCCESS_RESULT
+  end
+
+  private
+
   # Check whether chef have provisioned the server or not
   #
   # @param node [String] name of the node to check
@@ -139,16 +152,5 @@ class AwsTerraformConfigurator
     end
     @network_settings.store_network_configuration(@config)
     Result.ok('')
-  end
-
-  # Brings up nodes
-  #
-  # @return [Number] execution status
-  def up
-    nodes = @config.node_names
-    up_results = nodes.map { |node| bring_up_and_configure(node) }
-    return ERROR_RESULT unless up_results.detect(&:!).nil?
-
-    SUCCESS_RESULT
   end
 end
