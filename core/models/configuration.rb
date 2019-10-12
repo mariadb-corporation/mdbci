@@ -2,7 +2,6 @@
 
 # Class represents the MDBCI configuration on the hard drive.
 class Configuration
-  attr_reader :aws_keypair_name
   attr_reader :docker_network_name
   attr_reader :labels
   attr_reader :name
@@ -14,7 +13,6 @@ class Configuration
 
   NETWORK_FILE_SUFFIX = '_network_config'
   LABELS_INFO_FILE_SUFFIX = '_configured_labels'
-  AWS_KEYPAIR_NAME = 'maxscale.keypair_name'
 
   # Checks whether provided path is a directory containing configurations.
   #
@@ -75,7 +73,6 @@ class Configuration
     @provider = read_provider(@path)
     @template_path = read_template_path(@path)
     @node_configurations = extract_node_configurations(read_template(@template_path))
-    @aws_keypair_name = read_aws_keypair_name
     @docker_configuration = read_docker_configuration
     @labels = labels.nil? ? [] : labels.split(',')
     @node_names = select_node_names(node)
@@ -89,11 +86,6 @@ class Configuration
   # Provide a path to the configured label information file.
   def labels_information_file
     "#{@path}#{LABELS_INFO_FILE_SUFFIX}"
-  end
-
-  # Check whether configuration has the keypair name or not.
-  def aws_keypair_name?
-    @provider == 'aws' && @aws_keypair_name != ''
   end
 
   # Get the names of the boxes specified for this configuration
@@ -127,6 +119,12 @@ class Configuration
   # @return [Boolean] true if the configuration is present
   def docker_configuration?
     !@docker_configuration.empty?
+  end
+
+  # Check that configuration is AWS Terraform foncfiguration
+  # @return [Boolean] true if the configuration is AWS Terraform
+  def aws_terraform_configuration?
+    @provider == 'aws'
   end
 
   # Provide a copy of the Docker configuration for further modification
@@ -224,15 +222,6 @@ class Configuration
       element.instance_of?(Hash) &&
         element.key?('box')
     end
-  end
-
-  # Read the aws key pair name from the corresponding file.
-  # @return [String] name of the keypair or empty string.
-  def read_aws_keypair_name
-    keypair_file_path = "#{@path}/#{AWS_KEYPAIR_NAME}"
-    return '' unless File.exist?(keypair_file_path)
-
-    File.read(keypair_file_path).chomp
   end
 
   # Read node provider specified in the configuration.

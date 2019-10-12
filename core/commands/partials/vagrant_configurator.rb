@@ -2,37 +2,29 @@
 
 require_relative '../../models/return_codes'
 require_relative '../../services/shell_commands'
-require_relative '../../services/machine_commands'
+require_relative '../../services/vagrant_service'
 require_relative '../../services/machine_configurator'
 require_relative '../../services/network_config'
-require_relative 'vagrant_terraform_configuration_generator'
+require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
 
 # The configurator brings up the configuration for the Vagrant
-class VagrantTerraformConfigurator
+class VagrantConfigurator
+  include ReturnCodes
+  include ShellCommands
+
+  CHEF_CONFIGURATION_ATTEMPTS = 2
+
   def initialize(specification, config, env, logger)
     @specification = specification
     @config = config
     @env = env
     @ui = logger
-    @provider = config.provider
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
-    setup_threads_count(@provider, @env.threads_count)
-  end
-
-  # Setup @threads_count variable to correct threads_count depending on the current provider, setup Workers pool size
-  #
-  # @param provider [String] name of the nodes provider
-  # @param recommended_threads_count [Integer] recommended threads count.
-  def setup_threads_count(provider, recommended_threads_count)
-    @threads_count = if provider == 'aws'
-                       1
-                     else
-                       recommended_threads_count
-                     end
+    @threads_count = @env.threads_count
     Workers.pool.resize(@threads_count)
   end
 
@@ -42,10 +34,11 @@ class VagrantTerraformConfigurator
   # @param logger [Out] logger to log information to
   # return [Boolean]
   def node_provisioned?(node, logger)
-    result = MachineCommands.ssh_command(@provider, node, logger,
-                                         'test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT',
-                                         @network_config[node])
-    if result.success? && result.value.chomp == 'PROVISIONED'
+    result = VagrantService.ssh_command(node, logger,
+                                        '"test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT"',
+                                        @config.path)
+    provision_file = result[:output]
+    if provision_file == 'PROVISIONED'
       logger.info("Node '#{node}' was configured.")
       true
     else
@@ -61,17 +54,15 @@ class VagrantTerraformConfigurator
   # @return [Boolean] whether we were successful or not
   def configure(node, logger)
     @network_config.add_nodes([node])
-    return false unless MachineCommands.ssh_available?(@provider, logger, @network_config[node])
-
     solo_config = "#{node}-config.json"
-    role_file = VagrantTerraformConfigurationGenerator.role_file_name(@config.path, node)
+    role_file = VagrantConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
       logger.info("Machine '#{node}' should not be configured. Skipping.")
       return true
     end
     extra_files = [
       [role_file, "roles/#{node}.json"],
-      [VagrantTerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
+      [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
     CHEF_CONFIGURATION_ATTEMPTS.times do
       configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
@@ -84,13 +75,14 @@ class VagrantTerraformConfigurator
 
   # Bring up whole configuration or a machine up.
   #
+  # @param provider [String] name of the provider to use.
   # @param logger [Out] logger to log information to
   # @param node [String] node name to bring up. It can be empty if we need to bring
   # the whole configuration up.
   # @return result of the run_command_and_log()
-  def bring_up_machine(logger, node = '')
+  def bring_up_machine(provider, logger, node = '')
     logger.info("Bringing up #{(node.empty? ? 'configuration ' : 'node ')} #{@specification}")
-    MachineCommands.bring_up_machine(@provider, node, logger)
+    VagrantService.up(provider, node, logger, @config.path)
   end
 
   # Forcefully destroys given node
@@ -124,11 +116,11 @@ class VagrantTerraformConfigurator
       @ui.info("Bring up and configure node #{node}. Attempt #{attempt + 1}.")
       if @recreate_nodes || attempt.positive?
         destroy_node(node, logger)
-        bring_up_machine(logger, node)
-      elsif !MachineCommands.node_running?(@provider, @env.aws_service, node, logger)
-        bring_up_machine(logger, node)
+        bring_up_machine(@config.provider, logger, node)
+      elsif !VagrantService.node_running?(node, logger)
+        bring_up_machine(@config.provider, logger, node)
       end
-      next unless MachineCommands.node_running?(@provider, @env.aws_service, node, logger)
+      next unless VagrantService.node_running?(node, logger)
 
       return true if configure(node, logger)
     end
@@ -162,7 +154,7 @@ class VagrantTerraformConfigurator
   def up
     nodes = @config.node_names
     run_in_directory(@config.path) do
-      @network_config = NetworkConfig.new(@env.aws_service, @config, @ui)
+      @network_config = NetworkConfig.new(@config, @ui)
       @network_config.store_network_config
       up_results = Workers.map(nodes) { |node| up_node(node) }
       up_results.each { |up_result| up_result[1].print_to_stdout } if use_log_storage?

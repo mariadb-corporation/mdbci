@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require_relative 'shell_commands'
+require_relative 'machine_configurator'
+require 'net/ssh'
+require 'net/scp'
 
 # This class allows to execute commands of Terraform-cli
 module TerraformService
+  SSH_ATTEMPTS = 6
+
   def self.resource_type(provider)
     case provider
     when 'aws' then 'aws_instance'
@@ -29,5 +34,20 @@ module TerraformService
 
   def self.fmt(logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform fmt', path)
+  end
+
+  def self.ssh_command(network_settings, command, logger)
+    MachineConfigurator.new(logger).run_command(network_settings, command)
+  end
+
+  def self.ssh_available?(network_settings, logger)
+    SSH_ATTEMPTS.times do
+      ssh_command(network_settings, 'echo \'AVAILABLE\'', logger)
+    rescue
+      sleep(15)
+    else
+      return true
+    end
+    false
   end
 end

@@ -75,17 +75,6 @@ describe 'destroy command', :system do
     end
   end
 
-  context 'when destroying whole aws configuration' do
-    it 'should destroy the aws keypair too' do
-      template = 'suse_13_aws_plain'
-      config = mdbci_create_configuration(@test_dir, template)
-      keypair = File.read("#{config}/#{Configuration::AWS_KEYPAIR_NAME}").chomp
-      expect(mdbci_run_command("destroy #{config}")).to be_success
-      result = run_command("aws ec2 describe-key-pairs --key-names '#{keypair}'")
-      expect(result).not_to be_success
-    end
-  end
-
   context 'when vagrant was unable to destroy libvirt machine' do
     it 'should destroy it manually' do
       template = 'centos_7_libvirt_plain'

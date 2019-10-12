@@ -1,18 +1,16 @@
 # frozen_string_literal: true
 
 require_relative '../node'
-require_relative 'machine_commands'
+require_relative 'vagrant_service'
 require 'stringio'
 
-# Network configurator for vagrant and terraform nodes
+# Network configurator for vagrant nodes
 class NetworkConfig
 
-  def initialize(aws_service, config, logger)
+  def initialize(config, logger)
     @config = config
     @ui = logger
-    @aws_service = aws_service
     @nodes = {}
-    @provider = config.provider
   end
 
   # Adds configuration for a list of nodes.
@@ -91,9 +89,7 @@ class NetworkConfig
   #
   # @return [Array<String>, Array<String>] nodes that are running and those that are not
   def running_and_halt_nodes
-    @config.all_node_names.partition do |node|
-      MachineCommands.node_running?(@provider, @aws_service, node, @ui, @config.path)
-    end
+    @config.all_node_names.partition { |node| VagrantService.node_running?(node, @ui, @config.path) }
   end
 
   # Get node public IP

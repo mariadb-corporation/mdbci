@@ -61,6 +61,13 @@ class BoxDefinitions
     values.compact.uniq.sort
   end
 
+  # Checks for the existence of box
+  # @param box_name [String] the name of the box
+  # @return [Boolean] true if box exists
+  def box_exists?(box_name)
+    @boxes.key?(box_name)
+  end
+
   private
 
   def check_box(box_name)

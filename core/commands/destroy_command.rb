@@ -5,7 +5,8 @@ require_relative '../models/configuration'
 require_relative '../models/command_result.rb'
 require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
-require_relative 'partials/vagrant_terraform_cleaner'
+require_relative 'partials/vagrant_cleaner'
+require_relative 'partials/aws_terraform_cleaner'
 require_relative '../services/network_config'
 
 require 'fileutils'
@@ -47,8 +48,6 @@ In the latter case the command will remove the configuration folder,
 the network configuration file and the template. You can prevent
 destroy command from deleting the template file:
   mdbci destroy configuration --keep_template
-
-The command also deletes AWS key pair for corresponding configurations.
 
 After running the vagrant destroy this command also deletes the
 libvirt and VirtualBox boxes using low-level commands.
@@ -92,7 +91,22 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle cases when command calling with --list or --node-name options.
   def destroy_by_node_name
-    VagrantTerraformCleaner.new(@env, @ui).destroy_nodes_by_name
+    vagrant_cleaner = VagrantCleaner.new(@env, @ui)
+    aws_terraform_cleaner = AwsTerraformCleaner.new(@env.aws_service, @ui)
+
+    if @env.list
+      vm_list = vagrant_cleaner.full_vm_list + aws_terraform_cleaner.vm_list
+      @ui.info("Virtual machines list: #{vm_list}")
+      return
+    end
+
+    vagrant_providers_vm_list = vagrant_cleaner.filtered_by_name_nodes(@env.node_name)
+    aws_terraform_vm_list = aws_terraform_cleaner.filtered_by_name_nodes(@env.node_name)
+    @ui.info("Virtual machines to destroy: #{vagrant_providers_vm_list.values.flatten + aws_terraform_vm_list}")
+    return unless @ui.prompt('Do you want to continue? [y/n]')[0].casecmp('y').zero?
+
+    vagrant_cleaner.destroy_nodes_by_names(vagrant_providers_vm_list)
+    aws_terraform_cleaner.destroy_nodes_by_names(aws_terraform_vm_list)
   end
 
   # Handle case when command calling with configuration.
@@ -101,9 +115,12 @@ Labels should be separated with commas, do not contain any whitespaces.
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
+    elsif configuration.aws_terraform_configuration?
+      aws_terraform_cleaner = AwsTerraformCleaner.new(@env.aws_service, @ui)
+      aws_terraform_cleaner.destroy_nodes_by_configuration(configuration)
     else
-      vagrant_terraform_cleaner = VagrantTerraformCleaner.new(@env, @ui)
-      vagrant_terraform_cleaner.destroy_nodes_by_configuration(configuration)
+      vagrant_cleaner = VagrantCleaner.new(@env, @ui)
+      vagrant_cleaner.destroy_nodes_by_configuration(configuration)
       unless @env.labels.nil? && Configuration.config_directory?(@args.first)
         update_configuration_files(configuration)
         return
@@ -114,7 +131,7 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Update network_configuration and configured_labels files
   def update_configuration_files(configuration)
-    network_config = NetworkConfig.new(@aws_service, configuration, @ui)
+    network_config = NetworkConfig.new(configuration, @ui)
     network_config.store_network_config
     network_config.generate_config_information
   end

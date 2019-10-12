@@ -2,7 +2,8 @@
 
 require_relative 'base_command'
 require_relative 'partials/docker_swarm_configurator'
-require_relative 'partials/vagrant_terraform_configurator'
+require_relative 'partials/vagrant_configurator'
+require_relative 'partials/aws_terraform_configurator'
 require_relative '../models/configuration'
 
 # The command sets up the environment specified in the configuration file.
@@ -51,11 +52,15 @@ Labels should be separated with commas and should not contain any whitespaces.
   end
 
   def bing_up_nodes
-    if @config.provider == 'docker'
+    case @config.provider
+    when 'docker'
       configurator = DockerSwarmConfigurator.new(@config, @env, @ui)
       configurator.configure
+    when 'aws'
+      configurator = AwsTerraformConfigurator.new(@config, @env, @ui)
+      configurator.up
     else
-      configurator = VagrantTerraformConfigurator.new(@specification, @config, @env, @ui)
+      configurator = VagrantConfigurator.new(@specification, @config, @env, @ui)
       configurator.up
     end
   end

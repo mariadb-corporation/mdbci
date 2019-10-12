@@ -88,11 +88,26 @@ class AwsService
     end
   end
 
+  # Check whether instance with the specified name running or not.
+  # @param [String] instance_name to check
+  # @return [Boolean] true if it is running
+  def instance_by_name_running?(instance_name)
+    instance_running?(get_aws_instance_id_by_node_name(instance_name))
+  end
+
   # Terminate instance specified by the unique identifier
   # @param [String] instance_id to terminate
   def terminate_instance(instance_id)
+    return if instance_id.nil?
+
     @client.terminate_instances(instance_ids: [instance_id])
     nil
+  end
+
+  # Terminate instance specified by the node name
+  # @param [String] node_name name of node to terminate
+  def terminate_instance_by_name(node_name)
+    @client.terminate_instances(get_aws_instance_id_by_node_name(node_name))
   end
 
   GROUP_PERMISSIONS = %w[tcp udp icmp].map do |protocol|

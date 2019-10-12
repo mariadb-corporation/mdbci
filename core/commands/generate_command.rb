@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'base_command'
-require_relative 'partials/vagrant_terraform_configuration_generator'
+require_relative 'partials/vagrant_configuration_generator'
+require_relative 'partials/aws_terraform_configuration_generator'
 require_relative 'partials/docker_configuration_generator'
 require_relative '../models/configuration_template'
 
@@ -16,10 +17,14 @@ class GenerateCommand < BaseCommand
     check_result = setup_command
     return check_result unless check_result == SUCCESS_RESULT
 
-    if @template.template_type == :vagrant
-      generator = VagrantTerraformConfigurationGenerator.new(@args, @env, @ui)
+    case @template.template_type
+    when :vagrant
+      generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
       generator.execute(@args.first, @env.override)
-    else
+    when :aws
+      generator = AwsTerraformConfigurationGenerator.new(@args, @env, @ui)
+      generator.execute(@args.first, @env.override)
+    when :docker
       generator = DockerConfigurationGenerator.new(@configuration_path, @template_file, @template, @env, @ui)
       generator.generate_config
     end
