@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require 'json'
 require_relative '../models/return_codes'
 require_relative '../models/tool_configuration'
 
+# A class that provides access to list of repositories that are defined in MDBCI
 class RepoManager
   include ReturnCodes
 
   attr_accessor :repos
-  attr_accessor :recipes  # product => recipe
 
   PRODUCT_ATTRIBUTES = {
     'mariadb' => {
@@ -64,7 +66,7 @@ class RepoManager
       repository: 'clustrix',
       license_file_name: 'clustrix_license'
     }
-  }
+  }.freeze
 
   # The list of the directories to search data in. The last directory takes presence over the first one
   BOX_DIRECTORIES = [
@@ -72,19 +74,21 @@ class RepoManager
     File.join(XDG['CONFIG_HOME'].to_s, 'mdbci', 'repo.d')
   ].freeze
 
-  def initialize(logger, extra_path = nil)
+  def initialize(logger, box_definitions, extra_path = nil)
     @ui = logger
+    @box_definitions = box_definitions
     if !extra_path.nil? && !File.exist?(extra_path)
       raise ArgumentError, "The specified repository definition path is absent: '#{extra_path}'"
     end
 
-    @repos = Hash.new
+    @repos = {}
     paths = Array.new(BOX_DIRECTORIES).push(extra_path).compact
     paths.each do |path|
       lookup(path)
     end
     raise 'Repositories was not found' if @repos.empty?
-    @ui.info("Loaded repos: #{@repos.size.to_s}")
+
+    @ui.info("Loaded repos: #{@repos.size}")
   end
 
   # Get the recipe name for the product
@@ -116,16 +120,16 @@ class RepoManager
 
   def find_repository(product_name, product, box)
     @ui.info('Looking for repo')
-    if PRODUCT_ATTRIBUTES[product_name][:repository].nil?
+    if !PRODUCT_ATTRIBUTES[product_name].key?(:repository)
       @ui.warning('MDBCI cannot determine the existence/correctness of the specified version of the product!')
       return { 'version' => product['version'] }
     end
-    version = product['version'].nil? ? 'default' : product['version']
-    repository_key = $session.box_definitions.platform_key(box)
-    repository_name = PRODUCT_ATTRIBUTES[product_name][:repository]
-    if product['version'].nil?
+    repository_key = @box_definitions.platform_key(box)
+    if !product.key?('version')
       repo = find_last_repository_version(product, repository_key)
     else
+      version = product['version']
+      repository_name = PRODUCT_ATTRIBUTES[product_name][:repository]
       repo_key = "#{repository_name}@#{version}+#{repository_key}"
       repo = @repos[repo_key]
     end
@@ -135,7 +139,7 @@ class RepoManager
 
   def show
     @repos.keys.each do |key|
-      $out.out key + ' => [' +@repos[key]['repo'] +']'
+      @ui.out key + ' => [' + @repos[key]['repo'] + ']'
     end
     0
   end
@@ -143,12 +147,13 @@ class RepoManager
   def getRepo(key)
     repo = @repos[key]
     raise "Repository for key #{key} was not found" if repo.nil?
-    return repo
+
+    repo
   end
 
   def lookup(path)
     @ui.info("Looking up for repos in '#{path}'")
-    Dir.glob(path+'/**/*.json', File::FNM_DOTMATCH) do |f|
+    Dir.glob(path + '/**/*.json', File::FNM_DOTMATCH) do |f|
       addRepo(f)
     end
   end
@@ -161,32 +166,25 @@ class RepoManager
     repo.to_s.split('@')[0]
   end
 
-  def makeKey(product,version,platform,platform_version)
-    if version.nil?
-      version = '?'
-    end
+  def makeKey(product, version, platform, platform_version)
+    version = '?' if version.nil?
 
-    product.to_s+'@'+version.to_s+'+'+platform.to_s+'^'+platform_version.to_s
+    product.to_s + '@' + version.to_s + '+' + platform.to_s + '^' + platform_version.to_s
   end
 
   def addRepo(file)
-    begin
-      repo = JSON.parse(IO.read(file))
+    repo = JSON.parse(IO.read(file))
 
-      if repo.kind_of?(Array)
-        # in repo file arrays are allowed
-        repo.each do |r|
-          @repos[makeKey(r['product'],r['version'],r['platform'],r['platform_version'])] = r
-        end
-      else
-        @repos[makeKey(repo['product'],repo['version'],repo['platform'],repo['platform_version'])] = repo
+    if repo.is_a?(Array)
+      # in repo file arrays are allowed
+      repo.each do |r|
+        @repos[makeKey(r['product'], r['version'], r['platform'], r['platform_version'])] = r
       end
-
-      #TODO #6374 check keys
-      #@repos << repo
-    rescue
-      $out.warning 'Invalid file format: '+file.to_s + ' SKIPPED!'
+    else
+      @repos[makeKey(repo['product'], repo['version'], repo['platform'], repo['platform_version'])] = repo
     end
+  rescue StandardError
+    @ui.warning 'Invalid file format: ' + file.to_s + ' SKIPPED!'
   end
 
   private
