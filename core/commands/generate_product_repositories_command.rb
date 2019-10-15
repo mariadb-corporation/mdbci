@@ -277,11 +277,11 @@ In order to specify the number of retries for repository configuration use --att
   # Examples: rhel/8/x86_64/maxscale-2.3.12-1.rhel.8.x86_64.rpm
   # centos/8/x86_64/maxscale-experimental-2.3.12-1.rhel.8.x86_64.rpm
   # Group 1: centos, Group 2:	8, Group 3:	experimental
-  MAXSCALE_RPM_PACKAGE_REGEX = /^([^\/]+)\/([^\/]+)\/[^\/]+\/maxscale-([a-zA-Z]*)?.+\.rpm$/
+  MAXSCALE_RPM_PACKAGE_REGEX = %r{^([^\/]+)\/([^\/]+)\/[^\/]+\/maxscale-([a-zA-Z]*)?.+\.rpm$}
   # Examples: debian/dists/stretch/main/binary-amd64/maxscale-2.3.12-1.debian.stretch.x86_64.deb
   # ubuntu/dists/bionic/main/binary-amd64/maxscale-experimental-2.3.12-1.ubuntu.bionic.x86_64.deb
   # Group 1: ubuntu, Group 2:	bionic, Group 3:	experimental
-  MAXSCALE_DEB_PACKAGE_REGEX = /^([^\/]+)\/dists\/([^\/]+)\/main\/[^\/]+\/maxscale-([a-zA-Z]*)?.+\.deb$/
+  MAXSCALE_DEB_PACKAGE_REGEX = %r{^([^\/]+)\/dists\/([^\/]+)\/main\/[^\/]+\/maxscale-([a-zA-Z]*)?.+\.deb$}
 
   # rubocop:disable Security/Open
   def get_maxscale_links(path)
@@ -324,27 +324,33 @@ In order to specify the number of retries for repository configuration use --att
     end
   end
 
-  def parse_maxscale_package_link(link, release)
-    regex = if link.content =~ /^.+\.rpm$/
-              MAXSCALE_RPM_PACKAGE_REGEX
-            else
-              MAXSCALE_DEB_PACKAGE_REGEX
-            end
+  def generate_maxscale_repo_path(baseurl, platform, platform_version, maxscale_version)
+    baseurl
+      .sub('$MAXSCALE_VERSION$', maxscale_version)
+      .sub('$PLATFORM$', platform)
+      .sub('$PLATFORM_VERSION$', platform_version)
+  end
+
+  def parse_maxscale_package_link(config, link, release)
+    regex, baseurl, repo_key = if link.content =~ /^.+\.rpm$/
+                                 [MAXSCALE_RPM_PACKAGE_REGEX, config['repo']['rpm']['baseurl'],
+                                  config['repo']['rpm']['key']]
+                               else
+                                 [MAXSCALE_DEB_PACKAGE_REGEX, config['repo']['deb']['baseurl'],
+                                  config['repo']['deb']['key']]
+                               end
     captures = link.content.match(regex).captures
-    version = if captures[2].empty?
-                release
-              else
-                "#{captures[2]}-#{release}"
-              end
-    { repo: link.attribute('href').to_s, platform: captures[0], platform_version: captures[1], version: version }
+    platform, platform_version = captures
+    repo = generate_maxscale_repo_path(baseurl, platform, platform_version, release)
+    { repo: repo, platform: platform, platform_version: platform_version, version: release, repo_key: repo_key }
   end
 
   def parse_maxscale(config)
     get_maxscale_release_versions(config).map do |release|
       release[:packages_links].map do |link|
-        parse_maxscale_package_link(link, release[:release]).merge(repo_key: nil, product: 'maxscale')
+        parse_maxscale_package_link(config, link, release[:release]).merge(product: 'maxscale')
       end
-    end.flatten
+    end.flatten.uniq
   end
 
   def parse_mdbe(config)

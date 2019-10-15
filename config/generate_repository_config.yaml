@@ -24,6 +24,13 @@ maxscale_ci:
       key: "135659e928c12247"
 maxscale:
   path: https://dlm.mariadb.com/browse/mariadbmaxscale/
+  repo:
+    rpm:
+      baseurl: https://dlm.mariadb.com/repo/maxscale/$MAXSCALE_VERSION$/$PLATFORM$/$PLATFORM_VERSION$/$basearch
+      key: https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY
+    deb:
+      baseurl: https://dlm.mariadb.com/repo/maxscale/$MAXSCALE_VERSION$/$PLATFORM$ $PLATFORM_VERSION$ main
+      key: "135659e928c12247"
 mdbe:
   repo:
     rpm:
