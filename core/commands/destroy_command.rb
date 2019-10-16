@@ -134,7 +134,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
     elsif configuration.terraform_configuration?
-      terraform_cleaner = TerraformCleaner.new(@ui)
+      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service)
       terraform_cleaner.destroy_nodes_by_configuration(configuration)
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
