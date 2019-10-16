@@ -55,7 +55,7 @@ class AwsTerraformCleaner
   # @param configuration [Configuration] that we operate on
   def destroy_additional_resources(configuration)
     running_nodes = configuration.all_node_names.select do |node|
-      @aws_service.instance_by_name_running?(node)
+      TerraformService.resource_running?(node, @ui, configuration.path)
     end
     TerraformService.destroy_all(@ui, configuration.path) if running_nodes.empty?
   end

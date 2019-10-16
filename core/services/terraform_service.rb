@@ -50,4 +50,9 @@ module TerraformService
     end
     false
   end
+
+  def self.resource_running?(resource, logger, path = Dir.pwd)
+    result = ShellCommands.run_command_in_dir(logger, "terraform output #{resource}_running_state", path)
+    result[:value].success? && result[:output].include?('true')
+  end
 end

@@ -272,6 +272,9 @@ class AwsTerraformConfigurationGenerator < BaseCommand
         }
       <% end %>
     }
+    output "<%= name %>_running_state" {
+      value = aws_instance.<%= name %>.id != null
+    }
     AWS
     template.result(OpenStruct.new(node_params).instance_eval { binding })
   end

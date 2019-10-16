@@ -110,7 +110,7 @@ class AwsTerraformConfigurator
   end
 
   def node_running?(node)
-    @aws_service.instance_by_name_running?(node)
+    TerraformService.resource_running?(node, @ui, @config.path)
   end
 
   # Create and configure node, or recreate if it needs to fix.
