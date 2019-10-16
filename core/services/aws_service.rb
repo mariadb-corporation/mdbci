@@ -32,23 +32,6 @@ class AwsService
     @logger = logger
   end
 
-  # Generate key pair for the specified configuration path
-  # @param [String] configuration_path is path to configuration for which key pair is generated
-  # @raise [RuntimeError] if unable to generate key pair
-  # @return [Aws::EC2::Types::KeyPair] generated key pair information
-  def generate_key_pair(configuration_path)
-    hostname = Socket.gethostname
-    key_pair_name = File.basename(configuration_path)
-    key_name = "#{hostname}_#{key_pair_name}_#{Time.now.to_i}"
-    @client.create_key_pair(key_name: key_name)
-  end
-
-  # Delete key pair by the name
-  # @param [String] name of the key pair to delete
-  def delete_key_pair(name)
-    @client.delete_key_pair(key_name: name)
-  end
-
   # Get information about instances
   # @return [Hash] instances information
   def describe_instances
@@ -66,13 +49,6 @@ class AwsService
         { instance_id: instance[:instance_id], node_name: node_name }
       end
     end.flatten.compact
-  end
-
-  # Get the device name by ami
-  # @param [String] ami ami
-  # @return [String] device name, for example: /dev/sda1.
-  def device_name_for_ami(ami)
-    @client.describe_images(image_ids: [ami]).images.first.root_device_name
   end
 
   # Check whether instance with the specified id running or not.
@@ -108,35 +84,6 @@ class AwsService
   # @param [String] node_name name of node to terminate
   def terminate_instance_by_name(node_name)
     @client.terminate_instances(get_aws_instance_id_by_node_name(node_name))
-  end
-
-  GROUP_PERMISSIONS = %w[tcp udp icmp].map do |protocol|
-    {
-      ip_protocol: protocol,
-      from_port: 0,
-      to_port: protocol == 'icmp' ? -1 : 65_535,
-      ip_ranges: [{ cidr_ip: '0.0.0.0/0' }]
-    }
-  end.freeze
-
-  # Create and configure security group for the current machine
-  # @return [String] new security group name
-  def create_security_group
-    group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
-    begin
-      create_security_group_result = @client.create_security_group(
-        group_name: group_name,
-        description: "MDBCI #{group_name} auto generated"
-      )
-    rescue Aws::EC2::Errors::InvalidGroupDuplicate => error
-      @logger.error("Error during creation of the security group: #{error}")
-      return nil
-    end
-    @client.authorize_security_group_ingress(
-      group_id: create_security_group_result.group_id,
-      ip_permissions: GROUP_PERMISSIONS
-    )
-    group_name
   end
 
   # Return instance id by node name.
