@@ -115,7 +115,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
-    elsif configuration.aws_terraform_configuration?
+    elsif configuration.terraform_configuration?
       aws_terraform_cleaner = AwsTerraformCleaner.new(@env.aws_service, @ui)
       aws_terraform_cleaner.destroy_nodes_by_configuration(configuration)
     else

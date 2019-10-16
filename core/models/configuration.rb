@@ -121,10 +121,10 @@ class Configuration
     !@docker_configuration.empty?
   end
 
-  # Check that configuration is AWS Terraform foncfiguration
-  # @return [Boolean] true if the configuration is AWS Terraform
-  def aws_terraform_configuration?
-    @provider == 'aws'
+  # Check that configuration is Terraform configuration
+  # @return [Boolean] true if the configuration is Terraform
+  def terraform_configuration?
+    File.exist?(self.class.terraform_configuration(@path))
   end
 
   # Provide a copy of the Docker configuration for further modification
