@@ -19,7 +19,6 @@ class AwsTerraformConfigurator
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
-    @aws_service = @env.aws_service
     @network_settings = if File.exist?(config.network_settings_file)
                           NetworkSettings.from_file(config.network_settings_file)
                         else

@@ -6,7 +6,7 @@ require_relative '../models/command_result.rb'
 require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
-require_relative 'partials/aws_terraform_cleaner'
+require_relative 'partials/terraform_cleaner'
 require_relative '../services/network_config'
 
 require 'fileutils'
@@ -16,7 +16,7 @@ class DestroyCommand < BaseCommand
   include ShellCommands
 
   def self.synopsis
-    'Destroy configuration with all artefacts or a single node.'
+    'Destroy configuration with all artifacts or a single node.'
   end
 
   # Method checks the parameters that were passed to the application.
@@ -89,24 +89,42 @@ Labels should be separated with commas, do not contain any whitespaces.
     FileUtils.rm_f(configuration.template_path)
   end
 
-  # Handle cases when command calling with --list or --node-name options.
+  # Return all aws instances that correspond with the node_name.
+  #
+  # @param node_name [String] regexp of the node name
+  # @return [Array] node names
+  def filter_nodes_by_name(vm_list, node_name)
+    node_name_regexp = Regexp.new(node_name)
+    vm_list.select { |node| node =~ node_name_regexp }
+  end
+
+  # Handle cases when command calling with --list option.
+  def display_all_nodes
+    vagrant_cleaner = VagrantCleaner.new(@env, @ui)
+    vagrant_vm_list = vagrant_cleaner.vm_list
+    aws_vm_list = @aws_service.instances_names_list
+
+    vm_list = vagrant_vm_list.values.flatten + aws_vm_list
+    @ui.info("Virtual machines list: #{vm_list}")
+  end
+
+  # Handle cases when command calling with --node-name option.
   def destroy_by_node_name
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
-    aws_terraform_cleaner = AwsTerraformCleaner.new(@env.aws_service, @ui)
+    vagrant_vm_list = vagrant_cleaner.vm_list
+    aws_vm_list = @aws_service.instances_names_list
 
-    if @env.list
-      vm_list = vagrant_cleaner.full_vm_list + aws_terraform_cleaner.vm_list
-      @ui.info("Virtual machines list: #{vm_list}")
-      return
-    end
-
-    vagrant_providers_vm_list = vagrant_cleaner.filtered_by_name_nodes(@env.node_name)
-    aws_terraform_vm_list = aws_terraform_cleaner.filtered_by_name_nodes(@env.node_name)
-    @ui.info("Virtual machines to destroy: #{vagrant_providers_vm_list.values.flatten + aws_terraform_vm_list}")
+    filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
+      [provider, filter_nodes_by_name(nodes, @env.node_name)]
+    end.to_h
+    filtered_aws_vm_list = filter_nodes_by_name(aws_vm_list, @env.node_name)
+    @ui.info("Virtual machines to destroy: #{filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list}")
     return unless @ui.prompt('Do you want to continue? [y/n]')[0].casecmp('y').zero?
 
-    vagrant_cleaner.destroy_nodes_by_names(vagrant_providers_vm_list)
-    aws_terraform_cleaner.destroy_nodes_by_names(aws_terraform_vm_list)
+    filtered_vagrant_vm_list.each do |provider, nodes|
+      nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
+    end
+    filtered_aws_vm_list.each { |node| @aws_service.terminate_instance_by_name(node) }
   end
 
   # Handle case when command calling with configuration.
@@ -116,8 +134,8 @@ Labels should be separated with commas, do not contain any whitespaces.
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
     elsif configuration.terraform_configuration?
-      aws_terraform_cleaner = AwsTerraformCleaner.new(@env.aws_service, @ui)
-      aws_terraform_cleaner.destroy_nodes_by_configuration(configuration)
+      terraform_cleaner = TerraformCleaner.new(@ui)
+      terraform_cleaner.destroy_nodes_by_configuration(configuration)
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
@@ -140,8 +158,10 @@ Labels should be separated with commas, do not contain any whitespaces.
     return ARGUMENT_ERROR_RESULT unless check_parameters
 
     @aws_service = @env.aws_service
-    if @env.node_name || @env.list
+    if @env.node_name
       destroy_by_node_name
+    elsif @env.list
+      display_all_nodes
     else
       destroy_by_configuration
     end

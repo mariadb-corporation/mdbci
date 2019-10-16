@@ -42,29 +42,15 @@ class VagrantCleaner
   # Method gets vm names list of virtualbox and libvirt machines.
   #
   # @return [Array] instances names list.
-  def full_vm_list
-    libvirt_vm_list + virtualbox_vm_list
+  def vm_list
+    { libvirt: libvirt_vm_list, virtualbox: virtualbox_vm_list }
   end
 
-  # Destroy virtual machines by names list.
+  # Destroy virtual machine by name.
   #
-  # @param [Hash<String, Array>] vm_list in format: { <provider>: ['node_name_1', 'node_name_2'] }.
-  def destroy_nodes_by_names(vm_list)
-    vm_list.each do |provider, nodes|
-      nodes.each { |node| destroy_machine(nil, nil, provider.to_s, node) }
-    end
-  end
-
-  # Return all virtual machines that correspond with the node_name.
-  #
-  # @param node_name [String] regexp of the node name
-  # @return Hash<Symbol, Array> in format: { libvirt: ['node_name_1', 'node_name_2'], virtualbox: [...] }
-  def filtered_by_name_nodes(node_name)
-    node_name_regexp = Regexp.new(node_name)
-    vm_list = { libvirt: libvirt_vm_list, virtualbox: virtualbox_vm_list }
-    vm_list.each do |provider, nodes|
-      vm_list[provider] = nodes.select { |node| node =~ node_name_regexp }
-    end
+  # @param [String] node node name.
+  def destroy_node_by_name(node, provider)
+    destroy_machine(nil, nil, provider.to_s, node)
   end
 
   # Stop machines specified in the configuration or in a node

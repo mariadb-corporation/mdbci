@@ -2,11 +2,10 @@
 
 require_relative '../../services/terraform_service'
 
-# Class allows to clean up the machines that were created by the Terraform with AWS provider
-class AwsTerraformCleaner
-  def initialize(aws_service, logger)
+# Class allows to clean up the machines that were created by Terraform
+class TerraformCleaner
+  def initialize(logger)
     @ui = logger
-    @aws_service = aws_service
   end
 
   # Stop machines specified in the configuration or in a node
@@ -21,14 +20,6 @@ class AwsTerraformCleaner
     destroy_additional_resources(configuration)
   end
 
-  # Method gets the AWS instances names list.
-  #
-  # @return [Array] instances names list.
-  def vm_list
-    aws_instances_ids = @aws_service.instances_list || []
-    aws_instances_ids.map { |instance| instance[:node_name] }
-  end
-
   # Terminate AWS instances by names list.
   #
   # @param [Array] vm_list names list.
@@ -36,15 +27,6 @@ class AwsTerraformCleaner
     vm_list.each do |node|
       destroy_machine(node)
     end
-  end
-
-  # Return all aws instances that correspond with the node_name.
-  #
-  # @param node_name [String] regexp of the node name
-  # @return [Array] node names
-  def filtered_by_name_nodes(node_name)
-    node_name_regexp = Regexp.new(node_name)
-    vm_list.select { |node| node =~ node_name_regexp }
   end
 
   private

@@ -51,6 +51,14 @@ class AwsService
     end.flatten.compact
   end
 
+  # Method gets the AWS instances names list.
+  #
+  # @return [Array] instances names list.
+  def instances_names_list
+    aws_instances_ids = instances_list || []
+    aws_instances_ids.map { |instance| instance[:node_name] }
+  end
+
   # Check whether instance with the specified id running or not.
   # @param [String] instance_id to check
   # @return [Boolean] true if it is running
