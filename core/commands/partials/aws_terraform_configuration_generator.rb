@@ -429,7 +429,6 @@ class AwsTerraformConfigurationGenerator < BaseCommand
   # @return [Integer] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
-    # TODO: MariaDb Version Validator
     checks_result = check_path && check_nodes_names
     return ARGUMENT_ERROR_RESULT unless checks_result
 
