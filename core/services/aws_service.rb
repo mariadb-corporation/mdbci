@@ -91,7 +91,7 @@ class AwsService
   # Terminate instance specified by the node name
   # @param [String] node_name name of node to terminate
   def terminate_instance_by_name(node_name)
-    @client.terminate_instances(get_aws_instance_id_by_node_name(node_name))
+    terminate_instance(get_aws_instance_id_by_node_name(node_name))
   end
 
   # Return instance id by node name.
