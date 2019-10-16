@@ -40,7 +40,7 @@ class ConfigurationTemplate
   end
 
   # Method analyses the structure of the template
-  # @returns [Symbol] type of the template: vagrant, docker or aws
+  # @returns [Symbol] type of the template: vagrant, docker or terraform
   def determine_template_type
     target_boxes = @node_configurations.map { |_, node| node['box'] }
     template_type = nil
@@ -55,7 +55,11 @@ class ConfigurationTemplate
               'You can specify only nodes from one provider in the template.')
       end
     end
-    template_type = :vagrant if %w[libvirt vbox].include?(template_type)
+    if %w[libvirt vbox].include?(template_type)
+      template_type = :vagrant
+    elsif template_type == 'aws'
+      template_type = :terraform
+    end
     template_type.to_sym
   end
 end

@@ -21,7 +21,7 @@ class GenerateCommand < BaseCommand
     when :vagrant
       generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
       generator.execute(@args.first, @env.override)
-    when :aws
+    when :terraform
       generator = AwsTerraformConfigurationGenerator.new(@args, @env, @ui)
       generator.execute(@args.first, @env.override)
     when :docker
