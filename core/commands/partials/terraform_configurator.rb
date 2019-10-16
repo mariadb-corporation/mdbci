@@ -4,11 +4,11 @@ require_relative '../../models/return_codes'
 require_relative '../../services/machine_configurator'
 require_relative '../../services/terraform_service'
 require_relative '../../models/network_settings'
-require_relative 'aws_terraform_configuration_generator'
+require_relative 'terraform_configuration_generator'
 require_relative '../destroy_command'
 
 # The configurator brings up the configuration for the Vagrant
-class AwsTerraformConfigurator
+class TerraformConfigurator
   include ReturnCodes
 
   def initialize(config, env, logger)
@@ -66,14 +66,14 @@ class AwsTerraformConfigurator
     return false unless TerraformService.ssh_available?(node_settings, @ui)
 
     solo_config = "#{node}-config.json"
-    role_file = AwsTerraformConfigurationGenerator.role_file_name(@config.path, node)
+    role_file = TerraformConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
       @ui.info("Machine '#{node}' should not be configured. Skipping.")
       return true
     end
     extra_files = [
       [role_file, "roles/#{node}.json"],
-      [AwsTerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
+      [TerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
     configuration_status = @machine_configurator.configure(node_settings, solo_config, @ui, extra_files)
     if configuration_status.error?
@@ -92,7 +92,7 @@ class AwsTerraformConfigurator
     @ui.info("Bringing up node #{node}")
     TerraformService.init(@ui, @config.path)
     begin
-      resource_type = TerraformService.resource_type(AwsTerraformConfigurationGenerator::PROVIDER_NAME)
+      resource_type = TerraformService.resource_type(@config.provider)
     rescue RuntimeError => e
       @ui.error(e.message)
       return
@@ -140,7 +140,7 @@ class AwsTerraformConfigurator
     begin
       @network_settings.add_network_configuration(
         node,
-        'keyfile' => File.join(@config.path, AwsTerraformConfigurationGenerator::KEYFILE_NAME),
+        'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
         'private_ip' => IO.read(File.join(@config.path, "private_ip_#{node}")).chomp,
         'network' => IO.read(File.join(@config.path, "public_ip_#{node}")).chomp,
         'whoami' => IO.read(File.join(@config.path, "user_#{node}")).chomp

@@ -2,7 +2,7 @@
 
 require_relative 'base_command'
 require_relative 'partials/vagrant_configuration_generator'
-require_relative 'partials/aws_terraform_configuration_generator'
+require_relative 'partials/terraform_configuration_generator'
 require_relative 'partials/docker_configuration_generator'
 require_relative '../models/configuration_template'
 
@@ -22,7 +22,7 @@ class GenerateCommand < BaseCommand
       generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
       generator.execute(@args.first, @env.override)
     when :terraform
-      generator = AwsTerraformConfigurationGenerator.new(@args, @env, @ui)
+      generator = TerraformConfigurationGenerator.new(@args, @env, @ui)
       generator.execute(@args.first, @env.override)
     when :docker
       generator = DockerConfigurationGenerator.new(@configuration_path, @template_file, @template, @env, @ui)

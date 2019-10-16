@@ -11,8 +11,7 @@ require_relative '../../../core/services/configuration_generator'
 require_relative '../../../core/services/terraform_service'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair with Terraform backend
-class AwsTerraformConfigurationGenerator < BaseCommand
-  PROVIDER_NAME = 'aws'
+class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
   KEYFILE_NAME = 'maxscale.pem'
 
@@ -36,9 +35,9 @@ class AwsTerraformConfigurationGenerator < BaseCommand
       @ui.error(e.message)
       return ERROR_RESULT
     end
-    return ARGUMENT_ERROR_RESULT unless check_nodes_boxes
+    return ARGUMENT_ERROR_RESULT unless check_nodes_boxes_and_setup_provider
 
-    @ui.info("Nodes provider = #{PROVIDER_NAME}")
+    @ui.info("Nodes provider = #{@provider}")
     generate_result = generate
     return generate_result unless generate_result == SUCCESS_RESULT
 
@@ -449,14 +448,14 @@ class AwsTerraformConfigurationGenerator < BaseCommand
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
 
-    File.open(provider_file, 'w') { |f| f.write(PROVIDER_NAME) }
+    File.open(provider_file, 'w') { |f| f.write(@provider) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
   end
 
   # Check that all boxes specified in the the template are exist in the boxes.json.
   #
   # @return [Boolean] true if all boxes exist.
-  def check_nodes_boxes
+  def check_nodes_boxes_and_setup_provider
     nodes = @config.map { |node| %w[aws_config cookbook_path].include?(node[0]) ? nil : node }.compact.to_h
     nodes.each do |node_name, node_params|
       box = node_params['box'].to_s
@@ -469,6 +468,7 @@ class AwsTerraformConfigurationGenerator < BaseCommand
         return false
       end
     end
+    @provider = @boxes.get_box(nodes.values.first['box'])['provider']
     true
   end
 
