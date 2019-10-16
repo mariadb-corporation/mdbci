@@ -20,15 +20,6 @@ class TerraformCleaner
     destroy_additional_resources(configuration)
   end
 
-  # Terminate AWS instances by names list.
-  #
-  # @param [Array] vm_list names list.
-  def destroy_nodes_by_names(vm_list)
-    vm_list.each do |node|
-      destroy_machine(node)
-    end
-  end
-
   private
 
   # Destroy all resources if all nodes are not running
@@ -40,17 +31,5 @@ class TerraformCleaner
       TerraformService.resource_running?(node, @ui, configuration.path)
     end
     TerraformService.destroy_all(@ui, configuration.path) if running_nodes.empty?
-  end
-
-  # Destroy the aws virtual machine.
-  #
-  # @param node [String] name of node to destroy.
-  def destroy_machine(node)
-    unless @aws_service.instance_by_name_running?(node)
-      @ui.error("Unable to terminate #{node} machine. Instance id does not exist.")
-      return
-    end
-    @ui.info("Sending termination command for node '#{node}'.")
-    @aws_service.terminate_instance_by_name(node)
   end
 end
