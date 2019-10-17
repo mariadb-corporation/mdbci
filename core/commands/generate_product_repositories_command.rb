@@ -345,12 +345,25 @@ In order to specify the number of retries for repository configuration use --att
     { repo: repo, platform: platform, platform_version: platform_version, version: release, repo_key: repo_key }
   end
 
+  def generate_missing_major_maxscale_repos(repos)
+    minor_versions = repos.map { |repo| repo[:version] }.uniq
+    major_versions = minor_versions.map { |version| version.split('.')[0..1].join('.') }.uniq
+    missing_major_versions = major_versions.reject { |version| minor_versions.include?(version) }
+    missing_major_versions.map do |major_version|
+      last_minor_version = minor_versions
+                             .select { |version| version.start_with?(major_version) }
+                             .sort { |a, b| a.split('.').last.to_i <=> b.split('.').last.to_i }.last
+      repos.select { |repo| repo[:version] == last_minor_version }.map { |repo| repo.merge(version: major_version) }
+    end.flatten
+  end
+
   def parse_maxscale(config)
-    get_maxscale_release_versions(config).map do |release|
+    repos = get_maxscale_release_versions(config).map do |release|
       release[:packages_links].map do |link|
         parse_maxscale_package_link(config, link, release[:release]).merge(product: 'maxscale')
       end
     end.flatten.uniq
+    repos + generate_missing_major_maxscale_repos(repos)
   end
 
   def parse_mdbe(config)
