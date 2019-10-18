@@ -8,6 +8,9 @@ VAGRANT_VERSION = '2.2.6'
 VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.0.45'
 VAGRANT_AWS_PLUGIN_VERSION = '0.7.2'
 
+TERRAFORM_VERSION = '0.12.11'
+TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
+
 # Command installs reqired dependencies for running mdbci
 class SetupDependenciesCommand < BaseCommand
   include ShellCommands
@@ -28,10 +31,12 @@ After that 'default' VM pool created for libvirt and the current user added to t
 
 Then it installs Docker Engine and current user added to the docker user group.
 
-Or you can installs only libvirt or only Docker Engine (for example libvirt):
+Then it installs Terraform to /usr/local/bin path.
+
+Or you can installs only libvirt, only Docker Engine or only Terraform (for example libvirt):
   mdbci setup-dependencies --product libvirt
 
-Use 'libvirt' as product option for libvirt and 'docker' for Docker Engine.
+Use 'libvirt' as product option for libvirt, 'docker' for Docker Engine, and 'terraform' for Terraform.
 
 OPTIONS:
   --reinstall:
@@ -82,13 +87,18 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   def install
     result = @dependency_manager.install_dependencies
     if @dependency_manager.should_install?('libvirt')
-      result = install_vagrant_plugins if result == SUCCESS_RESULT
-      result = create_libvirt_pool if result == SUCCESS_RESULT
-      if result == SUCCESS_RESULT
-        export_libvirt_default_uri
-        @ui.info('Dependencies successfully installed.')
-        @ui.info('Please restart your computer in order to apply changes.')
-      end
+      result = result.and_then { install_vagrant_plugins }
+                     .and_then { create_libvirt_pool }
+                     .and_then { export_libvirt_default_uri }
+    end
+    if @dependency_manager.should_install?('terraform')
+      result = result.and_then { install_terraform }
+    end
+    if result.error?
+      @ui.error(result.error)
+    else
+      @ui.info('Dependencies successfully installed.')
+      @ui.info('Please restart your computer in order to apply changes.')
     end
     result
   end
@@ -102,6 +112,23 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
         return line.match(distribution_regex)[1].downcase if line =~ distribution_regex
       end
     end
+  end
+
+  def install_terraform
+    Dir.mktmpdir do |dir|
+      zip_path = File.join(dir, 'terraform.zip')
+      download_result = run_command("wget -O #{zip_path} #{TERRAFORM_ZIP_URL}")[:value]
+      return Result.error("Error of downloading Terraform from #{TERRAFORM_ZIP_URL}") unless download_result.success?
+
+      delete_terraform
+      unzip_result = run_command("sudo unzip #{zip_path} -d /usr/local/bin/")[:value]
+      return Result.error("Error of unzipping #{zip_path}") unless unzip_result.success?
+    end
+    Result.ok('')
+  end
+
+  def delete_terraform
+    run_command('sudo rm /usr/local/bin/terraform') if File.exist?('/usr/local/bin/terraform')
   end
 
   # Install vagrant plugins and prepares mdbci environment
@@ -139,6 +166,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
 
     delete_libvirt_pool
     delete_vagrant_plugins
+    delete_terraform
     @dependency_manager.delete_dependencies
   end
 
@@ -269,7 +297,7 @@ class CentosDependencyManager < DependencyManager
   def required_packages
     ['ceph-common', 'gcc', 'git', 'libvirt', 'libvirt-client',
      'libvirt-devel', 'qemu-img', 'qemu-kvm', 'rsync', 'wget',
-     'yum-utils', 'device-mapper-persistent-data', 'lvm2']
+     'yum-utils', 'device-mapper-persistent-data', 'lvm2', 'zip']
   end
 
   def install_dependencies
@@ -353,7 +381,7 @@ class DebianDependencyManager < DependencyManager
   def required_packages
     ['build-essential', 'cmake', 'git', 'libvirt-daemon-system',
      'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget',
-     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'software-properties-common']
+     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'software-properties-common', 'zip']
   end
 
   def install_dependencies
@@ -407,7 +435,7 @@ class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
     ['build-essential', 'cmake', 'dnsmasq', 'ebtables', 'git', 'libvirt-bin',
      'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget',
-     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
+     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common', 'zip']
   end
 
   def install_docker
