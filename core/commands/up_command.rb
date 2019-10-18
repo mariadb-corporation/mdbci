@@ -52,11 +52,10 @@ Labels should be separated with commas and should not contain any whitespaces.
   end
 
   def bing_up_nodes
-    case @config.provider
-    when 'docker'
+    if @config.docker_configuration?
       configurator = DockerSwarmConfigurator.new(@config, @env, @ui)
       configurator.configure
-    when 'aws'
+    elsif @config.terraform_configuration?
       configurator = TerraformConfigurator.new(@config, @env, @ui)
       configurator.up
     else
