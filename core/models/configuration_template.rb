@@ -16,7 +16,7 @@ class ConfigurationTemplate
   end
 
   private
-  
+
   # Read the contents of the template file. Raise exceptions if something is missing
   def read_template_file
     unless File.exist?(@template_path)
@@ -40,13 +40,26 @@ class ConfigurationTemplate
   end
 
   # Method analyses the structure of the template
-  # @returns [Symbol] type of the template: vagrant or docker
+  # @returns [Symbol] type of the template: vagrant, docker or terraform
   def determine_template_type
     target_boxes = @node_configurations.map { |_, node| node['box'] }
-    if target_boxes.include?('docker')
-      :docker
-    else
-      :vagrant
+    template_type = nil
+    target_boxes.each do |box|
+      box_provider = %w[docker aws libvirt vbox].detect { |provider| box.include?(provider) }
+      raise("Unknown provider #{box_provider}") if box_provider.nil?
+
+      if template_type.nil?
+        template_type = box_provider
+      elsif template_type != box_provider
+        raise("There are several node providers defined in the template.\n"\
+              'You can specify only nodes from one provider in the template.')
+      end
     end
+    if %w[libvirt vbox].include?(template_type)
+      template_type = :vagrant
+    elsif template_type == 'aws'
+      template_type = :terraform
+    end
+    template_type.to_sym
   end
 end

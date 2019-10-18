@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../node'
-require_relative 'vagrant_commands'
+require_relative 'vagrant_service'
 require 'stringio'
 
 # Network configurator for vagrant nodes
@@ -89,7 +89,7 @@ class NetworkConfig
   #
   # @return [Array<String>, Array<String>] nodes that are running and those that are not
   def running_and_halt_nodes
-    @config.all_node_names.partition { |node| VagrantCommands.node_running?(node, @ui, @config.path) }
+    @config.all_node_names.partition { |node| VagrantService.node_running?(node, @ui, @config.path) }
   end
 
   # Get node public IP

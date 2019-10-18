@@ -128,6 +128,15 @@
     "platform": "rhel",
     "platform_version": "7"
   },
+  "ubuntu_trusty_aws_large" : {
+    "provider": "aws",
+    "ami": "ami-03746875d916becc0",
+    "user": "ubuntu",
+    "default_instance_type": "m5.large",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "vpc": "true"
+  },
   "sles_11_aws" : {
     "provider": "aws",
     "ami": "ami-9a6f3ded",

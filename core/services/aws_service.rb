@@ -32,23 +32,6 @@ class AwsService
     @logger = logger
   end
 
-  # Generate key pair for the specified configuration path
-  # @param [String] configuration_path is path to configuration for which key pair is generated
-  # @raise [RuntimeError] if unable to generate key pair
-  # @return [Aws::EC2::Types::KeyPair] generated key pair information
-  def generate_key_pair(configuration_path)
-    hostname = Socket.gethostname
-    key_pair_name = File.basename(configuration_path)
-    key_name = "#{hostname}_#{key_pair_name}_#{Time.now.to_i}"
-    @client.create_key_pair(key_name: key_name)
-  end
-
-  # Delete key pair by the name
-  # @param [String] name of the key pair to delete
-  def delete_key_pair(name)
-    @client.delete_key_pair(key_name: name)
-  end
-
   # Get information about instances
   # @return [Hash] instances information
   def describe_instances
@@ -68,17 +51,20 @@ class AwsService
     end.flatten.compact
   end
 
-  # Get the device name by ami
-  # @param [String] ami ami
-  # @return [String] device name, for example: /dev/sda1.
-  def device_name_for_ami(ami)
-    @client.describe_images(image_ids: [ami]).images.first.root_device_name
+  # Method gets the AWS instances names list.
+  #
+  # @return [Array] instances names list.
+  def instances_names_list
+    aws_instances_ids = instances_list || []
+    aws_instances_ids.map { |instance| instance[:node_name] }
   end
 
   # Check whether instance with the specified id running or not.
   # @param [String] instance_id to check
   # @return [Boolean] true if it is running
   def instance_running?(instance_id)
+    return false if instance_id.nil?
+
     response = @client.describe_instance_status(instance_ids: [instance_id])
     response.instance_statuses.any? do |status|
       status.instance_id == instance_id &&
@@ -86,39 +72,34 @@ class AwsService
     end
   end
 
+  # Check whether instance with the specified name running or not.
+  # @param [String] instance_name to check
+  # @return [Boolean] true if it is running
+  def instance_by_name_running?(instance_name)
+    instance_running?(get_aws_instance_id_by_node_name(instance_name))
+  end
+
   # Terminate instance specified by the unique identifier
   # @param [String] instance_id to terminate
   def terminate_instance(instance_id)
+    return if instance_id.nil?
+
     @client.terminate_instances(instance_ids: [instance_id])
     nil
   end
 
-  GROUP_PERMISSIONS = %w[tcp udp icmp].map do |protocol|
-    {
-      ip_protocol: protocol,
-      from_port: 0,
-      to_port: protocol == 'icmp' ? -1 : 65_535,
-      ip_ranges: [{ cidr_ip: '0.0.0.0/0' }]
-    }
-  end.freeze
+  # Terminate instance specified by the node name
+  # @param [String] node_name name of node to terminate
+  def terminate_instance_by_name(node_name)
+    terminate_instance(get_aws_instance_id_by_node_name(node_name))
+  end
 
-  # Create and configure security group for the current machine
-  # @return [String] new security group name
-  def create_security_group
-    group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
-    begin
-      create_security_group_result = @client.create_security_group(
-        group_name: group_name,
-        description: "MDBCI #{group_name} auto generated"
-      )
-    rescue Aws::EC2::Errors::InvalidGroupDuplicate => error
-      @logger.error("Error during creation of the security group: #{error}")
-      return nil
-    end
-    @client.authorize_security_group_ingress(
-      group_id: create_security_group_result.group_id,
-      ip_permissions: GROUP_PERMISSIONS
-    )
-    group_name
+  # Return instance id by node name.
+  #
+  # @param node_name [String] name of instance.
+  # @return [String] id of the instance.
+  def get_aws_instance_id_by_node_name(node_name)
+    found_instance = instances_list.find { |instance| instance[:node_name] == node_name }
+    found_instance.nil? ? nil : found_instance[:instance_id]
   end
 end

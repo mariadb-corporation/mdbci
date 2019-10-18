@@ -2,7 +2,7 @@
 
 require_relative '../../models/return_codes'
 require_relative '../../services/shell_commands'
-require_relative '../../services/vagrant_commands'
+require_relative '../../services/vagrant_service'
 require_relative '../../services/machine_configurator'
 require_relative '../../services/network_config'
 require_relative 'vagrant_configuration_generator'
@@ -14,7 +14,6 @@ class VagrantConfigurator
   include ReturnCodes
   include ShellCommands
 
-  VAGRANT_NO_PARALLEL = '--no-parallel'
   CHEF_CONFIGURATION_ATTEMPTS = 2
 
   def initialize(specification, config, env, logger)
@@ -29,25 +28,15 @@ class VagrantConfigurator
     Workers.pool.resize(@threads_count)
   end
 
-  # Generate flags based upon the configuration
-  #
-  # @param provider [String] name of the provider to work with
-  # @return [String] flags that should be passed to Vagrant commands
-  def generate_vagrant_run_flags(provider)
-    flags = []
-    flags.push(VAGRANT_NO_PARALLEL) if provider == 'aws'
-    flags.uniq.join(' ')
-  end
-
   # Check whether chef have provisioned the server or not
   #
   # @param node [String] name of the node to check
   # @param logger [Out] logger to log information to
   # return [Boolean]
   def node_provisioned?(node, logger)
-    result = run_command("vagrant ssh #{node} -c"\
-                         '"test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT"',
-                         {}, logger)
+    result = VagrantService.ssh_command(node, logger,
+                                        '"test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT"',
+                                        @config.path)
     provision_file = result[:output]
     if provision_file == 'PROVISIONED'
       logger.info("Node '#{node}' was configured.")
@@ -93,8 +82,7 @@ class VagrantConfigurator
   # @return result of the run_command_and_log()
   def bring_up_machine(provider, logger, node = '')
     logger.info("Bringing up #{(node.empty? ? 'configuration ' : 'node ')} #{@specification}")
-    vagrant_flags = generate_vagrant_run_flags(provider)
-    run_command_and_log("vagrant up #{vagrant_flags} --provider=#{provider} #{node}", true, {}, logger)
+    VagrantService.up(provider, node, logger, @config.path)
   end
 
   # Forcefully destroys given node
@@ -129,10 +117,10 @@ class VagrantConfigurator
       if @recreate_nodes || attempt.positive?
         destroy_node(node, logger)
         bring_up_machine(@config.provider, logger, node)
-      elsif !VagrantCommands.node_running?(node, logger)
+      elsif !VagrantService.node_running?(node, logger)
         bring_up_machine(@config.provider, logger, node)
       end
-      next unless VagrantCommands.node_running?(node, logger)
+      next unless VagrantService.node_running?(node, logger)
 
       return true if configure(node, logger)
     end
