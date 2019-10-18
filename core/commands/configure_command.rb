@@ -47,7 +47,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
 
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
-    return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
+    #return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
 
     SUCCESS_RESULT
   end
@@ -55,9 +55,17 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
 
   private
 
+  def create_file_with_password(password)
+    file = File.new(File.expand_path('~/.config/mdbci/docker.md', 'w'))
+    file.write(password)
+    file.close
+    file.path
+  end
+
   def check_dock_credentials(docker_credentials)
-    cmd = "docker login --username #{docker_credentials['username']}" \
-          " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
+    path = create_file_with_password(docker_credentials['password'])
+    cmd = "cat #{path} | docker login --username #{docker_credentials['username']}" \
+          " --password-stdin #{docker_credentials['ci-server']}"
 
     out = ShellCommands.run_command_and_log(@ui, cmd)
     out[:value].success?
