@@ -55,7 +55,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
 
   private
 
-  def create_file_with_password(password)
+  def create_docker_file(password)
     file = File.new(File.expand_path('~/.config/mdbci/docker.md', 'w'))
     file.write(password)
     file.close
@@ -63,7 +63,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
   end
 
   def check_dock_credentials(docker_credentials)
-    path = create_file_with_password(docker_credentials['password'])
+    path = create_docker_file(docker_credentials['password'])
     cmd = "cat #{path} | docker login --username #{docker_credentials['username']}" \
           " --password-stdin #{docker_credentials['ci-server']}"
 
