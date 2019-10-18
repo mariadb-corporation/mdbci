@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../models/return_codes'
+require_relative '../../models/result'
 require_relative '../../services/machine_configurator'
 require_relative '../../services/terraform_service'
 require_relative '../../models/network_settings'
@@ -9,7 +9,6 @@ require_relative '../destroy_command'
 
 # The configurator brings up the configuration for the Vagrant
 class TerraformConfigurator
-  include ReturnCodes
 
   def initialize(config, env, logger)
     @config = config
@@ -32,9 +31,9 @@ class TerraformConfigurator
   def up
     nodes = @config.node_names
     up_results = nodes.map { |node| bring_up_and_configure(node) }
-    return ERROR_RESULT unless up_results.detect(&:!).nil?
+    return Result.error('') unless up_results.detect(&:!).nil?
 
-    SUCCESS_RESULT
+    Result.ok('')
   end
 
   private
