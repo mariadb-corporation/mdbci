@@ -116,13 +116,13 @@ EOF
     $out.info('Loading MDBCI configuration file')
     @tool_config = ToolConfiguration.load
     $out.info('Loading repository configuration files')
-    @repos = RepoManager.new($out, @repo_dir)
+    @box_definitions = BoxDefinitions.new(@boxes_location)
+    @repos = RepoManager.new($out, @box_definitions, @repo_dir)
     if @tool_config['aws']
       @aws_service = AwsService.new(@tool_config['aws'], $out)
     end
     @rhel_credentials = @tool_config['rhel']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
-    @box_definitions = BoxDefinitions.new(@boxes_location)
   end
 
   # Search for a configuration file in all known configuration locations that include

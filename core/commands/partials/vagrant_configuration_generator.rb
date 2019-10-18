@@ -37,25 +37,6 @@ class VagrantConfigurationGenerator < BaseCommand
     HEADER
   end
 
-  def aws_provider_config(aws_config, pemfile_path, keypair_name)
-    <<-PROVIDER
-    ###           AWS Provider config block                 ###
-    ###########################################################
-    config.vm.box = "dummy"
-
-    config.vm.provider :aws do |aws, override|
-      aws.keypair_name = "#{keypair_name}"
-      override.ssh.private_key_path = "#{pemfile_path}"
-      aws.region = "#{aws_config['region']}"
-      aws.security_groups = ['default', '#{aws_config['security_group']}']
-      aws.access_key_id = "#{aws_config['access_key_id']}"
-      aws.secret_access_key = "#{aws_config['secret_access_key']}"
-      aws.user_data = "#!/bin/bash\nsed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers"
-      override.nfs.functional = false
-    end ## of AWS Provider config block
-    PROVIDER
-  end
-
   def provider_config
     <<-CONFIG
 ### Default (VBox, Libvirt) Provider config ###
@@ -162,57 +143,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     template.result(OpenStruct.new(node_params).instance_eval { binding })
   end
   # rubocop:enable Metrics/MethodLength
-
-  # Get the package manager name by the platform name.
-  #
-  # @param platform [String] name of the platform
-  # @return [String] name of the package manager
-  # @raise RuntimeError if platform is unknown.
-  def get_package_manager_name(platform)
-    case platform
-    when 'ubuntu', 'debian' then 'apt'
-    when 'centos', 'redhat' then 'yum'
-    when 'suse' then 'zypper'
-    else raise 'Unknown platform'
-    end
-  end
-
-  # Convert the Hash to the String.
-  #
-  # @param hash [Hash] hash of the tags
-  # @return [String] converted hash in the format "{ 'key' => 'value', ... }"
-  def generate_aws_tag(hash)
-    vagrantfile_tags = hash.map { |key, value| "'#{key}' => '#{value}'" }.join(', ')
-    "{ #{vagrantfile_tags} }"
-  end
-
-  # Vagrantfile for AWS provider
-  # rubocop:disable Metrics/MethodLength
-  # The method returns a template; decomposition will complicate the code.
-  def get_aws_vms_definition(_cookbook_path, tags, node_params)
-    node_params = node_params.merge(tags: tags)
-    template = ERB.new <<-AWS
-      #  --> Begin definition for machine: <%= name %>
-      config.vm.define '<%= name %>' do |box|
-        <% if ssh_pty %>
-          box.ssh.pty = <%= ssh_pty %>
-        <% end %>
-        <% if template_path %>
-          box.vm.synced_folder '<%=template_path %>', '/home/vagrant/cnf_templates', type: 'rsync'
-        <% end %>
-        box.vm.provider :aws do |aws, override|
-          aws.ami = '<%= ami %>'
-          aws.tags = <%= tags %>
-          aws.instance_type = '<%= default_instance_type %>'
-          <% if device_name %>
-            aws.block_device_mapping = [{ 'DeviceName' => '<%= device_name %>', 'Ebs.VolumeSize' => 500 }]
-          <% end %>
-          override.ssh.username = '<%= user %>'
-        end
-      end #  <-- End of AWS definition for machine: <%= name %>
-    AWS
-    template.result(OpenStruct.new(node_params).instance_eval { binding })
-  end
 
   # Make product config and recipe name for install it to the VM.
   #
@@ -331,10 +261,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def print_node_info(node_params, box)
     @ui.info("Requested memory #{node_params[:vm_mem]}")
     @ui.info("Requested number of CPUs #{node_params[:vm_cpu]}")
-    if node_params[:provider] == 'aws'
-      @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:amiurl]}, "\
-               "user:#{node_params[:user]}, instance:#{node_params[:instance]}")
-    end
     @ui.info("config.ssh.pty option is #{node_params[:ssh_pty]} for a box #{box}") unless node_params[:ssh_pty].nil?
   end
 
@@ -349,15 +275,10 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     case node_params[:provider]
     when 'virtualbox'
       get_virtualbox_definition(cookbook_path, node_params)
-    when 'aws'
-      tags = generate_aws_tag('hostname' => Socket.gethostname, 'username' => Etc.getlogin,
-                              'full_config_path' => File.expand_path(path), 'machinename' => node_params[:name])
-      node_params[:device_name] = @aws_service.device_name_for_ami(node_params[:ami])
-      get_aws_vms_definition(cookbook_path, tags, node_params)
     when 'libvirt'
       get_libvirt_definition(cookbook_path, path, node_params)
     else
-      @ui.warning('Configuration type invalid! It must be vbox, aws or libvirt type. Check it, please!')
+      @ui.warning('Configuration type invalid! It must be vbox libvirt type. Check it, please!')
       ''
     end
   end
@@ -417,19 +338,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   end
   # rubocop:enable Metrics/MethodLength
 
-  # Generate the key pair for the AWS.
-  #
-  # @param path [String] path of the configuration file.
-  def generate_key_pair(path)
-    full_path = File.expand_path(path)
-    key_pair = @env.aws_service.generate_key_pair(full_path)
-    path_to_keyfile = File.join(full_path, 'maxscale.pem')
-    File.write(path_to_keyfile, key_pair.key_material)
-    path_to_keypair_file = File.join(full_path, Configuration::AWS_KEYPAIR_NAME)
-    File.write(path_to_keypair_file, key_pair.key_name)
-    [path_to_keyfile, key_pair.key_name]
-  end
-
   # Generate a Vagrantfile.
   #
   # @param path [String] path of the configuration file
@@ -441,14 +349,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def generate_vagrant_file(path, config, provider, cookbook_path)
     vagrant = File.open(File.join(path, 'Vagrantfile'), 'w')
     vagrant.puts vagrant_file_header, vagrant_config_header
-    if provider == 'aws'
-      @ui.info('Generating AWS configuration')
-      path_to_keyfile, keypair_name = generate_key_pair(path)
-      vagrant.puts aws_provider_config(@env.tool_config['aws'], path_to_keyfile, keypair_name)
-    else
-      @ui.info('Generating libvirt/VirtualBox configuration')
-      vagrant.puts provider_config
-    end
+    @ui.info('Generating libvirt/VirtualBox configuration')
+    vagrant.puts provider_config
     config.each do |node|
       next if node[1]['box'].nil?
 
@@ -464,7 +366,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   rescue RuntimeError => e
     @ui.error(e.message)
     @ui.error('Configuration is invalid')
-    @env.aws_service.delete_key_pair(keypair_name) if provider == 'aws'
     vagrant.close
     FileUtils.rm_rf(path)
     ERROR_RESULT
@@ -562,7 +463,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return [Array<String, Hash>] path and config hash
   # @raise RuntimeError if configuration file is invalid.
   def setup_command(name)
-    @aws_service = @env.aws_service
     @boxes = @env.box_definitions
     path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
     begin

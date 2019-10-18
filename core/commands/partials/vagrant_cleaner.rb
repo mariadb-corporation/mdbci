@@ -11,25 +11,12 @@ class VagrantCleaner
   include ReturnCodes
   include ShellCommands
 
-  INSTANCE_NOT_FOUND = 'instance-not-found'
-
   def initialize(env, logger)
     @env = env
     @ui = logger
-    @aws_service = env.aws_service
-  end
-
-  def destroy_nodes_by_name
-    remember_aws_instance_id
-    if @env.list
-      show_vm_list
-    elsif @env.node_name
-      destroy_machine_by_name(@env.node_name)
-    end
   end
 
   def destroy_nodes_by_configuration(configuration)
-    remember_aws_instance_id if configuration.provider == 'aws'
     stop_machines(configuration)
     configuration.node_names.each do |node_name|
       destroy_machine(configuration, node_name)
@@ -52,34 +39,18 @@ class VagrantCleaner
                   'Unable to get VirtualBox vm\'s list')[:output].split("\n")
   end
 
-  # Method gets the AWS instances names list.
+  # Method gets vm names list of virtualbox and libvirt machines.
   #
   # @return [Array] instances names list.
-  def aws_vm_list
-    @aws_instance_ids.map { |instance| instance[:node_name] }
+  def vm_list
+    { libvirt: libvirt_vm_list, virtualbox: virtualbox_vm_list }
   end
 
-  # Print virtual machines names list of all providers.
-  def show_vm_list
-    vm_list = libvirt_vm_list + virtualbox_vm_list + aws_vm_list
-    @ui.info("Virtual machines list: #{vm_list}")
-  end
-
-  # Destroy all virtual machines of all providers that correspond with the node_name.
+  # Destroy virtual machine by name.
   #
-  # @param node_name [String] regexp of the node name.
-  def destroy_machine_by_name(node_name)
-    node_name_regexp = Regexp.new(node_name)
-    vm_list = { libvirt: libvirt_vm_list, virtualbox: virtualbox_vm_list, aws: aws_vm_list }
-    vm_list.each do |provider, nodes|
-      vm_list[provider] = nodes.select { |node| node =~ node_name_regexp }
-    end
-    @ui.info("Virtual machines to destroy: #{vm_list.values.flatten}")
-    return unless @ui.prompt('Do you want to continue? [y/n]')[0].casecmp('y').zero?
-
-    vm_list.each do |provider, nodes|
-      nodes.each { |node| destroy_machine(nil, nil, provider.to_s, node) }
-    end
+  # @param [String] node node name.
+  def destroy_node_by_name(node, provider)
+    destroy_machine(nil, nil, provider.to_s, node)
   end
 
   # Stop machines specified in the configuration or in a node
@@ -87,19 +58,7 @@ class VagrantCleaner
   # @param configuration [Configuration] that we operate on
   def stop_machines(configuration)
     @ui.info 'Destroying the machines using vagrant'
-    check_command_in_dir("vagrant destroy -f #{configuration.node_names.join(' ')}",
-                         configuration.path,
-                         'Vagrant was unable to destroy existing nodes')
-  end
-
-  # Destroy aws keypair specified in the configuration.
-  #
-  # @param configuration [Configuration] that we operate on.
-  def destroy_aws_keypair(configuration)
-    return unless configuration.aws_keypair_name?
-
-    @ui.info "Destroying AWS key pair #{configuration.aws_keypair_name}"
-    @aws_service.delete_key_pair(configuration.aws_keypair_name)
+    VagrantService.destroy_nodes(configuration.node_names, configuration.path)
   end
 
   # Destroy the node if it was not destroyed by the vagrant.
@@ -116,8 +75,6 @@ class VagrantCleaner
       destroy_libvirt_domain(configuration, node, vm_name)
     when 'virtualbox'
       destroy_virtualbox_machine(configuration, node, vm_name)
-    when 'aws'
-      destroy_aws_machine(configuration, node, vm_name)
     else
       @ui.error("Unknown provider #{provider}. Can not manually destroy virtual machines.")
     end
@@ -179,39 +136,5 @@ class VagrantCleaner
                   "Unable to shutdown #{vbox_name} machine.")
     check_command("VBoxManage unregistervm #{vbox_name} -delete",
                   "Unable to delete #{vbox_name} machine.")
-  end
-
-  # Destroy the aws virtual machine.
-  # To destroy the node by name, use aws_box_name param.
-  #
-  # @param configuration [Configuration] configuration to user.
-  # @param node [String] name of node to destroy.
-  # @param aws_box_name [String] name of instance to destroy.
-  def destroy_aws_machine(configuration, node, aws_box_name = nil)
-    aws_box_name ||= "#{configuration.name}_#{node}"
-    instance_id = get_aws_instance_id_by_node_name(aws_box_name)
-    if instance_id.nil?
-      @ui.error("Unable to terminate #{aws_box_name} machine. Instance id does not exist.")
-      return
-    end
-    unless @aws_service.instance_running?(instance_id)
-      @ui.info("AWS instance '#{instance_id}' for node '#{node}' is not running.")
-    end
-    @ui.info("Sending termination command for instance '#{instance_id}' used for node '#{node}.")
-    @aws_service.terminate_instance(instance_id)
-  end
-
-  # Remember the instance id of aws virtual machines.
-  def remember_aws_instance_id
-    @aws_instance_ids = @aws_service&.instances_list || []
-  end
-
-  # Read the instance id of aws virtual machine from local vagrant directory.
-  #
-  # @param node_name [String] name of instance.
-  # @return [String] id of the instance.
-  def get_aws_instance_id_by_node_name(node_name)
-    found_instance = @aws_instance_ids.find { |instance| instance[:node_name] == node_name }
-    found_instance.nil? ? nil : found_instance[:instance_id]
   end
 end

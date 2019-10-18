@@ -90,8 +90,6 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     aws_credentials = input_aws_credentials
     return ERROR_RESULT if aws_credentials.nil?
 
-    aws_security_group = input_or_create_security_group(aws_credentials)
-    aws_credentials['security_group'] = aws_security_group
     @configuration['aws'] = aws_credentials
     SUCCESS_RESULT
   end
@@ -136,34 +134,24 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     { 'key' => read_topic('Please input the private key for MariaDB Enterprise', @configuration.dig('mdbe', 'key')) }
   end
 
-  def input_or_create_security_group(credentials)
-    if read_topic('Create new AWS security group?', 'y').casecmp('y').zero?
-      aws_service = AwsService.new(credentials, @ui)
-      security_group = aws_service.create_security_group
-      return ERROR_RESULT if security_group.nil?
-
-      @ui.info("Created new security group: #{security_group}")
-      security_group
-    else
-      read_topic('Please input the name of AWS security group', '')
-    end
-  end
-
   def input_aws_credentials
     key_id = ''
     secret_key = ''
     region = 'eu-west-1'
+    availability_zone = 'eu-west-1a'
     loop do
       key_id = read_topic('Please input AWS key id', key_id)
       secret_key = read_topic('Please input AWS secret key', secret_key)
       region = read_topic('Please input AWS region', region)
+      availability_zone = read_topic('Please input AWS availability zone to create subnet', availability_zone)
       check_complete = AwsService.check_credentials(@ui, key_id, secret_key, region)
       break if check_complete
 
       @ui.error('You have provided inappropriate information.')
       return nil unless read_topic('Try again?', 'y').casecmp('y').zero?
     end
-    { 'access_key_id' => key_id, 'secret_access_key' => secret_key, 'region' => region }
+    { 'access_key_id' => key_id, 'secret_access_key' => secret_key,
+      'region' => region, 'availability_zone' => availability_zone }
   end
 
   # Ask user to input non-empty string as value

@@ -1,4 +1,7 @@
 #/bin/bash
 # This scirpt executes the creation of appimage with ADSF
 
-../gen_appimage.sh adsf 1.4.1
+script_dir="${0%/*}"
+
+cd $script_dir
+../docker_build.sh adsf 1.4.2
