@@ -21,6 +21,7 @@ RUN yum install -y \
         curl \
         wget \
         sudo \
+        patch \
         vim && \
         wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmodern/ruby-install/archive/v$RUBY_INSTALL_VERSION.tar.gz && \
         tar -xzvf ruby-install-$RUBY_INSTALL_VERSION.tar.gz && \
