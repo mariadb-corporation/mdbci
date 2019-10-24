@@ -8,20 +8,15 @@ require 'net/ssh'
 class PublicKeysCommand < BaseCommand
   # This method is called whenever the command is executed
   def execute
-    exit_code = SUCCESS_RESULT
     if @env.show_help
       show_help
       return SUCCESS_RESULT
     end
     return ARGUMENT_ERROR_RESULT unless init == SUCCESS_RESULT
 
-    @network_config.store_network_config.each do |node_name|
-      @ui.info("Putting the key file to node '#{node_name}'")
-      ssh_connection_parameters = setup_ssh_key(node_name)
-      result = configure_server_ssh_key(ssh_connection_parameters)
-      exit_code = ERROR_RESULT if result == ERROR_RESULT
-    end
-    exit_code
+    return ERROR_RESULT if copy_key_to_node == ERROR_RESULT
+
+    SUCCESS_RESULT
   end
 
   def show_help
@@ -40,6 +35,21 @@ class PublicKeysCommand < BaseCommand
   end
 
   private
+
+  def copy_key_to_node
+    available_nodes = @network_config.store_network_config
+    if available_nodes.empty?
+      @ui.error('No available nodes')
+      return ERROR_RESULT
+    else
+      available_nodes.each do |node_name|
+        @ui.info("Putting the key file to node '#{node_name}'")
+        ssh_connection_parameters = setup_ssh_key(node_name)
+        result = configure_server_ssh_key(ssh_connection_parameters)
+        return ERROR_RESULT if result == ERROR_RESULT
+      end
+    end
+  end
 
   # Initializes the command variable.
   def init
