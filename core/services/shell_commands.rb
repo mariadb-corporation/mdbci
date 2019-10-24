@@ -92,6 +92,19 @@ module ShellCommands
     }
   end
 
+  # Run the command, gather the standard output and save the process results
+  # @param command [String] command to run
+  # @param options [Hash] parameters to pass to Open3 method
+  # @param env [Hash] environment to run command in
+  def self.run_command_without_log(command, options = {}, env = ShellCommands.environment)
+    options[:unsetenv_others] = true
+    output, status = Open3.capture2(env, command, options)
+    {
+      value: status,
+      output: output
+    }
+  end
+
   # Wrapper method for the module method
   def run_command(command, options = {}, logger = @ui, env = ShellCommands.environment)
     ShellCommands.run_command(logger, command, options, env)
