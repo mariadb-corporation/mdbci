@@ -55,24 +55,10 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
 
   private
 
-  def create_docker_file(password)
-    path = File.expand_path('~/.config/mdbci/docker.md')
-    return ERROR_RESULT if @configuration.check_config_dir(path, @ui) == ERROR_RESULT
-
-    file = File.new(path, 'w')
-    file.write(password)
-    file.close
-    file.path
-  end
-
   def check_dock_credentials(docker_credentials)
-    path = create_docker_file(docker_credentials['password'])
-    return ERROR_RESULT if path == ERROR_RESULT
-
-    cmd = "cat #{path} | docker login --username #{docker_credentials['username']}" \
-          " --password-stdin #{docker_credentials['ci-server']}"
+    cmd = "docker login --username #{docker_credentials['username']}" \
+          " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
     out = ShellCommands.run_command_and_log(@ui, cmd)
-    File.delete(path) if File.exists?(path)
     out[:value].success?
   end
 
