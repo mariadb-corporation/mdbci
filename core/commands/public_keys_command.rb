@@ -15,7 +15,7 @@ class PublicKeysCommand < BaseCommand
     end
     return ARGUMENT_ERROR_RESULT unless init == SUCCESS_RESULT
 
-    @mdbci_config.node_names.each do |node_name|
+    @network_config.store_network_config.each do |node_name|
       @ui.info("Putting the key file to node '#{node_name}'")
       ssh_connection_parameters = setup_ssh_key(node_name)
       result = configure_server_ssh_key(ssh_connection_parameters)
