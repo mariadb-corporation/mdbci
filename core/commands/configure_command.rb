@@ -58,7 +58,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
   def check_dock_credentials(docker_credentials)
     cmd = "docker login --username #{docker_credentials['username']}" \
           " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
-    out = ShellCommands.run_command_without_log(cmd)
+    out = ShellCommands.run_command_and_log(@ui, cmd, false)
     out[:value].success?
   end
 
