@@ -36,6 +36,7 @@ class PublicKeysCommand < BaseCommand
 
   private
 
+  # Сopies the ssh key to available nodes.
   def copy_key_to_node
     available_nodes = @network_config.store_network_config
     if available_nodes.empty?
