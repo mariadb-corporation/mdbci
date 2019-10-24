@@ -49,13 +49,14 @@ class PublicKeysCommand < BaseCommand
     end
 
     @mdbci_config = Configuration.new(@args.first, @env.labels)
+    @network_config = NetworkConfig.new(@mdbci_config, @ui)
     @keyfile = @env.keyFile.to_s
     unless File.exist?(@keyfile)
       @ui.error('Please specify the key file to put to nodes')
       return ARGUMENT_ERROR_RESULT
     end
     begin
-      @network_config = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
     rescue StandardError
       @ui.error('Network settings file is not found for the configuration')
       return ARGUMENT_ERROR_RESULT
@@ -94,7 +95,7 @@ class PublicKeysCommand < BaseCommand
   # Setup ssh key data
   # @param node_name [String] name of the node
   def setup_ssh_key(node_name)
-    network_settings = @network_config.node_settings(node_name)
+    network_settings = @network_settings.node_settings(node_name)
     { 'whoami' => network_settings['whoami'],
       'network' => network_settings['network'],
       'keyfile' => network_settings['keyfile'],
