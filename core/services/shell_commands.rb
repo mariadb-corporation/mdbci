@@ -36,9 +36,9 @@ module ShellCommands
   # @return [Process::Status] of the run command
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/BlockLength
-  def self.run_command_and_log(logger, command, show_notifications = false, options = {},
+  def self.run_command_and_log(logger, command, show_command = true, show_notifications = false, options = {},
                                env = ShellCommands.environment)
-    logger.info "Invoking command: #{command}"
+    logger.info "Invoking command: #{command}" if show_command
     options[:unsetenv_others] = true
     Open3.popen3(env, command, options) do |stdin, stdout, stderr, wthr|
       stdin.close
@@ -74,8 +74,8 @@ module ShellCommands
   # rubocop:enable Metrics/MethodLength
 
   # Wrapper method for the module method
-  def run_command_and_log(command, show_notifications = false, options = {}, logger = @ui, env = ShellCommands.environment)
-    ShellCommands.run_command_and_log(logger, command, show_notifications, options, env)
+  def run_command_and_log(command, show_command = true, show_notifications = false, options = {}, logger = @ui, env = ShellCommands.environment)
+    ShellCommands.run_command_and_log(logger, command, show_command, show_notifications, options, env)
   end
 
   # Run the command, gather the standard output and save the process results
