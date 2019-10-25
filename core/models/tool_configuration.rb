@@ -56,7 +56,8 @@ class ToolConfiguration
   end
 
   # Checks the config directory and creates a directory if it is missing
-  # logger [Out] logger to log information to
+  # @@param logger [Out] logger to log information to
+  # @param config_file [String] path to file
   def check_config_dir(config_file, logger)
     begin
       config_dir = File.dirname(config_file)
