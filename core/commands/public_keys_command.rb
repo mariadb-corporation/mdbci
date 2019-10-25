@@ -42,13 +42,12 @@ class PublicKeysCommand < BaseCommand
     if available_nodes.empty?
       @ui.error('No available nodes')
       return ERROR_RESULT
-    else
-      available_nodes.each do |node_name|
-        @ui.info("Putting the key file to node '#{node_name}'")
-        ssh_connection_parameters = setup_ssh_key(node_name)
-        result = configure_server_ssh_key(ssh_connection_parameters)
-        return ERROR_RESULT if result == ERROR_RESULT
-      end
+    end
+    available_nodes.each do |node_name|
+      @ui.info("Putting the key file to node '#{node_name}'")
+      ssh_connection_parameters = setup_ssh_key(node_name)
+      result = configure_server_ssh_key(ssh_connection_parameters)
+      return ERROR_RESULT if result == ERROR_RESULT
     end
   end
 
