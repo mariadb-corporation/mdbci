@@ -362,7 +362,12 @@ EOF
       $out.warning('Please specify the path to the nodes configuration as a parameter')
       return 2
     end
-    configuration = Configuration.new(path)
+    begin
+      configuration = Configuration.new(path)
+    rescue
+      $out.error("Invalid path to the MDBCI configuration: #{path}")
+      return 2
+    end
     if configuration.node_names.size != 1
       $out.warning('Please specify the node to get configuration from')
       return 2
