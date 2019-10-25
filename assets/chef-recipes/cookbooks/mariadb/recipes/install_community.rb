@@ -173,3 +173,10 @@ else
     command "echo '\n!includedir #{db_config_dir}' >> #{db_base_config}"
   end
 end
+
+directory db_config_dir do
+  owner 'root'
+  group 'root'
+  recursive true
+  mode '0644'
+end
