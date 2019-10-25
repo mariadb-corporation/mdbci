@@ -87,9 +87,9 @@ Specifies the command.
   def ssh_vagrant
     results = @config.node_names.map do |node|
       result = VagrantService.ssh_command(node, @ui, @command, @config.path)
-      return Result.error("Error of the executing ssh-command on node #{node}") if result.error?
+      return Result.error("Error of the executing ssh-command on node #{node}") unless result[:value].success?
 
-      result.value.chomp
+      result[:output].chomp
     end
     Result.ok(results)
   end
