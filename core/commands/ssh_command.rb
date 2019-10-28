@@ -16,7 +16,8 @@ class SshCommand < BaseCommand
     info = <<-HELP
 'ssh' executes a command on the virtual machine via ssh.
 
-mdbci ssh --command "ls ~" T/node0 - execute a command on the T/node0
+Execute a command on the T/node0:
+> mdbci ssh --command "ls ~" T/node0
 
 OPTIONS:
   --command [string]:
