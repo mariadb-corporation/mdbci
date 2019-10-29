@@ -9,6 +9,7 @@ require 'concurrent'
 require_relative 'clone'
 require_relative 'commands/up_command'
 require_relative 'commands/sudo_command'
+require_relative 'commands/ssh_command'
 require_relative 'commands/snapshot_command'
 require_relative 'commands/destroy_command'
 require_relative 'commands/generate_command'
@@ -51,7 +52,6 @@ class Session
   attr_accessor :repos
   attr_accessor :repo_dir
   attr_accessor :mdbciNodes # mdbci nodes
-  attr_accessor :templateNodes
   attr_accessor :attempts
   attr_accessor :mdbciDir
   attr_accessor :mdbci_dir
@@ -92,7 +92,6 @@ EOF
 
   def initialize
     @mdbciNodes = {}
-    @templateNodes = {}
     @keep_template = false
     @list = false
     @threads_count = Concurrent.physical_processor_count
@@ -186,20 +185,6 @@ EOF
     end
   end
 
-  # load template nodes
-  def loadTemplateNodes
-    pwd = Dir.pwd
-    instanceFile = $exception_handler.handle('INSTANCE configuration file not found') { IO.read(pwd+'/template') }
-    $out.info 'Load nodes from template file ' + instanceFile.to_s
-    @templateNodes = $exception_handler.handle('INSTANCE configuration file invalid') { JSON.parse(IO.read(instanceFile)) }
-    if @templateNodes.has_key?('cookbook_path');
-      @templateNodes.delete('cookbook_path');
-    end
-    if @templateNodes.has_key?('aws_config');
-      @templateNodes.delete('aws_config');
-    end
-  end
-
   # load mdbci nodes
   def loadMdbciNodes(path)
     templateFile = $exception_handler.handle('MDBCI configuration file not found') { IO.read(path+'/mdbci_template') }
@@ -212,15 +197,6 @@ EOF
     if @mdbciNodes.has_key?("aws_config");
       @mdbciNodes.delete("aws_config");
     end
-  end
-
-  # ./mdbci ssh command for AWS, VBox and PPC64 machines
-  def ssh(args)
-    result_ssh = getSSH(args,"")
-    result_ssh.each do |ssh_out|
-      $out.out ssh_out
-    end
-    return 0
   end
 
   def getSSH(args,command)
@@ -264,21 +240,6 @@ EOF
       end
     end
     return result
-  end
-
-  def createCmd(params, node, pwd)
-    dir = params[0]
-    node_arg =  params[1]
-    box = node[1]['box'].to_s
-    raise "Box: #{box} is empty" if box.empty?
-
-    box_params = $session.box_definitions.get_box(box)
-    cmd = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ' + mdbci_dir + '/KEYS/'
-                    + box_params['keyfile'].to_s + " "\
-                    + box_params['user'].to_s + "@"\
-                    + box_params['IP'].to_s + " "\
-                    + "'" + $session.command + "'"
-    return cmd
   end
 
   def runSSH(cmd, params)
@@ -530,7 +491,8 @@ EOF
       snapshot = SnapshotCommand.new(ARGV, self, $out)
       exit_code = snapshot.execute
     when 'ssh'
-      exit_code = ssh(ARGV.shift)
+      ssh = SshCommand.new(ARGV, self, $out)
+      exit_code = ssh.execute
     when 'sudo'
       sudo = SudoCommand.new(ARGV, self, $out)
       exit_code = sudo.execute
