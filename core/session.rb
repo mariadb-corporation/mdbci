@@ -366,7 +366,19 @@ EOF
     },
     keyfile: {
       description: 'Show box key file to access it',
-      action: ->(*params) { Network.showKeyFile(*params) }
+      action: ->(*params) do
+        config = Configuration.new(params.first)
+        if config.terraform_configuration?
+          network_settings = NetworkSettings.from_file(config.network_settings_file)
+          config.node_names.map do |node|
+            node_settings = network_settings.node_settings(node)
+            $out.out(node_settings['keyfile'])
+          end
+          0
+        else
+          Network.showKeyFile(*params)
+        end
+      end
     },
     help: {
       description: 'Print list of available actions and exit',
@@ -374,7 +386,19 @@ EOF
     },
     network: {
       description: 'Show network interface configuration',
-      action: ->(*params) { Network.show(*params) }
+      action: ->(*params) do
+        config = Configuration.new(params.first)
+        if config.terraform_configuration?
+          network_settings = NetworkSettings.from_file(config.network_settings_file)
+          config.node_names.map do |node|
+            node_settings = network_settings.node_settings(node)
+            $out.out(node_settings['network'])
+          end
+          0
+        else
+          Network.show(*params)
+        end
+      end
     },
     network_config: {
       description: 'Write host network configuration to the file',
@@ -386,7 +410,19 @@ EOF
     },
     private_ip: {
       description: 'Show private ip address of the box',
-      action: ->(*params) { Network.show(*params) }
+      action: ->(*params) do
+        config = Configuration.new(params.first)
+        if config.terraform_configuration?
+          network_settings = NetworkSettings.from_file(config.network_settings_file)
+          config.node_names.map do |node|
+            node_settings = network_settings.node_settings(node)
+            $out.out(node_settings['private_ip'])
+          end
+          0
+        else
+          Network.show(*params)
+        end
+      end
     },
     provider: {
       description: 'Show provider for the specified box',
