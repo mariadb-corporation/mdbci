@@ -161,7 +161,7 @@ module ShellCommands
   # @param options [Hash] options that are passed to the popen3 method
   def self.check_command(logger, command, message, options = {})
     result = ShellCommands.run_command_and_log(logger, command, false, options)
-    @ui.error message unless result[:value].success?
+    logger.error(message) unless result[:value].success?
     result
   end
 
