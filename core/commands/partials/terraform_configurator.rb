@@ -137,12 +137,13 @@ class TerraformConfigurator
   def store_network_settings(node)
     @ui.info('Generating network configuration file')
     begin
+      node_network = TerraformService.resource_network(node, @ui, @config.path)
       @network_settings.add_network_configuration(
         node,
         'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
-        'private_ip' => IO.read(File.join(@config.path, "private_ip_#{node}")).chomp,
-        'network' => IO.read(File.join(@config.path, "public_ip_#{node}")).chomp,
-        'whoami' => IO.read(File.join(@config.path, "user_#{node}")).chomp
+        'private_ip' => node_network['private_ip'],
+        'network' => node_network['public_ip'],
+        'whoami' => node_network['user']
       )
     rescue RuntimeError => e
       @ui.error(e.message)
