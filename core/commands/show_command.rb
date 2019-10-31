@@ -168,5 +168,8 @@ class ShowCommand < BaseCommand
     boxes.size != 0
   end
 
-
+  def showBoxField
+    $out.out findBoxField($session.boxName, $session.field)
+    return 0
+  end
 end
