@@ -57,8 +57,8 @@ class VagrantCleaner
   #
   # @param configuration [Configuration] that we operate on
   def stop_machines(configuration)
-    @ui.info 'Destroying the machines using vagrant'
-    VagrantService.destroy_nodes(configuration.node_names, configuration.path)
+    @ui.info('Destroying the machines using vagrant')
+    VagrantService.destroy_nodes(configuration.node_names, @ui, configuration.path)
   end
 
   # Destroy the node if it was not destroyed by the vagrant.
