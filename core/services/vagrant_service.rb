@@ -30,8 +30,8 @@ module VagrantService
     ShellCommands.run_command_in_dir(logger, "vagrant ssh #{node} -c #{command}", path)
   end
 
-  def self.destroy_nodes(node_names, path = Dir.pwd)
-    ShellCommands.check_command_in_dir("vagrant destroy -f #{node_names.join(' ')}", path,
+  def self.destroy_nodes(node_names, logger, path = Dir.pwd)
+    ShellCommands.check_command_in_dir(logger, "vagrant destroy -f #{node_names.join(' ')}", path,
                                        'Vagrant was unable to destroy existing nodes')
   end
 end

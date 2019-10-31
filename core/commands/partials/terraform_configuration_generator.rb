@@ -63,7 +63,7 @@ class TerraformConfigurationGenerator < BaseCommand
     @public_key_value = "#{type} #{data}"
     @path_to_keyfile = File.join(@configuration_path, KEYFILE_NAME)
     File.open(@path_to_keyfile, 'w') { |file| file.write(key.to_pem) }
-    File.chmod(400, @path_to_keyfile)
+    File.chmod(0o400, @path_to_keyfile)
 
     hostname = Socket.gethostname
     key_pair_name = File.basename(@configuration_path)

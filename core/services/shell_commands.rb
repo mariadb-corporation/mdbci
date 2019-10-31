@@ -36,6 +36,7 @@ module ShellCommands
   # @return [Process::Status] of the run command
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/BlockLength
+  # rubocop:disable Metrics/ParameterLists
   def self.run_command_and_log(logger, command, show_command = true, show_notifications = false, options = {},
                                env = ShellCommands.environment)
     logger.info "Invoking command: #{command}" if show_command
@@ -72,11 +73,15 @@ module ShellCommands
   end
   # rubocop:enable Metrics/BlockLength
   # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/ParameterLists
 
   # Wrapper method for the module method
-  def run_command_and_log(command, show_command = true, show_notifications = false, options = {}, logger = @ui, env = ShellCommands.environment)
+  # rubocop:disable Metrics/ParameterLists
+  def run_command_and_log(command, show_command = true, show_notifications = false, options = {}, logger = @ui,
+                          env = ShellCommands.environment)
     ShellCommands.run_command_and_log(logger, command, show_command, show_notifications, options, env)
   end
+  # rubocop:enable Metrics/ParameterLists
 
   # Run the command, gather the standard output and save the process results
   # @param command [String] command to run
@@ -114,9 +119,9 @@ module ShellCommands
   # @param log [Boolean] whether to log to stdout or not
   def self.run_command_in_dir(logger, command, directory, log = true)
     if log
-      run_command_and_log(logger, command, false, chdir: directory)
+      run_command_and_log(logger, command, false, false, { chdir: directory })
     else
-      run_command(logger, command, chdir: directory)
+      run_command(logger, command, { chdir: directory })
     end
   end
 
@@ -127,8 +132,8 @@ module ShellCommands
   # @param env [Hash] environment to run command in
   # @param until_first_error [Boolean] abort after first encountered error
   def self.run_sequence(logger, commands, options = {}, env = ShellCommands.environment, until_first_error = true)
-    commands.each_with_object(output: '') do |command, acc|
-      result = ShellCommands.run_command(logger, command, options, env)
+    commands.each_with_object({ output: '' }) do |command, acc|
+      result = run_command(logger, command, options, env)
       acc[:output] += result[:output]
       if result[:value].success?
         acc[:value] ||= result[:value]
@@ -147,26 +152,33 @@ module ShellCommands
     ShellCommands.run_sequence(@ui, commands, options, env, until_first_error)
   end
 
+  # Wrapper method for the module method
+  def check_command(command, message, options = {})
+    ShellCommands.check_command(@ui, command, message, options)
+  end
+
   # Execute the command, log stdout and stderr. If command was not
   # successful, then print information to error stream.
   #
+  # @param logger [Out] logger to provide data to
   # @param command [String] command to run
   # @param message [String] message to display in case of failure
   # @param options [Hash] options that are passed to the popen3 method
-  def check_command(command, message, options = {})
-    result = run_command_and_log(command, false, options)
-    @ui.error message unless result[:value].success?
+  def self.check_command(logger, command, message, options = {})
+    result = run_command_and_log(logger, command, false, false, options)
+    logger.error(message) unless result[:value].success?
     result
   end
 
   # Execute the command in the specified directory, log stdout and stderr.
   # If command was not successful, then print it onto error stream.
   #
+  # @param logger [Out] logger to provide data to
   # @param command [String] command to run
   # @param directory [String] directory to run command in
   # @param message [String] message to display in case of failure
-  def check_command_in_dir(command, directory, message)
-    check_command(command, message, chdir: directory)
+  def self.check_command_in_dir(logger, command, directory, message)
+    check_command(logger, command, message, { chdir: directory })
   end
 
   # Execute the command and raise error if it did not succeed
@@ -177,7 +189,7 @@ module ShellCommands
   # @param options [Hash] different options to pass to underlying implementation
   def run_reliable_command(command, message = "Command #{command} failed.", log = true, options = {})
     result = if log
-               run_command_and_log(command, false, options)
+               run_command_and_log(command, false, false, options)
              else
                run_command(command, options)
              end
