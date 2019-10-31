@@ -126,5 +126,19 @@ class ShowCommand < BaseCommand
     0
   end
 
+  def show_box_name_in_configuration(path = nil)
+    if path.nil?
+      $out.warning('Please specify the path to the nodes configuration as a parameter')
+      return 2
+    end
+    configuration = Configuration.new(path)
+    if configuration.node_names.size != 1
+      $out.warning('Please specify the node to get configuration from')
+      return 2
+    end
+    $out.out(configuration.box_names(configuration.node_names.first))
+    0
+  end
+
 
 end
