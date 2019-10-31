@@ -1,4 +1,6 @@
 
+require_relative '../models/network_settings'
+require_relative '../models/configuration'
 
 
 class ShowCommand < BaseCommand
@@ -164,7 +166,7 @@ class ShowCommand < BaseCommand
       definition['platform'] == @boxPlatform &&
         (@boxPlatformVersion.nil? || definition['platform_version'] == @boxPlatformVersion)
     end
-    boxes.each { |name, _| $out.out(name) }
+    boxes.each { |name, _| @ui.out(name) }
     boxes.size != 0
   end
 
@@ -187,5 +189,14 @@ class ShowCommand < BaseCommand
     else
       return box.to_json
     end
+  end
+
+  def show_box_keys
+    if @env.field.nil? || @env.field.empty?
+      @ui.error('Please specify the field to get summarized data')
+      return 1
+    end
+    @ui.out(@box_definitions.unique_values(@env.field))
+    0
   end
 end
