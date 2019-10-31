@@ -99,18 +99,31 @@ class ShowCommand < BaseCommand
 
   def execute
     if @args.empty?
-      $out.warning 'Please specify an action for the show command.'
+      @ui.warning 'Please specify an action for the show command.'
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
       return 0
     end
     action_name, *action_parameters = *@args
     action = SHOW_COMMAND_ACTIONS[action_name.to_sym]
     if action.nil?
-      $out.warning "Unknown action for the show command: #{action_name}."
+      @ui.warning "Unknown action for the show command: #{action_name}."
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
       return 2
     end
     instance_exec(*action_parameters, &action[:action])
+  end
+
+  # Show list of actions available for the base command
+  #
+  # @param base_command [String] name of the command user is typing
+  # @param actions [Hash] list of commands that must be described
+  def display_usage_info(base_command, actions)
+    max_width = actions.keys.map(&:length).max
+    @ui.out "List of subcommands for #{base_command}"
+    actions.keys.sort.each do |action|
+      @ui.out format("%-#{max_width}s %s", action, actions[action][:description])
+    end
+    0
   end
 
 
