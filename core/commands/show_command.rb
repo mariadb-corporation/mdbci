@@ -128,16 +128,44 @@ class ShowCommand < BaseCommand
 
   def show_box_name_in_configuration(path = nil)
     if path.nil?
-      $out.warning('Please specify the path to the nodes configuration as a parameter')
+      @ui.warning('Please specify the path to the nodes configuration as a parameter')
       return 2
     end
     configuration = Configuration.new(path)
     if configuration.node_names.size != 1
-      $out.warning('Please specify the node to get configuration from')
+      @ui.warning('Please specify the node to get configuration from')
       return 2
     end
-    $out.out(configuration.box_names(configuration.node_names.first))
+    @ui.out(configuration.box_names(configuration.node_names.first))
     0
+  end
+
+  def show_boxes
+    if @boxPlatform.nil?
+      @ui.warning('Required parameter --platform is not defined.')
+      @ui.info('Full command specification:')
+      @ui.info('./mdbci show boxes --platform PLATFORM [--platform-version VERSION]')
+      return 1
+    end
+    # check for undefined box platform
+    some_box = @box_definitions.find { |_, definition| definition['platform'] == @boxPlatform }
+    if some_box.nil?
+      @ui.error("Platform #{@boxPlatform} is not supported!")
+      return 1
+    end
+
+    platform_name = if @boxPlatformVersion.nil?
+                      @boxPlatform
+                    else
+                      "#{@boxPlatform}^#{@boxPlatformVersion}"
+                    end
+    @ui.info("List of boxes for the #{platform_name} platform:")
+    boxes = @box_definitions.select do |_, definition|
+      definition['platform'] == @boxPlatform &&
+        (@boxPlatformVersion.nil? || definition['platform_version'] == @boxPlatformVersion)
+    end
+    boxes.each { |name, _| $out.out(name) }
+    boxes.size != 0
   end
 
 
