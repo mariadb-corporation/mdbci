@@ -38,7 +38,7 @@ class PublicKeysCommand < BaseCommand
 
   # Сopies the ssh key to available nodes.
   def copy_key_to_node
-    available_nodes = @network_config.store_network_config
+    available_nodes = @network_settings.node_name_list
     if available_nodes.empty?
       @ui.error('No available nodes')
       return ERROR_RESULT
@@ -59,7 +59,6 @@ class PublicKeysCommand < BaseCommand
     end
 
     @mdbci_config = Configuration.new(@args.first, @env.labels)
-    @network_config = NetworkConfig.new(@mdbci_config, @ui)
     @keyfile = @env.keyFile.to_s
     unless File.exist?(@keyfile)
       @ui.error('Please specify the key file to put to nodes')
