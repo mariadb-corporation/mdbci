@@ -8,20 +8,15 @@ require 'net/ssh'
 class PublicKeysCommand < BaseCommand
   # This method is called whenever the command is executed
   def execute
-    exit_code = SUCCESS_RESULT
     if @env.show_help
       show_help
       return SUCCESS_RESULT
     end
     return ARGUMENT_ERROR_RESULT unless init == SUCCESS_RESULT
 
-    @mdbci_config.node_names.each do |node_name|
-      @ui.info("Putting the key file to node '#{node_name}'")
-      ssh_connection_parameters = setup_ssh_key(node_name)
-      result = configure_server_ssh_key(ssh_connection_parameters)
-      exit_code = ERROR_RESULT if result == ERROR_RESULT
-    end
-    exit_code
+    return ERROR_RESULT if copy_key_to_node == ERROR_RESULT
+
+    SUCCESS_RESULT
   end
 
   def show_help
@@ -41,6 +36,21 @@ class PublicKeysCommand < BaseCommand
 
   private
 
+  # Сopies the ssh key to available nodes.
+  def copy_key_to_node
+    available_nodes = @network_settings.node_name_list
+    if available_nodes.empty?
+      @ui.error('No available nodes')
+      return ERROR_RESULT
+    end
+    available_nodes.each do |node_name|
+      @ui.info("Putting the key file to node '#{node_name}'")
+      ssh_connection_parameters = setup_ssh_key(node_name)
+      result = configure_server_ssh_key(ssh_connection_parameters)
+      return ERROR_RESULT if result == ERROR_RESULT
+    end
+  end
+
   # Initializes the command variable.
   def init
     if @args.first.nil?
@@ -55,7 +65,7 @@ class PublicKeysCommand < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     begin
-      @network_config = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
     rescue StandardError
       @ui.error('Network settings file is not found for the configuration')
       return ARGUMENT_ERROR_RESULT
@@ -94,7 +104,7 @@ class PublicKeysCommand < BaseCommand
   # Setup ssh key data
   # @param node_name [String] name of the node
   def setup_ssh_key(node_name)
-    network_settings = @network_config.node_settings(node_name)
+    network_settings = @network_settings.node_settings(node_name)
     { 'whoami' => network_settings['whoami'],
       'network' => network_settings['network'],
       'keyfile' => network_settings['keyfile'],

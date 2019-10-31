@@ -22,6 +22,10 @@ class NetworkSettings
     @settings[name]
   end
 
+  def node_name_list
+    @settings.keys
+  end
+
   # Provide configuration in the form of the configuration hash
   def as_hash
     @settings.each_with_object({}) do |(name, config), result|
