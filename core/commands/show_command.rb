@@ -115,6 +115,11 @@ class ShowCommand < BaseCommand
     instance_exec(*action_parameters, &action[:action])
   end
 
+  def init
+    @boxPlatform = BoxDefinitions.new(@boxes_location)
+
+  end
+
   # Show list of actions available for the base command
   #
   # @param base_command [String] name of the command user is typing
@@ -171,12 +176,12 @@ class ShowCommand < BaseCommand
   end
 
   def showBoxField
-    @ui.out findBoxField($session.boxName, $session.field)
+    @ui.out findBoxField(@env.boxName, @env.field)
     return 0
   end
 
   def findBoxField(boxName, field)
-    box = $session.box_definitions.get_box(boxName)
+    box = @env.box_definitions.get_box(boxName)
     if box == nil
       raise "Box #{boxName} is not found"
     end
