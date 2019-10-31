@@ -169,7 +169,23 @@ class ShowCommand < BaseCommand
   end
 
   def showBoxField
-    $out.out findBoxField($session.boxName, $session.field)
+    @ui.out findBoxField($session.boxName, $session.field)
     return 0
+  end
+
+  def findBoxField(boxName, field)
+    box = $session.box_definitions.get_box(boxName)
+    if box == nil
+      raise "Box #{boxName} is not found"
+    end
+
+    if field != nil
+      if !box.has_key?(field)
+        raise "Box #{boxName} does not have #{field} key"
+      end
+      return box[field]
+    else
+      return box.to_json
+    end
   end
 end
