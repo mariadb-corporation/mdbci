@@ -127,6 +127,12 @@ class Configuration
     File.exist?(self.class.terraform_configuration(@path))
   end
 
+  # Check that configuration is Vagrant configuration
+  # @return [Boolean] true if the configuration is Vagrant
+  def vagrant_configuration?
+    File.exist?(self.class.vagrant_configuration(@path))
+  end
+
   # Provide a copy of the Docker configuration for further modification
   # @return [Hash] a full Docker Swarm configuration
   def docker_configuration
