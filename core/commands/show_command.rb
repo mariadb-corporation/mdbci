@@ -209,4 +209,25 @@ class ShowCommand < BaseCommand
       false
     end
   end
+
+  # print boxes platform versions by platform name
+  def show_platform_versions
+    if @env.boxPlatform.nil?
+      @ui.warning('Please specify the platform via --platform flag.')
+      return false
+    end
+
+    boxes = @env.box_definitions.select do |_, definition|
+      definition['platform'] == @env.boxPlatform
+    end
+    if boxes.size.zero?
+      @ui.error("The platform #{@env.boxPlatform} is not supported.")
+      return false
+    end
+
+    @ui.info("Supported versions for #{@env.boxPlatform}")
+    versions = boxes.map { |_, definition| definition['platform_version'] }.uniq
+    @ui.out(versions)
+    true
+  end
 end
