@@ -17,7 +17,7 @@ class ShowCommand < BaseCommand
     },
     boxinfo: {
       description: 'Show the field value of the box configuration',
-      action: ->(*) { showBoxField }
+      action: ->(*) { show_box_field }
     },
     boxkeys: {
       description: 'Show keys for all configured boxes',
@@ -169,25 +169,20 @@ class ShowCommand < BaseCommand
     boxes.size != SUCCESS_RESULT
   end
 
-  def showBoxField
-    @ui.out findBoxField(@env.boxName, @env.field)
-    return SUCCESS_RESULT
+  def show_box_field
+    @ui.out find_box_field(@env.boxName, @env.field)
+    SUCCESS_RESULT
   end
 
-  def findBoxField(boxName, field)
+  def find_box_field(box_name, field)
     box = @env.box_definitions.get_box(boxName)
-    if box == nil
-      raise "Box #{boxName} is not found"
-    end
+    raise "Box #{box_name} is not found" if box.nil?
 
-    if field != nil
-      if !box.has_key?(field)
-        raise "Box #{boxName} does not have #{field} key"
-      end
-      return box[field]
-    else
-      return box.to_json
-    end
+    return box.to_json if field.nil?
+
+    raise "Box #{box_name} does not have #{field} key" unless box.has_key?(field)
+
+    box[field]
   end
 
   def show_box_keys
