@@ -89,7 +89,7 @@ class ShowCommand < BaseCommand
     },
     repos: {
       description: 'List all configured repositories',
-      action: ->(*) { @repos.show }
+      action: ->(*) { @env.repos.show }
     },
     versions: {
       description: 'List boxes versions for specified platform',
@@ -113,11 +113,6 @@ class ShowCommand < BaseCommand
       return 2
     end
     instance_exec(*action_parameters, &action[:action])
-  end
-
-  def init
-    @boxPlatform = BoxDefinitions.new(@boxes_location)
-
   end
 
   # Show list of actions available for the base command
@@ -148,28 +143,27 @@ class ShowCommand < BaseCommand
   end
 
   def show_boxes
-    if @boxPlatform.nil?
+    if @env.boxPlatform.nil?
       @ui.warning('Required parameter --platform is not defined.')
       @ui.info('Full command specification:')
       @ui.info('./mdbci show boxes --platform PLATFORM [--platform-version VERSION]')
       return 1
     end
     # check for undefined box platform
-    some_box = @box_definitions.find { |_, definition| definition['platform'] == @boxPlatform }
+    some_box = @env.box_definitions.find { |_, definition| definition['platform'] == @env.boxPlatform }
     if some_box.nil?
-      @ui.error("Platform #{@boxPlatform} is not supported!")
+      @ui.error("Platform #{@env.boxPlatform} is not supported!")
       return 1
     end
-
-    platform_name = if @boxPlatformVersion.nil?
-                      @boxPlatform
+    platform_name = if @env.boxPlatformVersion.nil?
+                      @env.boxPlatform
                     else
-                      "#{@boxPlatform}^#{@boxPlatformVersion}"
+                      "#{@env.boxPlatform}^#{@env.boxPlatformVersion}"
                     end
     @ui.info("List of boxes for the #{platform_name} platform:")
     boxes = @box_definitions.select do |_, definition|
-      definition['platform'] == @boxPlatform &&
-        (@boxPlatformVersion.nil? || definition['platform_version'] == @boxPlatformVersion)
+      definition['platform'] == @env.boxPlatform &&
+        (@env.boxPlatformVersion.nil? || definition['platform_version'] == @env.boxPlatformVersion)
     end
     boxes.each { |name, _| @ui.out(name) }
     boxes.size != 0
