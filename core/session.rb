@@ -23,6 +23,7 @@ require_relative 'commands/setup_dependencies_command'
 require_relative 'commands/show_network_config_command'
 require_relative 'commands/install_product_command.rb'
 require_relative 'commands/update_configuration_command'
+require_relative 'commands/show_command'
 require_relative 'constants'
 require_relative 'helper'
 require_relative 'models/configuration'
@@ -34,6 +35,7 @@ require_relative 'services/aws_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
 require_relative 'commands/remove_product_command'
+
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
 # These responsibilites should be split between several classes.
@@ -524,7 +526,8 @@ EOF
     when 'setup_repo'
       exit_code = NodeProduct.setup_product_repo(ARGV.shift)
     when 'show'
-      exit_code = show(ARGV)
+      command = ShowCommand.new(ARGV, self, $out)
+      exit_code = command.execute
     when 'snapshot'
       snapshot = SnapshotCommand.new(ARGV, self, $out)
       exit_code = snapshot.execute

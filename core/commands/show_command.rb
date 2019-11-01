@@ -31,9 +31,9 @@ class ShowCommand < BaseCommand
           network_settings = NetworkSettings.from_file(config.network_settings_file)
           config.node_names.map do |node|
             node_settings = network_settings.node_settings(node)
-            $out.out(node_settings['keyfile'])
+            @ui.out(node_settings['keyfile'])
           end
-          0
+          SUCCESS_RESULT
         else
           Network.showKeyFile(*params)
         end
@@ -51,7 +51,7 @@ class ShowCommand < BaseCommand
           network_settings = NetworkSettings.from_file(config.network_settings_file)
           config.node_names.map do |node|
             node_settings = network_settings.node_settings(node)
-            $out.out(node_settings['network'])
+            @ui.out(node_settings['network'])
           end
           SUCCESS_RESULT
         else
@@ -61,7 +61,7 @@ class ShowCommand < BaseCommand
     },
     network_config: {
       description: 'Write host network configuration to the file',
-      action: ->(*params) { ShowNetworkConfigCommand.execute(params, self, $out) }
+      action: ->(*params) { ShowNetworkConfigCommand.execute(params, self, @ui) }
     },
     platforms: {
       description: 'List all known platforms',
@@ -75,7 +75,7 @@ class ShowCommand < BaseCommand
           network_settings = NetworkSettings.from_file(config.network_settings_file)
           config.node_names.map do |node|
             node_settings = network_settings.node_settings(node)
-            $out.out(node_settings['private_ip'])
+            @ui.out(node_settings['private_ip'])
           end
           SUCCESS_RESULT
         else
