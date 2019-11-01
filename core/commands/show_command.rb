@@ -198,4 +198,9 @@ class ShowCommand < BaseCommand
     @ui.out(@env.box_definitions.unique_values(@env.field))
     SUCCESS_RESULT
   end
+
+  def show_platforms
+    @ui.out(@env.box_definitions.unique_values('platform'))
+    SUCCESS_RESULT
+  end
 end
