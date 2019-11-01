@@ -135,7 +135,12 @@ class ShowCommand < BaseCommand
       @ui.warning('Please specify the path to the nodes configuration as a parameter')
       return ERROR_RESULT
     end
-    configuration = Configuration.new(path)
+    begin
+      configuration = Configuration.new(path)
+    rescue StandardError
+      @ui.error("Invalid path to the MDBCI configuration: #{path}")
+      return ARGUMENT_ERROR_RESULT
+    end
     if configuration.node_names.size != 1
       @ui.warning('Please specify the node to get configuration from')
       return ERROR_RESULT
@@ -173,18 +178,28 @@ class ShowCommand < BaseCommand
   end
 
   def show_box_field
-    @ui.out find_box_field(@env.boxName, @env.field)
+    out = find_box_field(@env.boxName, @env.field)
+    return ARGUMENT_ERROR_RESULT if out == ARGUMENT_ERROR_RESULT
+
+    @ui.out out
     SUCCESS_RESULT
   end
 
   def find_box_field(box_name, field)
-    box = @env.box_definitions.get_box(box_name)
-    raise "Box #{box_name} is not found" if box.nil?
+    begin
+      box = @env.box_definitions.get_box(box_name)
+    rescue StandardError
+      @ui.error("Box #{box_name} is not found")
+      return ARGUMENT_ERROR_RESULT
+    end
+
 
     return box.to_json if field.nil?
 
-    raise "Box #{box_name} does not have #{field} key" unless box.has_key?(field)
-
+    unless box.has_key?(field)
+      @ui.error("Box #{box_name} does not have #{field} key")
+      return ARGUMENT_ERROR_RESULT
+    end
     box[field]
   end
 
