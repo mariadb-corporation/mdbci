@@ -98,7 +98,9 @@ class ShowCommand < BaseCommand
   }.freeze
 
 
-
+  # Show information to the user about
+  #
+  # @param parameters [Array] of parameters to the show command
   def execute
     if @args.empty?
       @ui.warning 'Please specify an action for the show command.'
@@ -142,6 +144,7 @@ class ShowCommand < BaseCommand
     SUCCESS_RESULT
   end
 
+  # Show boxes with platform and version
   def show_boxes
     if @env.boxPlatform.nil?
       @ui.warning('Required parameter --platform is not defined.')
