@@ -161,7 +161,7 @@ class ShowCommand < BaseCommand
                       "#{@env.boxPlatform}^#{@env.boxPlatformVersion}"
                     end
     @ui.info("List of boxes for the #{platform_name} platform:")
-    boxes = @box_definitions.select do |_, definition|
+    boxes = @env.box_definitions.select do |_, definition|
       definition['platform'] == @env.boxPlatform &&
         (@env.boxPlatformVersion.nil? || definition['platform_version'] == @env.boxPlatformVersion)
     end
@@ -195,7 +195,7 @@ class ShowCommand < BaseCommand
       @ui.error('Please specify the field to get summarized data')
       return 1
     end
-    @ui.out(@box_definitions.unique_values(@env.field))
+    @ui.out(@env.box_definitions.unique_values(@env.field))
     0
   end
 end
