@@ -198,4 +198,15 @@ class ShowCommand < BaseCommand
     @ui.out(@env.box_definitions.unique_values('platform'))
     SUCCESS_RESULT
   end
+
+  def show_provider(name = nil)
+    begin
+      box_definition = @env.box_definitions.get_box(name)
+      @ui.out(box_definition['provider'])
+      true
+    rescue ArgumentError => error
+      @ui.error(error.message)
+      false
+    end
+  end
 end
