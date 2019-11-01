@@ -175,7 +175,7 @@ class ShowCommand < BaseCommand
   end
 
   def find_box_field(box_name, field)
-    box = @env.box_definitions.get_box(boxName)
+    box = @env.box_definitions.get_box(box_name)
     raise "Box #{box_name} is not found" if box.nil?
 
     return box.to_json if field.nil?
