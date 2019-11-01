@@ -53,7 +53,7 @@ class ShowCommand < BaseCommand
             node_settings = network_settings.node_settings(node)
             $out.out(node_settings['network'])
           end
-          0
+          SUCCESS_RESULT
         else
           Network.show(*params)
         end
@@ -77,7 +77,7 @@ class ShowCommand < BaseCommand
             node_settings = network_settings.node_settings(node)
             $out.out(node_settings['private_ip'])
           end
-          0
+          SUCCESS_RESULT
         else
           Network.show(*params)
         end
@@ -103,14 +103,14 @@ class ShowCommand < BaseCommand
     if @args.empty?
       @ui.warning 'Please specify an action for the show command.'
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
-      return 0
+      return SUCCESS_RESULT
     end
     action_name, *action_parameters = *@args
     action = SHOW_COMMAND_ACTIONS[action_name.to_sym]
     if action.nil?
       @ui.warning "Unknown action for the show command: #{action_name}."
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
-      return 2
+      return ERROR_RESULT
     end
     instance_exec(*action_parameters, &action[:action])
   end
@@ -125,21 +125,21 @@ class ShowCommand < BaseCommand
     actions.keys.sort.each do |action|
       @ui.out format("%-#{max_width}s %s", action, actions[action][:description])
     end
-    0
+    SUCCESS_RESULT
   end
 
   def show_box_name_in_configuration(path = nil)
     if path.nil?
       @ui.warning('Please specify the path to the nodes configuration as a parameter')
-      return 2
+      return ERROR_RESULT
     end
     configuration = Configuration.new(path)
     if configuration.node_names.size != 1
       @ui.warning('Please specify the node to get configuration from')
-      return 2
+      return ERROR_RESULT
     end
     @ui.out(configuration.box_names(configuration.node_names.first))
-    0
+    SUCCESS_RESULT
   end
 
   def show_boxes
@@ -147,13 +147,13 @@ class ShowCommand < BaseCommand
       @ui.warning('Required parameter --platform is not defined.')
       @ui.info('Full command specification:')
       @ui.info('./mdbci show boxes --platform PLATFORM [--platform-version VERSION]')
-      return 1
+      return ARGUMENT_ERROR_RESULT
     end
     # check for undefined box platform
     some_box = @env.box_definitions.find { |_, definition| definition['platform'] == @env.boxPlatform }
     if some_box.nil?
       @ui.error("Platform #{@env.boxPlatform} is not supported!")
-      return 1
+      return ARGUMENT_ERROR_RESULT
     end
     platform_name = if @env.boxPlatformVersion.nil?
                       @env.boxPlatform
@@ -166,12 +166,12 @@ class ShowCommand < BaseCommand
         (@env.boxPlatformVersion.nil? || definition['platform_version'] == @env.boxPlatformVersion)
     end
     boxes.each { |name, _| @ui.out(name) }
-    boxes.size != 0
+    boxes.size != SUCCESS_RESULT
   end
 
   def showBoxField
     @ui.out findBoxField(@env.boxName, @env.field)
-    return 0
+    return SUCCESS_RESULT
   end
 
   def findBoxField(boxName, field)
@@ -193,9 +193,9 @@ class ShowCommand < BaseCommand
   def show_box_keys
     if @env.field.nil? || @env.field.empty?
       @ui.error('Please specify the field to get summarized data')
-      return 1
+      return ARGUMENT_ERROR_RESULT
     end
     @ui.out(@env.box_definitions.unique_values(@env.field))
-    0
+    SUCCESS_RESULT
   end
 end
