@@ -51,7 +51,11 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     @mdbci_config = Configuration.new(@args.first, @env.labels)
-    @network_config = NetworkConfig.new(@mdbci_config, @ui)
+    if @mdbci_config.terraform_configuration?
+      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+    else
+      @network_config = NetworkConfig.new(@mdbci_config, @ui)
+    end
 
     @product = @env.nodeProduct
     @product_version = @env.productVersion
@@ -73,10 +77,20 @@ class InstallProduct < BaseCommand
       role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-      @network_config.add_nodes([name])
-      @machine_configurator.configure(@network_config[name], "#{name}-config.json",
-                                      @ui, extra_files)
+      configure_node(name, extra_files)
     end
+  end
+
+  # Configure node
+  # @param node [String] name of the node
+  def configure_node(node, extra_files = [])
+    node_settings = if @mdbci_config.terraform_configuration?
+                      @network_settings.node_settings(node)
+                    else
+                      @network_config.add_nodes([node])
+                      @network_config[node]
+                    end
+    @machine_configurator.configure(node_settings, "#{node}-config.json", @ui, extra_files)
   end
 
   # Create a role file to install the product from the chef
