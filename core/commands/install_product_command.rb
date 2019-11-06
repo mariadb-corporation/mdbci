@@ -73,15 +73,9 @@ class InstallProduct < BaseCommand
       role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-      configure_node(name, extra_files)
+      node_settings = @network_settings.node_settings(name)
+      @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
     end
-  end
-
-  # Configure node
-  # @param node [String] name of the node
-  def configure_node(node, extra_files = [])
-    node_settings = @network_settings.node_settings(node)
-    @machine_configurator.configure(node_settings, "#{node}-config.json", @ui, extra_files)
   end
 
   # Create a role file to install the product from the chef
