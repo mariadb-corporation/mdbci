@@ -243,19 +243,6 @@ class TerraformConfigurationGenerator < BaseCommand
       #!/bin/bash
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
-      provisioner "local-exec" {
-        command = "echo ${aws_instance.<%= name %>.public_ip} > public_ip_<%= name %>"
-      }
-      provisioner "local-exec" {
-        command = "echo ${aws_instance.<%= name %>.private_ip} > private_ip_<%= name %>"
-      }
-      provisioner "local-exec" {
-        command = "echo <%= user %> > user_<%= name %>"
-      }
-      provisioner "local-exec" {
-        when    = "destroy"
-        command = "rm public_ip_<%= name %> private_ip_<%= name %> user_<%= name %>"
-      }
       <% if template_path %>
         provisioner "file" {
           source = "<%=template_path %>"
@@ -273,6 +260,13 @@ class TerraformConfigurationGenerator < BaseCommand
     }
     output "<%= name %>_running_state" {
       value = aws_instance.<%= name %>.id != null
+    }
+    output "<%= name %>_network" {
+      value = {
+        user = "<%= user %>"
+        private_ip = aws_instance.<%= name %>.private_ip
+        public_ip = aws_instance.<%= name %>.public_ip
+      }
     }
     AWS
     template.result(OpenStruct.new(node_params).instance_eval { binding })
@@ -319,6 +313,7 @@ class TerraformConfigurationGenerator < BaseCommand
   def provider_resource
     <<-PROVIDER
     provider "aws" {
+      version = "~> 2.33"
       profile = "default"
       region = "#{@aws_config['region']}"
       access_key = "#{@aws_config['access_key_id']}"
