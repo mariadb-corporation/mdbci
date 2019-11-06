@@ -51,11 +51,7 @@ class RemoveProductCommand < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     @mdbci_config = Configuration.new(@args.first, @env.labels)
-    if @mdbci_config.terraform_configuration?
-      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
-    else
-      @network_config = NetworkConfig.new(@mdbci_config, @ui)
-    end
+    @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
 
     @product = @env.nodeProduct
     if @product.nil?
@@ -82,12 +78,7 @@ class RemoveProductCommand < BaseCommand
   # Configure node
   # @param node [String] name of the node
   def configure_node(node, extra_files = [])
-    node_settings = if @mdbci_config.terraform_configuration?
-                      @network_settings.node_settings(node)
-                    else
-                      @network_config.add_nodes([node])
-                      @network_config[node]
-                    end
+    node_settings = @network_settings.node_settings(node)
     @machine_configurator.configure(node_settings, "#{node}-config.json", @ui, extra_files)
   end
 
