@@ -136,21 +136,16 @@ class TerraformConfigurator
 
   def store_network_settings(node)
     @ui.info('Generating network configuration file')
-    begin
-      TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
-        @network_settings.add_network_configuration(
-          node,
-          'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
-          'private_ip' => node_network['private_ip'],
-          'network' => node_network['public_ip'],
-          'whoami' => node_network['user']
-        )
-      end
-    rescue RuntimeError => e
-      @ui.error(e.message)
-      Result.error(e.message)
+    TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
+      @network_settings.add_network_configuration(
+        node,
+        'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
+        'private_ip' => node_network['private_ip'],
+        'network' => node_network['public_ip'],
+        'whoami' => node_network['user']
+      )
+      @network_settings.store_network_configuration(@config)
+      Result.ok('')
     end
-    @network_settings.store_network_configuration(@config)
-    Result.ok('')
   end
 end
