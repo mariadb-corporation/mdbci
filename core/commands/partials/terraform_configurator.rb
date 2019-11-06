@@ -137,7 +137,10 @@ class TerraformConfigurator
   def store_network_settings(node)
     @ui.info('Generating network configuration file')
     begin
-      node_network = TerraformService.resource_network(node, @ui, @config.path)
+      network_result = TerraformService.resource_network(node, @ui, @config.path)
+      raise(network_result.error) if network_result.error?
+
+      node_network = network_result.value
       @network_settings.add_network_configuration(
         node,
         'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),

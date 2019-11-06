@@ -59,7 +59,9 @@ module TerraformService
 
   def self.resource_network(resource, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
-    res = ShellCommands.run_command_in_dir(logger, "terraform output -json #{resource}_network", path)[:output]
-    JSON.parse(res)
+    result = ShellCommands.run_command_in_dir(logger, "terraform output -json #{resource}_network", path)
+    return Result.error('Error of terraform output network command') unless result[:value].success?
+
+    Result.ok(JSON.parse(result[:output]))
   end
 end
