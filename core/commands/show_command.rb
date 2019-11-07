@@ -159,7 +159,18 @@ class ShowCommand < BaseCommand
       @ui.info('./mdbci show boxes --platform PLATFORM [--platform-version VERSION]')
       return ARGUMENT_ERROR_RESULT
     end
-    # check for undefined box platform
+    return ARGUMENT_ERROR_RESULT if check_box_platform == ARGUMENT_ERROR_RESULT
+
+    boxes = @env.box_definitions.select do |_, definition|
+      definition['platform'] == @env.boxPlatform &&
+        (@env.boxPlatformVersion.nil? || definition['platform_version'] == @env.boxPlatformVersion)
+    end
+    boxes.each { |name, _| @ui.out(name) }
+    boxes.size != SUCCESS_RESULT
+  end
+
+  # Check for undefined box platform
+  def check_box_platform
     some_box = @env.box_definitions.find { |_, definition| definition['platform'] == @env.boxPlatform }
     if some_box.nil?
       @ui.error("Platform #{@env.boxPlatform} is not supported!")
@@ -171,12 +182,6 @@ class ShowCommand < BaseCommand
                       "#{@env.boxPlatform}^#{@env.boxPlatformVersion}"
                     end
     @ui.info("List of boxes for the #{platform_name} platform:")
-    boxes = @env.box_definitions.select do |_, definition|
-      definition['platform'] == @env.boxPlatform &&
-        (@env.boxPlatformVersion.nil? || definition['platform_version'] == @env.boxPlatformVersion)
-    end
-    boxes.each { |name, _| @ui.out(name) }
-    boxes.size != SUCCESS_RESULT
   end
 
   def show_box_field
