@@ -1,8 +1,9 @@
+# frozen_string_literal: true
 
 require_relative '../models/network_settings'
 require_relative '../models/configuration'
 
-
+# Command shows information for the user.
 class ShowCommand < BaseCommand
 
   # List of actions that are provided by the show command.
@@ -98,9 +99,7 @@ class ShowCommand < BaseCommand
   }.freeze
 
 
-  # Show information to the user about
-  #
-  # @param parameters [Array] of parameters to the show command
+  # This method is called whenever the command is executed
   def execute
     if @args.empty?
       @ui.warning 'Please specify an action for the show command.'
@@ -130,6 +129,9 @@ class ShowCommand < BaseCommand
     SUCCESS_RESULT
   end
 
+  # Show box name for selected configuration
+  #
+  # @param path [String] path to configuration
   def show_box_name_in_configuration(path = nil)
     if path.nil?
       @ui.warning('Please specify the path to the nodes configuration as a parameter')
