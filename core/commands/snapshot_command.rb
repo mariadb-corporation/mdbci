@@ -89,6 +89,8 @@ class SnapshotCommand < BaseCommand
 
   def execute
     setup_command
+    return SUCCESS_RESULT if @config.terraform_configuration?
+
     action = check_and_get_action
     case action
     when ACTION_TAKE
