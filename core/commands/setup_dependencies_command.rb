@@ -308,7 +308,7 @@ class CentosDependencyManager < DependencyManager
         return ERROR_RESULT unless result.success?
       end
     end
-    if should_install?('docker')
+    if 'docker' == @env.nodeProduct
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
