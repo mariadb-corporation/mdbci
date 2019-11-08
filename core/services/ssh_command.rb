@@ -13,8 +13,12 @@ module SshCommand
     end
   end
 
+  def self.sudo_exec(connection, sudo_password, command, logger)
+    ssh_exec(connection, "sudo -S #{command}", logger, sudo_password)
+  end
+
   # rubocop:disable Metrics/MethodLength
-  def ssh_exec(connection, command, logger, sudo_password = '')
+  def self.ssh_exec(connection, command, logger, sudo_password = '')
     logger.info("Running '#{command}' on the remote server")
     output = ''
     return_code = 0
