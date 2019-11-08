@@ -142,12 +142,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
                            'GEM_HOME=~/.vagrant.d/gems GEM_PATH=$GEM_HOME:/opt/vagrant/embedded/gems '\
                            "PATH=/opt/vagrant/embedded/bin:$PATH #{install_libvirt_plugin}")[:value]
     end
-    return result.exitstatus unless result.success?
-
-    run_sequence([
-                   "vagrant plugin install vagrant-aws --plugin-version #{VAGRANT_AWS_PLUGIN_VERSION}",
-                   'vagrant box add --force dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
-                 ])[:value].exitstatus
+    result.exitstatus
   end
 
   # Created new libvirt pool with 'default' as name
