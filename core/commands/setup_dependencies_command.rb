@@ -142,17 +142,26 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
                            'GEM_HOME=~/.vagrant.d/gems GEM_PATH=$GEM_HOME:/opt/vagrant/embedded/gems '\
                            "PATH=/opt/vagrant/embedded/bin:$PATH #{install_libvirt_plugin}")[:value]
     end
-    result.exitstatus
+    if result.success?
+      Result.ok('Successfully installed vagrant plugins')
+    else
+      Result.error('Could not install vagrant plugins')
+    end
   end
 
   # Created new libvirt pool with 'default' as name
   def create_libvirt_pool
     delete_libvirt_pool if run_command('sudo virsh pool-info default')[:value].success?
     images_dir = "#{ENV['HOME']}/libvirt-images"
-    run_sequence([
+    result = run_sequence([
                    "sudo mkdir -p #{images_dir}",
                    "sudo virsh pool-create-as default dir --target #{images_dir}"
-                 ])[:value].exitstatus
+                 ])[:value]
+    if result.success?
+      Result.ok('Successfully installed vagrant plugins')
+    else
+      Result.error('Could not install vagrant plugins')
+    end
   end
 
   # Deletes previously setup environment
