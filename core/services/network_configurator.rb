@@ -15,6 +15,27 @@ class NetworkConfigurator
 
   def configure(machine, config_name, logger = @logger, sudo_password = '')
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
-    configure_server_ssh_key(machine)
+    configure_machine(machine)
+  end
+
+  private
+
+  # Connect to machine and check resource
+  # @param machine [Hash] information about machine to connect
+  def configure_machine(machine)
+    exit_code = SUCCESS_RESULT
+    options = Net::SSH.configuration_for(machine['network'], true)
+    options[:auth_methods] = %w[publickey none]
+    options[:verify_host_key] = false
+    options[:keys] = [machine['keyfile']]
+    begin
+      Net::SSH.start(machine['network'], machine['whoami'], options) do |ssh|
+        check_available_resources(ssh)
+      end
+    rescue StandardError
+      @ui.error("Could not initiate connection to the node '#{machine['name']}'")
+      exit_code = ERROR_RESULT
+    end
+    exit_code
   end
 end
