@@ -104,7 +104,8 @@ class TerraformConfigurator
   # @param node [String] name of node which needs to be destroyed
   def destroy_node(node)
     @ui.info("Destroying '#{node}' node.")
-    DestroyCommand.execute(["#{@config.path}/#{node}"], @env, @ui, keep_template: true)
+    DestroyCommand.execute(["#{@config.path}/#{node}"], @env, @ui,
+                           keep_template: true, keep_configuration_path: true)
   end
 
   def node_running?(node)
