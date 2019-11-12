@@ -60,7 +60,7 @@ class Session
   attr_accessor :productVersion
   attr_accessor :keyFile
   attr_accessor :keep_template
-  attr_accessor :keep_configuration_path
+  attr_accessor :keep_configuration
   attr_accessor :list
   attr_accessor :boxPlatform
   attr_accessor :boxPlatformVersion
@@ -94,7 +94,7 @@ EOF
   def initialize
     @mdbciNodes = {}
     @keep_template = false
-    @keep_configuration_path = false
+    @keep_configuration = false
     @list = false
     @threads_count = Concurrent.physical_processor_count
     @cpu_count = determine_cpu_count

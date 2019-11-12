@@ -76,17 +76,14 @@ Labels should be separated with commas, do not contain any whitespaces.
   #
   # @param configuration [Configuration] that we are deling with.
   # @param keep_template [Boolean] whether to remove template or not.
-  # @param keep_configuration_path [Boolean] whether to remove configuration path or not.
-  def remove_files(configuration, keep_template, keep_configuration_path)
-    unless keep_configuration_path
-      @ui.info("Removing configuration directory #{configuration.path}")
-      FileUtils.rm_rf(configuration.path)
-    end
+  def remove_files(configuration, keep_template)
+    @ui.info("Removing configuration directory #{configuration.path}")
+    FileUtils.rm_rf(configuration.path)
     @ui.info("Removing network settings file #{configuration.network_settings_file}")
     FileUtils.rm_f(configuration.network_settings_file)
     @ui.info("Removing label information file #{configuration.labels_information_file}")
     FileUtils.rm_f(configuration.labels_information_file)
-    return if keep_template || keep_configuration_path
+    return if keep_template
 
     @ui.info("Removing template file #{configuration.template_path}")
     FileUtils.rm_f(configuration.template_path)
@@ -147,7 +144,7 @@ Labels should be separated with commas, do not contain any whitespaces.
         return
       end
     end
-    remove_files(configuration, @env.keep_template, @env.keep_configuration_path)
+    remove_files(configuration, @env.keep_template) unless @env.keep_configuration
   end
 
   # Update network_configuration and configured_labels files
