@@ -159,6 +159,11 @@ class Configuration
     end
   end
 
+  # Allows to check that all nodes has been selected by the end-user
+  def all_nodes_selected?
+    all_node_names.difference(@node_names).empty?
+  end
+
   private
 
   # Method parses configuration/node specification and extracts path to the

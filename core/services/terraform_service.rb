@@ -7,7 +7,7 @@ require 'net/scp'
 
 # This class allows to execute commands of Terraform-cli
 module TerraformService
-  SSH_ATTEMPTS = 15
+  SSH_ATTEMPTS = 40
 
   def self.resource_type(provider)
     case provider

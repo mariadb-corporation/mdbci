@@ -244,14 +244,20 @@ class TerraformConfigurationGenerator < BaseCommand
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
       <% if template_path %>
+        provisioner "remote-exec" {
+          inline = [
+            "mkdir -p /home/<%= user %>/cnf_templates"
+          ]
+          <%= connection_block %>
+        }
         provisioner "file" {
-          source = "<%=template_path %>"
+          source = "<%= template_path %>"
           destination = "/home/<%= user %>/cnf_templates"
           <%= connection_block %>
         }
         provisioner "remote-exec" {
           inline = [
-            "sudo mkdir /home/vagrant",
+            "sudo mkdir -p /home/vagrant/",
             "sudo mv /home/<%= user %>/cnf_templates /home/vagrant/cnf_templates"
           ]
           <%= connection_block %>
