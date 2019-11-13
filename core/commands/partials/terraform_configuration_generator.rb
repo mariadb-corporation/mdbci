@@ -342,9 +342,9 @@ class TerraformConfigurationGenerator < BaseCommand
       name = "<%= group_name %>"
       description = "MDBCI <%= group_name %> auto generated"
       ingress {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
         cidr_blocks = ["0.0.0.0/0"]
       }
       <% if vpc %>
