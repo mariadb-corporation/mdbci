@@ -13,16 +13,26 @@ class TerraformCleaner
   #
   # @param configuration [Configuration] that we operate on
   def destroy_nodes_by_configuration(configuration)
-    @ui.info 'Destroying the machines using terraform'
-    resource_type = TerraformService.resource_type(configuration.provider)
-    configuration.node_names.each do |node|
-      TerraformService.destroy("#{resource_type}.#{node}", @ui, configuration.path)
-      destroy_machine(node, configuration.provider)
+    @ui.info('Destroying the machines using terraform')
+    if configuration.all_nodes_selected?
+      TerraformService.destroy_all(@ui, configuration.path)
+    else
+      resource_type = TerraformService.resource_type(configuration.provider)
+      configuration.node_names.each do |node|
+        TerraformService.destroy("#{resource_type}.#{node}", @ui, configuration.path)
+      end
     end
-    destroy_additional_resources(configuration)
+    cleanup_nodes(configuration.node_names, configuration.provider)
   end
 
   private
+
+  def cleanup_nodes(nodes, provider)
+    @ui.info('Cleaning-up leftover machines using AWS EC2')
+    nodes.each do |node|
+      destroy_machine(node, provider)
+    end
+  end
 
   def destroy_machine(node, provider)
     case provider
@@ -31,16 +41,5 @@ class TerraformCleaner
     else
       @ui.error("Unknown provider #{provider}. Can not manually destroy virtual machines.")
     end
-  end
-
-  # Destroy all resources if all nodes are not running
-  # For example, for AWS will be destroyed vpc resources, security group, key_pair etc.
-  #
-  # @param configuration [Configuration] that we operate on
-  def destroy_additional_resources(configuration)
-    running_nodes = configuration.all_node_names.select do |node|
-      TerraformService.resource_running?(node, @ui, configuration.path)
-    end
-    TerraformService.destroy_all(@ui, configuration.path) if running_nodes.empty?
   end
 end

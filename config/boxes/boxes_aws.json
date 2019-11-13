@@ -57,11 +57,12 @@
   },
   "centos_7_aws" : {
     "provider": "aws",
-    "ami": "ami-1c2e8b6b",
-    "user": "ec2-user",
-    "default_instance_type": "m1.medium",
+    "ami": "ami-005b5c720e7b986d6",
+    "user": "centos",
+    "default_instance_type": "t3.medium",
     "platform": "centos",
-    "platform_version": "7"
+    "platform_version": "7",
+    "vpc": "true"
   },
   "centos_7_aws_large" : {
     "provider": "aws",
@@ -147,11 +148,12 @@
   },
   "sles_12_aws" : {
     "provider": "aws",
-    "ami": "ami-1804aa6f",
+    "ami": "ami-0d3747c7692f33308",
     "user": "ec2-user",
-    "default_instance_type": "m3.medium",
+    "default_instance_type": "t3.medium",
     "platform": "sles",
-    "platform_version": "12"
+    "platform_version": "12",
+    "vpc": true
   },
   "suse_13_aws" : {
     "provider": "aws",
