@@ -205,7 +205,7 @@ class TerraformConfigurationGenerator < BaseCommand
     connection {
       type = "ssh"
       private_key = file("#{@path_to_keyfile}")
-      timeout = "5m"
+      timeout = "10m"
       agent = false
       user = "#{user}"
       host = aws_instance.#{name}.public_ip

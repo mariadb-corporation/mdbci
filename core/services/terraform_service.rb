@@ -53,12 +53,14 @@ module TerraformService
 
   def self.resource_running?(resource, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
+    logger.info("Check resource running state: #{resource}_running_state")
     result = ShellCommands.run_command_in_dir(logger, "terraform output #{resource}_running_state", path)
     result[:value].success? && result[:output].include?('true')
   end
 
   def self.resource_network(resource, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
+    logger.info("Output network info: #{resource}_network")
     result = ShellCommands.run_command_in_dir(logger, "terraform output -json #{resource}_network", path)
     return Result.error('Error of terraform output network command') unless result[:value].success?
 
