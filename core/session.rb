@@ -297,25 +297,19 @@ EOF
   end
 
   def showBoxField
-    out = findBoxField($session.boxName, $session.field)
-    return 2 if out == 2
-
-    $out.out out
-    0
+    $out.out findBoxField($session.boxName, $session.field)
+    return 0
   end
 
   def findBoxField(boxName, field)
-    begin
-      box = $session.box_definitions.get_box(boxName)
-    rescue StandardError
-      $out.error("Box #{boxName} is not found")
-      return 2
+    box = $session.box_definitions.get_box(boxName)
+    if box == nil
+      raise "Box #{boxName} is not found"
     end
 
     if field != nil
       if !box.has_key?(field)
-        $out.error("Box #{boxName} does not have #{field} key")
-        return 2
+        raise "Box #{boxName} does not have #{field} key"
       end
       return box[field]
     else
@@ -329,12 +323,7 @@ EOF
       $out.warning('Please specify the path to the nodes configuration as a parameter')
       return 2
     end
-    begin
-      configuration = Configuration.new(path)
-    rescue StandardError
-      $out.error("Invalid path to the MDBCI configuration: #{path}")
-      return 2
-    end
+    configuration = Configuration.new(path)
     if configuration.node_names.size != 1
       $out.warning('Please specify the node to get configuration from')
       return 2
