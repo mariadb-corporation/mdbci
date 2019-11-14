@@ -26,19 +26,7 @@ class ShowCommand < BaseCommand
     },
     keyfile: {
       description: 'Show box key file to access it',
-      action: ->(*params) do
-        config = Configuration.new(params.first)
-        if config.terraform_configuration?
-          network_settings = NetworkSettings.from_file(config.network_settings_file)
-          config.node_names.map do |node|
-            node_settings = network_settings.node_settings(node)
-            @ui.out(node_settings['keyfile'])
-          end
-          SUCCESS_RESULT
-        else
-          Network.showKeyFile(*params)
-        end
-      end
+      action: ->(*params) { show_box_key_file(params) }
     },
     help: {
       description: 'Print list of available actions and exit',
@@ -114,6 +102,20 @@ class ShowCommand < BaseCommand
       return ERROR_RESULT
     end
     instance_exec(*action_parameters, &action[:action])
+  end
+
+  def show_box_key_file(params)
+    config = Configuration.new(params.first)
+    if config.terraform_configuration?
+      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        @ui.out(node_settings['keyfile'])
+      end
+      SUCCESS_RESULT
+    else
+      Network.showKeyFile(*params)
+    end
   end
 
   # Show list of actions available for the base command
@@ -199,8 +201,6 @@ class ShowCommand < BaseCommand
       @ui.error("Box #{box_name} is not found")
       return ARGUMENT_ERROR_RESULT
     end
-
-
     return box.to_json if field.nil?
 
     unless box.has_key?(field)
