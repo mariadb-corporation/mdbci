@@ -2,6 +2,7 @@
 
 require_relative '../models/network_settings'
 require_relative '../models/configuration'
+require_relative 'show_network_config_command'
 
 # Command shows information for the user.
 class ShowCommand < BaseCommand
@@ -38,7 +39,7 @@ class ShowCommand < BaseCommand
     },
     network_config: {
       description: 'Write host network configuration to the file',
-      action: ->(*params) { ShowNetworkConfigCommand.execute(params, self, @ui) }
+      action: ->(*params) { ShowNetworkConfigCommand.execute(params, @env, @ui) }
     },
     platforms: {
       description: 'List all known platforms',
@@ -253,7 +254,6 @@ class ShowCommand < BaseCommand
       @ui.error("The platform #{@env.boxPlatform} is not supported.")
       return false
     end
-
     @ui.info("Supported versions for #{@env.boxPlatform}")
     versions = boxes.map { |_, definition| definition['platform_version'] }.uniq
     @ui.out(versions)
