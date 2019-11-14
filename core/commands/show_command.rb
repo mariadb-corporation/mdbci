@@ -46,19 +46,7 @@ class ShowCommand < BaseCommand
     },
     private_ip: {
       description: 'Show private ip address of the box',
-      action: ->(*params) do
-        config = Configuration.new(params.first)
-        if config.terraform_configuration?
-          network_settings = NetworkSettings.from_file(config.network_settings_file)
-          config.node_names.map do |node|
-            node_settings = network_settings.node_settings(node)
-            @ui.out(node_settings['private_ip'])
-          end
-          SUCCESS_RESULT
-        else
-          Network.show(*params)
-        end
-      end
+      action: ->(*params) { show_private_ip_address(params) }
     },
     provider: {
       description: 'Show provider for the specified box',
@@ -90,6 +78,20 @@ class ShowCommand < BaseCommand
       return ERROR_RESULT
     end
     instance_exec(*action_parameters, &action[:action])
+  end
+
+  def show_private_ip_address(params)
+    config = Configuration.new(params.first)
+    if config.terraform_configuration?
+      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        @ui.out(node_settings['private_ip'])
+      end
+      SUCCESS_RESULT
+    else
+      Network.show(*params)
+    end
   end
 
   def show_network_interface_configuration(params)
