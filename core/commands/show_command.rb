@@ -101,7 +101,7 @@ class ShowCommand < BaseCommand
 
   # This method is called whenever the command is executed
   def execute
-    if @args.empty?
+    if @args.empty? || @env.show_help
       @ui.warning 'Please specify an action for the show command.'
       display_usage_info('show', SHOW_COMMAND_ACTIONS)
       return SUCCESS_RESULT
