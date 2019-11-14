@@ -34,19 +34,7 @@ class ShowCommand < BaseCommand
     },
     network: {
       description: 'Show network interface configuration',
-      action: ->(*params) do
-        config = Configuration.new(params.first)
-        if config.terraform_configuration?
-          network_settings = NetworkSettings.from_file(config.network_settings_file)
-          config.node_names.map do |node|
-            node_settings = network_settings.node_settings(node)
-            @ui.out(node_settings['network'])
-          end
-          SUCCESS_RESULT
-        else
-          Network.show(*params)
-        end
-      end
+      action: ->(*params) { show_network_interface_configuration(params) }
     },
     network_config: {
       description: 'Write host network configuration to the file',
@@ -102,6 +90,20 @@ class ShowCommand < BaseCommand
       return ERROR_RESULT
     end
     instance_exec(*action_parameters, &action[:action])
+  end
+
+  def show_network_interface_configuration(params)
+    config = Configuration.new(params.first)
+    if config.terraform_configuration?
+      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        @ui.out(node_settings['network'])
+      end
+      SUCCESS_RESULT
+    else
+      Network.show(*params)
+    end
   end
 
   def show_box_key_file(params)
