@@ -205,7 +205,7 @@ class TerraformConfigurationGenerator < BaseCommand
     connection {
       type = "ssh"
       private_key = file("#{@path_to_keyfile}")
-      timeout = "5m"
+      timeout = "10m"
       agent = false
       user = "#{user}"
       host = aws_instance.#{name}.public_ip
@@ -243,28 +243,21 @@ class TerraformConfigurationGenerator < BaseCommand
       #!/bin/bash
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
-      provisioner "local-exec" {
-        command = "echo ${aws_instance.<%= name %>.public_ip} > public_ip_<%= name %>"
-      }
-      provisioner "local-exec" {
-        command = "echo ${aws_instance.<%= name %>.private_ip} > private_ip_<%= name %>"
-      }
-      provisioner "local-exec" {
-        command = "echo <%= user %> > user_<%= name %>"
-      }
-      provisioner "local-exec" {
-        when    = "destroy"
-        command = "rm public_ip_<%= name %> private_ip_<%= name %> user_<%= name %>"
-      }
       <% if template_path %>
+        provisioner "remote-exec" {
+          inline = [
+            "mkdir -p /home/<%= user %>/cnf_templates"
+          ]
+          <%= connection_block %>
+        }
         provisioner "file" {
-          source = "<%=template_path %>"
+          source = "<%= template_path %>"
           destination = "/home/<%= user %>/cnf_templates"
           <%= connection_block %>
         }
         provisioner "remote-exec" {
           inline = [
-            "sudo mkdir /home/vagrant",
+            "sudo mkdir -p /home/vagrant/",
             "sudo mv /home/<%= user %>/cnf_templates /home/vagrant/cnf_templates"
           ]
           <%= connection_block %>
@@ -273,6 +266,13 @@ class TerraformConfigurationGenerator < BaseCommand
     }
     output "<%= name %>_running_state" {
       value = aws_instance.<%= name %>.id != null
+    }
+    output "<%= name %>_network" {
+      value = {
+        user = "<%= user %>"
+        private_ip = aws_instance.<%= name %>.private_ip
+        public_ip = aws_instance.<%= name %>.public_ip
+      }
     }
     AWS
     template.result(OpenStruct.new(node_params).instance_eval { binding })
@@ -319,6 +319,7 @@ class TerraformConfigurationGenerator < BaseCommand
   def provider_resource
     <<-PROVIDER
     provider "aws" {
+      version = "~> 2.33"
       profile = "default"
       region = "#{@aws_config['region']}"
       access_key = "#{@aws_config['access_key_id']}"
@@ -341,9 +342,9 @@ class TerraformConfigurationGenerator < BaseCommand
       name = "<%= group_name %>"
       description = "MDBCI <%= group_name %> auto generated"
       ingress {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
         cidr_blocks = ["0.0.0.0/0"]
       }
       <% if vpc %>

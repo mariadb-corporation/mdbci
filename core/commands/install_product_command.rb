@@ -51,7 +51,7 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     @mdbci_config = Configuration.new(@args.first, @env.labels)
-    @network_config = NetworkConfig.new(@mdbci_config, @ui)
+    @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
 
     @product = @env.nodeProduct
     @product_version = @env.productVersion
@@ -73,9 +73,8 @@ class InstallProduct < BaseCommand
       role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-      @network_config.add_nodes([name])
-      @machine_configurator.configure(@network_config[name], "#{name}-config.json",
-                                      @ui, extra_files)
+      node_settings = @network_settings.node_settings(name)
+      @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
     end
   end
 
