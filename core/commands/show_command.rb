@@ -82,33 +82,42 @@ class ShowCommand < BaseCommand
   end
 
   def show_private_ip_address(params)
-    config = Configuration.new(params.first)
-    network_settings = NetworkSettings.from_file(config.network_settings_file)
-    config.node_names.map do |node|
-      node_settings = network_settings.node_settings(node)
-      @ui.out(node_settings['private_ip'])
+    config = Configuration.from_spec(params.first).and_then do |config|
+      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        @ui.out(node_settings['private_ip'])
+      end
+      return SUCCESS_RESULT
     end
-    SUCCESS_RESULT
+    @ui.error(config.error)
+    ARGUMENT_ERROR_RESULT
   end
 
   def show_network_interface_configuration(params)
-    config = Configuration.new(params.first)
-    network_settings = NetworkSettings.from_file(config.network_settings_file)
-    config.node_names.map do |node|
-      node_settings = network_settings.node_settings(node)
-      @ui.out(node_settings['network'])
+    config = Configuration.from_spec(params.first).and_then do |config|
+      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        @ui.out(node_settings['network'])
+      end
+      SUCCESS_RESULT
     end
-    SUCCESS_RESULT
+    @ui.error(config.error)
+    ARGUMENT_ERROR_RESULT
   end
 
   def show_box_key_file(params)
-    config = Configuration.new(params.first)
+  config = Configuration.from_spec(params.first).and_then do |config|
     network_settings = NetworkSettings.from_file(config.network_settings_file)
     config.node_names.map do |node|
       node_settings = network_settings.node_settings(node)
       @ui.out(node_settings['keyfile'])
     end
     SUCCESS_RESULT
+  end
+  @ui.error(config.error)
+  ARGUMENT_ERROR_RESULT
   end
 
   # Show list of actions available for the base command
@@ -132,18 +141,16 @@ class ShowCommand < BaseCommand
       @ui.warning('Please specify the path to the nodes configuration as a parameter')
       return ERROR_RESULT
     end
-    begin
-      configuration = Configuration.new(path)
-    rescue StandardError
-      @ui.error("Invalid path to the MDBCI configuration: #{path}")
-      return ARGUMENT_ERROR_RESULT
+    configuration = Configuration.from_spec(path).and_then do |configuration|
+      if configuration.node_names.size != 1
+        @ui.warning('Please specify the node to get configuration from')
+        return ERROR_RESULT
+      end
+      @ui.out(configuration.box_names(configuration.node_names.first))
+      SUCCESS_RESULT
     end
-    if configuration.node_names.size != 1
-      @ui.warning('Please specify the node to get configuration from')
-      return ERROR_RESULT
-    end
-    @ui.out(configuration.box_names(configuration.node_names.first))
-    SUCCESS_RESULT
+    @ui.error(configuration.error)
+    ARGUMENT_ERROR_RESULT
   end
 
   # Show boxes with platform and version
