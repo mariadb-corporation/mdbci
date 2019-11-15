@@ -447,7 +447,12 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
         return false
       end
 
-      box_params = @boxes.get_box(box)
+      begin
+        box_params = @boxes.get_box(box)
+      rescue StandardError
+        @ui.error("Box #{box} is not found")
+        return false
+      end
       box_params['provider'].to_s
     end
     return false unless check_providers(providers)
