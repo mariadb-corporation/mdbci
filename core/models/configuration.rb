@@ -79,9 +79,9 @@ class Configuration
   end
 
   def self.from_spec(spec, labels = nil)
-    return Result.ok(Configuration.new(spec, labels)) if self.class.config_directory?(spec)
+    return Result.ok(Configuration.new(spec, labels)) if config_directory?(spec)
 
-    @ui.info("Invalid path to the MDBCI configuration: #{spec}")
+    Result.error("Invalid path to the MDBCI configuration: #{spec}")
   end
 
   # Provide a path to the network settings configuration file.
