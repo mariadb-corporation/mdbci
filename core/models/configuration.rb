@@ -78,6 +78,12 @@ class Configuration
     @node_names = select_node_names(node)
   end
 
+  def self.from_spec(spec, labels = nil)
+    return Result.ok(Configuration.new(spec, labels)) if self.class.config_directory?(spec)
+
+    @ui.info("Invalid path to the MDBCI configuration: #{spec}")
+  end
+
   # Provide a path to the network settings configuration file.
   def network_settings_file
     "#{@path}#{NETWORK_FILE_SUFFIX}"
