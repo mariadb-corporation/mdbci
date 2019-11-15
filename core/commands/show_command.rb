@@ -83,44 +83,32 @@ class ShowCommand < BaseCommand
 
   def show_private_ip_address(params)
     config = Configuration.new(params.first)
-    if config.terraform_configuration? || config.vagrant_configuration?
-      network_settings = NetworkSettings.from_file(config.network_settings_file)
-      config.node_names.map do |node|
-        node_settings = network_settings.node_settings(node)
-        @ui.out(node_settings['private_ip'])
-      end
-      SUCCESS_RESULT
-    else
-      Network.show(*params)
+    network_settings = NetworkSettings.from_file(config.network_settings_file)
+    config.node_names.map do |node|
+      node_settings = network_settings.node_settings(node)
+      @ui.out(node_settings['private_ip'])
     end
+    SUCCESS_RESULT
   end
 
   def show_network_interface_configuration(params)
     config = Configuration.new(params.first)
-    if config.terraform_configuration? || config.vagrant_configuration?
-      network_settings = NetworkSettings.from_file(config.network_settings_file)
-      config.node_names.map do |node|
-        node_settings = network_settings.node_settings(node)
-        @ui.out(node_settings['network'])
-      end
-      SUCCESS_RESULT
-    else
-      Network.show(*params)
+    network_settings = NetworkSettings.from_file(config.network_settings_file)
+    config.node_names.map do |node|
+      node_settings = network_settings.node_settings(node)
+      @ui.out(node_settings['network'])
     end
+    SUCCESS_RESULT
   end
 
   def show_box_key_file(params)
     config = Configuration.new(params.first)
-    if config.terraform_configuration? || config.vagrant_configuration?
-      network_settings = NetworkSettings.from_file(config.network_settings_file)
-      config.node_names.map do |node|
-        node_settings = network_settings.node_settings(node)
-        @ui.out(node_settings['keyfile'])
-      end
-      SUCCESS_RESULT
-    else
-      Network.showKeyFile(*params)
+    network_settings = NetworkSettings.from_file(config.network_settings_file)
+    config.node_names.map do |node|
+      node_settings = network_settings.node_settings(node)
+      @ui.out(node_settings['keyfile'])
     end
+    SUCCESS_RESULT
   end
 
   # Show list of actions available for the base command
