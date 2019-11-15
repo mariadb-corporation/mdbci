@@ -81,6 +81,10 @@ class Configuration
   def self.from_spec(spec, labels = nil)
     return Result.ok(Configuration.new(spec, labels)) if config_directory?(spec)
 
+    conf = spec.split('/')
+    conf = conf[0, conf.length - 1].join('/')
+    return Result.ok(Configuration.new(spec, labels)) if config_directory?(conf)
+
     Result.error("Invalid path to the MDBCI configuration: #{spec}")
   end
 
