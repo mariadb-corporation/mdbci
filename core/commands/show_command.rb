@@ -147,7 +147,7 @@ class ShowCommand < BaseCommand
         return ERROR_RESULT
       end
       @ui.out(configuration.box_names(configuration.node_names.first))
-      SUCCESS_RESULT
+      return SUCCESS_RESULT
     end
     @ui.error(configuration.error)
     ARGUMENT_ERROR_RESULT
