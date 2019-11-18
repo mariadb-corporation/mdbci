@@ -246,7 +246,9 @@ class TerraformConfigurationGenerator < BaseCommand
       <% if template_path %>
         provisioner "remote-exec" {
           inline = [
-            "mkdir -p /home/<%= user %>/cnf_templates"
+            "mkdir -p /home/<%= user %>/cnf_templates",
+            "sudo mkdir /vagrant",
+            "sudo bash -c 'echo \\"<%= provider %>\\" > /vagrant/provider'"
           ]
           <%= connection_block %>
         }
