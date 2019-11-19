@@ -24,8 +24,9 @@ module TerraformService
     ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve -target=#{resource}", path)
   end
 
-  def self.destroy(resource, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve -target=#{resource}", path)
+  def self.destroy(resources, logger, path = Dir.pwd)
+    target_args = resources.map { |resource| "-target=#{resource}" }.join(' ')
+    ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{target_args}", path)
   end
 
   def self.destroy_all(logger, path = Dir.pwd)
@@ -47,6 +48,18 @@ module TerraformService
       sleep(15)
     else
       return true
+    end
+    false
+  end
+
+  def self.has_running_resources_type?(resource_type, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
+    logger.info('Output the has_running_machines')
+    result = ShellCommands.run_command_in_dir(logger, 'terraform state list', path)
+    return false unless result[:value].success?
+
+    result[:output].split("\n").each do |resource|
+      return true unless (resource =~ /^#{resource_type}\./).nil?
     end
     false
   end

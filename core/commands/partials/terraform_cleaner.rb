@@ -14,13 +14,11 @@ class TerraformCleaner
   # @param configuration [Configuration] that we operate on
   def destroy_nodes_by_configuration(configuration)
     @ui.info('Destroying the machines using terraform')
-    if configuration.all_nodes_selected?
+    resource_type = TerraformService.resource_type(configuration.provider)
+    resources = configuration.node_names.map { |node| "#{resource_type}.#{node}" }
+    TerraformService.destroy(resources, @ui, configuration.path)
+    unless TerraformService.has_running_resources_type?(resource_type, @ui, configuration.path)
       TerraformService.destroy_all(@ui, configuration.path)
-    else
-      resource_type = TerraformService.resource_type(configuration.provider)
-      configuration.node_names.each do |node|
-        TerraformService.destroy("#{resource_type}.#{node}", @ui, configuration.path)
-      end
     end
     cleanup_nodes(configuration.node_names, configuration.provider)
   end
