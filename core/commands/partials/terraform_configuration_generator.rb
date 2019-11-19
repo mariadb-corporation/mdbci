@@ -266,9 +266,6 @@ class TerraformConfigurationGenerator < BaseCommand
         }
       <% end %>
     }
-    output "<%= name %>_running_state" {
-      value = aws_instance.<%= name %>.id != null
-    }
     output "<%= name %>_network" {
       value = {
         user = "<%= user %>"

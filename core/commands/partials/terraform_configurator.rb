@@ -109,7 +109,8 @@ class TerraformConfigurator
   end
 
   def node_running?(node)
-    TerraformService.resource_running?(node, @ui, @config.path)
+    resource_type = TerraformService.resource_type(@config.provider)
+    TerraformService.resource_running?(resource_type, node, @ui, @config.path)
   end
 
   # Create and configure node, or recreate if it needs to fix.

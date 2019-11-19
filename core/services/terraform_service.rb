@@ -64,11 +64,16 @@ module TerraformService
     false
   end
 
-  def self.resource_running?(resource, logger, path = Dir.pwd)
+  def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
-    logger.info("Check resource running state: #{resource}_running_state")
-    result = ShellCommands.run_command_in_dir(logger, "terraform output #{resource}_running_state", path)
-    result[:value].success? && result[:output].include?('true')
+    logger.info("Check resource running state: #{resource_type}_#{resource}")
+    result = ShellCommands.run_command_in_dir(logger, 'terraform state list', path)
+    return false unless result[:value].success?
+
+    result[:output].split("\n").each do |resource_item|
+      return true unless (resource_item =~ /^#{resource_type}\.#{resource}$/).nil?
+    end
+    false
   end
 
   def self.resource_network(resource, logger, path = Dir.pwd)
