@@ -86,17 +86,15 @@ class TerraformConfigurator
   #
   # @param node [String] node name to bring up. It can be empty if we need to bring
   # the whole configuration up.
-  # @return result of the run_command_and_log()
+  # @return [Result] with result of the run_command_and_log()
   def bring_up_machine(node)
     @ui.info("Bringing up node #{node}")
     TerraformService.init(@ui, @config.path)
-    begin
-      resource_type = TerraformService.resource_type(@config.provider)
-    rescue RuntimeError => e
-      @ui.error(e.message)
-      return
+    result = TerraformService.resource_type(@config.provider).and_then do |resource_type|
+      return Result.ok(TerraformService.apply("#{resource_type}.#{node}", @ui, @config.path))
     end
-    TerraformService.apply("#{resource_type}.#{node}", @ui, @config.path)
+    @ui.error(result.error)
+    result
   end
 
   # Forcefully destroys given node
@@ -109,8 +107,11 @@ class TerraformConfigurator
   end
 
   def node_running?(node)
-    resource_type = TerraformService.resource_type(@config.provider)
-    TerraformService.resource_running?(resource_type, node, @ui, @config.path)
+    result = TerraformService.resource_type(@config.provider).and_then do |resource_type|
+      return TerraformService.resource_running?(resource_type, node, @ui, @config.path)
+    end
+    @ui.error(result.error)
+    false
   end
 
   # Create and configure node, or recreate if it needs to fix.
@@ -120,12 +121,13 @@ class TerraformConfigurator
   def bring_up_and_configure(node)
     @attempts.times do |attempt|
       @ui.info("Bring up and configure node #{node}. Attempt #{attempt + 1}.")
-      if @recreate_nodes || attempt.positive?
-        destroy_node(node)
-        bring_up_machine(node)
-      elsif !node_running?(node)
-        bring_up_machine(node)
-      end
+      bring_up_result = if @recreate_nodes || attempt.positive?
+                          destroy_node(node)
+                          bring_up_machine(node)
+                        elsif !node_running?(node)
+                          bring_up_machine(node)
+                        end
+      break if !bring_up_result.nil? && bring_up_result.error?
       next unless node_running?(node)
 
       store_network_settings(node).and_then do

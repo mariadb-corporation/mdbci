@@ -2,6 +2,7 @@
 
 require_relative 'shell_commands'
 require_relative 'machine_configurator'
+require_relative '../models/result'
 require 'net/ssh'
 require 'net/scp'
 
@@ -11,8 +12,8 @@ module TerraformService
 
   def self.resource_type(provider)
     case provider
-    when 'aws' then 'aws_instance'
-    else raise('Unknown Terraform service provider')
+    when 'aws' then Result.ok('aws_instance')
+    else Result.error('Unknown Terraform service provider')
     end
   end
 

@@ -133,6 +133,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
+      Result.ok('')
     elsif configuration.terraform_configuration?
       terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service)
       terraform_cleaner.destroy_nodes_by_configuration(configuration)
@@ -143,8 +144,10 @@ Labels should be separated with commas, do not contain any whitespaces.
         update_configuration_files(configuration)
         return
       end
+      Result.ok('')
+    end.and_then do
+      remove_files(configuration, @env.keep_template) unless @env.keep_configuration
     end
-    remove_files(configuration, @env.keep_template) unless @env.keep_configuration
   end
 
   # Update network_configuration and configured_labels files
