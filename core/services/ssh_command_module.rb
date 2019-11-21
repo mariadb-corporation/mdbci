@@ -1,6 +1,13 @@
+# frozen_string_literal: true
 
+require 'io/console'
+require 'net/ssh'
+require 'net/scp'
+require_relative '../models/result'
+require_relative '../services/log_storage'
 
-module SshCommand
+# ddd
+module SshCommandModule
   # Connect to the specified machine and yield active connection
   # @param machine [Hash] information about machine to connect
   def self.within_ssh_session(machine)
@@ -13,9 +20,9 @@ module SshCommand
     end
   end
 
-  def self.sudo_exec(connection, sudo_password, command, logger)
-    ssh_exec(connection, "sudo -S #{command}", logger, sudo_password)
-  end
+  # def self.sudo_exec(connection, sudo_password, command, logger)
+  #   ssh_exec(connection, "sudo -S #{command}", logger, sudo_password)
+  # end
 
   # rubocop:disable Metrics/MethodLength
   def self.ssh_exec(connection, command, logger, sudo_password = '')
