@@ -27,7 +27,10 @@ module TerraformService
 
   def self.destroy(resources, logger, path = Dir.pwd)
     target_args = resources.map { |resource| "-target=#{resource}" }.join(' ')
-    ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{target_args}", path)
+    result = ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{target_args}", path)
+    return Result.error(result[:output]) unless result[:value].success?
+
+    Result.ok('')
   end
 
   def self.destroy_all(logger, path = Dir.pwd)
