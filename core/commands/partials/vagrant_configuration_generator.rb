@@ -113,6 +113,9 @@ end
           qemu.cpu_mode = 'host-passthrough'
           qemu.cpus = <%= vm_cpu %>
           qemu.memory = <%= vm_mem %>
+        <% if box == 'generic/opensuse15' %>
+          qemu.disk_bus = '<%= disk_bus %>'
+        <% end %>
         end
         <% if platform == 'ubuntu' && platform_version == 'bionic' %>
         # Fix DNS bug
