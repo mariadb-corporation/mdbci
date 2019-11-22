@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
-require 'net/ssh'
+require 'yaml'
 require_relative '../models/result'
 require_relative 'ssh_command_module'
+require_relative '../models/command_result'
 
 # Class allows to configure a specified machine
 class NetworkConfigurator
+  RESOURCE = '../config/resource.yaml'
 
   def initialize(logger)
     @logger = logger
@@ -13,8 +15,7 @@ class NetworkConfigurator
 
   def configure(machine, config_name, logger = @logger, sudo_password = '')
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
-    result = configure_machine(machine, logger, sudo_password)
-    logger.error(result.error) if result.error?
+    configure_machine(machine, logger, sudo_password)
   end
 
   private
@@ -34,19 +35,23 @@ class NetworkConfigurator
     rescue StandardError
       return Result.error("Could not initiate connection to the node '#{machine['name']}'")
     end
-    Result.ok(result.value)
+    result
   end
 
   def check_available_resources(ssh, logger, sudo_password)
-    cmd = "curl -Is #{GITHUB} | head -1"
-    logger.info("Invoke command: #{cmd}")
+    resource = Array(YAML.load_file(RESOURCE))
+    list_avaible_site = []
+    3.times do
+      elem = resource.delete_at(rand(resource.size))
+      cmd = "curl -Is #{elem[1]['site']} | head -1"
+      logger.info("Invoke command: #{cmd}")
+      out = SshCommandModule.sudo_exec(ssh, sudo_password, cmd, logger)
+      return Result.error(out.error) if out.error?
 
-    #out2 = SshCommandModule.exec(ssh, cmd, logger, sudo_password)
-    #p out2.error
-    #p out2.ok
-    #out = ssh.exec!(cmd)
-    #p out
+      return Result.error("Website #{elem[1]['site']} unavailable.") unless out.value.to_s == "HTTP/1.1 200 OK\r\n\n"
 
-    Result.ok('ok')
+      list_avaible_site.push(elem[1]['site'])
+    end
+    Result.ok(list_avaible_site)
   end
 end
