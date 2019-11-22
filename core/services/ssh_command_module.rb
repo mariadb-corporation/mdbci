@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
 require 'io/console'
-require 'net/ssh'
-require 'net/scp'
 require_relative '../models/result'
 require_relative '../services/log_storage'
 
 # ddd
 module SshCommandModule
+  def self.log_printable_lines(lines, logger)
+    lines.split("\n").map(&:chomp)
+      .select { |line| line =~ /\p{Graph}+/mu }
+      .each do |line|
+      logger.debug("ssh: #{line}")
+    end
+  end
+
   # Connect to the specified machine and yield active connection
   # @param machine [Hash] information about machine to connect
   def self.within_ssh_session(machine)
@@ -20,9 +26,9 @@ module SshCommandModule
     end
   end
 
-  # def self.sudo_exec(connection, sudo_password, command, logger)
-  #   ssh_exec(connection, "sudo -S #{command}", logger, sudo_password)
-  # end
+  def self.sudo_exec(connection, sudo_password, command, logger)
+    ssh_exec(connection, "sudo -S #{command}", logger, sudo_password)
+  end
 
   # rubocop:disable Metrics/MethodLength
   def self.ssh_exec(connection, command, logger, sudo_password = '')
