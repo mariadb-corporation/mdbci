@@ -31,7 +31,7 @@ class MachineConfigurator
   # @param extra_files [Array<Array<String>>] pairs of source and target paths.
   # @param logger [Out] logger to log information to
   # rubocop:disable Metrics/ParameterLists
-  def configure(machine, config_name, logger = @log, extra_files = [], sudo_password = '', chef_version = '15.3.14')
+  def configure(machine, config_name, logger = @log, extra_files = [], sudo_password = '', chef_version = '15.5.17')
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
     remote_dir = '/tmp/provision'
     within_ssh_session(machine) do |connection|
