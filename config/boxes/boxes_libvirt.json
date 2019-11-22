@@ -1,13 +1,7 @@
 {
-  "debian_wheezy_libvirt": {
-    "provider": "libvirt",
-    "box": "baremettle/debian-7.5",
-    "platform": "debian",
-    "platform_version": "wheezy"
-  },
   "debian_jessie_libvirt": {
     "provider": "libvirt",
-    "box": "debian/jessie64",
+    "box": "generic/debian8",
     "platform": "debian",
     "platform_version": "jessie"
   },
@@ -25,22 +19,9 @@
   },
   "ubuntu_trusty_libvirt": {
     "provider": "libvirt",
-    "box": "baremettle/ubuntu-14.04",
+    "box": "mrlesmithjr/trusty64",
     "platform": "ubuntu",
     "platform_version": "trusty"
-  },
-  "ubuntu_precise_libvirt": {
-    "provider": "libvirt",
-    "box": "fancycode/ubuntu-1204-server-amd64",
-    "platform": "ubuntu",
-    "platform_version": "precise"
-  },
-  "ubuntu_wily_libvirt": {
-    "provider": "libvirt",
-    "box": "beeksiwaais/wily-devos",
-    "ssh_pty" : "true",
-    "platform": "ubuntu",
-    "platform_version": "wily"
   },
   "ubuntu_xenial_libvirt": {
     "provider": "libvirt",
@@ -56,25 +37,27 @@
     "platform": "ubuntu",
     "platform_version": "bionic"
   },
+  "centos_8_libvirt": {
+    "provider": "libvirt",
+    "box": "generic/centos8",
+    "platform": "centos",
+    "platform_version": "7",
+    "disk_bus": "sata"
+  },
   "centos_7_libvirt": {
     "provider": "libvirt",
-    "box": "centos/7",
+    "box": "generic/centos7",
     "platform": "centos",
-    "platform_version": "7"
+    "platform_version": "7",
+    "disk_bus": "sata"
   },
   "centos_6_libvirt": {
     "provider": "libvirt",
-    "box": "centos/6",
+    "box": "generic/centos6",
     "ssh_pty" : "true",
     "platform": "centos",
-    "platform_version": "6"
-  },
-  "centos_5_libvirt": {
-    "provider": "libvirt",
-    "box": "baremettle/centos-5.10",
-    "ssh_pty" : "true",
-    "platform": "centos",
-    "platform_version": "5"
+    "platform_version": "6",
+    "disk_bus": "sata"
   },
   "suse_15_libvirt" : {
     "provider": "libvirt",
@@ -82,12 +65,6 @@
     "box": "generic/opensuse15",
     "platform_version": "15",
     "disk_bus": "sata"
-  },
-  "suse_13_libvirt" : {
-    "provider": "libvirt",
-    "platform": "opensuse",
-    "box": "webhippie/opensuse-13.2",
-    "platform_version": "13"
   },
   "sles_12_libvirt" : {
     "provider": "libvirt",
@@ -100,6 +77,7 @@
     "box": "generic/rhel8",
     "platform": "rhel",
     "platform_version": "8",
-    "configure_subscription_manager": "true"
+    "configure_subscription_manager": "true",
+    "disk_bus": "sata"
   }
 }
