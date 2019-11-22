@@ -48,7 +48,7 @@ class NetworkConfigurator
       out = SshCommandModule.sudo_exec(ssh, sudo_password, cmd, logger)
       return Result.error(out.error) if out.error?
 
-      return Result.error("Website #{elem[1]['site']} unavailable.") unless out.value.to_s == "HTTP/1.1 200 OK\r\n\n"
+      return Result.error("Website #{elem[1]['site']} unavailable.") if out.value.to_s.empty?
 
       list_avaible_site.push(elem[1]['site'])
     end
