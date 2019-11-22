@@ -1,13 +1,10 @@
 ---
 github:
-  site: https://github.com
-
+  site: https://github.com/
 apache:
-  site: https://github.com
-
+  site: https://www-eu.apache.org/
 nodejs:
-  site: https://github.com
-
+  site: https://nodejs.org/en/
 sourceforge:
-  site: https://github.com
+  site: https://sourceforge.net/
 
