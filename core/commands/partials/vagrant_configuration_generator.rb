@@ -113,7 +113,7 @@ end
           qemu.cpu_mode = 'host-passthrough'
           qemu.cpus = <%= vm_cpu %>
           qemu.memory = <%= vm_mem %>
-        <% if box == 'generic/opensuse15' %>
+        <% if disk_bus %>
           qemu.disk_bus = '<%= disk_bus %>'
         <% end %>
         end
