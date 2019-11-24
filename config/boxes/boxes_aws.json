@@ -74,11 +74,12 @@
   },
   "centos_6_aws" : {
     "provider": "aws",
-    "ami": "ami-2a04a85d",
-    "user": "ec2-user",
-    "default_instance_type": "m1.medium",
+    "ami": "ami-0451e9d3427711cb1",
+    "user": "centos",
+    "default_instance_type": "t2.medium",
     "platform": "centos",
-    "platform_version": "6"
+    "platform_version": "6",
+    "vpc": "true"
   },
   "debian_jessie_aws" : {
     "provider": "aws",
