@@ -33,11 +33,12 @@
   },
   "ubuntu_trusty_aws": {
     "provider": "aws",
-    "ami": "ami-5da23a2a",
+    "ami": "ami-053ba9d62f24950f2",
     "user": "ubuntu",
-    "default_instance_type": "m1.medium",
+    "default_instance_type": "t3.medium",
     "platform": "ubuntu",
-    "platform_version": "trusty"
+    "platform_version": "trusty",
+    "vpc": "true"
   },
   "ubuntu_precise_aws": {
     "provider": "aws",
