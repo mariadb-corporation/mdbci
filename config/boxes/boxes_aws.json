@@ -9,11 +9,12 @@
   },
   "ubuntu_xenial_aws": {
     "provider": "aws",
-    "ami": "ami-4ac34439",
+    "ami": "ami-02fcf12d5bd33ce51",
     "user": "ubuntu",
-    "default_instance_type": "m3.medium",
+    "default_instance_type": "t3.medium",
     "platform": "ubuntu",
-    "platform_version": "xenial"
+    "platform_version": "xenial",
+    "vpc": "true"
   },
   "ubuntu_wily_aws": {
     "provider": "aws",
