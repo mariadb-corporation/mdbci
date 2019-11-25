@@ -106,11 +106,12 @@
   },
   "debian_stretch_aws" : {
     "provider": "aws",
-    "ami": "ami-23c4dc45",
+    "ami": "ami-00a845a11b3d1f308",
     "user": "admin",
-    "default_instance_type": "m3.medium",
+    "default_instance_type": "t3.medium",
     "platform": "debian",
-    "platform_version": "stretch"
+    "platform_version": "stretch",
+    "vpc": "true"
   },
   "rhel_6_aws" : {
     "provider": "aws",
