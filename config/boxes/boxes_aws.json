@@ -105,6 +105,15 @@
     "platform": "debian",
     "platform_version": "wheezy"
   },
+  "debian_buster_aws" : {
+    "provider": "aws",
+    "ami": "ami-015c88ecc51bd3239",
+    "user": "admin",
+    "default_instance_type": "t3.medium",
+    "platform": "debian",
+    "platform_version": "buster",
+    "vpc": "true"
+  },
   "debian_stretch_aws" : {
     "provider": "aws",
     "ami": "ami-00a845a11b3d1f308",
