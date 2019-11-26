@@ -64,6 +64,15 @@ class Configuration
     File.join(path, 'docker-configuration.yaml')
   end
 
+  # Create the configuration based on the path specification and labels list.
+  #
+  # Method returns Result that may contain the Configuration
+  def self.from_spec(spec, labels = nil)
+    Result.ok(Configuration.new(spec, labels))
+  rescue ArgumentError => error
+    Result.error(error.message)
+  end
+
   def initialize(spec, labels = nil)
     @path, node = parse_spec(spec)
     raise ArgumentError, "Invalid path to the MDBCI configuration: #{spec}" unless self.class.config_directory?(@path)
@@ -78,15 +87,6 @@ class Configuration
     @node_names = select_node_names(node)
   end
 
-  def self.from_spec(spec, labels = nil)
-    return Result.ok(Configuration.new(spec, labels)) if config_directory?(spec)
-
-    conf = spec.split('/')
-    conf = conf[0, conf.length - 1].join('/')
-    return Result.ok(Configuration.new(spec, labels)) if config_directory?(conf)
-
-    Result.error("Invalid path to the MDBCI configuration: #{spec}")
-  end
 
   # Provide a path to the network settings configuration file.
   def network_settings_file
