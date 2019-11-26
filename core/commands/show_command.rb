@@ -136,19 +136,15 @@ class ShowCommand < BaseCommand
   # @param path [String] path to configuration
   def show_box_name_in_configuration(path = nil)
     if path.nil?
-      @ui.warning('Please specify the path to the nodes configuration as a parameter')
-      return ERROR_RESULT
+      return Result.error('Please specify the path to the nodes configuration as a parameter')
     end
-    configuration = Configuration.from_spec(path).and_then do |configuration|
+    Configuration.from_spec(path).and_then do |configuration|
       if configuration.node_names.size != 1
-        @ui.warning('Please specify the node to get configuration from')
-        return ERROR_RESULT
+        return Result.error('Please specify the node to get configuration from')
       end
       @ui.out(configuration.box_names(configuration.node_names.first))
-      return SUCCESS_RESULT
+      Result.ok('')
     end
-    @ui.error(configuration.error)
-    ARGUMENT_ERROR_RESULT
   end
 
   # Show boxes with platform and version
