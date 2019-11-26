@@ -95,16 +95,14 @@ class ShowCommand < BaseCommand
   end
 
   def show_network_interface_configuration(params)
-    config = Configuration.from_spec(params.first).and_then do |config|
+    Configuration.from_spec(params.first).and_then do |config|
       network_settings = NetworkSettings.from_file(config.network_settings_file)
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['network'])
       end
-      SUCCESS_RESULT
+      Result.ok('')
     end
-    @ui.error(config.error)
-    ARGUMENT_ERROR_RESULT
   end
 
   def show_box_key_file(params)
