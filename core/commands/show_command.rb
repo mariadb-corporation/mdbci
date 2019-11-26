@@ -6,7 +6,6 @@ require_relative 'show_network_config_command'
 
 # Command shows information for the user.
 class ShowCommand < BaseCommand
-
   # List of actions that are provided by the show command.
   SHOW_COMMAND_ACTIONS = {
     box: {
@@ -62,7 +61,6 @@ class ShowCommand < BaseCommand
       action: ->(*) { show_platform_versions }
     }
   }.freeze
-
 
   # This method is called whenever the command is executed
   def execute
@@ -131,13 +129,11 @@ class ShowCommand < BaseCommand
   #
   # @param path [String] path to configuration
   def show_box_name_in_configuration(path = nil)
-    if path.nil?
-      return Result.error('Please specify the path to the nodes configuration as a parameter')
-    end
+    return Result.error('Please specify the path to the nodes configuration as a parameter') if path.nil?
+
     Configuration.from_spec(path).and_then do |configuration|
-      if configuration.node_names.size != 1
-        return Result.error('Please specify the node to get configuration from')
-      end
+      return Result.error('Please specify the node to get configuration from') if configuration.node_names.size != 1
+
       @ui.out(configuration.box_names(configuration.node_names.first))
       Result.ok('')
     end
@@ -193,7 +189,7 @@ class ShowCommand < BaseCommand
     end
     return box.to_json if field.nil?
 
-    unless box.has_key?(field)
+    unless box.key?(field)
       @ui.error("Box #{box_name} does not have #{field} key")
       return ARGUMENT_ERROR_RESULT
     end
@@ -215,14 +211,12 @@ class ShowCommand < BaseCommand
   end
 
   def show_provider(name = nil)
-    begin
-      box_definition = @env.box_definitions.get_box(name)
-      @ui.out(box_definition['provider'])
-      true
-    rescue ArgumentError => error
-      @ui.error(error.message)
-      false
-    end
+    box_definition = @env.box_definitions.get_box(name)
+    @ui.out(box_definition['provider'])
+    true
+  rescue ArgumentError => e
+    @ui.error(e.message)
+    false
   end
 
   # print boxes platform versions by platform name
