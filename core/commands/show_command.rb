@@ -108,16 +108,14 @@ class ShowCommand < BaseCommand
   end
 
   def show_box_key_file(params)
-  config = Configuration.from_spec(params.first).and_then do |config|
-    network_settings = NetworkSettings.from_file(config.network_settings_file)
-    config.node_names.map do |node|
-      node_settings = network_settings.node_settings(node)
-      @ui.out(node_settings['keyfile'])
+    Configuration.from_spec(params.first).and_then do |config|
+      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        @ui.out(node_settings['keyfile'])
+      end
+      Result.ok('')
     end
-    SUCCESS_RESULT
-  end
-  @ui.error(config.error)
-  ARGUMENT_ERROR_RESULT
   end
 
   # Show list of actions available for the base command
