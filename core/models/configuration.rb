@@ -19,6 +19,8 @@ class Configuration
   # @param path [String] path that should be checked
   #
   # @returns [Boolean]
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
   def self.config_directory?(path)
     !path.nil? &&
       !path.empty? &&
@@ -31,6 +33,8 @@ class Configuration
         File.exist?(terraform_configuration(path))
       )
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
 
   # Returns all nodes for configuration.
   def all_node_names
@@ -69,8 +73,8 @@ class Configuration
   # Method returns Result that may contain the Configuration
   def self.from_spec(spec, labels = nil)
     Result.ok(Configuration.new(spec, labels))
-  rescue ArgumentError => error
-    Result.error(error.message)
+  rescue ArgumentError => e
+    Result.error(e.message)
   end
 
   def initialize(spec, labels = nil)
@@ -86,7 +90,6 @@ class Configuration
     @labels = labels.nil? ? [] : labels.split(',')
     @node_names = select_node_names(node)
   end
-
 
   # Provide a path to the network settings configuration file.
   def network_settings_file
