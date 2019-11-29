@@ -20,7 +20,6 @@ class TerraformCleaner
       unless TerraformService.has_running_resources_type?(resource_type, @ui, configuration.path)
         TerraformService.destroy_all(@ui, configuration.path)
       end
-      cleanup_nodes(configuration.node_names, configuration.provider)
       return Result.ok('')
     end
     @ui.error(result.error)
