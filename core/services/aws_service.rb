@@ -39,14 +39,15 @@ class AwsService
   end
 
   # Get the instances list
-  # @return [Array] instances list in format [{ instance_id, node_name }]
+  # @return [Array] instances list in format [{ instance_id, node_name, configuration_id }]
   def instances_list
     describe_instances[:reservations].map do |reservation|
       reservation[:instances].map do |instance|
         next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
 
-        node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }[:value]
-        { instance_id: instance[:instance_id], node_name: node_name }
+        node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }&.fetch(:value, nil)
+        configuration_id = instance[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
+        { instance_id: instance[:instance_id], node_name: node_name, configuration_id: configuration_id }
       end
     end.flatten.compact
   end
@@ -79,6 +80,14 @@ class AwsService
     instance_running?(get_aws_instance_id_by_node_name(instance_name))
   end
 
+  # Check whether instance with the specified name running or not.
+  # @param [String] configuration_id configuration id
+  # @param [String] instance_name to check
+  # @return [Boolean] true if it is running
+  def instance_by_config_id_running?(configuration_id, instance_name)
+    instance_running?(get_aws_instance_id_by_config_id(configuration_id, instance_name))
+  end
+
   # Terminate instance specified by the unique identifier
   # @param [String] instance_id to terminate
   def terminate_instance(instance_id)
@@ -94,12 +103,32 @@ class AwsService
     terminate_instance(get_aws_instance_id_by_node_name(node_name))
   end
 
+  # Terminate instance specified by the node name
+  # @param [String] configuration_id configuration id
+  # @param [String] node_name name of node to terminate
+  def terminate_instance_by_config_id(configuration_id, node_name)
+    terminate_instance(get_aws_instance_id_by_config_id(configuration_id, node_name))
+  end
+
   # Return instance id by node name.
   #
   # @param node_name [String] name of instance.
   # @return [String] id of the instance.
   def get_aws_instance_id_by_node_name(node_name)
     found_instance = instances_list.find { |instance| instance[:node_name] == node_name }
+    found_instance.nil? ? nil : found_instance[:instance_id]
+  end
+
+  # Return instance id by node name.
+  #
+  # @param [String] configuration_id configuration id
+  # @param node_name [String] name of instance.
+  # @return [String] id of the instance.
+  def get_aws_instance_id_by_config_id(configuration_id, node_name)
+    found_instance = instances_list.find do |instance|
+      instance[:node_name] == node_name &&
+        instance[:configuration_id] == configuration_id
+    end
     found_instance.nil? ? nil : found_instance[:instance_id]
   end
 end

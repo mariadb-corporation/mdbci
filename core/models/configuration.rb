@@ -9,6 +9,7 @@ class Configuration
   attr_reader :node_names
   attr_reader :path
   attr_reader :provider
+  attr_reader :configuration_id
   attr_reader :template_path
 
   NETWORK_FILE_SUFFIX = '_network_config'
@@ -84,6 +85,7 @@ class Configuration
     @name = File.basename(@path)
     @docker_network_name = "#{@name}_mdbci_config_bridge_network"
     @provider = read_provider(@path)
+    @configuration_id = read_configuration_id(@path)
     @template_path = read_template_path(@path)
     @node_configurations = extract_node_configurations(read_template(@template_path))
     @docker_configuration = read_docker_configuration
@@ -246,6 +248,16 @@ class Configuration
       element.instance_of?(Hash) &&
         element.key?('box')
     end
+  end
+
+  # Read configuration id specified in the configuration.
+  #
+  # @return [String] configuration_id specified in the file (nil if file is not exist).
+  def read_configuration_id(config_path)
+    configuration_id_file_path = "#{config_path}/configuration_id"
+    return nil unless File.exist?(configuration_id_file_path)
+
+    File.read(configuration_id_file_path).strip
   end
 
   # Read node provider specified in the configuration.
