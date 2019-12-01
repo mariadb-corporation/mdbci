@@ -42,11 +42,17 @@ class TerraformConfigurationGenerator < BaseCommand
     return generate_result unless generate_result == SUCCESS_RESULT
 
     @ui.info "Generating config in #{@configuration_path}"
-    generate_provider_and_template_files
+    generate_configuration_info_files
     SUCCESS_RESULT
   end
 
   private
+
+  def generate_configuration_id
+    hostname = Socket.gethostname
+    config_name = File.basename(@configuration_path)
+    @configuration_id = "#{hostname}_#{config_name}_#{Time.now.to_i}"
+  end
 
   def file_header
     <<-HEADER
@@ -64,10 +70,7 @@ class TerraformConfigurationGenerator < BaseCommand
     @path_to_keyfile = File.join(@configuration_path, KEYFILE_NAME)
     File.open(@path_to_keyfile, 'w') { |file| file.write(key.to_pem) }
     File.chmod(0o400, @path_to_keyfile)
-
-    hostname = Socket.gethostname
-    key_pair_name = File.basename(@configuration_path)
-    @key_name = "#{hostname}_#{key_pair_name}_#{Time.now.to_i}"
+    @key_name = @configuration_id
   end
 
   def keypair_resource
@@ -200,6 +203,21 @@ class TerraformConfigurationGenerator < BaseCommand
     products
   end
 
+  def generate_tags_list(tags = {})
+    { configuration_id: @configuration_id }.merge(tags)
+  end
+
+  def tags_partial(tags)
+    template = ERB.new <<-PARTIAL
+    tags = {
+      <% tags.each do |tag_key, tag_value| %>
+          <%= tag_key %> = "<%= tag_value %>"
+        <% end %>
+      }
+    PARTIAL
+    template.result(binding)
+  end
+
   def connection_partial(user, name)
     <<-PARTIAL
     connection {
@@ -219,6 +237,7 @@ class TerraformConfigurationGenerator < BaseCommand
   # rubocop:disable Metrics/MethodLength
   def get_vms_definition(node_params)
     connection_block = connection_partial(node_params[:user], node_params[:name])
+    tags_block = tags_partial(node_params[:tags])
     template = ERB.new <<-AWS
     resource "aws_instance" "<%= name %>" {
       ami = "<%= ami %>"
@@ -231,11 +250,7 @@ class TerraformConfigurationGenerator < BaseCommand
       <% else %>
         security_groups = ["default", aws_security_group.security_group.name]
       <% end %>
-      tags = {
-        <% tags.each do |tag_key, tag_value| %>
-          <%= tag_key %> = "<%= tag_value %>"
-        <% end %>
-      }
+      <%= tags_block %>
       root_block_device {
         volume_size = 500
       }
@@ -282,8 +297,8 @@ class TerraformConfigurationGenerator < BaseCommand
   # @param node_params [Hash] list of the node parameters
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
-    tags = { hostname: Socket.gethostname, username: Etc.getlogin,
-             full_config_path: File.expand_path(@configuration_path), machinename: node_params[:name] }
+    tags = generate_tags_list(hostname: Socket.gethostname, username: Etc.getlogin, machinename: node_params[:name],
+                              full_config_path: File.expand_path(@configuration_path))
     get_vms_definition(node_params.merge(tags: tags))
   end
 
@@ -336,6 +351,7 @@ class TerraformConfigurationGenerator < BaseCommand
 
   def security_group_resource(vpc)
     group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
+    tags_block = tags_partial(generate_tags_list)
     template = ERB.new <<-SECURITY_GROUP
     resource "aws_security_group" "security_group<%= vpc ? '_vpc' : '' %>" {
       name = "<%= group_name %>"
@@ -360,6 +376,7 @@ class TerraformConfigurationGenerator < BaseCommand
           cidr_blocks = ["0.0.0.0/0"]
         }
       <% end %>
+      <%= tags_block %>
     }
     SECURITY_GROUP
     template.result(binding)
@@ -371,15 +388,18 @@ class TerraformConfigurationGenerator < BaseCommand
       cidr_block = local.cidr_vpc
       enable_dns_support = true
       enable_dns_hostnames = true
+      #{tags_partial(generate_tags_list)}
     }
     resource "aws_internet_gateway" "igw" {
       vpc_id = aws_vpc.vpc.id
+      #{tags_partial(generate_tags_list)}
     }
     resource "aws_subnet" "subnet_public" {
       vpc_id = aws_vpc.vpc.id
       cidr_block = local.cidr_subnet
       map_public_ip_on_launch = true
       availability_zone = local.availability_zone
+      #{tags_partial(generate_tags_list)}
     }
     resource "aws_route_table" "rtb_public" {
       vpc_id = aws_vpc.vpc.id
@@ -387,10 +407,12 @@ class TerraformConfigurationGenerator < BaseCommand
           cidr_block = "0.0.0.0/0"
           gateway_id = aws_internet_gateway.igw.id
       }
+      #{tags_partial(generate_tags_list)}
     }
     resource "aws_route_table_association" "rta_subnet_public" {
       subnet_id = aws_subnet.subnet_public.id
       route_table_id = aws_route_table.rtb_public.id
+      #{tags_partial(generate_tags_list)}
     }
     #{security_group_resource(true)}
     VPC_RESOURCES
@@ -444,17 +466,20 @@ class TerraformConfigurationGenerator < BaseCommand
     ERROR_RESULT
   end
 
-  # Generate provider and template files in the configuration directory.
+  # Generate provider, template and configuration_id files in the configuration directory.
   #
   # @raise RuntimeError if provider or template files already exists.
-  def generate_provider_and_template_files
+  def generate_configuration_info_files
     provider_file = File.join(@configuration_path, 'provider')
     template_file = File.join(@configuration_path, 'template')
+    configuration_id_file = File.join(@configuration_path, 'configuration_id')
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
+    raise 'Configuration \'id\' file already exists' if File.exist?(configuration_id_file)
 
     File.open(provider_file, 'w') { |f| f.write(@provider) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
+    File.open(configuration_id_file, 'w') { |f| f.write(@configuration_id) }
   end
 
   # Check that all boxes specified in the the template are exist in the boxes.json.
@@ -495,5 +520,6 @@ class TerraformConfigurationGenerator < BaseCommand
     end
     @aws_config = @env.tool_config['aws']
     @override = override
+    generate_configuration_id
   end
 end

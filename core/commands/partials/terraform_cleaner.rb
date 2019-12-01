@@ -20,6 +20,7 @@ class TerraformCleaner
       unless TerraformService.has_running_resources_type?(resource_type, @ui, configuration.path)
         TerraformService.destroy_all(@ui, configuration.path)
       end
+      cleanup_nodes(configuration.configuration_id, configuration.node_names, configuration.provider)
       return Result.ok('')
     end
     @ui.error(result.error)
@@ -28,17 +29,17 @@ class TerraformCleaner
 
   private
 
-  def cleanup_nodes(nodes, provider)
-    @ui.info('Cleaning-up leftover machines using AWS EC2')
+  def cleanup_nodes(configuration_id, nodes, provider)
     nodes.each do |node|
-      destroy_machine(node, provider)
+      destroy_machine(configuration_id, node, provider)
     end
   end
 
-  def destroy_machine(node, provider)
+  def destroy_machine(configuration_id, node, provider)
     case provider
     when 'aws'
-      @aws_service.terminate_instance_by_name(node)
+      @ui.info('Cleaning-up leftover machine using AWS EC2')
+      @aws_service.terminate_instance_by_config_id(configuration_id, node)
     else
       @ui.error("Unknown provider #{provider}. Can not manually destroy virtual machines.")
     end
