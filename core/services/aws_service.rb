@@ -58,7 +58,7 @@ class AwsService
     @client.describe_vpcs(filters: tags_to_filters(tags)).to_h[:vpcs].map do |vpc|
       configuration_id = vpc[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
       { vpc_id: vpc[:vpc_id], configuration_id: configuration_id }
-    end.flatten.compact
+    end
   end
 
   # Get the vpc specified by the configuration id
@@ -90,7 +90,7 @@ class AwsService
     @client.describe_security_groups(filters: tags_to_filters(tags)).to_h[:security_groups].map do |security_group|
       configuration_id = security_group[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
       { group_id: security_group[:group_id], configuration_id: configuration_id }
-    end.flatten.compact
+    end
   end
 
   # Get the security group specified by the configuration id
