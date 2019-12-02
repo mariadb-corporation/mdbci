@@ -202,10 +202,6 @@ class TerraformConfigurationGenerator < BaseCommand
     products
   end
 
-  def generate_tags_list(tags = {})
-    { configuration_id: @configuration_id }.merge(tags)
-  end
-
   def tags_partial(tags)
     template = ERB.new <<-PARTIAL
     tags = {
@@ -296,8 +292,10 @@ class TerraformConfigurationGenerator < BaseCommand
   # @param node_params [Hash] list of the node parameters
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
-    tags = generate_tags_list(hostname: Socket.gethostname, username: Etc.getlogin, machinename: node_params[:name],
-                              full_config_path: File.expand_path(@configuration_path))
+    tags = @configuration_tags.merge(hostname: Socket.gethostname,
+                                     username: Etc.getlogin,
+                                     machinename: node_params[:name],
+                                     full_config_path: File.expand_path(@configuration_path))
     get_vms_definition(node_params.merge(tags: tags))
   end
 
@@ -350,7 +348,7 @@ class TerraformConfigurationGenerator < BaseCommand
 
   def security_group_resource(vpc)
     group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
-    tags_block = tags_partial(generate_tags_list)
+    tags_block = tags_partial(@configuration_tags)
     template = ERB.new <<-SECURITY_GROUP
     resource "aws_security_group" "security_group<%= vpc ? '_vpc' : '' %>" {
       name = "<%= group_name %>"
@@ -387,18 +385,18 @@ class TerraformConfigurationGenerator < BaseCommand
       cidr_block = local.cidr_vpc
       enable_dns_support = true
       enable_dns_hostnames = true
-      #{tags_partial(generate_tags_list)}
+      #{tags_partial(@configuration_tags)}
     }
     resource "aws_internet_gateway" "igw" {
       vpc_id = aws_vpc.vpc.id
-      #{tags_partial(generate_tags_list)}
+      #{tags_partial(@configuration_tags)}
     }
     resource "aws_subnet" "subnet_public" {
       vpc_id = aws_vpc.vpc.id
       cidr_block = local.cidr_subnet
       map_public_ip_on_launch = true
       availability_zone = local.availability_zone
-      #{tags_partial(generate_tags_list)}
+      #{tags_partial(@configuration_tags)}
     }
     resource "aws_route_table" "rtb_public" {
       vpc_id = aws_vpc.vpc.id
@@ -406,12 +404,12 @@ class TerraformConfigurationGenerator < BaseCommand
           cidr_block = "0.0.0.0/0"
           gateway_id = aws_internet_gateway.igw.id
       }
-      #{tags_partial(generate_tags_list)}
+      #{tags_partial(@configuration_tags)}
     }
     resource "aws_route_table_association" "rta_subnet_public" {
       subnet_id = aws_subnet.subnet_public.id
       route_table_id = aws_route_table.rtb_public.id
-      #{tags_partial(generate_tags_list)}
+      #{tags_partial(@configuration_tags)}
     }
     #{security_group_resource(true)}
     VPC_RESOURCES
@@ -520,5 +518,6 @@ class TerraformConfigurationGenerator < BaseCommand
     @aws_config = @env.tool_config['aws']
     @override = override
     generate_configuration_id
+    @configuration_tags = { configuration_id: @configuration_id }
   end
 end
