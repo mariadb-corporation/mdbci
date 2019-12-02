@@ -17,16 +17,24 @@ module TerraformService
     end
   end
 
+  def self.make_target_args(resources)
+    resources.map { |resource| "-target=#{resource}" }.join(' ')
+  end
+
   def self.init(logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform init', path)
   end
 
-  def self.apply(resource, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve -target=#{resource}", path)
+  def self.apply(resources, logger, path = Dir.pwd)
+    target_args = make_target_args(resources)
+    result = ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve #{target_args}", path)
+    return Result.error(result[:output]) unless result[:value].success?
+
+    Result.ok('')
   end
 
   def self.destroy(resources, logger, path = Dir.pwd)
-    target_args = resources.map { |resource| "-target=#{resource}" }.join(' ')
+    target_args = make_target_args(resources)
     result = ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{target_args}", path)
     return Result.error(result[:output]) unless result[:value].success?
 
@@ -68,14 +76,33 @@ module TerraformService
     false
   end
 
-  def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
+  def self.running_resources(logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
-    logger.info("Check resource running state: #{resource_type}_#{resource}")
+    logger.info('Check running resources list')
     result = ShellCommands.run_command_in_dir(logger, 'terraform state list', path)
-    return false unless result[:value].success?
+    return Result.error('') unless result[:value].success?
 
-    result[:output].split("\n").each do |resource_item|
-      return true unless (resource_item =~ /^#{resource_type}\.#{resource}$/).nil?
+    Result.ok(result[:output].split("\n"))
+  end
+
+  # Select resource names from list by it type.
+  # For example, for list ['aws_instance.node1', 'aws_instance.node2', 'aws_keypair.keypair_name']
+  # and resource_type is 'aws_instance', result: ['node1', 'node2']
+  #
+  # @param resources [Array<String>] resource specs
+  # @param resource_type [String] resource type of resources, for example: `aws_instance`
+  # @return [Array] name of resources.
+  def self.select_resources_name_by_type(resources_list, resource_type)
+    resources_list
+      .select { |resource| resource.split('.')[0] == resource_type }
+      .map { |resource| resource.split('.')[1] }
+  end
+
+  def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
+    running_resources(logger, path).and_then do |resources|
+      resources.each do |resource_item|
+        return true unless (resource_item =~ /^#{resource_type}\.#{resource}$/).nil?
+      end
     end
     false
   end

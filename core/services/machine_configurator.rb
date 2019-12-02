@@ -19,10 +19,10 @@ class MachineConfigurator
   end
 
   # Run command on the remote machine and return result to the caller
-  def run_command(machine, command)
-    @log.info("Running command '#{command}' on the '#{machine['network']}' machine")
+  def run_command(machine, command, logger = @log)
+    logger.info("Running command '#{command}' on the '#{machine['network']}' machine")
     within_ssh_session(machine) do |connection|
-      ssh_exec(connection, command, @log)
+      ssh_exec(connection, command, logger)
     end
   end
 
