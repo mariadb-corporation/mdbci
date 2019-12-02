@@ -70,13 +70,12 @@ class TerraformConfigurationGenerator < BaseCommand
     @path_to_keyfile = File.join(@configuration_path, KEYFILE_NAME)
     File.open(@path_to_keyfile, 'w') { |file| file.write(key.to_pem) }
     File.chmod(0o400, @path_to_keyfile)
-    @key_name = @configuration_id
   end
 
   def keypair_resource
     <<-KEYPAIR_RESOURCE
     resource "aws_key_pair" "ec2key" {
-      key_name = "#{@key_name}"
+      key_name = "#{@configuration_id}"
       public_key = "#{@public_key_value}"
     }
     KEYPAIR_RESOURCE
