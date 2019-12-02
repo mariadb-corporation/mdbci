@@ -254,7 +254,7 @@ class Configuration
   #
   # @return [String] configuration_id specified in the file (nil if file is not exist).
   def read_configuration_id(config_path)
-    configuration_id_file_path = "#{config_path}/configuration_id"
+    configuration_id_file_path = File.join(config_path, 'configuration_id')
     return nil unless File.exist?(configuration_id_file_path)
 
     File.read(configuration_id_file_path).strip
@@ -265,7 +265,7 @@ class Configuration
   # @return [String] name of the provider specified in the file.
   # @raise ArgumentError if there is no file or invalid provider specified.
   def read_provider(config_path)
-    provider_file_path = "#{config_path}/provider"
+    provider_file_path = File.join(config_path, 'provider')
     unless File.exist?(provider_file_path)
       raise ArgumentError, "There is no provider configuration specified in #{config_path}."
     end
@@ -294,7 +294,7 @@ class Configuration
   # @returns [String] path to the template path
   # @raise [ArgumentError] if there is an error during the file read
   def read_template_path(config_path)
-    template_file_name_path = "#{config_path}/template"
+    template_file_name_path = File.join(config_path, 'template')
     unless File.exist?(template_file_name_path)
       raise ArgumentError, "There is no template configuration specified in #{config_path}."
     end
