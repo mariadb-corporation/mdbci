@@ -52,6 +52,78 @@ class AwsService
     end.flatten.compact
   end
 
+  # Get the vpc list
+  # @return [Array] vpc list in format [{ vpc_id, configuration_id }]
+  def vpc_list(tags)
+    @client.describe_vpcs(filters: tags_to_filters(tags)).to_h[:vpcs].map do |vpc|
+      configuration_id = vpc[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
+      { vpc_id: vpc[:vpc_id], configuration_id: configuration_id }
+    end.flatten.compact
+  end
+
+  # Get the vpc specified by the configuration id
+  # @param [String] configuration_id configuration id
+  def get_vpc_by_config_id(configuration_id)
+    vpc_list(configuration_id: configuration_id).first
+  end
+
+  # Delete vpc specified by the vpc id
+  # @param [String] vpc_id vpc id
+  def delete_vpc(vpc_id)
+    return if vpc_id.nil?
+
+    @client.delete_vpc(vpc_id: vpc_id)
+  end
+
+  # Delete vpc specified by the configuration id
+  # @param [String] configuration_id configuration id
+  def delete_vpc_by_config_id(configuration_id)
+    return if configuration_id.nil?
+
+    vpc = get_vpc_by_config_id(configuration_id)
+    delete_vpc(vpc[:vpc_id]) unless vpc.nil?
+  end
+
+  # Get the security_group list
+  # @return [Array] security_group list in format [{ group_id, configuration_id }]
+  def security_group_list(tags)
+    @client.describe_security_groups(filters: tags_to_filters(tags)).to_h[:security_groups].map do |security_group|
+      configuration_id = security_group[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
+      { group_id: security_group[:group_id], configuration_id: configuration_id }
+    end.flatten.compact
+  end
+
+  # Get the security group specified by the configuration id
+  # @param [String] configuration_id configuration id
+  def get_security_group_by_config_id(configuration_id)
+    security_group_list(configuration_id: configuration_id).first
+  end
+
+  # Delete security group specified by the group id
+  # @param [String] group_id group id
+  def delete_security_group(group_id)
+    return if group_id.nil?
+
+    @client.delete_security_group(group_id: group_id)
+  end
+
+  # Delete security group specified by the configuration id
+  # @param [String] configuration_id configuration id
+  def delete_security_group_by_config_id(configuration_id)
+    return if configuration_id.nil?
+
+    security_group = get_security_group_by_config_id(configuration_id)
+    delete_security_group(security_group[:group_id]) unless security_group.nil?
+  end
+
+  # Delete key pair specified by it name
+  # @param [String] key_name key pair name
+  def delete_key_pair(key_name)
+    return if key_name.nil?
+
+    @client.delete_key_pair(key_name: key_name)
+  end
+
   # Method gets the AWS instances names list.
   #
   # @return [Array] instances names list.
@@ -130,5 +202,11 @@ class AwsService
         instance[:configuration_id] == configuration_id
     end
     found_instance.nil? ? nil : found_instance[:instance_id]
+  end
+
+  private
+
+  def tags_to_filters(tags)
+    tags.map { |name, value| { name: "tag:#{name}", values: [value.to_s] } }
   end
 end
