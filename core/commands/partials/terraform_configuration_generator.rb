@@ -295,7 +295,7 @@ class TerraformConfigurationGenerator < BaseCommand
     tags = @configuration_tags.merge(hostname: Socket.gethostname,
                                      username: Etc.getlogin,
                                      machinename: node_params[:name],
-                                     full_config_path: File.expand_path(@configuration_path))
+                                     full_config_path: @configuration_path)
     get_vms_definition(node_params.merge(tags: tags))
   end
 
