@@ -2,6 +2,7 @@
 
 # Class represents the MDBCI configuration on the hard drive.
 class Configuration
+  attr_reader :configuration_id
   attr_reader :docker_network_name
   attr_reader :labels
   attr_reader :name
@@ -9,7 +10,6 @@ class Configuration
   attr_reader :node_names
   attr_reader :path
   attr_reader :provider
-  attr_reader :configuration_id
   attr_reader :template_path
 
   NETWORK_FILE_SUFFIX = '_network_config'
