@@ -147,6 +147,7 @@ class TerraformConfigurator
   # @param nodes [Array<String>] name of nodes to configure
   # @return [Result]
   def configure_machines(nodes)
+    @ui.info("Configure machines: #{nodes}")
     configure_results = Workers.map(nodes) do |node|
       logger = retrieve_logger_for_node
       next [false, node, logger] if store_network_settings(node, logger).error?
