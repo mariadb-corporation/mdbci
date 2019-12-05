@@ -5,7 +5,7 @@ server {
     server_name maxscale-docker-registry.mariadb.net;
 
     location / {
-        return 302 https://$server_name:5000$request_uri;
+        return 302 https://$server_name$request_uri;
     }
 }
 
@@ -19,7 +19,10 @@ server {
     include snippets/ssl-params.conf;
     include snippets/mariadb-net-ssl-cert.conf;
 
+    include proxy_params;
+
     location / {
-        return 302 https://$server_name:5000$request_uri;
+        client_max_body_size 500M;
+        proxy_pass https://$server_name:5000;
     }
 }
