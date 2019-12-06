@@ -65,12 +65,12 @@ class TerraformConfigurator
   # @return [Boolean] whether we were successful or not
   def configure(node, logger)
     node_settings = @network_settings.node_settings(node)
-    return false unless TerraformService.ssh_available?(node_settings, logger)
+    return false unless TerraformService.ssh_available?(node_settings, @ui)
 
     solo_config = "#{node}-config.json"
     role_file = TerraformConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
-      logger.info("Machine '#{node}' should not be configured. Skipping.")
+      @ui.info("Machine '#{node}' should not be configured. Skipping.")
       return true
     end
     extra_files = [
@@ -79,7 +79,7 @@ class TerraformConfigurator
     ]
     configuration_status = @machine_configurator.configure(node_settings, solo_config, logger, extra_files)
     if configuration_status.error?
-      logger.error("Error during machine configuration: #{configuration_status.error}")
+      @ui.error("Error during machine configuration: #{configuration_status.error}")
       return false
     end
     node_provisioned?(node, logger)
@@ -150,11 +150,11 @@ class TerraformConfigurator
     @ui.info("Configure machines: #{nodes}")
     configure_results = Workers.map(nodes) do |node|
       logger = retrieve_logger_for_node
-      next [false, node, logger] if store_network_settings(node, logger).error?
+      next [false, node, logger] if store_network_settings(node, @ui).error?
 
       configure_result = false
       @attempts.times do |attempt|
-        logger.info("Configure node #{node}. Attempt #{attempt + 1}.")
+        @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
         configure_result = configure(node, logger)
         break if configure_result
       end
