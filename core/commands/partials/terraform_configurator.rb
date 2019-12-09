@@ -98,17 +98,6 @@ class TerraformConfigurator
   end
 
   # Generate resource specs by node names and it resource type.
-  # For example, for nodes ['node1', 'node2'] and resource type 'aws_instance'
-  # result: ['aws_instance.node1', 'aws_instance.node2'].
-  #
-  # @param nodes [Array<String>] name of nodes
-  # @param resource_type [String] resource type of nodes, for example: `aws_instance`
-  # @return [Array<String>] resource specs.
-  def nodes_to_resources(nodes, resource_type)
-    nodes.map { |node| "#{resource_type}.#{node}" }
-  end
-
-  # Generate resource specs by node names and it resource type.
   # For example, for specs ['aws_instance.node1', 'aws_instance.node2'] and resource type 'aws_instance'
   # result: ['node1', 'node2'].
   #
@@ -131,7 +120,7 @@ class TerraformConfigurator
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
         destroy_nodes(target_nodes) if @recreate_nodes || attempt.positive?
 
-        resources = nodes_to_resources(target_nodes, resource_type)
+        resources = TerraformService.nodes_to_resources(target_nodes, resource_type)
         apply_result = TerraformService.apply(resources, @ui, @config.path)
         return Result.ok('') if apply_result.success?
 

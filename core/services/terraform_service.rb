@@ -85,6 +85,17 @@ module TerraformService
     Result.ok(result[:output].split("\n"))
   end
 
+  # Generate resource specs by node names and it resource type.
+  # For example, for nodes ['node1', 'node2'] and resource type 'aws_instance'
+  # result: ['aws_instance.node1', 'aws_instance.node2'].
+  #
+  # @param nodes [Array<String>] name of nodes
+  # @param resource_type [String] resource type of nodes, for example: `aws_instance`
+  # @return [Array<String>] resource specs.
+  def self.nodes_to_resources(nodes, resource_type)
+    nodes.map { |node| "#{resource_type}.#{node}" }
+  end
+
   # Select resource names from list by it type.
   # For example, for list ['aws_instance.node1', 'aws_instance.node2', 'aws_keypair.keypair_name']
   # and resource_type is 'aws_instance', result: ['node1', 'node2']
