@@ -97,17 +97,6 @@ class TerraformConfigurator
     end
   end
 
-  # Generate resource specs by node names and it resource type.
-  # For example, for specs ['aws_instance.node1', 'aws_instance.node2'] and resource type 'aws_instance'
-  # result: ['node1', 'node2'].
-  #
-  # @param resources [Array<String>] resource specs
-  # @param resource_type [String] resource type of nodes, for example: `aws_instance`
-  # @return [Array] name of nodes.
-  def resources_to_nodes(resources, resource_type)
-    TerraformService.select_resources_name_by_type(resources, resource_type)
-  end
-
   # Up machines via Terraform.
   #
   # @param nodes [Array<String>] name of nodes to bring up
@@ -115,20 +104,19 @@ class TerraformConfigurator
   def up_machines(nodes)
     TerraformService.resource_type(@config.provider).and_then do |resource_type|
       TerraformService.init(@ui, @config.path)
-      target_nodes = nodes
+      target_nodes = TerraformService.nodes_to_resources(nodes, resource_type)
       @attempts.times do |attempt|
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
-        destroy_nodes(target_nodes) if @recreate_nodes || attempt.positive?
+        destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
 
-        resources = TerraformService.nodes_to_resources(target_nodes, resource_type)
-        apply_result = TerraformService.apply(resources, @ui, @config.path)
+        apply_result = TerraformService.apply(target_nodes.values, @ui, @config.path)
         return Result.ok('') if apply_result.success?
 
         TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
-          target_nodes = resources_to_nodes(resources - running_resources, resource_type)
+          target_nodes = target_nodes.reject { |_node, resource| running_resources.include?(resource) }
         end
       end
-      Result.error("Error up of machines: #{target_nodes}")
+      Result.error("Error up of machines: #{target_nodes.keys}")
     end
   end
 
