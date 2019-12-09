@@ -6,6 +6,7 @@ require_relative '../../services/terraform_service'
 require_relative '../../models/network_settings'
 require_relative 'terraform_configuration_generator'
 require_relative '../destroy_command'
+require 'workers'
 
 # The configurator brings up the configuration for the Terraform
 class TerraformConfigurator
