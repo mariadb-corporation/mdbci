@@ -104,9 +104,12 @@ module TerraformService
   # @param resource_type [String] resource type of resources, for example: `aws_instance`
   # @return [Array] name of resources.
   def self.select_resources_name_by_type(resources_list, resource_type)
-    resources_list
-      .select { |resource| resource.split('.')[0] == resource_type }
-      .map { |resource| resource.split('.')[1] }
+    resources_list.map do |resource|
+      type, name = resource.split('.')
+      { type: type, name: name }
+    end
+                  .select { |resource| resource[:type] == resource_type }
+                  .map { |resource| resource[:name] }
   end
 
   def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
