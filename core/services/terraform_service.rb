@@ -112,7 +112,7 @@ module TerraformService
   def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
     running_resources(logger, path).and_then do |resources|
       resources.each do |resource_item|
-        return true unless (resource_item =~ /^#{resource_type}\.#{resource}$/).nil?
+        return true if resource_item =~ /^#{resource_type}\.#{resource}$/
       end
     end
     false
