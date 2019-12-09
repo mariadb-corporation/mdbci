@@ -132,27 +132,34 @@ class TerraformConfigurator
     end
   end
 
+  # Configure machine via mdbci.
+  #
+  # @param node [String] name of node to configure
+  # @return [Hash] result of configuring in format { node: String, result: Boolean, logger: Out }
+  def configure_machine(node)
+    logger = retrieve_logger_for_node
+    return { node: node, result: false, logger: logger } if store_network_settings(node, @ui).error?
+
+    configure_result = false
+    @attempts.times do |attempt|
+      @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
+      configure_result = configure(node, logger)
+      break if configure_result
+    end
+    { node: node, result: configure_result, logger: logger }
+  end
+
   # Configure machines via mdbci.
   #
   # @param nodes [Array<String>] name of nodes to configure
   # @return [Result::Base]
   def configure_machines(nodes)
     @ui.info("Configure machines: #{nodes}")
-    configure_results = Workers.map(nodes) do |node|
-      logger = retrieve_logger_for_node
-      next [false, node, logger] if store_network_settings(node, @ui).error?
-
-      configure_result = false
-      @attempts.times do |attempt|
-        @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
-        configure_result = configure(node, logger)
-        break if configure_result
-      end
-      [configure_result, node, logger]
-    end
-    configure_results.each { |result| result[2].print_to_stdout } if use_log_storage?
-    configure_results.each { |result| @ui.info("Configuration result of node '#{result[1]}': #{result[0]}") }
-    return Result.error('') unless configure_results.detect { |result| !result[0] }.nil?
+    configure_results = Workers.map(nodes) { |node| configure_machine(node) }
+    configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage?
+    configure_results.each { |result| @ui.info("Configuration result of node '#{result[:node]}': #{result[:result]}") }
+    error_nodes = configure_results.reject { |result| result[:result] }
+    return Result.error(error_nodes) unless error_nodes.empty?
 
     Result.ok('')
   end
