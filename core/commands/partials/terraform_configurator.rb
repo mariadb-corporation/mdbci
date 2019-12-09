@@ -126,8 +126,6 @@ class TerraformConfigurator
   # @return [Hash] result of configuring in format { node: String, result: Boolean, logger: Out }
   def configure_machine(node)
     logger = retrieve_logger_for_node
-    return { node: node, result: false, logger: logger } if store_network_settings(node, @ui).error?
-
     configure_result = false
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
@@ -143,6 +141,11 @@ class TerraformConfigurator
   # @return [Result::Base]
   def configure_machines(nodes)
     @ui.info("Configure machines: #{nodes}")
+    error_network_nodes = nodes.map { |node| store_network_settings(node, @ui) }.reject(&:success?)
+    unless error_network_nodes.empty?
+      @ui.error("Error of storing network settings for nodes: #{error_network_nodes}")
+      return Result.error(error_network_nodes)
+    end
     configure_results = Workers.map(nodes) { |node| configure_machine(node) }
     configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage?
     configure_results.each { |result| @ui.info("Configuration result of node '#{result[:node]}': #{result[:result]}") }
