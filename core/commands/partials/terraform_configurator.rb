@@ -128,7 +128,7 @@ class TerraformConfigurator
           target_nodes = resources_to_nodes(resources - running_resources, resource_type)
         end
       end
-      Result.error('Error up one or more machines')
+      Result.error("Error up of machines: #{target_nodes}")
     end
   end
 
