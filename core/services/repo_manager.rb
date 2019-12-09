@@ -112,7 +112,7 @@ class RepoManager
 
   # Get the product license
   # @param product [String] product name
-  # @return [Result] product license value
+  # @return [Result::Base] product license value
   def product_license(product)
     file_name = PRODUCT_ATTRIBUTES[product][:license_file_name]
     ToolConfiguration.load_license_file(file_name)

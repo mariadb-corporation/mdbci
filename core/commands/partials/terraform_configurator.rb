@@ -30,7 +30,7 @@ class TerraformConfigurator
 
   # Brings up nodes
   #
-  # @return [Result] execution result
+  # @return [Result::Base] execution result
   def up
     nodes = @config.node_names
     up_machines(nodes).and_then do
@@ -122,7 +122,7 @@ class TerraformConfigurator
   # Up machines via Terraform.
   #
   # @param nodes [Array<String>] name of nodes to bring up
-  # @return [Result]
+  # @return [Result::Base]
   def up_machines(nodes)
     TerraformService.resource_type(@config.provider).and_then do |resource_type|
       TerraformService.init(@ui, @config.path)
@@ -146,7 +146,7 @@ class TerraformConfigurator
   # Configure machines via mdbci.
   #
   # @param nodes [Array<String>] name of nodes to configure
-  # @return [Result]
+  # @return [Result::Base]
   def configure_machines(nodes)
     @ui.info("Configure machines: #{nodes}")
     configure_results = Workers.map(nodes) do |node|
