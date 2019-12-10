@@ -1,0 +1,9 @@
+{
+  "debian_stretch_gcp": {
+    "provider": "gcp",
+    "image": "debian-cloud/debian-9",
+    "machine_type": "f1-micro",
+    "platform": "debian",
+    "platform_version": "stretch"
+  }
+}
