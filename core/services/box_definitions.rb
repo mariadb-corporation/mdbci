@@ -88,6 +88,7 @@ class BoxDefinitions
 
   REQUIRED_KEYS = %w[provider platform platform_version].freeze
   AWS_KEYS = %w[ami user default_instance_type].freeze
+  GCP_KEYS = %w[image machine_type].freeze
 
   # @param box_definition [Hash] check that provided box description contains required keys
   def check_box_definition(box_definition)
@@ -99,6 +100,8 @@ class BoxDefinitions
     REQUIRED_KEYS.each(&key_check)
     if box_definition['provider'] == 'aws'
       AWS_KEYS.each(&key_check)
+    elsif box_definition['provider'] == 'gcp'
+      GCP_KEYS.each(&key_check)
     else
       key_check.call('box')
     end
