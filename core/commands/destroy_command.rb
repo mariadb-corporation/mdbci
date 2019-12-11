@@ -136,7 +136,10 @@ Labels should be separated with commas, do not contain any whitespaces.
       Result.ok('')
     elsif configuration.terraform_configuration?
       terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service)
-      terraform_cleaner.destroy_nodes_by_configuration(configuration)
+      result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
+      return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
+
+      result
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
