@@ -67,7 +67,7 @@ class TerraformConfigurationGenerator < BaseCommand
     private_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
     File.open(private_key_file_path, 'w') { |file| file.write(key.to_pem) }
     File.chmod(0o400, private_key_file_path)
-    @ssh_keys = { public_key_value: public_key_value, private_key_file_path: private_key_file_path }
+    @ssh_keys = { public_key_value: public_key_value, private_key_file_path: private_key_file_path, login: login }
   end
 
   # Make product config and recipe name for install it to the VM.
@@ -319,10 +319,8 @@ class TerraformConfigurationGenerator < BaseCommand
       'project' => 'mdbci-261111',
       'region' => 'us-central1',
       'zone' => 'us-central1-a',
-      'user' => 'vlasovy',
       'network' => '',
-      'tags' => '',
-      'ssh_key_path' => '/home/vlasovy/.ssh/id_rsa'
+      'tags' => []
     }
     @override = override
     generate_configuration_id

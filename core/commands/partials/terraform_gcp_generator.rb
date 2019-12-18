@@ -22,6 +22,7 @@ class TerraformGcpGenerator
     @configuration_labels = { configuration_id: @configuration_id }
     @public_key_value = ssh_keys[:public_key_value]
     @private_key_file_path = ssh_keys[:private_key_file_path]
+    @user = ssh_keys[:login]
   end
 
   # Generate a Terraform configuration file.
@@ -79,7 +80,7 @@ class TerraformGcpGenerator
   # @return [String] generated fields.
   def ssh_data
     <<-SSH_DATA
-    ssh-keys = "#{@gcp_config['user']}:#{@public_key_value}}"
+    ssh-keys = "#{@user}:#{@public_key_value}}"
     enable-oslogin = "FALSE"
     SSH_DATA
   end
@@ -122,7 +123,7 @@ class TerraformGcpGenerator
     network = network_name
     tags_block = tags_partial(instance_tags)
     labels_block = labels_partial(node_params[:labels])
-    user = @gcp_config['user']
+    user = @user
     is_own_vpc = own_vpc?
     connection_block = connection_partial(user)
     key_file = @private_key_file_path
@@ -250,7 +251,7 @@ class TerraformGcpGenerator
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
     labels = @configuration_labels.merge(hostname: Socket.gethostname,
-                                         username: Etc.getlogin,
+                                         username: @user,
                                          machinename: node_params[:name])
     instance_resources(node_params.merge(labels: labels))
   end
