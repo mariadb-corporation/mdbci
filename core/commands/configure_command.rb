@@ -133,7 +133,7 @@ Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for
                    'network' => read_topic('Please input Google Cloud Platform network name',
                                            @configuration.dig('gcp', 'network')),
                    'tags' => read_topic('Please input Google Cloud Platform network tags with a space',
-                                        @configuration.dig('gcp', 'tags'))).split('')
+                                        @configuration.dig('gcp', 'tags')).split(' '))
   end
 
   def configure_mdbe

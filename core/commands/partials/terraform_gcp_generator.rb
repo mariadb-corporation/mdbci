@@ -39,7 +39,7 @@ class TerraformGcpGenerator
       print_node_info(node)
       file.puts(generate_node_definition(node))
     end
-    file.puts(vpc_resources) if own_vpc?
+    file.puts(vpc_resources) unless use_existing_network?
     file.close
   rescue StandardError => e
     Result.error(e.message)
@@ -125,7 +125,7 @@ class TerraformGcpGenerator
     tags_block = tags_partial(instance_tags)
     labels_block = labels_partial(node_params[:labels])
     user = @user
-    is_own_vpc = own_vpc?
+    is_own_vpc = !use_existing_network?
     connection_block = connection_partial(user)
     key_file = @private_key_file_path
     template = ERB.new <<-INSTANCE_RESOURCES
@@ -222,17 +222,17 @@ class TerraformGcpGenerator
     "tags = [#{tags.map { |tag| "\"#{tag}\"" }.join(', ')}]"
   end
 
-  # Returns true if a new vpc resources need to be generated for the current configuration, otherwise false.
+  # Returns false if a new vpc resources need to be generated for the current configuration, otherwise true.
   # @return [Boolean] result.
-  def own_vpc?
-    true
+  def use_existing_network?
+    @gcp_config['use_existing_network']
   end
 
   # Returns network name for current configuration if a new vpc resources need to be generated for the current
   # configuration, otherwise returns network name configured in the mdbci configuration.
   # @return [String] network name.
   def network_name
-    return "#{@configuration_id}-network" if own_vpc?
+    return "#{@configuration_id}-network" unless use_existing_network?
 
     @gcp_config['network']
   end
@@ -242,7 +242,7 @@ class TerraformGcpGenerator
   # configuration, otherwise returns network tags configured in the mdbci configuration.
   # @return [String] network name.
   def instance_tags
-    return ['allow-all-traffic'] if own_vpc?
+    return ['allow-all-traffic'] unless use_existing_network?
 
     @gcp_config['tags']
   end
