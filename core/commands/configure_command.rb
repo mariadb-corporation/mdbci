@@ -18,15 +18,15 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
+'configure' command creates configuration for MDBCI to use AWS, Google Cloud Platform, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
 
-You can configure AWS, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
+You can configure AWS, Google Cloud Platform, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
   mdbci configure
 
 Or you can configure only AWS, only RHEL credentials, only MariaDB Enterprise or only MaxScale CI Docker Registry subscription (for example, AWS):
   mdbci configure --product aws
 
-Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for MariaDB Enterprise and 'docker' for MaxScale CI Docker Registry subscription.
+Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for RHEL subscription, 'mdbe' for MariaDB Enterprise and 'docker' for MaxScale CI Docker Registry subscription.
     HELP
     @ui.info(info)
   end
@@ -40,6 +40,7 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     configure_results = []
 
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
+    configure_results << configure_gcp if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('gcp').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
     configure_results << configure_mdbe if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('mdbe').zero?
     configure_results << configure_docker if @env.nodeProduct.casecmp('docker').zero?
@@ -88,6 +89,14 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
     SUCCESS_RESULT
   end
 
+  def configure_gcp
+    gcp_settings = input_gcp_settings
+    return ERROR_RESULT if gcp_settings.nil?
+
+    @configuration['gcp'] = gcp_settings
+    SUCCESS_RESULT
+  end
+
   def input_docker_credentials
     {
       'username' => read_topic('Please input username for Docker Registry',
@@ -106,6 +115,25 @@ Use 'aws' as product option for AWS, 'rhel' for RHEL subscription, 'mdbe' for Ma
       'password' => read_topic('Please input password for Red Hat Subscription-Manager',
                                @configuration.dig('rhel', 'password'))
     }
+  end
+
+  def input_gcp_settings
+    settings = {
+      'credentials_file' => read_topic('Please input path to the Google Cloud Platform json credentials file',
+                                       @configuration.dig('gcp', 'credentials_file')),
+      'project' => read_topic('Please input name of the Google Cloud Platform project',
+                              @configuration.dig('gcp', 'project')),
+      'region' => read_topic('Please input Google Cloud Platform region', @configuration.dig('gcp', 'region')),
+      'zone' => read_topic('Please input Google Cloud Platform zone', @configuration.dig('gcp', 'zone')),
+      'use_existing_network' => false
+    }
+    return settings unless read_topic('Use existing network for Google Compute instances?', 'y').casecmp('y').zero?
+
+    settings.merge('use_existing_network' => true,
+                   'network' => read_topic('Please input Google Cloud Platform network name',
+                                           @configuration.dig('gcp', 'network')),
+                   'tags' => read_topic('Please input Google Cloud Platform network tags with a space',
+                                        @configuration.dig('gcp', 'tags'))).split('')
   end
 
   def configure_mdbe

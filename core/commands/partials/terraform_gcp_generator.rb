@@ -2,8 +2,8 @@
 
 require 'date'
 require 'erb'
-require 'fileutils'
 require 'socket'
+require_relative '../../models/result'
 
 # The class generates the Terraform infrastructure file for Google Cloud Platform provider
 class TerraformGcpGenerator
@@ -30,6 +30,8 @@ class TerraformGcpGenerator
   # @param configuration_file_path [String] path to generated Terraform infrastructure file.
   # @return [Result::Base] generation result.
   def generate_configuration_file(node_params, configuration_file_path)
+    raise 'Google Cloud Platform is not configured' if @gcp_config.nil?
+
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
@@ -38,12 +40,11 @@ class TerraformGcpGenerator
       file.puts(generate_node_definition(node))
     end
     file.puts(vpc_resources) if own_vpc?
-  rescue Errno::ENOENT => e
+    file.close
+  rescue StandardError => e
     Result.error(e.message)
   else
     Result.ok('')
-  ensure
-    file.close
   end
 
   private

@@ -313,15 +313,7 @@ class TerraformConfigurationGenerator < BaseCommand
       raise('Instance configuration file is invalid or not found!')
     end
     @aws_config = @env.tool_config['aws']
-    # TODO: Get Google cloud configuration
-    @gcp_config = {
-      'credentials_file' => '/home/vlasovy/projects/evgeny/mariadb/mdbci-261111-5353d18f3cd5.json',
-      'project' => 'mdbci-261111',
-      'region' => 'us-central1',
-      'zone' => 'us-central1-a',
-      'network' => '',
-      'tags' => []
-    }
+    @gcp_config = @env.tool_config['gcp']
     @override = override
     generate_configuration_id
   end
