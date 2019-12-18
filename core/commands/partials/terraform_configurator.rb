@@ -176,7 +176,7 @@ class TerraformConfigurator
     @ui.info("Generating network configuration file for node '#{node}'")
     TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
       node_network = {
-        'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEY_FILE_NAME),
+        'keyfile' => node_network['key_file'],
         'private_ip' => node_network['private_ip'],
         'network' => node_network['public_ip'],
         'whoami' => node_network['user'],

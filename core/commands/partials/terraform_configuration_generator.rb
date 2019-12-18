@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
+require 'date'
+require 'etc'
 require 'fileutils'
 require 'json'
-require 'date'
 require 'socket'
 require_relative '../base_command'
 require_relative '../../../core/services/configuration_generator'
 require_relative '../../../core/services/terraform_service'
 require_relative 'terraform_aws_generator'
+require_relative 'terraform_gcp_generator'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair with Terraform backend
 class TerraformConfigurationGenerator < BaseCommand
@@ -50,17 +52,22 @@ class TerraformConfigurationGenerator < BaseCommand
   def generate_configuration_id
     hostname = Socket.gethostname
     config_name = File.basename(@configuration_path)
-    @configuration_id = "#{hostname}_#{config_name}_#{Time.now.to_i}"
+    @configuration_id = "#{hostname}-#{config_name}-#{Time.now.to_i}".gsub('_', '-')
   end
 
-  def generate_key_file
+  # Generate public and private ssh keys and set the @ssh_keys variable
+  # in format { public_key_value, private_key_file_path }.
+  def generate_ssh_keys
     key = OpenSSL::PKey::RSA.new(2048)
     type = key.ssh_type
     data = [key.to_blob].pack('m0')
-    @public_key_value = "#{type} #{data}"
-    @key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
-    File.open(@key_file_path, 'w') { |file| file.write(key.to_pem) }
-    File.chmod(0o400, @key_file_path)
+    login = Etc.getlogin
+    hostname = Socket.gethostname
+    public_key_value = "#{type} #{data} #{login}@#{hostname}"
+    private_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
+    File.open(private_key_file_path, 'w') { |file| file.write(key.to_pem) }
+    File.chmod(0o400, private_key_file_path)
+    @ssh_keys = { public_key_value: public_key_value, private_key_file_path: private_key_file_path }
   end
 
   # Make product config and recipe name for install it to the VM.
@@ -156,11 +163,12 @@ class TerraformConfigurationGenerator < BaseCommand
     { name: node[0].to_s, host: node[1]['hostname'].to_s }.merge(symbolic_box_params)
   end
 
-  # Log the information about the main parameters of the node.
+  # Parse path to the products configurations directory from configuration of node.
   #
-  # @param node_params [Hash] list of the node parameters
-  def print_node_info(node_params)
-    @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:ami]}, user:#{node_params[:user]}")
+  # @param node [Array] internal name of the machine specified in the template
+  # @return [String] path to the products configurations directory.
+  def parse_cnf_template_path(node)
+    node[1]['cnf_template_path'] || node[1]['product']&.fetch('cnf_template_path', nil)
   end
 
   # Parse the products lists from configuration of node.
@@ -224,8 +232,9 @@ class TerraformConfigurationGenerator < BaseCommand
   def retrieve_configuration_file_generator
     case @provider
     when 'aws'
-      Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @key_file_path, @ui,
-                                          @configuration_path, @public_key_value))
+      Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui, @configuration_path, @ssh_keys))
+    when 'gcp'
+      Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path, @ssh_keys))
     else Result.error("Unknown provider #{@provider}")
     end
   end
@@ -238,7 +247,7 @@ class TerraformConfigurationGenerator < BaseCommand
     checks_result = check_path && check_nodes_names
     return ARGUMENT_ERROR_RESULT unless checks_result
 
-    generate_key_file
+    generate_ssh_keys
     generation_result = generate_configuration_file.and_then do
       TerraformService.fmt(@ui, @configuration_path)
       return SUCCESS_RESULT unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
@@ -304,6 +313,17 @@ class TerraformConfigurationGenerator < BaseCommand
       raise('Instance configuration file is invalid or not found!')
     end
     @aws_config = @env.tool_config['aws']
+    # TODO: Get Google cloud configuration
+    @gcp_config = {
+      'credentials_file' => '/home/vlasovy/projects/evgeny/mariadb/mdbci-261111-5353d18f3cd5.json',
+      'project' => 'mdbci-261111',
+      'region' => 'us-central1',
+      'zone' => 'us-central1-a',
+      'user' => 'vlasovy',
+      'network' => '',
+      'tags' => '',
+      'ssh_key_path' => '/home/vlasovy/.ssh/id_rsa'
+    }
     @override = override
     generate_configuration_id
   end
