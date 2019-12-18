@@ -3,6 +3,7 @@
 require 'date'
 require 'socket'
 require 'erb'
+require_relative '../../models/result'
 
 # The class generates the Terraform infrastructure file for AWS provider
 class TerraformAwsGenerator
@@ -29,6 +30,8 @@ class TerraformAwsGenerator
   # @return [Result::Base] generation result.
   # rubocop:disable Metrics/MethodLength
   def generate_configuration_file(node_params, configuration_file_path)
+    raise 'AWS is not configured' if @aws_config.nil?
+
     need_vpc = false
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
@@ -39,12 +42,11 @@ class TerraformAwsGenerator
       need_vpc = true if node[:vpc]
     end
     file.puts(vpc_resources) if need_vpc
+    file.close
   rescue Errno::ENOENT => e
     Result.error(e.message)
   else
     Result.ok('')
-  ensure
-    file.close
   end
   # rubocop:enable Metrics/MethodLength
 
