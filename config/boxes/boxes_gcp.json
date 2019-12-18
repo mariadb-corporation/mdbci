@@ -5,5 +5,85 @@
     "machine_type": "f1-micro",
     "platform": "debian",
     "platform_version": "stretch"
+  },
+  "debian_buster_gcp": {
+    "provider": "gcp",
+    "image": "debian-cloud/debian-10",
+    "machine_type": "f1-micro",
+    "platform": "debian",
+    "platform_version": "buster"
+  },
+  "centos_6_gcp": {
+    "provider": "gcp",
+    "image": "centos-cloud/centos-6",
+    "machine_type": "f1-micro",
+    "platform": "centos",
+    "platform_version": "6"
+  },
+  "centos_7_gcp": {
+    "provider": "gcp",
+    "image": "centos-cloud/centos-7",
+    "machine_type": "f1-micro",
+    "platform": "centos",
+    "platform_version": "7"
+  },
+  "centos_8_gcp": {
+    "provider": "gcp",
+    "image": "centos-cloud/ubuntu-1604-lts",
+    "machine_type": "f1-micro",
+    "platform": "centos",
+    "platform_version": "8"
+  },
+  "ubuntu_bionic_gcp": {
+    "provider": "gcp",
+    "image": "ubuntu-os-cloud/ubuntu-1804-lts",
+    "machine_type": "f1-micro",
+    "platform": "ubuntu",
+    "platform_version": "bionic"
+  },
+  "ubuntu_xenial_gcp": {
+    "provider": "gcp",
+    "image": "ubuntu-os-cloud/ubuntu-1604-lts",
+    "machine_type": "f1-micro",
+    "platform": "ubuntu",
+    "platform_version": "xenial"
+  },
+  "rhel_6_gcp": {
+    "provider": "gcp",
+    "image": "rhel-cloud/rhel-6",
+    "machine_type": "f1-micro",
+    "platform": "rhel",
+    "platform_version": "6",
+    "configure_subscription_manager": "true"
+  },
+  "rhel_7_gcp": {
+    "provider": "gcp",
+    "image": "rhel-cloud/rhel-7",
+    "machine_type": "f1-micro",
+    "platform": "rhel",
+    "platform_version": "7",
+    "configure_subscription_manager": "true"
+  },
+  "rhel_8_gcp": {
+    "provider": "gcp",
+    "image": "rhel-cloud/rhel-8",
+    "machine_type": "f1-micro",
+    "platform": "rhel",
+    "platform_version": "8",
+    "configure_subscription_manager": "true"
+  },
+  "sles_12_gcp": {
+    "provider": "gcp",
+    "image": "suse-cloud/sles-12",
+    "machine_type": "f1-micro",
+    "platform": "sles",
+    "platform_version": "12"
+  },
+  "sles_15_gcp": {
+    "provider": "gcp",
+    "image": "suse-cloud/sles-15",
+    "machine_type": "f1-micro",
+    "platform": "sles",
+    "platform_version": "15"
   }
 }
