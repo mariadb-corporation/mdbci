@@ -12,6 +12,7 @@ module TerraformService
   def self.resource_type(provider)
     case provider
     when 'aws' then Result.ok('aws_instance')
+    when 'gcp' then Result.ok('google_compute_instance')
     else Result.error('Unknown Terraform service provider')
     end
   end

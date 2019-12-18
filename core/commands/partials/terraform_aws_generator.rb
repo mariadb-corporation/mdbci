@@ -6,25 +6,35 @@ require 'erb'
 
 # The class generates the Terraform infrastructure file for AWS provider
 class TerraformAwsGenerator
-  def initialize(configuration_id, aws_config, key_file_path, logger, configuration_path, public_key_value)
+  # Initializer.
+  # @param configuration_id [String] configuration id
+  # @param aws_config [Hash] hash of AWS configuration
+  # @param logger [Out] logger
+  # @param configuration_path [String] path to directory of generated configuration
+  # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
+  # @return [Result::Base] generation result.
+  def initialize(configuration_id, aws_config, logger, configuration_path, ssh_keys)
     @configuration_id = configuration_id
     @configuration_tags = { configuration_id: @configuration_id }
     @aws_config = aws_config
-    @key_file_path = key_file_path
     @ui = logger
     @configuration_path = configuration_path
-    @public_key_value = public_key_value
+    @public_key_value = ssh_keys[:public_key_value]
+    @private_key_file_path = ssh_keys[:private_key_file_path]
   end
 
   # Generate a Terraform configuration file.
-  # @param configuration_file_path [String] path to generated Terraform infrastructure file.
+  # @param node_params [Array<Hash>] list of node params
+  # @param configuration_file_path [String] path to generated Terraform infrastructure file
   # @return [Result::Base] generation result.
+  # rubocop:disable Metrics/MethodLength
   def generate_configuration_file(node_params, configuration_file_path)
     need_vpc = false
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
     node_params.each do |node|
+      print_node_info(node)
       file.puts(generate_node_definition(node))
       need_vpc = true if node[:vpc]
     end
@@ -36,8 +46,16 @@ class TerraformAwsGenerator
   ensure
     file.close
   end
+  # rubocop:enable Metrics/MethodLength
 
   private
+
+  # Log the information about the main parameters of the node.
+  #
+  # @param node_params [Hash] list of the node parameters
+  def print_node_info(node_params)
+    @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:ami]}, user:#{node_params[:user]}")
+  end
 
   def file_header
     <<-HEADER
@@ -108,7 +126,7 @@ class TerraformAwsGenerator
     <<-PARTIAL
     connection {
       type = "ssh"
-      private_key = file("#{@key_file_path}")
+      private_key = file("#{@private_key_file_path}")
       timeout = "10m"
       agent = false
       user = "#{user}"
@@ -166,13 +184,14 @@ class TerraformAwsGenerator
   end
   # rubocop:enable Metrics/MethodLength
 
-  # Generate Terraform configuration resources of AWS instance.
+  # Generate Terraform configuration resources for instance.
   # @param node_params [Hash] list of the node parameters
-  # @return [String] configuration content of AWS instance.
+  # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(node_params)
     connection_block = connection_partial(node_params[:user])
     tags_block = tags_partial(node_params[:tags])
+    key_file = @private_key_file_path
     template = ERB.new <<-AWS
     resource "aws_instance" "<%= name %>" {
       ami = "<%= ami %>"
@@ -219,6 +238,7 @@ class TerraformAwsGenerator
         user = "<%= user %>"
         private_ip = aws_instance.<%= name %>.private_ip
         public_ip = aws_instance.<%= name %>.public_ip
+        key_file = "<%= key_file %>"
       }
     }
     AWS
