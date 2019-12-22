@@ -253,6 +253,7 @@ class TerraformAwsGenerator
         private_ip = aws_instance.<%= name %>.private_ip
         public_ip = aws_instance.<%= name %>.public_ip
         key_file = "<%= key_file %>"
+        hostname = "ip-${replace(aws_instance.<%= name %>.private_ip, ".", "-")}"
       }
     }
     AWS

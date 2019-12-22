@@ -178,6 +178,7 @@ class TerraformGcpGenerator
         private_ip = google_compute_instance.<%= name %>.network_interface.0.network_ip
         public_ip = google_compute_instance.<%= name %>.network_interface.0.access_config.0.nat_ip
         key_file = "<%= key_file %>"
+        hostname = "<%= instance_name %>"
       }
     }
     INSTANCE_RESOURCES
