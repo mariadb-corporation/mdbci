@@ -21,7 +21,7 @@ class TerraformCleaner
       cleanup_nodes(configuration.configuration_id, configuration.node_names, configuration.provider)
       unless TerraformService.has_running_resources_type?(resource_type, @ui, configuration.path)
         TerraformService.destroy_all(@ui, configuration.path)
-        cleanup_additional_resources(configuration.configuration_id, configuration.provider)
+        cleanup_additional_resources(configuration.path, configuration.configuration_id, configuration.provider)
       end
       return Result.ok('')
     end
@@ -37,13 +37,14 @@ class TerraformCleaner
     end
   end
 
-  def cleanup_additional_resources(configuration_id, provider)
+  def cleanup_additional_resources(configuration_path, configuration_id, provider)
     case provider
     when 'aws'
       @ui.info('Cleaning-up leftover additional resources using AWS EC2')
       @aws_service.delete_vpc_by_config_id(configuration_id)
       @aws_service.delete_security_group_by_config_id(configuration_id)
-      @aws_service.delete_key_pair(TerraformAwsGenerator.generate_key_pair_name(configuration_id))
+      key_pair_name = TerraformAwsGenerator.generate_key_pair_name(configuration_id, configuration_path)
+      @aws_service.delete_key_pair(key_pair_name)
     else
       @ui.error("Skipping of destroying additional resources for provider: #{provider}.")
     end
