@@ -50,6 +50,18 @@ class TerraformAwsGenerator
   end
   # rubocop:enable Metrics/MethodLength
 
+  # Generate key pair name by configuration id.
+  # The name includes an identifier, host name,
+  # and configuration name to identify the owner of the key.
+  #
+  # @param configuration_id [String] configuration id
+  # @return [String] key pair name
+  def self.generate_key_pair_name(configuration_id)
+    hostname = Socket.gethostname
+    config_name = File.basename(@configuration_path)
+    "#{configuration_id}-#{config_name}-#{hostname}"
+  end
+
   private
 
   # Log the information about the main parameters of the node.
@@ -249,9 +261,10 @@ class TerraformAwsGenerator
   # rubocop:enable Metrics/MethodLength
 
   def key_pair_resource
+    key_pair_name = self.class.generate_key_pair_name(@configuration_id)
     <<-KEY_PAIR_RESOURCE
     resource "aws_key_pair" "ec2key" {
-      key_name = "#{@configuration_id}"
+      key_name = "#{key_pair_name}"
       public_key = "#{@public_key_value}"
     }
     KEY_PAIR_RESOURCE

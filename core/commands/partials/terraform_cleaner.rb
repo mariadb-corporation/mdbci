@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../services/terraform_service'
+require_relative 'terraform_aws_generator'
 
 # Class allows to clean up the machines that were created by Terraform
 class TerraformCleaner
@@ -42,7 +43,7 @@ class TerraformCleaner
       @ui.info('Cleaning-up leftover additional resources using AWS EC2')
       @aws_service.delete_vpc_by_config_id(configuration_id)
       @aws_service.delete_security_group_by_config_id(configuration_id)
-      @aws_service.delete_key_pair(configuration_id)
+      @aws_service.delete_key_pair(TerraformAwsGenerator.generate_key_pair_name(configuration_id))
     else
       @ui.error("Skipping of destroying additional resources for provider: #{provider}.")
     end

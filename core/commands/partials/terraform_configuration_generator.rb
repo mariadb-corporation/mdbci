@@ -50,9 +50,7 @@ class TerraformConfigurationGenerator < BaseCommand
   private
 
   def generate_configuration_id
-    hostname = Socket.gethostname
-    config_name = File.basename(@configuration_path)
-    @configuration_id = "#{hostname}-#{config_name}-#{Time.now.to_i}".gsub('_', '-')
+    @configuration_id = "mdbci-#{rand(36**8).to_s(36)}-#{Time.now.to_i}"
   end
 
   # Generate public and private ssh keys and set the @ssh_keys variable
