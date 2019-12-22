@@ -119,7 +119,7 @@ class TerraformGcpGenerator
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(node_params)
-    instance_name = "#{@configuration_id}-#{node_params[:name]}"
+    instance_name = "#{@configuration_id}-#{format_string(node_params[:name])}"
     ssh_metadata = ssh_data
     network = network_name
     tags_block = tags_partial(instance_tags)
@@ -252,9 +252,16 @@ class TerraformGcpGenerator
   # @param node_params [Hash] list of the node parameters
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
-    labels = @configuration_labels.merge(hostname: Socket.gethostname,
-                                         username: @user,
-                                         machinename: node_params[:name])
+    labels = @configuration_labels.merge(hostname: format_string(Socket.gethostname),
+                                         username: format_string(@user),
+                                         machinename: format_string(node_params[:name]))
     instance_resources(node_params.merge(labels: labels))
+  end
+
+  # Format string to format supported by Google Cloud Platform (only letters, numbers and hyphen).
+  # @param string [String] string for format
+  # @return [String] formatted string.
+  def format_string(string)
+    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
   end
 end
