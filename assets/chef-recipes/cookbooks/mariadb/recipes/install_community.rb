@@ -91,7 +91,7 @@ case node[:platform_family]
     if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
       bash 'Save iptables rules on CentOS 7' do
       code <<-EOF
-        iptables-save > /etc/sysconfig/iptables
+        bash -c "iptables-save > /etc/sysconfig/iptables"
       EOF
       end
     else
