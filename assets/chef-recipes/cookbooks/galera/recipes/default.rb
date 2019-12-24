@@ -113,7 +113,7 @@ case node[:platform_family]
       bash 'Save iptables rules on CentOS 7' do
       code <<-EOF
         # TODO: use firewalld
-        iptables-save > /etc/sysconfig/iptables
+        bash -c "iptables-save > /etc/sysconfig/iptables"
       EOF
       end
     else
