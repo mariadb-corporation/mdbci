@@ -33,14 +33,20 @@ class TerraformAwsGenerator
     raise 'AWS is not configured' if @aws_config.nil?
 
     need_vpc = false
+    need_standard_security_group = false
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
     node_params.each do |node|
       print_node_info(node)
       file.puts(generate_node_definition(node))
-      need_vpc = true if node[:vpc]
+      if node[:vpc]
+        need_vpc = true
+      else
+        need_standard_security_group = true
+      end
     end
+    file.puts(security_group_resource) if need_standard_security_group
     file.puts(vpc_resources) if need_vpc
     file.close
   rescue Errno::ENOENT => e
@@ -94,7 +100,6 @@ class TerraformAwsGenerator
       availability_zone = "#{@aws_config['availability_zone']}" # availability zone to create subnet
     }
     #{key_pair_resource}
-    #{security_group_resource(false)}
     PROVIDER
   end
 
@@ -164,7 +169,7 @@ class TerraformAwsGenerator
   # @param vpc [Boolean] true if it's vpc security group
   # @return [String] security group resource definition.
   # rubocop:disable Metrics/MethodLength
-  def security_group_resource(vpc)
+  def security_group_resource(vpc = false)
     group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
     tags_block = tags_partial(@configuration_tags)
     template = ERB.new <<-SECURITY_GROUP
