@@ -146,7 +146,8 @@ class TerraformConfigurator
         'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
         'private_ip' => node_network['private_ip'],
         'network' => node_network['public_ip'],
-        'whoami' => node_network['user']
+        'whoami' => node_network['user'],
+        'hostname' => node_network['hostname']
       )
       @network_settings.store_network_configuration(@config)
       Result.ok('')

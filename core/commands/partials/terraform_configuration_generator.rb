@@ -281,6 +281,7 @@ class TerraformConfigurationGenerator < BaseCommand
         user = "<%= user %>"
         private_ip = aws_instance.<%= name %>.private_ip
         public_ip = aws_instance.<%= name %>.public_ip
+        hostname = "ip-${replace(aws_instance.<%= name %>.private_ip, ".", "-")}"
       }
     }
     AWS
