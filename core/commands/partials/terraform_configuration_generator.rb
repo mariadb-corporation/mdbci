@@ -342,11 +342,10 @@ class TerraformConfigurationGenerator < BaseCommand
       availability_zone = "#{@aws_config['availability_zone']}" # availability zone to create subnet
     }
     #{keypair_resource}
-    #{security_group_resource(false)}
     PROVIDER
   end
 
-  def security_group_resource(vpc)
+  def security_group_resource(vpc = false)
     group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
     tags_block = tags_partial(@configuration_tags)
     template = ERB.new <<-SECURITY_GROUP
@@ -420,6 +419,7 @@ class TerraformConfigurationGenerator < BaseCommand
   # The method performs a single function; decomposition of the method will complicate the code.
   def generate_configuration_file
     need_vpc = false
+    need_standard_security_group = false
     file = File.open(File.join(@configuration_path, CONFIGURATION_FILE_NAME), 'w')
     file.puts(file_header)
     file.puts(provider_resource)
@@ -430,9 +430,14 @@ class TerraformConfigurationGenerator < BaseCommand
       node_definition = node_definition(node)
       raise node_definition.error if node_definition.error?
 
-      need_vpc = true if node_definition.value[:need_vpc]
+      if node_definition.value[:need_vpc]
+        need_vpc = true
+      else
+        need_standard_security_group = true
+      end
       file.puts(node_definition.value[:node_definition])
     end
+    file.puts(security_group_resource) if need_standard_security_group
     file.puts(vpc_resources) if need_vpc
     file.close
     TerraformService.fmt(@ui, @configuration_path)
