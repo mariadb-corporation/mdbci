@@ -4,8 +4,8 @@ AllCops:
 Metrics/AbcSize:
   Enabled: false
 
-Metrics/LineLength:
-  Max: 120
+Layout/LineLength:
+  Max: 100
 
 Metrics/MethodLength:
   Max: 15
@@ -21,7 +21,7 @@ Metrics/BlockLength:
 Style/NegatedIf:
   Enabled: false
 
-Layout/IndentHeredoc:
+Layout/HeredocIndentation:
   Enabled: false
 
 Style/MultilineBlockChain:
