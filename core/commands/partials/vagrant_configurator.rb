@@ -8,6 +8,7 @@ require_relative '../../services/network_config'
 require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
+require_relative '../../services/network_checker'
 
 # The configurator brings up the configuration for the Vagrant
 class VagrantConfigurator
@@ -55,7 +56,6 @@ class VagrantConfigurator
   # @param logger [Out] logger to log information to
   # @return [Boolean] whether we were successful or not
   def configure(node, logger)
-    @network_config.add_nodes([node])
     solo_config = "#{node}-config.json"
     role_file = VagrantConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
@@ -144,6 +144,11 @@ class VagrantConfigurator
         bring_up_machine(@config.provider, logger, node)
       end
       next unless VagrantService.node_running?(node, logger)
+      @network_config.add_nodes([node])
+      unless NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger)
+       @ui.error("Network resources not available!")
+       return false
+      end
 
       return true if configure(node, logger)
     end
