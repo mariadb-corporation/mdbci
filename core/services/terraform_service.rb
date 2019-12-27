@@ -8,7 +8,6 @@ require 'net/scp'
 
 # This class allows to execute commands of Terraform-cli
 module TerraformService
-  SSH_ATTEMPTS = 40
 
   def self.resource_type(provider)
     case provider
@@ -43,17 +42,6 @@ module TerraformService
 
   def self.ssh_command(network_settings, command, logger)
     MachineConfigurator.new(logger).run_command(network_settings, command)
-  end
-
-  def self.ssh_available?(network_settings, logger)
-    SSH_ATTEMPTS.times do
-      ssh_command(network_settings, 'echo \'AVAILABLE\'', logger)
-    rescue
-      sleep(15)
-    else
-      return true
-    end
-    false
   end
 
   def self.has_running_resources_type?(resource_type, logger, path = Dir.pwd)

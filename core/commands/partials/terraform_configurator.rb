@@ -10,6 +10,8 @@ require_relative '../destroy_command'
 # The configurator brings up the configuration for the Vagrant
 class TerraformConfigurator
 
+  SSH_ATTEMPTS = 40
+
   def initialize(config, env, logger)
     @config = config
     @env = env
@@ -44,9 +46,8 @@ class TerraformConfigurator
   # return [Boolean]
   def node_provisioned?(node)
     node_settings = @network_settings.node_settings(node)
-    result = TerraformService.ssh_command(node_settings,
-                                          'test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT',
-                                          @ui)
+    result = @machine_configurator.run_command(node_settings,
+                                          'test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT')
     if result.success? && result.value.chomp == 'PROVISIONED'
       @ui.info("Node '#{node}' was configured.")
       true
@@ -62,7 +63,7 @@ class TerraformConfigurator
   # @return [Boolean] whether we were successful or not
   def configure(node)
     node_settings = @network_settings.node_settings(node)
-    return false unless TerraformService.ssh_available?(node_settings, @ui)
+    return false unless ssh_available?(node_settings)
 
     solo_config = "#{node}-config.json"
     role_file = TerraformConfigurationGenerator.role_file_name(@config.path, node)
@@ -171,6 +172,17 @@ class TerraformConfigurator
     end
     false
   rescue
+    false
+  end
+
+  def ssh_available?(network_settings)
+    SSH_ATTEMPTS.times do
+      @machine_configurator.run_command(network_settings, 'echo "connected"')
+    rescue
+      sleep(15)
+    else
+      return true
+    end
     false
   end
 end
