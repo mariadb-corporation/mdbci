@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require_relative 'log_storage'
 require_relative 'machine_configurator'
 
 # This class checks the health of network resources
 module NetworkChecker
-  RESOURCES = ["https://github.com",
-               "https://www-eu.apache.org/",
-               "https://nodejs.org/",
-               "http://prdownloads.sourceforge.net/"]
+  RESOURCES = ['https://github.com',
+               'https://www-eu.apache.org/',
+               'https://nodejs.org/',
+               'http://prdownloads.sourceforge.net/'].freeze
 
   # Check all resources for availability
   # @return [Boolean] true if all resources available

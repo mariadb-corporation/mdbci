@@ -114,7 +114,7 @@ class VagrantConfigurator
   # @param logger [Out] logger to log information to
   def destroy_node(node, logger)
     logger.info("Destroying '#{node}' node.")
-    DestroyCommand.execute(["#{@config.path}/#{node}"], @env, logger, keep_template: true)
+    DestroyCommand.execute(["#{@config.path}/#{node}"], @env, logger, { keep_template: true })
   end
 
   # Switch to the working directory, so all Vagrant commands will
@@ -144,10 +144,11 @@ class VagrantConfigurator
         bring_up_machine(@config.provider, logger, node)
       end
       next unless VagrantService.node_running?(node, logger)
+
       @network_config.add_nodes([node])
       unless NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger)
-       @ui.error("Network resources not available!")
-       return false
+        @ui.error('Network resources not available!')
+        return false
       end
 
       return true if configure(node, logger)
@@ -187,7 +188,6 @@ class VagrantConfigurator
       up_results = Workers.map(nodes) { |node| up_node(node) }
       up_results.each { |up_result| up_result[1].print_to_stdout } if use_log_storage?
       return ERROR_RESULT unless up_results.detect { |up_result| !up_result[0] }.nil?
-
     end
     @network_config.generate_config_information
     SUCCESS_RESULT
