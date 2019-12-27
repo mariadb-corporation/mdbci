@@ -139,18 +139,38 @@ class TerraformConfigurator
   end
 
   def store_network_settings(node)
-    @ui.info('Generating network configuration file')
+    @ui.info("Generating network configuration file for node '#{node}'")
     TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
+      node_network = {
+          'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
+          'private_ip' => node_network['private_ip'],
+          'network' => node_network['public_ip'],
+          'whoami' => node_network['user'],
+          'hostname' => node_network['hostname']
+      }
+      if can_connect_using_private_ip?(node_network)
+        node_network['network'] = node_network['private_ip']
+      end
       @network_settings.add_network_configuration(
         node,
-        'keyfile' => File.join(@config.path, TerraformConfigurationGenerator::KEYFILE_NAME),
-        'private_ip' => node_network['private_ip'],
-        'network' => node_network['public_ip'],
-        'whoami' => node_network['user'],
-        'hostname' => node_network['hostname']
+        node_network
       )
       @network_settings.store_network_configuration(@config)
       Result.ok('')
     end
+  end
+
+  def can_connect_using_private_ip?(node_network)
+    @ui.info("Checking whether node is available via private IP, '#{node_network['private_ip']}'")
+    private_network = node_network.merge({
+                                             'network' => node_network['private_ip'],
+                                             'timeout' => 5
+                                         })
+    @machine_configurator.run_command(private_network, 'echo "connected"').and_then do
+      return true
+    end
+    false
+  rescue
+    false
   end
 end
