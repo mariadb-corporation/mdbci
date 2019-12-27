@@ -32,6 +32,7 @@ class TerraformConfigurator
   def up
     nodes = @config.node_names
     up_results = nodes.map { |node| bring_up_and_configure(node) }
+    @network_settings.store_network_configuration(@config)
     return Result.error('') if up_results.any?(&:error?)
 
     Result.ok('Terraform configuration has been configured')
