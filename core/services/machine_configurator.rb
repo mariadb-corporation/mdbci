@@ -56,7 +56,7 @@ class MachineConfigurator
     options[:verify_host_key] = :never
     options[:keys] = [machine['keyfile']]
     options[:non_interactive] = true
-    options[:timeout] = machine['timeout'] if machine.key?('timeout')
+    options[:timeout] = 5
     Net::SSH.start(machine['network'], machine['whoami'], options) do |ssh|
       yield ssh
     end
