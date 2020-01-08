@@ -19,6 +19,7 @@ class VagrantConfigurator
   def initialize(specification, config, env, logger)
     @specification = specification
     @config = config
+    @provider = config.provider
     @env = env
     @ui = logger
     @machine_configurator = MachineConfigurator.new(@ui)
@@ -64,11 +65,13 @@ class VagrantConfigurator
       [role_file, "roles/#{node}.json"],
       [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    CHEF_CONFIGURATION_ATTEMPTS.times do
-      configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
-      break if configuration_status.success?
+    @machine_configurator.provide_cnf_and_provider_files(@network_config[node], @config.cnf_path, @provider, @ui).and_then do
+      CHEF_CONFIGURATION_ATTEMPTS.times do
+        configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
+        break if configuration_status.success?
 
-      logger.error("Error during machine configuration: #{configuration_status.error}")
+        logger.error("Error during machine configuration: #{configuration_status.error}")
+      end
     end
     node_provisioned?(node, logger)
   end

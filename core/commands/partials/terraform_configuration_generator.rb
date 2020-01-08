@@ -14,6 +14,7 @@ require_relative '../../../core/services/terraform_service'
 class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
   KEYFILE_NAME = 'maxscale.pem'
+  CNF_PATH_FILE_NAME = 'cnf_path'
 
   def self.role_file_name(path, role)
     "#{path}/#{role}.json"
@@ -213,25 +214,11 @@ class TerraformConfigurationGenerator < BaseCommand
     template.result(binding)
   end
 
-  def connection_partial(user, name)
-    <<-PARTIAL
-    connection {
-      type = "ssh"
-      private_key = file("#{@path_to_keyfile}")
-      timeout = "10m"
-      agent = false
-      user = "#{user}"
-      host = aws_instance.#{name}.public_ip
-    }
-    PARTIAL
-  end
-
   # Generate Terraform configuration of AWS instance
   # @param node_params [Hash] list of the node parameters
   # @return [String] configuration content of AWS instance
   # rubocop:disable Metrics/MethodLength
   def get_vms_definition(node_params)
-    connection_block = connection_partial(node_params[:user], node_params[:name])
     tags_block = tags_partial(node_params[:tags])
     template = ERB.new <<-AWS
     resource "aws_instance" "<%= name %>" {
@@ -253,28 +240,6 @@ class TerraformConfigurationGenerator < BaseCommand
       #!/bin/bash
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
-      <% if template_path %>
-        provisioner "remote-exec" {
-          inline = [
-            "mkdir -p /home/<%= user %>/cnf_templates",
-            "sudo mkdir /vagrant",
-            "sudo bash -c 'echo \\"<%= provider %>\\" > /vagrant/provider'"
-          ]
-          <%= connection_block %>
-        }
-        provisioner "file" {
-          source = "<%= template_path %>"
-          destination = "/home/<%= user %>/cnf_templates"
-          <%= connection_block %>
-        }
-        provisioner "remote-exec" {
-          inline = [
-            "sudo mkdir -p /home/vagrant/",
-            "sudo mv /home/<%= user %>/cnf_templates /home/vagrant/cnf_templates"
-          ]
-          <%= connection_block %>
-        }
-      <% end %>
     }
     output "<%= name %>_network" {
       value = {
@@ -317,7 +282,10 @@ class TerraformConfigurationGenerator < BaseCommand
     print_node_info(node_params)
     cnf_template_path = parse_cnf_template_path(node)
     products = parse_products_info(node, cnf_template_path)
-    node_params[:template_path] = cnf_template_path unless cnf_template_path.nil?
+    unless cnf_template_path.nil?
+      node_params[:template_path] = cnf_template_path
+      IO.write(File.join(@configuration_path, CNF_PATH_FILE_NAME), cnf_template_path)
+    end
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box).and_then do |role|
       IO.write(self.class.role_file_name(@configuration_path, node_params[:name]), role)
