@@ -14,7 +14,7 @@ class MachineConfigurator
   CHEF_INSTALLATION_ATTEMPTS = 3
 
   # Directory on the server where the configuration file is uploaded (/home/#{user_name}/#{CNF_FILE_DIRECTORY})
-  CNF_FILE_DIRECTORY = 'temp_cnf_templates'
+  CNF_FILE_DIRECTORY = 'cnf_templates'
 
   def initialize(logger, root_path = File.expand_path('../../assets/chef-recipes', __dir__))
     @log = logger
@@ -115,22 +115,16 @@ class MachineConfigurator
     end
   end
 
-  # Upload cnf files directory if it exists to machine and create provider file
+  # Upload cnf files directory if it exists to machine
   # @param machine [Hash] information about machine to connect
   # @param cnf_dir [String] path to the cnf directory
-  # @param provider [String] node provider
   # @param logger [Out] logger to log information to
   # @param sudo_password [String] sudo password
-  def provide_cnf_and_provider_files(machine, cnf_dir, provider, logger = @log, sudo_password = '')
-    user = machine['whoami']
+  def provide_cnf_files(machine, cnf_dir, logger = @log, sudo_password = '')
+    return Result.error('Cnf directory is nil') if cnf_dir.nil?
+
     within_ssh_session(machine) do |connection|
-      create_provider_file(connection, user, provider, logger).and_then do
-        if cnf_dir.nil?
-          Result.ok('')
-        else
-          copy_cnf_file(connection, cnf_dir, user, logger, sudo_password)
-        end
-      end
+      copy_cnf_file(connection, cnf_dir, logger, sudo_password)
     end
   end
 
@@ -255,21 +249,14 @@ class MachineConfigurator
               "chef-solo -c #{remote_dir}/solo.rb -j #{remote_dir}/configs/#{config_name}", logger)
   end
 
-  def copy_cnf_file(connection, source_dir, user, logger = @log, sudo_password = '')
+  def copy_cnf_file(connection, source_dir, logger = @log, sudo_password = '')
     logger.info('Copying cnf file to the server.')
-    cnf_path = File.join('/home', user, CNF_FILE_DIRECTORY)
+    cnf_path = File.join('/tmp', CNF_FILE_DIRECTORY)
     sudo_exec(connection, sudo_password, "rm -rf #{cnf_path}", logger).and_then do
       ssh_exec(connection, "mkdir -p #{cnf_path}", logger)
     end.and_then do
       logger.info('Uploading cnf file to server')
       upload_file(connection, File.join(source_dir, '.'), cnf_path)
     end
-  end
-
-  def create_provider_file(connection, user, provider, logger = @log)
-    logger.info('Create provider file to the server.')
-    provider_file_path = File.join('/home', user, 'provider')
-    ssh_exec(connection, "touch #{provider_file_path}", logger)
-    ssh_exec(connection, "echo \"#{provider}\" > #{provider_file_path}", logger)
   end
 end

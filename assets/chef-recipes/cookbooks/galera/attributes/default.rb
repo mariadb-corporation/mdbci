@@ -6,8 +6,6 @@ default["galera"]["cnf_template"] = "server1.cnf"
 # node name
 default["galera"]["node_name"] = "galera0"
 
-user = ENV['SUDO_USER']
-home_dir = Dir.home(user)
-default['galera']['cnf_path'] = File.join(home_dir, 'temp_cnf_templates')
+default['galera']['cnf_path'] = File.join('/tmp', 'cnf_templates')
 
-default['galera']['provider_file_path'] = File.join(home_dir, 'provider')
+default['galera']['provider'] = nil

@@ -12,6 +12,4 @@ default["mysql"]["repo_key"] = "http://repo.mysql.com/yum/"
 # path for server.cnf file
 default["mysql"]["cnf_template"] = "server1.cnf"
 
-user = ENV['SUDO_USER']
-home_dir = Dir.home(user)
-default['mysql']['cnf_path'] = File.join(home_dir, 'temp_cnf_templates')
+default['mysql']['cnf_path'] = File.join('/tmp', 'cnf_templates')
