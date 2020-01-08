@@ -66,7 +66,8 @@ module ConfigurationGenerator
   # @param product [Hash] parameters of the product to configure from configuration file
   # @param box [String] name of the box
   # @param repo [String] repo for product
-  def self.generate_product_config(repos, product_name, product, box, repo)
+  # @param provider [String] configuration provider
+  def self.generate_product_config(repos, product_name, product, box, repo, provider)
     repo = repos.find_repository(product_name, product, box) if repo.nil?
     raise "Repo for product #{product['name']} #{product['version']} for #{box} not found" if repo.nil?
 
@@ -77,6 +78,7 @@ module ConfigurationGenerator
     end
     repo_file_name = repos.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
+    config['provider'] = provider
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
     setup_product_license_if_need(repos, config, product_name).and_then do |updated_config|
       attribute_name = repos.attribute_name(product_name)

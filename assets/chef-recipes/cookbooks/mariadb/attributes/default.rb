@@ -21,6 +21,4 @@ default['mariadb']['repo_file_name'] = 'mariadb'
 # MariaDB components for Debian repo
 default['mariadb']['deb_components'] = ['main']
 
-user = ENV['SUDO_USER']
-home_dir = Dir.home(user)
-default['mariadb']['cnf_path'] = File.join(home_dir, 'temp_cnf_templates')
+default['mariadb']['cnf_path'] = File.join('/tmp', 'cnf_templates')

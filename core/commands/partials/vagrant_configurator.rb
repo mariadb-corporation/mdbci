@@ -65,7 +65,12 @@ class VagrantConfigurator
       [role_file, "roles/#{node}.json"],
       [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    @machine_configurator.provide_cnf_and_provider_files(@network_config[node], @config.cnf_path, @provider, @ui).and_then do
+    cnf_path = @config.cnf_template_path(node)
+    if cnf_path.nil?
+      Result.ok('')
+    else
+      @machine_configurator.provide_cnf_files(@network_config[node], cnf_path, @ui)
+    end.and_then do
       CHEF_CONFIGURATION_ATTEMPTS.times do
         configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
         break if configuration_status.success?

@@ -103,7 +103,7 @@ class TerraformConfigurationGenerator < BaseCommand
     end
     recipe_name = @env.repos.recipe_name(product_name)
     if product_name != 'packages'
-      ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo)
+      ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo, @provider)
     else
       Result.ok({})
     end.and_then do |product_config|
@@ -182,25 +182,12 @@ class TerraformConfigurationGenerator < BaseCommand
     @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:ami]}, user:#{node_params[:user]}")
   end
 
-  # Parse path to the products configurations directory from configuration of node.
-  #
-  # @param node [Array] internal name of the machine specified in the template
-  # @return [String] path to the products configurations directory.
-  def parse_cnf_template_path(node)
-    node[1]['cnf_template_path'] || node[1]['product']&.fetch('cnf_template_path', nil)
-  end
-
   # Parse the products lists from configuration of node.
   #
   # @param node [Array] internal name of the machine specified in the template
-  # @param cnf_template_path [String] path to the products configurations directory
   # @return [Array<Hash>] list of parameters of products.
-  def parse_products_info(node, cnf_template_path)
-    products = [{ 'name' => 'packages' }].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
-    unless cnf_template_path.nil?
-      products.each { |product| product['cnf_template_path'] = cnf_template_path if product['cnf_template'] }
-    end
-    products
+  def parse_products_info(node)
+    [{ 'name' => 'packages' }].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
   end
 
   def tags_partial(tags)
@@ -280,12 +267,7 @@ class TerraformConfigurationGenerator < BaseCommand
     end
     node_params = make_node_params(node, @boxes.get_box(box))
     print_node_info(node_params)
-    cnf_template_path = parse_cnf_template_path(node)
-    products = parse_products_info(node, cnf_template_path)
-    unless cnf_template_path.nil?
-      node_params[:template_path] = cnf_template_path
-      IO.write(File.join(@configuration_path, CNF_PATH_FILE_NAME), cnf_template_path)
-    end
+    products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box).and_then do |role|
       IO.write(self.class.role_file_name(@configuration_path, node_params[:name]), role)
