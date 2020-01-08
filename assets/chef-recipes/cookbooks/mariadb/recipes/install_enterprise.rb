@@ -104,7 +104,7 @@ case node[:platform_family]
       command createcmd
     end
 
-    copycmd = 'cp /home/vagrant/cnf_templates/' + node['mariadb']['cnf_template'] + ' /etc/mysql/my.cnf.d/'
+    copycmd = "cp #{File.join(node['mariadb']['cnf_path'], node['mariadb']['cnf_template'])} /etc/mysql/my.cnf.d/"
     execute "Copy server.cnf to cnf_template directory" do
       command copycmd
     end
@@ -117,7 +117,7 @@ case node[:platform_family]
     end
 
     # /etc/my.cnf.d -- dir for *.cnf files
-    copycmd = 'cp /home/vagrant/cnf_templates/' + node['mariadb']['cnf_template'] + ' /etc/my.cnf.d/'
+    copycmd = "cp #{File.join(node['mariadb']['cnf_path'], node['mariadb']['cnf_template'])} /etc/mysql/my.cnf.d/"
     execute "Copy server.cnf to cnf_template directory" do
       command copycmd
     end
