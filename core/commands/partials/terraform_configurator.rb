@@ -68,10 +68,11 @@ class TerraformConfigurator
     end
     extra_files = [
       [role_file, "roles/#{node}.json"],
-      [TerraformConfigurationGenerator.node_config_file_name(@config.path, node),
-       "configs/#{solo_config}"]
+      [TerraformConfigurationGenerator.node_config_file_name(@config.path, node),"configs/#{solo_config}"]
     ]
-    @machine_configurator.configure(node_settings, solo_config, @ui, extra_files).and_then do
+    @machine_configurator.provide_cnf_and_provider_files(node_settings, @config.cnf_path, @provider, @ui).and_then do
+      @machine_configurator.configure(node_settings, solo_config, @ui, extra_files)
+    end.and_then do
       node_provisioned?(node)
     end
   end

@@ -17,6 +17,8 @@ require_relative '../../../core/services/configuration_generator'
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
 # rubocop:disable Metrics/ClassLength
 class VagrantConfigurationGenerator < BaseCommand
+  CNF_PATH_FILE_NAME = 'cnf_path'
+
   def self.synopsis
     'Generate a configuration based on the template.'
   end
@@ -73,9 +75,6 @@ end
         <% if ssh_pty %>
            box.ssh.pty = <%= ssh_pty %>
         <% end %>
-        <% if template_path %>
-           box.vm.synced_folder '<%= template_path %>', '/home/vagrant/cnf_templates'
-        <% end %>
         box.vm.provider :virtualbox do |vbox|
           <% if vm_mem %>
              vbox.memory = <%= vm_mem %>
@@ -101,10 +100,6 @@ end
         <% if ssh_pty %>
           box.ssh.pty = <%= ssh_pty %>
         <% end %>
-        <% if template_path %>
-          box.vm.synced_folder '<%= template_path %>', '/home/vagrant/cnf_templates', type:'rsync'
-        <% end %>
-        box.vm.synced_folder '<%= expand_path %>', '/vagrant', type: 'rsync'
         <% if ipv6 %>
           box.vm.network :public_network, :dev => 'virbr0', :mode => 'bridge', :type => 'bridge'
         <% end %>
@@ -324,7 +319,10 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     end
     cnf_template_path = parse_cnf_template_path(node)
     products = parse_products_info(node, cnf_template_path)
-    node_params[:template_path] = cnf_template_path unless cnf_template_path.nil?
+    unless cnf_template_path.nil?
+      node_params[:template_path] = cnf_template_path
+      IO.write(File.join(@configuration_path, CNF_PATH_FILE_NAME), cnf_template_path)
+    end
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box).and_then do |role|
       IO.write(self.class.role_file_name(path, node_params[:name]), role)
@@ -472,14 +470,14 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @raise RuntimeError if configuration file is invalid.
   def setup_command(name)
     @boxes = @env.box_definitions
-    path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
+    @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
     begin
       instance_config_file = IO.read(@env.template_file)
       config = JSON.parse(instance_config_file)
     rescue IOError, JSON::ParserError
       raise('Instance configuration file is invalid or not found!')
     end
-    [path, config]
+    [@configuration_path, config]
   end
 
   # Generate a configuration.

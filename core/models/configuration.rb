@@ -2,6 +2,7 @@
 
 # Class represents the MDBCI configuration on the hard drive.
 class Configuration
+  attr_reader :cnf_path
   attr_reader :configuration_id
   attr_reader :docker_network_name
   attr_reader :labels
@@ -86,6 +87,7 @@ class Configuration
     @docker_network_name = "#{@name}_mdbci_config_bridge_network"
     @provider = read_provider(@path)
     @configuration_id = read_configuration_id(@path)
+    @cnf_path = read_cnf_path(@path)
     @template_path = read_template_path(@path)
     @node_configurations = extract_node_configurations(read_template(@template_path))
     @docker_configuration = read_docker_configuration
@@ -258,6 +260,16 @@ class Configuration
     return nil unless File.exist?(configuration_id_file_path)
 
     File.read(configuration_id_file_path).strip
+  end
+
+  # Read configuration cnf path if cnf path file exists.
+  #
+  # @return [String] cnf path specified in the file (nil if file is not exist).
+  def read_cnf_path(config_path)
+    cnf_path_file_path = File.join(config_path, 'cnf_path')
+    return nil unless File.exist?(cnf_path_file_path)
+
+    File.read(cnf_path_file_path).strip
   end
 
   # Read node provider specified in the configuration.
