@@ -187,7 +187,7 @@ directory db_config_dir do
 end
 
 execute 'Copy server.cnf to cnf_template directory' do
-  command "cp /home/vagrant/cnf_templates/#{node['galera']['cnf_template']} #{db_config_dir}"
+  command "cp #{File.join(node['galera']['cnf_path'], node['galera']['cnf_template'])} #{db_config_dir}"
 end
 
 file "#{db_config_dir}/#{node['galera']['cnf_template']}" do
@@ -207,7 +207,7 @@ case node[:platform_family]
       EOF
     end
 
-    provider = IO.read("vagrant/provider")
+    provider = IO.read(node['galera']['provider_file_path'])
     if provider == "aws"
       bash 'Configure Galera server.cnf - Get AWS node IP address' do
         code <<-EOF

@@ -60,7 +60,7 @@ directory db_config_dir do
 end
 
 execute 'Copy server.cnf to cnf_template directory' do
-  command "cp /home/vagrant/cnf_templates/#{node['mysql']['cnf_template']} #{db_config_dir}"
+  command "cp #{File.join(node['mysql']['cnf_path'], node['mysql']['cnf_template'])} #{db_config_dir}"
 end
 
 file "#{db_config_dir}/#{node['mysql']['cnf_template']}" do
