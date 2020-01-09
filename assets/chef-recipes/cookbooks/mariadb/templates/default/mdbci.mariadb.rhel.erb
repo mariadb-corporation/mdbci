@@ -3,3 +3,4 @@ name = MariaDB
 baseurl = <%= node['mariadb']['repo'] %>
 gpgkey=<%= node['mariadb']['repo_key'] %>
 gpgcheck=1
+module_hotfixes=true
