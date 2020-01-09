@@ -126,7 +126,6 @@ class TerraformGcpGenerator
     labels_block = labels_partial(node_params[:labels])
     user = @user
     is_own_vpc = !use_existing_network?
-    connection_block = connection_partial(user)
     key_file = @private_key_file_path
     template = ERB.new <<-INSTANCE_RESOURCES
     resource "google_compute_instance" "<%= name %>" {
@@ -151,26 +150,6 @@ class TerraformGcpGenerator
       metadata = {
         <%= ssh_metadata %>
       }
-      <%= connection_block %>
-      <% if template_path %>
-        provisioner "remote-exec" {
-          inline = [
-            "mkdir -p /home/<%= user %>/cnf_templates",
-            "sudo mkdir /vagrant",
-            "sudo bash -c 'echo \\"<%= provider %>\\" > /vagrant/provider'"
-          ]
-        }
-        provisioner "file" {
-          source = "<%= template_path %>"
-          destination = "/home/<%= user %>/cnf_templates"
-        }
-        provisioner "remote-exec" {
-          inline = [
-            "sudo mkdir -p /home/vagrant/",
-            "sudo mv /home/<%= user %>/cnf_templates /home/vagrant/cnf_templates"
-          ]
-        }
-      <% end %>
     }
     output "<%= name %>_network" {
       value = {
@@ -185,22 +164,6 @@ class TerraformGcpGenerator
     template.result(OpenStruct.new(node_params).instance_eval { binding })
   end
   # rubocop:enable Metrics/MethodLength
-
-  # Generate a connection block for Google Compute instance resource.
-  # @param user [String] user name of instance
-  # @return [String] connection block definition.
-  def connection_partial(user)
-    <<-PARTIAL
-    connection {
-      type = "ssh"
-      private_key = file("#{@private_key_file_path}")
-      timeout = "10m"
-      agent = false
-      user = "#{user}"
-      host = self.network_interface.0.access_config.0.nat_ip
-    }
-    PARTIAL
-  end
 
   # Generate a labels block.
   # @param labels [Hash] list of labels in format { label_name: label_value }
