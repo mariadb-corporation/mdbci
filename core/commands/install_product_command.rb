@@ -73,16 +73,27 @@ class InstallProduct < BaseCommand
       role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
+      extra_files.concat(cnf_extra_files(node))
       node_settings = @network_settings.node_settings(name)
-      cnf_path = @config.cnf_template_path(node)
-      if cnf_path.nil?
-        Result.ok('')
-      else
-        @machine_configurator.provide_cnf_files(node_settings, cnf_path, @ui)
-      end.and_then do
-        @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
-      end
+      @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
     end
+  end
+
+  # Make array of cnf files and it target path on the nodes
+  #
+  # @return [Array] array of [source_file_path, target_file_path]
+  def cnf_extra_files(node)
+    cnf_template_path = @mdbci_config.cnf_template_path(node)
+    return [] if cnf_template_path.nil?
+
+    @mdbci_config.products_info(node).map do |product_info|
+      cnf_template = product_info['cnf_template']
+      next if cnf_template.nil?
+
+      product = product_info['name']
+      [File.join(cnf_template_path, cnf_template),
+       File.join(@env.repos.files_location(product), cnf_template)]
+    end.compact
   end
 
   # Create a role file to install the product from the chef

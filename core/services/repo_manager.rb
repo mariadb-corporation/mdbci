@@ -14,7 +14,8 @@ class RepoManager
     'mariadb' => {
       recipe: 'mariadb::install_community',
       name: 'mariadb',
-      repository: 'mariadb'
+      repository: 'mariadb',
+      files_location: 'cookbooks/mariadb/files'
     },
     'mdbe' => {
       recipe: 'mariadb::install_enterprise',
@@ -40,7 +41,8 @@ class RepoManager
     'mysql' => {
       recipe: 'mysql::install_community',
       name: 'mysql',
-      repository: 'mysql'
+      repository: 'mysql',
+      files_location: 'cookbooks/mysql/files'
     },
     'packages' => {
       recipe: 'packages',
@@ -54,7 +56,8 @@ class RepoManager
     'galera' => {
       recipe: 'galera',
       name: 'galera',
-      repository: 'mariadb'
+      repository: 'mariadb',
+      files_location: 'cookbooks/galera/files'
     },
     'docker' => {
       recipe: 'docker',
@@ -108,6 +111,10 @@ class RepoManager
 
   def need_product_license?(product)
     !PRODUCT_ATTRIBUTES[product][:license_file_name].nil?
+  end
+
+  def files_location(product)
+    PRODUCT_ATTRIBUTES[product][:files_location]
   end
 
   # Get the product license

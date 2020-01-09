@@ -104,9 +104,9 @@ case node[:platform_family]
       command createcmd
     end
 
-    copycmd = "cp #{File.join(node['mariadb']['cnf_path'], node['mariadb']['cnf_template'])} /etc/mysql/my.cnf.d/"
-    execute "Copy server.cnf to cnf_template directory" do
-      command copycmd
+    cookbook_file '/etc/mysql/my.cnf.d/' do
+      source node['mariadb']['cnf_template']
+      action :create
     end
 
   when "rhel", "fedora", "centos", "opensuse"
@@ -117,9 +117,9 @@ case node[:platform_family]
     end
 
     # /etc/my.cnf.d -- dir for *.cnf files
-    copycmd = "cp #{File.join(node['mariadb']['cnf_path'], node['mariadb']['cnf_template'])} /etc/mysql/my.cnf.d/"
-    execute "Copy server.cnf to cnf_template directory" do
-      command copycmd
+    cookbook_file '/etc/mysql/my.cnf.d/' do
+      source node['mariadb']['cnf_template']
+      action :create
     end
 
 end
