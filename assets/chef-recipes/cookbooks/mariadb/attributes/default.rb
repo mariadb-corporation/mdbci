@@ -20,5 +20,3 @@ default['mariadb']['repo_file_name'] = 'mariadb'
 
 # MariaDB components for Debian repo
 default['mariadb']['deb_components'] = ['main']
-
-default['mariadb']['cnf_path'] = File.join('/tmp', 'cnf_templates')

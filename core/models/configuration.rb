@@ -181,10 +181,19 @@ class Configuration
 
   # Parse path to the products configurations directory from configuration of node.
   #
-  # @param node [Array] internal name of the machine specified in the template
+  # @param node [String] internal name of the machine specified in the template
   # @return [String] path to the products configurations directory.
   def cnf_template_path(node)
     @node_configurations[node]['cnf_template_path'] || @node_configurations[node]['product']&.fetch('cnf_template_path', nil)
+  end
+
+  # Parse the products lists from configuration of node.
+  #
+  # @param node [String] internal name of the machine specified in the template
+  # @return [Array<Hash>] list of parameters of products.
+  def products_info(node)
+    node_info = @node_configurations[node]
+    [].push(node_info['product']).push(node_info['products']).flatten.compact.uniq
   end
 
   private

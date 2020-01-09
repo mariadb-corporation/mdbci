@@ -73,14 +73,7 @@ class RemoveProductCommand < BaseCommand
     target_path_config = "configs/#{name}-config.json"
     extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
     node_settings = @network_settings.node_settings(name)
-    cnf_path = @config.cnf_template_path(node)
-    if cnf_path.nil?
-      Result.ok('')
-    else
-      @machine_configurator.provide_cnf_files(node_settings, cnf_path, @ui)
-    end.and_then do
-      @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
-    end
+    @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
   end
 
   # Create a role file to install the product from the chef

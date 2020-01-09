@@ -154,16 +154,9 @@ end
 
 configuration_file = File.join(db_config_dir, node['mariadb']['cnf_template'])
 
-execute 'Copy server.cnf to cnf_template directory' do
-  command "cp #{File.join(node['mariadb']['cnf_path'], node['mariadb']['cnf_template'])} #{configuration_file}"
-end
-
-execute 'Correct priviledges to the configuration file' do
-  command "chmod 644 #{configuration_file}"
-end
-
-file configuration_file do
-  action :touch
+cookbook_file configuration_file do
+  source node['mariadb']['cnf_template']
+  action :create
   owner 'root'
   group 'root'
   mode '0644'

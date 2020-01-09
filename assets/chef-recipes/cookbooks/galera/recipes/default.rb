@@ -188,11 +188,9 @@ directory db_config_dir do
   action :create
 end
 
-execute 'Copy server.cnf to cnf_template directory' do
-  command "cp #{File.join(node['galera']['cnf_path'], node['galera']['cnf_template'])} #{db_config_dir}"
-end
-
-file "#{db_config_dir}/#{node['galera']['cnf_template']}" do
+cookbook_file "#{db_config_dir}/#{node['galera']['cnf_template']}" do
+  source node['galera']['cnf_template']
+  action :create
   owner 'root'
   group 'root'
   mode '0644'

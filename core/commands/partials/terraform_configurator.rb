@@ -14,6 +14,7 @@ class TerraformConfigurator
   def initialize(config, env, logger)
     @config = config
     @env = env
+    @repos = env.repos
     @ui = logger
     @provider = config.provider
     @machine_configurator = MachineConfigurator.new(@ui)
@@ -70,16 +71,27 @@ class TerraformConfigurator
       [role_file, "roles/#{node}.json"],
       [TerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    cnf_path = @config.cnf_template_path(node)
-    if cnf_path.nil?
-      Result.ok('')
-    else
-      @machine_configurator.provide_cnf_files(node_settings, cnf_path, @ui)
-    end.and_then do
-      @machine_configurator.configure(node_settings, solo_config, @ui, extra_files)
-    end.and_then do
+    extra_files.concat(cnf_extra_files(node))
+    @machine_configurator.configure(node_settings, solo_config, @ui, extra_files).and_then do
       node_provisioned?(node)
     end
+  end
+
+  # Make array of cnf files and it target path on the nodes
+  #
+  # @return [Array] array of [source_file_path, target_file_path]
+  def cnf_extra_files(node)
+    cnf_template_path = @config.cnf_template_path(node)
+    return [] if cnf_template_path.nil?
+
+    @config.products_info(node).map do |product_info|
+      cnf_template = product_info['cnf_template']
+      next if cnf_template.nil?
+
+      product = product_info['name']
+      [File.join(cnf_template_path, cnf_template),
+       File.join(@repos.files_location(product), cnf_template)]
+    end.compact
   end
 
   # Bring up whole configuration or a machine up.

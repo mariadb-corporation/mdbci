@@ -11,5 +11,3 @@ default["mysql"]["repo_key"] = "http://repo.mysql.com/yum/"
 
 # path for server.cnf file
 default["mysql"]["cnf_template"] = "server1.cnf"
-
-default['mysql']['cnf_path'] = File.join('/tmp', 'cnf_templates')

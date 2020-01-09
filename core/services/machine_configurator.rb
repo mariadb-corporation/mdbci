@@ -115,19 +115,6 @@ class MachineConfigurator
     end
   end
 
-  # Upload cnf files directory if it exists to machine
-  # @param machine [Hash] information about machine to connect
-  # @param cnf_dir [String] path to the cnf directory
-  # @param logger [Out] logger to log information to
-  # @param sudo_password [String] sudo password
-  def provide_cnf_files(machine, cnf_dir, logger = @log, sudo_password = '')
-    return Result.error('Cnf directory is nil') if cnf_dir.nil?
-
-    within_ssh_session(machine) do |connection|
-      copy_cnf_file(connection, cnf_dir, logger, sudo_password)
-    end
-  end
-
   private
 
   def log_printable_lines(lines, logger)
@@ -247,16 +234,5 @@ class MachineConfigurator
   def run_chef_solo(config_name, connection, remote_dir, sudo_password, logger)
     sudo_exec(connection, sudo_password,
               "chef-solo -c #{remote_dir}/solo.rb -j #{remote_dir}/configs/#{config_name}", logger)
-  end
-
-  def copy_cnf_file(connection, source_dir, logger = @log, sudo_password = '')
-    logger.info('Copying cnf file to the server.')
-    cnf_path = File.join('/tmp', CNF_FILE_DIRECTORY)
-    sudo_exec(connection, sudo_password, "rm -rf #{cnf_path}", logger).and_then do
-      ssh_exec(connection, "mkdir -p #{cnf_path}", logger)
-    end.and_then do
-      logger.info('Uploading cnf file to server')
-      upload_file(connection, File.join(source_dir, '.'), cnf_path)
-    end
   end
 end

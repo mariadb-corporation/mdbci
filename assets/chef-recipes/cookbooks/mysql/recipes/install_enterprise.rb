@@ -61,9 +61,9 @@ case node[:platform_family]
       command createcmd
     end
 
-    copycmd = "cp #{File.join(node['mysql']['cnf_path'], node['mysql']['cnf_template'])} /etc/mysql/my.cnf.d/"
-    execute "Copy server.cnf to cnf_template directory" do
-      command copycmd
+    cookbook_file '/etc/mysql/my.cnf.d/' do
+      source node['mysql']['cnf_template']
+      action :create
     end
 
     # /etc/mysql/my.cnf.d -- dir for *.cnf files
@@ -75,9 +75,9 @@ case node[:platform_family]
   when "rhel", "fedora", "centos", "suse", "opensuse"
 
     # /etc/my.cnf.d -- dir for *.cnf files
-    copycmd = "cp #{File.join(node['mysql']['cnf_path'], node['mysql']['cnf_template'])} /etc/mysql/my.cnf.d/"
-    execute "Copy server.cnf to cnf_template directory" do
-      command copycmd
+    cookbook_file '/etc/mysql/my.cnf.d/' do
+      source node['mysql']['cnf_template']
+      action :create
     end
 
     # TODO: check if line already exist !!!

@@ -21,6 +21,7 @@ class VagrantConfigurator
     @config = config
     @provider = config.provider
     @env = env
+    @repos = env.repos
     @ui = logger
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
@@ -65,20 +66,31 @@ class VagrantConfigurator
       [role_file, "roles/#{node}.json"],
       [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
-    cnf_path = @config.cnf_template_path(node)
-    if cnf_path.nil?
-      Result.ok('')
-    else
-      @machine_configurator.provide_cnf_files(@network_config[node], cnf_path, @ui)
-    end.and_then do
-      CHEF_CONFIGURATION_ATTEMPTS.times do
-        configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
-        break if configuration_status.success?
+    extra_files.concat(cnf_extra_files(node))
+    CHEF_CONFIGURATION_ATTEMPTS.times do
+      configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
+      break if configuration_status.success?
 
-        logger.error("Error during machine configuration: #{configuration_status.error}")
-      end
+      logger.error("Error during machine configuration: #{configuration_status.error}")
     end
     node_provisioned?(node, logger)
+  end
+
+  # Make array of cnf files and it target path on the nodes
+  #
+  # @return [Array] array of [source_file_path, target_file_path]
+  def cnf_extra_files(node)
+    cnf_template_path = @config.cnf_template_path(node)
+    return [] if cnf_template_path.nil?
+
+    @config.products_info(node).map do |product_info|
+      cnf_template = product_info['cnf_template']
+      next if cnf_template.nil?
+
+      product = product_info['name']
+      [File.join(cnf_template_path, cnf_template),
+       File.join(@repos.files_location(product), cnf_template)]
+    end.compact
   end
 
   # Bring up whole configuration or a machine up.
