@@ -13,9 +13,6 @@ class MachineConfigurator
   # installed old version of the Chef, the installation is performed at the second attempt
   CHEF_INSTALLATION_ATTEMPTS = 3
 
-  # Directory on the server where the configuration file is uploaded (/home/#{user_name}/#{CNF_FILE_DIRECTORY})
-  CNF_FILE_DIRECTORY = 'cnf_templates'
-
   def initialize(logger, root_path = File.expand_path('../../assets/chef-recipes', __dir__))
     @log = logger
     @root_path = root_path
