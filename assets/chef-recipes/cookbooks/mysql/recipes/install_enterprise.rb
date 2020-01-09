@@ -61,7 +61,7 @@ case node[:platform_family]
       command createcmd
     end
 
-    cookbook_file '/etc/mysql/my.cnf.d/' do
+    cookbook_file File.join('/etc/mysql/my.cnf.d', ['mysql']['cnf_template']) do
       source node['mysql']['cnf_template']
       action :create
     end
@@ -75,7 +75,7 @@ case node[:platform_family]
   when "rhel", "fedora", "centos", "suse", "opensuse"
 
     # /etc/my.cnf.d -- dir for *.cnf files
-    cookbook_file '/etc/mysql/my.cnf.d/' do
+    cookbook_file File.join('/etc/my.cnf.d', ['mysql']['cnf_template']) do
       source node['mysql']['cnf_template']
       action :create
     end
