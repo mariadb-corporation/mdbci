@@ -184,7 +184,6 @@ class TerraformConfigurationGenerator < BaseCommand
   def generate_node_info(node)
     box = node[1]['box'].to_s
     node_params = make_node_params(node, @boxes.get_box(box))
-    print_node_info(node_params)
     products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box).and_then do |role|
