@@ -27,6 +27,7 @@ when 'rhel', 'fedora', 'centos'
     baseurl node['mariadb']['repo']
     gpgkey node['mariadb']['repo_key']
     sensitive true
+    options({ 'module_hotfixes' => '1' })
   end
 when 'suse', 'opensuse', 'sles', nil
   # Add the repo
