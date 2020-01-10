@@ -14,25 +14,27 @@ module NetworkChecker
   # @return [Boolean] true if all resources available
   def self.resources_available?(machine_configurator, machine, logger)
     tool = if check_available_tool?('curl', machine_configurator, machine, logger)
-             'curl'
+             'c'
            else
-             'wget'
+             'w'
            end
-    random_resources.each do |resource|
-      return false unless check_resource?(tool, machine_configurator, machine, resource, logger)
-    end
-    true
+    random_resources.all? { |resource| check_resource?(tool, machine_configurator, machine, resource, logger) }
   end
 
   def self.check_resource?(tool, machine_configurator, machine, resource, logger)
-    if tool == 'curl'
-      return true if check_resource_by_curl?(machine_configurator, machine, resource, logger)
-
+    result = case tool
+             when 'c'
+               check_resource_by_curl?(machine_configurator, machine, resource, logger)
+             else
+               check_resource_by_wget?(machine_configurator, machine, resource, logger)
+             end
+    if result
+      logger.debug("#{resource} is available on the remote server")
+      return true
+    else
+      logger.error("#{resource} is not available on the remote server")
       return false
     end
-    return true if check_resource_by_wget?(machine_configurator, machine, resource, logger)
-
-    false
   end
 
   # Randomly selects three resources
@@ -44,26 +46,16 @@ module NetworkChecker
 
   # Check single resource for availability by curl
   #  @return [Boolean] true if resource available
-  def self.check_resource_by_curl?(machine_configurator, machine, resource, logger)
+  def self.check_resource_by_curl?(machine_configurator, machine, resource, _logger)
     result = machine_configurator.run_command(machine, "curl -Is #{resource} | head -n 1 ")
-    if curl_responce_successfull?(result.value)
-      logger.debug("#{resource} available on the remote server")
-      return true
-    end
-    logger.error("#{resource} not available on the remote server")
-    false
+    curl_responce_successfull?(result.value)
   end
 
   # Check single resource for availability by wget
   #  @return [Boolean] true if resource available
-  def self.check_resource_by_wget?(machine_configurator, machine, resource, logger)
+  def self.check_resource_by_wget?(machine_configurator, machine, resource, _logger)
     result = machine_configurator.run_command(machine, "wget -S -q --spider #{resource}")
-    unless result.error?
-      logger.debug("#{resource} available on the remote server")
-      return true
-    end
-    logger.error("#{resource} not available on the remote server")
-    false
+    !result.error?
   end
 
   # Checks the string from curl for correctness
