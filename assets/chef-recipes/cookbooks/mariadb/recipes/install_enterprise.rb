@@ -94,37 +94,6 @@ case node[:platform_family]
     end
 end # save iptables rules
 
-# copy server.cnf to my.cnf.d/ dir
-case node[:platform_family]
-
-  when "debian", "ubuntu"
-
-    createcmd = "mkdir -p /etc/mysql/my.cnf.d/"
-    execute "Create cnf_template directory" do
-      command createcmd
-    end
-
-    cookbook_file '/etc/mysql/my.cnf.d/' do
-      source node['mariadb']['cnf_template']
-      action :create
-    end
-
-  when "rhel", "fedora", "centos", "opensuse"
-
-    createcmd = 'mkdir -p /etc/my.cnf.d/'
-    execute "Create cnf_template directory" do
-      command createcmd
-    end
-
-    # /etc/my.cnf.d -- dir for *.cnf files
-    cookbook_file '/etc/mysql/my.cnf.d/' do
-      source node['mariadb']['cnf_template']
-      action :create
-    end
-
-end
-
-
 # Install packages
 case node[:platform_family]
 when "suse"
@@ -145,35 +114,52 @@ else
   package 'MariaDB-client'
 end
 
+# Copy server.cnf configuration file to configuration
+case node[:platform_family]
+when 'debian', 'ubuntu'
+  db_config_dir = '/etc/mysql/my.cnf.d/'
+  db_base_config = '/etc/mysql/my.cnf'
+when 'rhel', 'fedora', 'centos', 'suse', 'opensuse'
+  db_config_dir = '/etc/my.cnf.d/'
+  db_base_config = '/etc/my.cnf'
+end
+
+directory db_config_dir do
+  owner 'root'
+  group 'root'
+  recursive true
+  mode '0755'
+  action :create
+end
+
+configuration_file = File.join(db_config_dir, node['mariadb']['cnf_template'])
+
+cookbook_file configuration_file do
+  source node['mariadb']['cnf_template']
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0644'
+end
+
+# add !includedir to my.cnf
+if node['mariadb']['version'] == '5.1'
+  execute 'Add my.cnf.d directory for old MySQL version' do
+    command <<-COMMAND
+    echo "\n[client-server]\n!includedir #{db_config_dir}" >> #{db_base_config}
+    COMMAND
+  end
+else
+  execute 'Add my.cnf.d directory to the base mysql configuration file' do
+    command "echo '\n!includedir #{db_config_dir}' >> #{db_base_config}"
+  end
+end
+
 # Starts service
 case node[:platform_family]
 when "windows"
 else
-  service "mysql" do
+  service "mariadb" do
     action :start
-  end 
-end
-
-
-# add !includedir to my.cnf
-case node[:platform_family]
-
-  when "debian", "ubuntu"
-
-    # /etc/mysql/my.cnf.d -- dir for *.cnf files
-    addlinecmd = 'echo "!includedir /etc/mysql/my.cnf.d/" >> /etc/mysql/my.cnf'
-    execute "Add server.cnf dir to /etc/my.cnf includedir parameter" do
-      command addlinecmd
-    end
-
-  when "rhel", "fedora", "centos", "opensuse"
-
-    # create /etc/my.cnf file for MariaDB 5.1
-    if node['mariadb']['version'] == "5.1"
-      addlinecmd = 'echo -e \'#'+'\n'+'[client-server]'+'\n\n'+'# include all files from the config directory:'+'\n'+'!includedir /etc/my.cnf.d/\' >> /etc/my.cnf'
-      execute "Add server.cnf dir to /etc/my.cnf includedir parameter" do
-        command addlinecmd
-      end
-    end
-
+  end
 end
