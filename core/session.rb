@@ -35,6 +35,7 @@ require_relative 'services/gcp_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
 require_relative 'commands/remove_product_command'
+require_relative 'commands/check_relevance_command'
 
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
@@ -282,7 +283,8 @@ EOF
     exit_code = 1
     case ARGV.shift
     when 'check_relevance'
-      exit_code = checkRelevanceNetworkConfig(ARGV.shift)
+      command = CheckRelevanceCommand.new(ARGV.shift, self, $out)
+      exit_code = command.execute
     when 'clone'
       exit_code = clone_config(ARGV[0], ARGV[1])
     when 'configure'
@@ -348,9 +350,5 @@ EOF
       command.execute
     end
     return exit_code
-  end
-
-  def checkRelevanceNetworkConfig(filename)
-    system 'scripts/check_network_config.sh ' + filename
   end
 end
