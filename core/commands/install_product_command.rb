@@ -91,8 +91,11 @@ class InstallProduct < BaseCommand
       next if cnf_template.nil?
 
       product = product_info['name']
+      files_location = @repos.files_location(product)
+      next if files_location.nil?
+
       [File.join(cnf_template_path, cnf_template),
-       File.join(@env.repos.files_location(product), cnf_template)]
+       File.join(files_location, cnf_template)]
     end.compact
   end
 
