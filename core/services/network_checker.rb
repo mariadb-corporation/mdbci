@@ -14,19 +14,19 @@ module NetworkChecker
   # @return [Boolean] true if all resources available
   def self.resources_available?(machine_configurator, machine, logger)
     tool = if check_available_tool?('curl', machine_configurator, machine, logger)
-             'c'
+             :curl
            else
-             'w'
+             :wget
            end
     random_resources.all? { |resource| check_resource?(tool, machine_configurator, machine, resource, logger) }
   end
 
   def self.check_resource?(tool, machine_configurator, machine, resource, logger)
     result = case tool
-             when 'c'
-               check_resource_by_curl?(machine_configurator, machine, resource, logger)
+             when :curl
+               check_resource_by_curl?(machine_configurator, machine, resource)
              else
-               check_resource_by_wget?(machine_configurator, machine, resource, logger)
+               check_resource_by_wget?(machine_configurator, machine, resource)
              end
     if result
       logger.debug("#{resource} is available on the remote server")
@@ -46,14 +46,14 @@ module NetworkChecker
 
   # Check single resource for availability by curl
   #  @return [Boolean] true if resource available
-  def self.check_resource_by_curl?(machine_configurator, machine, resource, _logger)
+  def self.check_resource_by_curl?(machine_configurator, machine, resource)
     result = machine_configurator.run_command(machine, "curl -Is #{resource} | head -n 1 ")
     curl_responce_successfull?(result.value)
   end
 
   # Check single resource for availability by wget
   #  @return [Boolean] true if resource available
-  def self.check_resource_by_wget?(machine_configurator, machine, resource, _logger)
+  def self.check_resource_by_wget?(machine_configurator, machine, resource)
     result = machine_configurator.run_command(machine, "wget -S -q --spider #{resource}")
     !result.error?
   end
