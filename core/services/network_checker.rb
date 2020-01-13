@@ -1,24 +1,44 @@
 # frozen_string_literal: true
 
+require 'xdg'
+require 'yaml'
+
 require_relative 'log_storage'
 require_relative 'machine_configurator'
 
 # This class checks the health of network resources
 module NetworkChecker
-  RESOURCES = %w[https://github.com
-                 https://www-eu.apache.org/
-                 https://nodejs.org/
-                 http://prdownloads.sourceforge.net/].freeze
+  NETWORK_RESOURCES_BY_USER = 'mdbci/required-network-resources.yaml'
+  NETWORK_RESOURCES_BY_DEFAULT = '../../config/required-network-resources.yaml'
 
   # Check all resources for availability
   # @return [Boolean] true if all resources available
   def self.resources_available?(machine_configurator, machine, logger)
+    resources = load_resources
+    return true if resources.nil?
+
     tool = if check_available_tool?('curl', machine_configurator, machine, logger)
              :curl
            else
              :wget
            end
-    random_resources.all? { |resource| check_resource?(tool, machine_configurator, machine, resource, logger) }
+    random_resources(resources).all? do |resource|
+      check_resource?(tool, machine_configurator, machine, resource, logger)
+    end
+  end
+
+  # Load network resources from the user's configuration file if the file is available
+  # Load default network resources if the file is not available
+  # @return [Array<String>] resources read from the file
+  def self.load_resources
+    XDG['CONFIG'].each do |config_dir|
+      path = File.expand_path(NETWORK_RESOURCES_BY_USER, config_dir)
+      next unless File.exist?(path)
+
+      return YAML.safe_load(File.read(path))
+    end
+    path = File.expand_path(NETWORK_RESOURCES_BY_DEFAULT, __dir__)
+    YAML.safe_load(File.read(path))
   end
 
   def self.check_resource?(tool, machine_configurator, machine, resource, logger)
@@ -39,8 +59,8 @@ module NetworkChecker
 
   # Randomly selects three resources
   # @return [Array<String>] the list of resources
-  def self.random_resources
-    shuffle_resources = RESOURCES.shuffle
+  def self.random_resources(resources)
+    shuffle_resources = resources.shuffle
     shuffle_resources.first(3)
   end
 
