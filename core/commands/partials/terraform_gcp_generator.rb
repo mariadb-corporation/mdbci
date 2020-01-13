@@ -47,6 +47,35 @@ class TerraformGcpGenerator
     Result.ok('')
   end
 
+  # Generate the instance name.
+  # @param configuration_id [String] configuration id.
+  # @param node_name [String] name of the node.
+  # @return [String] generated instance name.
+  def self.generate_instance_name(configuration_id, node_name)
+    "#{configuration_id}-#{format_string(node_name)}"
+  end
+
+  # Generate the vpc network name.
+  # @param configuration_id [String] configuration id.
+  # @return [String] generated network name.
+  def self.generate_network_name(configuration_id)
+    "#{configuration_id}-network"
+  end
+
+  # Generate the firewall name.
+  # @param configuration_id [String] configuration id.
+  # @return [String] generated firewall name.
+  def self.generate_firewall_name(configuration_id)
+    "#{configuration_id}-firewall"
+  end
+
+  # Format string to format supported by Google Cloud Platform (only letters, numbers and hyphen).
+  # @param string [String] string for format
+  # @return [String] formatted string.
+  def self.format_string(string)
+    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
+  end
+
   private
 
   # Log the information about the main parameters of the node.
@@ -89,12 +118,13 @@ class TerraformGcpGenerator
   # Generate vpc resources.
   # @return [String] generated resources for vpc.
   def vpc_resources
+    firewall_name = self.class.generate_firewall_name(@configuration_id)
     <<-VPC_RESOURCES
     resource "google_compute_network" "vpc_network" {
       name = "#{network_name}"
     }
     resource "google_compute_firewall" "firewall_rules" {
-      name = "#{@configuration_id}-firewall"
+      name = "#{firewall_name}"
       description = "Allow all traffic"
       network = google_compute_network.vpc_network.name
       allow {
@@ -119,7 +149,7 @@ class TerraformGcpGenerator
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(node_params)
-    instance_name = "#{@configuration_id}-#{format_string(node_params[:name])}"
+    instance_name = self.class.generate_instance_name(@configuration_id, node_params[:name])
     ssh_metadata = ssh_data
     network = network_name
     tags_block = tags_partial(instance_tags)
@@ -196,7 +226,7 @@ class TerraformGcpGenerator
   # configuration, otherwise returns network name configured in the mdbci configuration.
   # @return [String] network name.
   def network_name
-    return "#{@configuration_id}-network" unless use_existing_network?
+    return self.class.generate_network_name(@configuration_id) unless use_existing_network?
 
     @gcp_config['network']
   end
@@ -215,16 +245,9 @@ class TerraformGcpGenerator
   # @param node_params [Hash] list of the node parameters
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
-    labels = @configuration_labels.merge(hostname: format_string(Socket.gethostname),
-                                         username: format_string(@user),
-                                         machinename: format_string(node_params[:name]))
+    labels = @configuration_labels.merge(hostname: self.class.format_string(Socket.gethostname),
+                                         username: self.class.format_string(@user),
+                                         machinename: self.class.format_string(node_params[:name]))
     instance_resources(node_params.merge(labels: labels))
-  end
-
-  # Format string to format supported by Google Cloud Platform (only letters, numbers and hyphen).
-  # @param string [String] string for format
-  # @return [String] formatted string.
-  def format_string(string)
-    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
   end
 end

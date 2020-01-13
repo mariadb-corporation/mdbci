@@ -31,6 +31,7 @@ require_relative 'network'
 require_relative 'out'
 require_relative 'services/repo_manager'
 require_relative 'services/aws_service'
+require_relative 'services/gcp_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
 require_relative 'commands/remove_product_command'
@@ -70,6 +71,7 @@ class Session
   attr_accessor :snapshot_name
   attr_accessor :ipv6
   attr_reader :aws_service
+  attr_reader :gcp_service
   attr_reader :tool_config
   attr_reader :rhel_credentials
   attr_reader :mdbe_private_key
@@ -120,9 +122,8 @@ EOF
     $out.info('Loading repository configuration files')
     @box_definitions = BoxDefinitions.new(@boxes_location)
     @repos = RepoManager.new($out, @box_definitions, @repo_dir)
-    if @tool_config['aws']
-      @aws_service = AwsService.new(@tool_config['aws'], $out)
-    end
+    @aws_service = AwsService.new(@tool_config['aws'], $out) if @tool_config['aws']
+    @gcp_service = GcpService.new(@tool_config['gcp'], $out) if @tool_config['gcp']
     @rhel_credentials = @tool_config['rhel']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
   end
