@@ -103,8 +103,9 @@ Labels should be separated with commas, do not contain any whitespaces.
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_vm_list = vagrant_cleaner.vm_list
     aws_vm_list = @aws_service.instances_names_list
+    gcp_vm_list = @gcp_service.instances_list
 
-    vm_list = vagrant_vm_list.values.flatten + aws_vm_list
+    vm_list = vagrant_vm_list.values.flatten + aws_vm_list + gcp_vm_list
     @ui.info("Virtual machines list: #{vm_list}")
   end
 
@@ -113,18 +114,21 @@ Labels should be separated with commas, do not contain any whitespaces.
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_vm_list = vagrant_cleaner.vm_list
     aws_vm_list = @aws_service.instances_names_list
+    gcp_vm_list = @gcp_service.instances_list
 
     filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
       [provider, filter_nodes_by_name(nodes, @env.node_name)]
     end.to_h
     filtered_aws_vm_list = filter_nodes_by_name(aws_vm_list, @env.node_name)
-    @ui.info("Virtual machines to destroy: #{filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list}")
+    filtered_gcp_vm_list = filter_nodes_by_name(gcp_vm_list, @env.node_name)
+    @ui.info("Virtual machines to destroy: #{filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list + filtered_gcp_vm_list}")
     return unless @ui.prompt('Do you want to continue? [y/n]')[0].casecmp('y').zero?
 
     filtered_vagrant_vm_list.each do |provider, nodes|
       nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
     end
     filtered_aws_vm_list.each { |node| @aws_service.terminate_instance_by_name(node) }
+    filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
   end
 
   # Handle case when command calling with configuration.
@@ -135,7 +139,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       docker_cleaner.destroy_stack(configuration)
       Result.ok('')
     elsif configuration.terraform_configuration?
-      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service)
+      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service)
       result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
       return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
 
@@ -164,6 +168,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     return ARGUMENT_ERROR_RESULT unless check_parameters
 
     @aws_service = @env.aws_service
+    @gcp_service = @env.gcp_service
     if @env.node_name
       destroy_by_node_name
     elsif @env.list
