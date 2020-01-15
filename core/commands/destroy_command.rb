@@ -102,8 +102,8 @@ Labels should be separated with commas, do not contain any whitespaces.
   def display_all_nodes
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_vm_list = vagrant_cleaner.vm_list
-    aws_vm_list = @aws_service.instances_names_list
-    gcp_vm_list = @gcp_service.instances_list
+    aws_vm_list = @aws_service&.instances_names_list || []
+    gcp_vm_list = @gcp_service&.instances_list || []
 
     vm_list = vagrant_vm_list.values.flatten + aws_vm_list + gcp_vm_list
     @ui.info("Virtual machines list: #{vm_list}")
@@ -113,8 +113,8 @@ Labels should be separated with commas, do not contain any whitespaces.
   def destroy_by_node_name
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_vm_list = vagrant_cleaner.vm_list
-    aws_vm_list = @aws_service.instances_names_list
-    gcp_vm_list = @gcp_service.instances_list
+    aws_vm_list = @aws_service&.instances_names_list || []
+    gcp_vm_list = @gcp_service&.instances_list || []
 
     filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
       [provider, filter_nodes_by_name(nodes, @env.node_name)]
