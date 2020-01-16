@@ -24,7 +24,7 @@ class HelpCommand < BaseCommand
   HELP_TEMPLATE_FILE = File.expand_path('../../../docs/help.erb', __FILE__)
 
   COMMANDS = {
-    'check_relevance' => CheckRelevanceCommand.synopsis,
+    'check_relevance' => 'Check for relevance of network_config file.',
     'clone' => 'Clone existing configuration into a new one.',
     'configure' => ConfigureCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
