@@ -13,6 +13,7 @@ require_relative 'update_configuration_command'
 require_relative 'install_product_command'
 require_relative 'remove_product_command'
 require_relative 'provide_files'
+require_relative 'check_relevance_command'
 
 # Command provides a documentation to the user on how to use the mdbci tool.
 class HelpCommand < BaseCommand
@@ -23,7 +24,7 @@ class HelpCommand < BaseCommand
   HELP_TEMPLATE_FILE = File.expand_path('../../../docs/help.erb', __FILE__)
 
   COMMANDS = {
-    'check_relevance' => 'Check for relevance of network_config file.',
+    'check_relevance' => CheckRelevanceCommand.synopsis,
     'clone' => 'Clone existing configuration into a new one.',
     'configure' => ConfigureCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
