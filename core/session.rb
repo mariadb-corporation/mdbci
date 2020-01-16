@@ -122,8 +122,8 @@ EOF
     $out.info('Loading repository configuration files')
     @box_definitions = BoxDefinitions.new(@boxes_location)
     @repos = RepoManager.new($out, @box_definitions, @repo_dir)
-    @aws_service = AwsService.new(@tool_config['aws'], $out) if @tool_config['aws']
-    @gcp_service = GcpService.new(@tool_config['gcp'], $out) if @tool_config['gcp']
+    @aws_service = AwsService.new(@tool_config['aws'], $out)
+    @gcp_service = GcpService.new(@tool_config['gcp'], $out)
     @rhel_credentials = @tool_config['rhel']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
   end
