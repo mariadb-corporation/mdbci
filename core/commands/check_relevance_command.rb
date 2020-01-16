@@ -19,6 +19,7 @@ _network_config file is relevant, if the connection was successful to all nodes.
     @ui.info(info)
   end
 
+  # Method try 
   def execute
     if @env.show_help
       show_help
@@ -37,7 +38,7 @@ _network_config file is relevant, if the connection was successful to all nodes.
       Timeout.timeout(AVAILABLE_TIME) do
         machine.run_command(network_settings.node_settings(node), '')
       end
-    rescue Errno::EHOSTUNREACH || Timeout::Error
+    rescue StandardError
       return Result.error("#{@args} is not relevance")
     end
     @ui.info("#{@args} is relevance")
