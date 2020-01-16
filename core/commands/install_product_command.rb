@@ -73,7 +73,7 @@ class InstallProduct < BaseCommand
       role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-      extra_files.concat(cnf_extra_files(node))
+      extra_files.concat(cnf_extra_files(name))
       node_settings = @network_settings.node_settings(name)
       @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
     end
