@@ -6,6 +6,7 @@ require_relative '../../services/terraform_service'
 require_relative '../../models/network_settings'
 require_relative 'terraform_configuration_generator'
 require_relative '../destroy_command'
+require_relative '../../services/network_checker'
 
 # The configurator brings up the configuration for the Vagrant
 class TerraformConfigurator
@@ -139,9 +140,15 @@ class TerraformConfigurator
       bring_up_result = bring_up_node(attempt, node)
       break if !bring_up_result.nil? && bring_up_result.error?
       next unless node_running?(node)
-
       result = configure_node(node)
       return result if result.success?
+      store_network_settings(node).and_then do
+        unless NetworkChecker.resources_available?(@machine_configurator, @network_settings.node_settings(node), @ui)
+          @ui.error('Network resources not available!')
+          return false
+        end
+        return true if configure(node)
+      end
     end
     @ui.error("Node '#{node}' was not configured.")
     Result.error("Node '#{node}' was not configured.")
