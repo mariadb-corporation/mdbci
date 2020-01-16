@@ -18,7 +18,7 @@ _network_config file is relevant, if the connection was successful to all nodes.
     HELP
     @ui.info(info)
   end
-  
+
   def execute
     if @env.show_help
       show_help
