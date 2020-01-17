@@ -20,7 +20,8 @@ class RepoManager
     'mdbe' => {
       recipe: 'mariadb::install_enterprise',
       name: 'mariadb',
-      repository: 'mdbe'
+      repository: 'mdbe',
+      files_location: 'cookbooks/mariadb/files',
     },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
