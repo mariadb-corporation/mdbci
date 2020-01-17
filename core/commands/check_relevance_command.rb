@@ -14,7 +14,7 @@ class CheckRelevanceCommand < BaseCommand
   def show_help
     info = <<-HELP
 Check relevance command tries to connect to all nodes in the _network_config file.
-_network_config file is relevant, if the connection was successful to all nodes.
+The _network_config file is relevant, if the connection was successful to all nodes.
     HELP
     @ui.info(info)
   end
@@ -38,9 +38,9 @@ _network_config file is relevant, if the connection was successful to all nodes.
         machine.run_command(network_settings.node_settings(node), '')
       end
     rescue StandardError
-      return Result.error("#{@args} is not relevance")
+      return Result.error("#{@args} is not relevant")
     end
-    @ui.info("#{@args} is relevance")
-    Result.ok("#{@args} is relevance")
+    @ui.info("#{@args} is relevant")
+    Result.ok("#{@args} is relevant")
   end
 end
