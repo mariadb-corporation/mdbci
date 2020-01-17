@@ -52,6 +52,8 @@ class GcpService
     return unless configured?
 
     @service.delete_instance(@gcp_config['project'], @gcp_config['zone'], instance_name)
+  rescue StandardError => e
+    @logger.error(e.message)
   end
 
   # Delete network specified by the it name
@@ -60,6 +62,8 @@ class GcpService
     return unless configured?
 
     @service.delete_network(@gcp_config['project'], network_name)
+  rescue StandardError => e
+    @logger.error(e.message)
   end
 
   # Delete firewall specified by the it name
@@ -68,5 +72,7 @@ class GcpService
     return unless configured?
 
     @service.delete_firewall(@gcp_config['project'], firewall_name)
+  rescue StandardError => e
+    @logger.error(e.message)
   end
 end
