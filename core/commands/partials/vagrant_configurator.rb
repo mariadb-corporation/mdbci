@@ -9,6 +9,7 @@ require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
 require_relative '../../services/network_checker'
+require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
 class VagrantConfigurator

@@ -7,6 +7,7 @@ require_relative '../../models/network_settings'
 require_relative 'terraform_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/network_checker'
+require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
 class TerraformConfigurator
@@ -26,6 +27,8 @@ class TerraformConfigurator
                         else
                           NetworkSettings.new
                         end
+    @threads_count = @env.threads_count
+    Workers.pool.resize(@threads_count)
   end
 
   # Brings up nodes
@@ -33,9 +36,11 @@ class TerraformConfigurator
   # @return [Number] execution status
   def up
     nodes = @config.node_names
-    up_results = nodes.map { |node| bring_up_and_configure(node) }
+    result = up_machines(nodes).and_then do
+      configure_nodes(nodes)
+    end
     @network_settings.store_network_configuration(@config)
-    return Result.error('') if up_results.any?(&:error?)
+    return Result.error('') if result.error?
 
     Result.ok('Terraform configuration has been configured')
   end
@@ -60,7 +65,8 @@ class TerraformConfigurator
   # Configure single node using the chef-solo respected role
   #
   # @param node [String] name of the node
-  def configure_with_chef(node)
+  # @param logger [Out] logger to log information to
+  def configure_with_chef(node, logger)
     node_settings = @network_settings.node_settings(node)
     solo_config = "#{node}-config.json"
     role_file = TerraformConfigurationGenerator.role_file_name(@config.path, node)
@@ -73,7 +79,7 @@ class TerraformConfigurator
       [TerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
     extra_files.concat(cnf_extra_files(node))
-    @machine_configurator.configure(node_settings, solo_config, @ui, extra_files).and_then do
+    @machine_configurator.configure(node_settings, solo_config, logger, extra_files).and_then do
       node_provisioned?(node)
     end
   end
@@ -98,88 +104,82 @@ class TerraformConfigurator
     end.compact
   end
 
-  # Bring up whole configuration or a machine up.
+  # Forcefully destroys given nodes
   #
-  # @param node [String] node name to bring up. It can be empty if we need to bring
-  # the whole configuration up.
-  # @return [Result] with result of the run_command_and_log()
-  def bring_up_machine(node)
-    @ui.info("Bringing up node #{node}")
-    TerraformService.init(@ui, @config.path)
-    result = TerraformService.resource_type(@config.provider).and_then do |resource_type|
-      return Result.ok(TerraformService.apply("#{resource_type}.#{node}", @ui, @config.path))
+  # @param nodes [Array<String>] name of nodes which needs to be destroyed.
+  def destroy_nodes(nodes)
+    @ui.info("Destroying nodes: #{nodes}")
+    nodes.each do |node|
+      DestroyCommand.execute(["#{@config.path}/#{node}"], @env, @ui,
+                             { keep_template: true, keep_configuration: true })
     end
-    @ui.error(result.error)
-    result
   end
 
-  # Forcefully destroys given node
+  # Up machines via Terraform.
   #
-  # @param node [String] name of node which needs to be destroyed
-  def destroy_node(node)
-    @ui.info("Destroying '#{node}' node.")
-    DestroyCommand.execute(["#{@config.path}/#{node}"], @env, @ui,
-                           { keep_template: true, keep_configuration: true })
-  end
-
-  def node_running?(node)
-    result = TerraformService.resource_type(@config.provider).and_then do |resource_type|
-      return TerraformService.resource_running?(resource_type, node, @ui, @config.path)
-    end
-    @ui.error(result.error)
-    false
-  end
-
-  # Create and configure node, or recreate if it needs to fix.
-  #
-  # @param node [String] name of node which needs to be configured
-  # @return [Bool] configuration result
-  def bring_up_and_configure(node)
-    @attempts.times do |attempt|
-      @ui.info("Bring up and configure node #{node}. Attempt #{attempt + 1}.")
-      bring_up_result = bring_up_node(attempt, node)
-      break if !bring_up_result.nil? && bring_up_result.error?
-      next unless node_running?(node)
-
-      result = configure_node(node)
-      return result if result.success?
-    end
-    @ui.error("Node '#{node}' was not configured.")
-    Result.error("Node '#{node}' was not configured.")
-  end
-
-  def bring_up_node(attempt, node)
-    if @recreate_nodes || attempt.positive?
-      destroy_node(node)
-      bring_up_machine(node)
-    elsif !node_running?(node)
-      bring_up_machine(node)
+  # @param nodes [Array<String>] name of nodes to bring up
+  # @return [Result::Base]
+  def up_machines(nodes)
+    TerraformService.resource_type(@config.provider).and_then do |resource_type|
+      TerraformService.init(@ui, @config.path)
+      target_nodes = TerraformService.nodes_to_resources(nodes, resource_type)
+      @attempts.times do |attempt|
+        @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
+        destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
+        TerraformService.apply(target_nodes.values, @ui, @config.path)
+        TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
+          target_nodes = target_nodes.reject { |_node, resource| running_resources.include?(resource) }
+        end
+        return Result.ok('') if target_nodes.empty?
+      end
+      Result.error("Error up of machines: #{target_nodes.keys}")
     end
   end
 
   # rubocop:disable Metrics/MethodLength
   def configure_node(node)
-    result = retrieve_network_settings(node).and_then do |node_network|
-      wait_for_node_availability(node, node_network)
-    end.and_then do |node_network|
-      @network_settings.add_network_configuration(node, node_network)
-      if NetworkChecker.resources_available?(@machine_configurator, @network_settings.node_settings(node), @ui)
-        Result.ok('')
-      else
-        Result.error('Network resources not available!')
+    logger = retrieve_logger_for_node
+    result = nil
+    @attempts.times do |attempt|
+      @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
+      result = retrieve_network_settings(node).and_then do |node_network|
+        wait_for_node_availability(node, node_network)
+      end.and_then do |node_network|
+        @network_settings.add_network_configuration(node, node_network)
+        if NetworkChecker.resources_available?(@machine_configurator, @network_settings.node_settings(node), logger)
+          Result.ok('')
+        else
+          Result.error('Network resources not available!')
+        end
+      end.and_then do
+        configure_with_chef(node, logger)
       end
-    end.and_then do
-      configure_with_chef(node)
-    end
 
-    if result.success?
-      @ui.info("Node '#{node}' has been configured.")
-    else
-      @ui.error("Exception during node configuration: #{result.error}")
+      if result.success?
+        @ui.info("Node '#{node}' has been configured.")
+        break
+      else
+        @ui.error("Exception during node configuration: #{result.error}")
+      end
     end
-    result
+    { node: node, result: result, logger: logger }
   end
   # rubocop:enable Metrics/MethodLength
+
+  # Configure machines via mdbci.
+  #
+  # @param nodes [Array<String>] name of nodes to configure
+  # @return [Result::Base]
+  def configure_nodes(nodes)
+    @ui.info("Configure machines: #{nodes}")
+    configure_results = Workers.map(nodes) { |node| configure_node(node) }
+    configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage?
+    configure_results.each { |result| @ui.info("Configuration result of node '#{result[:node]}': #{result[:result].success?}") }
+    error_nodes = configure_results.reject { |result| result[:result] }
+    return Result.error(error_nodes) unless error_nodes.empty?
+
+    Result.ok('')
+  end
 
   def retrieve_network_settings(node)
     @ui.info("Generating network configuration file for node '#{node}'")
@@ -221,5 +221,21 @@ class TerraformConfigurator
     false
   rescue StandardError
     false
+  end
+
+  # Get the logger. Depending on the number of threads returns a unique logger or @ui.
+  #
+  # @return [Out] logger.
+  def retrieve_logger_for_node
+    if use_log_storage?
+      LogStorage.new
+    else
+      @ui
+    end
+  end
+
+  # Checks whether to use log storage
+  def use_log_storage?
+    @threads_count > 1 && @config.node_names.size > 1
   end
 end
