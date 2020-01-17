@@ -21,13 +21,17 @@ module TerraformService
     ShellCommands.run_command_in_dir(logger, 'terraform init', path)
   end
 
-  def self.apply(resource, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve -target=#{resource}", path)
+  def self.apply(resources, logger, path = Dir.pwd)
+    targets = make_targets(resources)
+    result = ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve #{targets}", path)
+    return Result.error(result[:output]) unless result[:value].success?
+
+    Result.ok('')
   end
 
   def self.destroy(resources, logger, path = Dir.pwd)
-    target_args = resources.map { |resource| "-target=#{resource}" }.join(' ')
-    result = ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{target_args}", path)
+    targets = make_targets(resources)
+    result = ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{targets}", path)
     return Result.error(result[:output]) unless result[:value].success?
 
     Result.ok('')
@@ -57,14 +61,20 @@ module TerraformService
     false
   end
 
-  def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
+  def self.running_resources(logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
-    logger.info("Check resource running state: #{resource_type}_#{resource}")
+    logger.info('Check running resources list')
     result = ShellCommands.run_command_in_dir(logger, 'terraform state list', path)
-    return false unless result[:value].success?
+    return Result.error('') unless result[:value].success?
 
-    result[:output].split("\n").each do |resource_item|
-      return true unless (resource_item =~ /^#{resource_type}\.#{resource}$/).nil?
+    Result.ok(result[:output].split("\n"))
+  end
+
+  def self.resource_running?(resource_type, resource, logger, path = Dir.pwd)
+    running_resources(logger, path).and_then do |resources|
+      resources.each do |resource_item|
+        return true if resource_item =~ /^#{resource_type}\.#{resource}$/
+      end
     end
     false
   end
@@ -76,5 +86,36 @@ module TerraformService
     return Result.error('Error of terraform output network command') unless result[:value].success?
 
     Result.ok(JSON.parse(result[:output]))
+  end
+
+  def self.make_targets(resources)
+    resources.map { |resource| "-target=#{resource}" }.join(' ')
+  end
+
+  # Generate resource specs by node names and it resource type.
+  # For example, for nodes ['node1', 'node2'] and resource type 'aws_instance'
+  # result: ['aws_instance.node1', 'aws_instance.node2'].
+  #
+  # @param nodes [Array<String>] name of nodes
+  # @param resource_type [String] resource type of nodes, for example: `aws_instance`
+  # @return [Hash] Hash in format { 'node_1' => 'aws_instance.node_1', 'node_2' => 'aws_instance.node_2' }.
+  def self.nodes_to_resources(nodes, resource_type)
+    nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
+  end
+
+  # Select resource names from list by it type.
+  # For example, for list ['aws_instance.node1', 'aws_instance.node2', 'aws_keypair.keypair_name']
+  # and resource_type is 'aws_instance', result: ['node1', 'node2']
+  #
+  # @param resources [Array<String>] resource specs
+  # @param resource_type [String] resource type of resources, for example: `aws_instance`
+  # @return [Array] name of resources.
+  def self.select_resources_name_by_type(resources_list, resource_type)
+    resources_list.map do |resource|
+      type, name = resource.split('.')
+      { type: type, name: name }
+    end
+      .select { |resource| resource[:type] == resource_type }
+      .map { |resource| resource[:name] }
   end
 end
