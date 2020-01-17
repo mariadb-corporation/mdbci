@@ -140,15 +140,9 @@ class TerraformConfigurator
       bring_up_result = bring_up_node(attempt, node)
       break if !bring_up_result.nil? && bring_up_result.error?
       next unless node_running?(node)
+
       result = configure_node(node)
       return result if result.success?
-      store_network_settings(node).and_then do
-        unless NetworkChecker.resources_available?(@machine_configurator, @network_settings.node_settings(node), @ui)
-          @ui.error('Network resources not available!')
-          return false
-        end
-        return true if configure(node)
-      end
     end
     @ui.error("Node '#{node}' was not configured.")
     Result.error("Node '#{node}' was not configured.")
@@ -163,11 +157,18 @@ class TerraformConfigurator
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def configure_node(node)
     result = retrieve_network_settings(node).and_then do |node_network|
       wait_for_node_availability(node, node_network)
     end.and_then do |node_network|
       @network_settings.add_network_configuration(node, node_network)
+      if NetworkChecker.resources_available?(@machine_configurator, @network_settings.node_settings(node), @ui)
+        Result.ok('')
+      else
+        Result.error('Network resources not available!')
+      end
+    end.and_then do
       configure_with_chef(node)
     end
 
@@ -178,6 +179,7 @@ class TerraformConfigurator
     end
     result
   end
+  # rubocop:enable Metrics/MethodLength
 
   def retrieve_network_settings(node)
     @ui.info("Generating network configuration file for node '#{node}'")
