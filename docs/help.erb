@@ -115,8 +115,6 @@ mdbci install_product --product maxscale T/node0
 
 mdbci public_keys --key keyfile.pem T/node0
 
-mdbci validate_template --template TEMPLATE_PATH
-
 mdbci clone docker_light docker_light_clone
 
 mdbci snapshot list --path-to-nodes T --node-name N

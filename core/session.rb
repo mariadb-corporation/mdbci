@@ -1,4 +1,3 @@
-require 'json-schema'
 require 'json'
 require 'fileutils'
 require 'uri'
@@ -258,20 +257,6 @@ EOF
     result[:output]
   end
 
-  def validate_template
-    raise 'Template must be specified!' unless $session.template_file
-    begin
-      schema = JSON.parse(File.read 'templates/schemas/template.json')
-      json = JSON.parse(File.read $session.template_file)
-      JSON::Validator.validate!(schema, json)
-      $out.info "Template #{$session.template_file} is valid"
-    rescue JSON::Schema::ValidationError => e
-      $out.error "Template #{$session.template_file} is NOT valid"
-      raise e.message
-    end
-    return 0
-  end
-
   def clone_config(path_to_nodes, new_path_to_nodes)
     $out.info "Performing cloning operation for config #{path_to_nodes}. Cloned configuration name: #{new_path_to_nodes}"
     Clone.new.clone_nodes(path_to_nodes, new_path_to_nodes)
@@ -342,8 +327,6 @@ EOF
     when 'update-configuration'
       command = UpdateConfigurationCommand.new(ARGV, self, $out)
       exit_code = command.execute
-    when 'validate_template'
-      exit_code = validate_template
     else
       $out.error 'Unknown mdbci command. Please look help!'
       command = HelpCommand.new(ARGV, self, $out)
