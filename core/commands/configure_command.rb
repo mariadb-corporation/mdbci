@@ -18,9 +18,9 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS, Google Cloud Platform, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
+'configure' command creates configuration for MDBCI to use AWS, Google Cloud Platform, Digital Ocean, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
 
-You can configure AWS, Google Cloud Platform, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
+You can configure AWS, Google Cloud Platform, Digital Ocean, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
   mdbci configure
 
 Or you can configure only AWS, only RHEL credentials, only MariaDB Enterprise or only MaxScale CI Docker Registry subscription (for example, AWS):
@@ -41,6 +41,7 @@ Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for
 
     configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
     configure_results << configure_gcp if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('gcp').zero?
+    configure_results << configure_digitalocean if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('digitalocean').zero?
     configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
     configure_results << configure_mdbe if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('mdbe').zero?
     configure_results << configure_docker if @env.nodeProduct.casecmp('docker').zero?
@@ -97,6 +98,14 @@ Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for
     SUCCESS_RESULT
   end
 
+  def configure_digitalocean
+    digitalocean_settings = input_digitalocean_settings
+    return ERROR_RESULT if digitalocean_settings.nil?
+
+    @configuration['digitalocean'] = digitalocean_settings
+    SUCCESS_RESULT
+  end
+
   def input_docker_credentials
     {
       'username' => read_topic('Please input username for Docker Registry',
@@ -134,6 +143,13 @@ Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for
                                            @configuration.dig('gcp', 'network')),
                    'tags' => read_topic('Please input Google Cloud Platform network tags with a space',
                                         @configuration.dig('gcp', 'tags')).split(' '))
+  end
+
+  def input_digitalocean_settings
+    {
+      'region' => read_topic('Please input Digital Ocean region', @configuration.dig('digitalocean', 'region')),
+      'token' => read_topic('Please input Digital Ocean token', @configuration.dig('digitalocean', 'token'))
+    }
   end
 
   def configure_mdbe
