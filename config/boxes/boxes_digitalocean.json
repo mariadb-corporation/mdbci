@@ -6,5 +6,45 @@
     "platform": "ubuntu",
     "platform_version": "bionic",
     "user": "root"
+  },
+  "ubuntu_xenial_digitalocean": {
+    "provider": "digitalocean",
+    "image": "ubuntu-16-04-x64",
+    "size": "s-1vcpu-1gb",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "user": "root"
+  },
+  "debian_stretch_digitalocean": {
+    "provider": "digitalocean",
+    "image": "debian-9-x64",
+    "size": "s-1vcpu-1gb",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "user": "root"
+  },
+  "debian_buster_digitalocean": {
+    "provider": "digitalocean",
+    "image": "debian-10-x64",
+    "size": "s-1vcpu-1gb",
+    "platform": "debian",
+    "platform_version": "buster",
+    "user": "root"
+  },
+  "centos_6_digitalocean": {
+    "provider": "digitalocean",
+    "image": "centos-6-x64",
+    "size": "s-1vcpu-1gb",
+    "platform": "centos",
+    "platform_version": "6",
+    "user": "root"
+  },
+  "centos_7_digitalocean": {
+    "provider": "digitalocean",
+    "image": "centos-7-x64",
+    "size": "s-1vcpu-1gb",
+    "platform": "centos",
+    "platform_version": "7",
+    "user": "root"
   }
 }
