@@ -45,7 +45,7 @@ class ConfigurationTemplate
     target_boxes = @node_configurations.map { |_, node| node['box'] }
     template_type = nil
     target_boxes.each do |box|
-      box_provider = %w[docker aws libvirt vbox gcp].detect { |provider| box.include?(provider) }
+      box_provider = %w[docker aws libvirt vbox gcp digitalocean].detect { |provider| box.include?(provider) }
       raise("Unknown provider #{box_provider}") if box_provider.nil?
 
       if template_type.nil?
@@ -57,7 +57,7 @@ class ConfigurationTemplate
     end
     if %w[libvirt vbox].include?(template_type)
       template_type = :vagrant
-    elsif %[aws gcp].include?(template_type)
+    elsif %[aws gcp digitalocean].include?(template_type)
       template_type = :terraform
     end
     template_type.to_sym

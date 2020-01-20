@@ -9,6 +9,7 @@ require_relative '../base_command'
 require_relative '../../../core/services/configuration_generator'
 require_relative '../../../core/services/terraform_service'
 require_relative 'terraform_aws_generator'
+require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair with Terraform backend
@@ -232,6 +233,8 @@ class TerraformConfigurationGenerator < BaseCommand
       Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui, @configuration_path, @ssh_keys))
     when 'gcp'
       Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path, @ssh_keys))
+    when 'digitalocean'
+      Result.ok(TerraformDigitaloceanGenerator.new(@configuration_id, @digitalocean_config, @ui, @configuration_path, @ssh_keys))
     else Result.error("Unknown provider #{@provider}")
     end
   end
@@ -311,6 +314,7 @@ class TerraformConfigurationGenerator < BaseCommand
     end
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
+    @digitalocean_config = @env.tool_config['digitalocean']
     @override = override
     generate_configuration_id
   end
