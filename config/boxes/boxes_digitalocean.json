@@ -1,0 +1,10 @@
+{
+  "ubuntu_bionic_digitalocean": {
+    "provider": "digitalocean",
+    "image": "ubuntu-18-04-x64",
+    "size": "s-1vcpu-1gb",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "user": "root"
+  }
+}
