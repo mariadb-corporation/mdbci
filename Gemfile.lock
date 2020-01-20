@@ -46,8 +46,6 @@ GEM
     ipaddress (0.8.3)
     jaro_winkler (1.5.4)
     jmespath (1.4.0)
-    json-schema (2.6.2)
-      addressable (~> 2.3.8)
     jwt (2.2.1)
     memoist (0.16.2)
     method_source (0.9.2)
@@ -125,7 +123,6 @@ DEPENDENCIES
   google-api-client
   iniparse
   ipaddress
-  json-schema (= 2.6.2)
   net-scp
   net-ssh (~> 6.0.0.beta1)
   nokogiri
@@ -139,4 +136,4 @@ DEPENDENCIES
   xdg
 
 BUNDLED WITH
-   2.0.2
+   2.1.0

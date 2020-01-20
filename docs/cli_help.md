@@ -98,8 +98,6 @@ sudo Execute command using sudo on the node.
 
 up Setup environment as specified in the configuration.
 
-validate\_template Check that template has valid syntax.
-
 SHOW SUB COMMANDS: box, boxes, boxinfo, boxkeys, help, keyfile, network,
 network\_config, platforms, private\_ip, provider, repos, versions
 
@@ -138,8 +136,6 @@ mdbci setup\_repo --product mariadb --product-version 10.0 T/node0
 mdbci install\_product --product maxscale T/node0
 
 mdbci public\_keys --key keyfile.pem T/node0
-
-mdbci validate\_template --template TEMPLATE\_PATH
 
 mdbci clone docker\_light docker\_light\_clone
 

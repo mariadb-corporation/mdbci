@@ -8,7 +8,6 @@
 ./mdbci setup_repo --product maxscale T/node0
 ./mdbci setup_repo --product mariadb --product-version 10.0 T/node0
 ./mdbci install_product --product 'maxscale' T/node0
-./mdbci validate_template --template TEMPLATE_PATH
 ./mdbci show network_config T
 ./mdbci show network_config T/node0
 ```

@@ -44,8 +44,7 @@ class HelpCommand < BaseCommand
     'ssh' => 'Execute command on the configuration node.',
     'sudo' => 'Execute command using sudo on the node.',
     'up' => UpCommand.synopsis,
-    'update-configuration' => UpdateConfigurationCommand.synopsis,
-    'validate_template' => 'Check that template has valid syntax.'
+    'update-configuration' => UpdateConfigurationCommand.synopsis
   }.freeze
 
   # Show overview about all the commands that are available
