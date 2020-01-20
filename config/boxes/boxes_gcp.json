@@ -29,7 +29,7 @@
   },
   "centos_8_gcp": {
     "provider": "gcp",
-    "image": "centos-cloud/ubuntu-1604-lts",
+    "image": "centos-cloud/centos-8",
     "machine_type": "f1-micro",
     "platform": "centos",
     "platform_version": "8"
