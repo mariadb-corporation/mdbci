@@ -5,7 +5,6 @@ require 'open3'
 require 'xdg'
 require 'concurrent'
 
-require_relative 'clone'
 require_relative 'commands/up_command'
 require_relative 'commands/sudo_command'
 require_relative 'commands/ssh_command'
@@ -163,32 +162,6 @@ EOF
     Concurrent.processor_count / 4 + 1
   end
 
-  def setup(what)
-    case what
-    when 'boxes'
-      $out.info('Adding boxes to vagrant')
-      @box_definitions.each_definition do |name, definition|
-        next if %w[aws mdbci].include?(definition['provider'])
-
-        command = if definition['box'] =~ URI::REGEXP
-                    "vagrant box add #{name} #{definition['box']}"
-                  else
-                    "vagrant box add --provider #{definition['provider']} #{definition['box']}"
-                  end
-        result = ShellCommands.run_command_and_log($out, "#{command} 2>&1")
-
-        if !result[:value].success? && !result[:output].include?('already exists')
-          $out.error("Unable to add the box #{name} to the Vagrant")
-          return 1
-        end
-      end
-      0
-    else
-      $out.error("Do not know how to setup #{what}")
-      1
-    end
-  end
-
   # load mdbci nodes
   def loadMdbciNodes(path)
     templateFile = $exception_handler.handle('MDBCI configuration file not found') { IO.read(path+'/mdbci_template') }
@@ -257,12 +230,6 @@ EOF
     result[:output]
   end
 
-  def clone_config(path_to_nodes, new_path_to_nodes)
-    $out.info "Performing cloning operation for config #{path_to_nodes}. Cloned configuration name: #{new_path_to_nodes}"
-    Clone.new.clone_nodes(path_to_nodes, new_path_to_nodes)
-    return 0
-  end
-
   # all mdbci commands swith
   def commands
     exit_code = 1
@@ -270,8 +237,6 @@ EOF
     when 'check_relevance'
       command = CheckRelevanceCommand.new(ARGV.shift, self, $out)
       exit_code = command.execute
-    when 'clone'
-      exit_code = clone_config(ARGV[0], ARGV[1])
     when 'configure'
       command = ConfigureCommand.new(ARGV, self, $out)
       exit_code = command.execute
@@ -302,8 +267,6 @@ EOF
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)
       exit_code = command.execute
-    when 'setup'
-      exit_code = setup(ARGV.shift)
     when 'setup-dependencies'
       command = SetupDependenciesCommand.new(ARGV, self, $out)
       exit_code = command.execute()

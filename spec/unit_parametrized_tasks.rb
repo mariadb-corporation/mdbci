@@ -8,7 +8,6 @@ namespace :run_unit_parametrized do
   task :task_6644_show_private_ip_exit_code do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT, PPC]) end
   task :task_6643_show_network_exit_code do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT, PPC]) end
   task :task_6645_public_keys_exit_code do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT, PPC]) end
-  task :task_7159_main_cloning_func do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT, DOCKER, PPC]) end
   task :task_7107_show_keyfile do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT, PPC]) end
   task :task_7110_collectConfigurationNetworkInfo do |t| RakeTaskManager.new(t).run_unit_parametrized([DOCKER])  end
   task :task_6821_show_box_config_node do |t| RakeTaskManager.new(t).run_unit_parametrized([DOCKER])  end

@@ -25,7 +25,6 @@ class HelpCommand < BaseCommand
 
   COMMANDS = {
     'check_relevance' => CheckRelevanceCommand.synopsis,
-    'clone' => 'Clone existing configuration into a new one.',
     'configure' => ConfigureCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
     'destroy' => DestroyCommand.synopsis,

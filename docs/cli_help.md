@@ -64,8 +64,6 @@ COMMANDS:
 
 check\_relevance Check for relevance of network\_config file.
 
-clone Clone existing configuration into a new one.
-
 configure Creates configuration file for MDBCI
 
 deploy-examples Deploy examples from AppImage to the current working
@@ -83,8 +81,6 @@ help Show information about MDBCI tool and it commands.
 install\_product Install a product onto the configuration node.
 
 public\_keys Copy ssh keys to configured nodes.
-
-setup Download boxes to the vagrant.
 
 setup\_repo Install product repository and update it.
 
@@ -127,8 +123,6 @@ mdbci --repo-dir /home/testbed/config/repos show repos
 
 mdbci up --attempts 4 T/node0
 
-mdbci setup \[boxes\]
-
 mdbci setup\_repo --product maxscale T/node0
 
 mdbci setup\_repo --product mariadb --product-version 10.0 T/node0
@@ -136,8 +130,6 @@ mdbci setup\_repo --product mariadb --product-version 10.0 T/node0
 mdbci install\_product --product maxscale T/node0
 
 mdbci public\_keys --key keyfile.pem T/node0
-
-mdbci clone docker\_light docker\_light\_clone
 
 mdbci snapshot list --path-to-nodes T --node-name N
 

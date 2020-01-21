@@ -16,7 +16,6 @@ require_relative 'spec/rake_helper'
 require_relative 'spec/unit_tasks'
 require_relative 'spec/unit_parametrized_tasks'
 require_relative 'spec/integration_tasks'
-require_relative 'spec/integration_parametrized_tasks'
 
 # Using Rpec test runner to run new tests for the application
 begin

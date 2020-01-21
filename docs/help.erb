@@ -105,8 +105,6 @@ mdbci --repo-dir /home/testbed/config/repos show repos
 
 mdbci up --attempts 4 T/node0
 
-mdbci setup [boxes]
-
 mdbci setup_repo --product maxscale T/node0
 
 mdbci setup_repo --product mariadb --product-version 10.0 T/node0
@@ -114,8 +112,6 @@ mdbci setup_repo --product mariadb --product-version 10.0 T/node0
 mdbci install_product --product maxscale T/node0
 
 mdbci public_keys --key keyfile.pem T/node0
-
-mdbci clone docker_light docker_light_clone
 
 mdbci snapshot list --path-to-nodes T --node-name N
 
