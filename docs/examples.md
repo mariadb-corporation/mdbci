@@ -16,8 +16,3 @@ Show repositories with using alternative repo.d repository
 ```
 ./mdbci --repo-dir /home/testbed/config/repos show repos
 ```
-
-Cloning configuration (docker_light should be launched before clonning)
-```
-./mdbci clone docker_light cloned_docker_light
-```

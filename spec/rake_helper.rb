@@ -1,5 +1,3 @@
-require_relative '../scripts/parametrized_testing/parametrized_test_wrapper'
-
 class RakeTaskManager
 
   PATH_TO_RSPEC_SPEC_FOLDER = 'spec/'
@@ -8,13 +6,9 @@ class RakeTaskManager
 
   PARAMETRIZED_CONFIG_ENV_VAR_PREFIX = 'mdbci_param_conf'
   PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN = 'mdbci_param_conf_origin'
-  PARAMETRIZED_CONFIG_PREFIX = 'mdbci_param_test_clone'
   PARAMETRIZED_CONFIG_PREFIX_ORIGIN = 'mdbci_param_test'
 
   PARAMETRIZED_CONFIGS = {
-      "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX}_#{DOCKER}" => "#{PARAMETRIZED_CONFIG_PREFIX}_#{DOCKER}",
-      "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX}_#{LIBVIRT}" => "#{PARAMETRIZED_CONFIG_PREFIX}_#{LIBVIRT}",
-      "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX}_#{PPC}" => "#{PARAMETRIZED_CONFIG_PREFIX}_#{PPC_FROM_DOCKER}",
       "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{DOCKER}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{DOCKER}",
       "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{LIBVIRT}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{LIBVIRT}",
       "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{DOCKER_FOR_PPC}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{DOCKER_FOR_PPC}"
@@ -102,36 +96,14 @@ class RakeTaskManager
     variables.each { |key, _| ENV.delete(key.to_s) }
   end
 
-  def run_parametrized(arguments)
-    with_environment_variables(PARAMETRIZED_CONFIGS) {
-      begin
-        ptw = ParametrizedTestWrapper.new
-        ptw.prepare_clones(arguments)
-        run
-      ensure
-        ptw.remove_clones(arguments)
-      end
-    }
-  end
-
   def run_unit
     @rspec_test_name = PATH_TO_UNIT_TESTS_FOLDER + @rspec_test_name
     run
   end
 
-  def run_unit_parametrized(arguments)
-    @rspec_test_name = PATH_TO_UNIT_TESTS_FOLDER + @rspec_test_name
-    run_parametrized arguments
-  end
-
   def run_integration
     @rspec_test_name = PATH_TO_INTEGRATION_TESTS_FOLDER + @rspec_test_name
     run
-  end
-
-  def run_integration_parametrized(arguments)
-    @rspec_test_name = PATH_TO_INTEGRATION_TESTS_FOLDER + @rspec_test_name
-    run_parametrized arguments
   end
 
   def self.custom_task(*args, &block)

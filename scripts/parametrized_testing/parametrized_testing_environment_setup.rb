@@ -71,10 +71,6 @@ Arguments:
     $session.up config_name
   end
 
-  def clone_config(origin_config, testing_config)
-    $session.clone_config(origin_config, testing_config)
-  end
-
   def complete_restart_origin_config(template_path, config_name)
     destroy_config(config_name)
     generate_config(template_path, config_name)
