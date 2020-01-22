@@ -35,7 +35,6 @@ class HelpCommand < BaseCommand
     'remove_product' => RemoveProductCommand.synopsis,
     'provide-files' => ProvideFiles.synopsis,
     'public_keys' => 'Copy ssh keys to configured nodes.',
-    'setup' => 'Download boxes to the vagrant.',
     'setup-dependencies' => SetupDependenciesCommand.synopsis,
     'setup_repo' => 'Install product repository and update it.',
     'show' => 'Get information about mdbci and configurations.',
