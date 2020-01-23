@@ -148,7 +148,7 @@ class VagrantConfigurator
 
       @network_config.add_nodes([node])
       if NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger).error?
-        @ui.error('Network resources not available!')
+        logger.error('Network resources not available!')
         return false
       end
 

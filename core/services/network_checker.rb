@@ -48,9 +48,9 @@ module NetworkChecker
   def self.check_resource?(tool, machine_configurator, machine, resource, logger)
     result = case tool
              when :curl
-               check_resource_by_curl?(machine_configurator, machine, resource)
+               check_resource_by_curl?(machine_configurator, machine, resource, logger)
              else
-               check_resource_by_wget?(machine_configurator, machine, resource)
+               check_resource_by_wget?(machine_configurator, machine, resource, logger)
              end
     if result
       logger.debug("#{resource} is available on the remote server")
@@ -69,16 +69,16 @@ module NetworkChecker
 
   # Check single resource for availability by curl
   #  @return [Boolean] true if resource available
-  def self.check_resource_by_curl?(machine_configurator, machine, resource)
-    result = machine_configurator.run_command(machine, "curl -Is #{resource} | head -n 1 ")
+  def self.check_resource_by_curl?(machine_configurator, machine, resource, logger)
+    result = machine_configurator.run_command(machine, "curl -Is #{resource} | head -n 1", logger)
     curl_responce_successfull?(result.value)
   end
 
   # Check single resource for availability by wget
   #  @return [Boolean] true if resource available
-  def self.check_resource_by_wget?(machine_configurator, machine, resource)
-    result = machine_configurator.run_command(machine, "wget -S -q --spider #{resource}")
-    !result.error?
+  def self.check_resource_by_wget?(machine_configurator, machine, resource, logger)
+    result = machine_configurator.run_command(machine, "wget -S -q --spider #{resource}", logger)
+    result.success?
   end
 
   # Checks the string from curl for correctness
@@ -90,8 +90,8 @@ module NetworkChecker
   # Checks the tool for availability
   # @return [Boolean] true if tool available
   def self.check_available_tool?(tool, machine_configurator, machine, logger)
-    result = machine_configurator.run_command(machine, "#{tool} -V")
-    unless result.error?
+    result = machine_configurator.run_command(machine, "#{tool} -V", logger)
+    if result.success?
       logger.debug "#{tool} is available"
       return true
     end
