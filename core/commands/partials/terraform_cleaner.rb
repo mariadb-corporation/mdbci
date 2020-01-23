@@ -20,14 +20,24 @@ class TerraformCleaner
   #
   # @param configuration [Configuration] that we operate on
   def destroy_nodes_by_configuration(configuration)
+    destroy_nodes(configuration.node_names, configuration.path, configuration.provider, configuration.configuration_id)
+  end
+
+  # Destroy nodes
+  #
+  # @param nodes [Array<String>] list of node names
+  # @param path [String] path to configuration
+  # @param provider [String] provider of nodes
+  # @param configuration_id [String] configuration id
+  def destroy_nodes(nodes, path, provider, configuration_id)
     @ui.info('Destroying the machines using terraform')
-    result = TerraformService.resource_type(configuration.provider).and_then do |resource_type|
-      resources = TerraformService.nodes_to_resources(configuration.node_names, resource_type).values
-      TerraformService.destroy(resources, @ui, configuration.path)
-      cleanup_nodes(configuration.configuration_id, configuration.node_names, configuration.provider)
-      unless TerraformService.has_running_resources_type?(resource_type, @ui, configuration.path)
-        TerraformService.destroy_all(@ui, configuration.path)
-        cleanup_additional_resources(configuration.path, configuration.configuration_id, configuration.provider)
+    result = TerraformService.resource_type(provider).and_then do |resource_type|
+      resources = TerraformService.nodes_to_resources(nodes, resource_type).values
+      TerraformService.destroy(resources, @ui, path)
+      cleanup_nodes(configuration_id, nodes, provider)
+      unless TerraformService.has_running_resources_type?(resource_type, @ui, path)
+        TerraformService.destroy_all(@ui, path)
+        cleanup_additional_resources(path, configuration_id, provider)
       end
       return Result.ok('')
     end
