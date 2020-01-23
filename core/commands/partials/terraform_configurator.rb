@@ -137,8 +137,7 @@ class TerraformConfigurator
   end
 
   # rubocop:disable Metrics/MethodLength
-  def configure_node(node)
-    logger = retrieve_logger_for_node
+  def configure_node(node, logger)
     result = nil
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
@@ -162,7 +161,7 @@ class TerraformConfigurator
         @ui.error("Exception during node configuration: #{result.error}")
       end
     end
-    { node: node, result: result, logger: logger }
+    result
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -172,8 +171,17 @@ class TerraformConfigurator
   # @return [Result::Base]
   def configure_nodes(nodes)
     @ui.info("Configure machines: #{nodes}")
-    configure_results = Workers.map(nodes) { |node| configure_node(node) }
-    configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage?
+    use_log_storage = @threads_count > 1 && @config.node_names.size > 1
+    configure_results = Workers.map(nodes) do |node|
+      logger = if use_log_storage?
+                 LogStorage.new
+               else
+                 @ui
+               end
+      result = configure_node(node, logger)
+      { node: node, result: result, logger: logger }
+    end
+    configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage
     configure_results.each { |result| @ui.info("Configuration result of node '#{result[:node]}': #{result[:result].success?}") }
     error_nodes = configure_results.reject { |result| result[:result] }
     return Result.error(error_nodes) unless error_nodes.empty?
@@ -221,21 +229,5 @@ class TerraformConfigurator
     false
   rescue StandardError
     false
-  end
-
-  # Get the logger. Depending on the number of threads returns a unique logger or @ui.
-  #
-  # @return [Out] logger.
-  def retrieve_logger_for_node
-    if use_log_storage?
-      LogStorage.new
-    else
-      @ui
-    end
-  end
-
-  # Checks whether to use log storage
-  def use_log_storage?
-    @threads_count > 1 && @config.node_names.size > 1
   end
 end
