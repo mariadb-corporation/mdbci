@@ -38,6 +38,47 @@ class GcpService
     end.map(&:name)
   end
 
+  # Checks for instance existence.
+  # @param instance_name [String] instance name
+  # @return [Boolean] true if instance exists.
+  def instance_exists?(instance_name)
+    instances_list.include?(instance_name)
+  end
+
+  # Fetch networks list and return networks names.
+  # @return [Array<String>] network names.
+  def networks_list
+    return [] unless configured?
+
+    @service.fetch_all do |token|
+      @service.list_networks(@gcp_config['project'], page_token: token)
+    end.map(&:name)
+  end
+
+  # Checks for network existence.
+  # @param network_name [String] network name
+  # @return [Boolean] true if network exists.
+  def network_exists?(network_name)
+    networks_list.include?(network_name)
+  end
+
+  # Fetch firewalls list and return firewalls names.
+  # @return [Array<String>] firewall names.
+  def firewalls_list
+    return [] unless configured?
+
+    @service.fetch_all do |token|
+      @service.list_firewalls(@gcp_config['project'], page_token: token)
+    end.map(&:name)
+  end
+
+  # Checks for firewall existence.
+  # @param firewall_name [String] firewall name
+  # @return [Boolean] true if firewall exists.
+  def firewall_exists?(firewall_name)
+    firewalls_list.include?(firewall_name)
+  end
+
   # Returns false if a new vpc resources need to be generated for the current configuration, otherwise true.
   # @return [Boolean] result.
   def use_existing_network?
@@ -49,30 +90,30 @@ class GcpService
   # Delete instance specified by the it name
   # @param instance_name [String] name of the instance to delete.
   def delete_instance(instance_name)
-    return unless configured?
+    return if !configured? || !instance_exists?(instance_name)
 
     @service.delete_instance(@gcp_config['project'], @gcp_config['zone'], instance_name)
   rescue StandardError => e
-    @logger.info(e.message)
+    @logger.error(e.message)
   end
 
   # Delete network specified by the it name
   # @param network_name [String] name of the network to delete.
   def delete_network(network_name)
-    return unless configured?
+    return if !configured? || !network_exists?(network_name)
 
     @service.delete_network(@gcp_config['project'], network_name)
   rescue StandardError => e
-    @logger.info(e.message)
+    @logger.error(e.message)
   end
 
   # Delete firewall specified by the it name
   # @param firewall_name [String] name of the firewall to delete.
   def delete_firewall(firewall_name)
-    return unless configured?
+    return if !configured? || !firewall_exists?(firewall_name)
 
     @service.delete_firewall(@gcp_config['project'], firewall_name)
   rescue StandardError => e
-    @logger.info(e.message)
+    @logger.error(e.message)
   end
 end
