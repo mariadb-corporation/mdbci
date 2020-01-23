@@ -27,7 +27,7 @@ class TerraformConfigurator
                         else
                           NetworkSettings.new
                         end
-    @threads_count = @env.threads_count
+    @threads_count = @config.node_names.length
     Workers.pool.resize(@threads_count)
   end
 
