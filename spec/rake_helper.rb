@@ -1,3 +1,5 @@
+require_relative '../core/constants'
+
 class RakeTaskManager
 
   PATH_TO_RSPEC_SPEC_FOLDER = 'spec/'
