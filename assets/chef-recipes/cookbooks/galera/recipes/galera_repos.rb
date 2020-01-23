@@ -25,13 +25,16 @@ when 'debian', 'ubuntu'
     command 'apt-get update'
   end
 when 'rhel', 'fedora', 'centos'
-  template '/etc/yum.repos.d/galera.repo' do
-    source 'mdbci.galera.rhel.erb'
+  yum_repository 'galera' do
     action :create
+    baseurl node['galera']['repo']
+    gpgkey node['galera']['repo_key']
+    options({ 'module_hotfixes' => '1' })
   end
 when 'suse'
-  template '/etc/zypp/repos.d/galera.repo' do
-    source 'mdbci.galera.suse.erb'
-    action :create
+  zypper_repository 'galera' do
+    action :add
+    baseurl node['galera']['repo']
+    gpgkey node['galera']['repo_key']
   end
 end
