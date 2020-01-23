@@ -168,7 +168,7 @@ class TerraformConfigurator
     @ui.info("Configure machines: #{nodes}")
     use_log_storage = @threads_count > 1 && @config.node_names.size > 1
     configure_results = Workers.map(nodes) do |node|
-      logger = if use_log_storage?
+      logger = if use_log_storage
                  LogStorage.new
                else
                  @ui
