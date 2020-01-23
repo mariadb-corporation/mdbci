@@ -5,6 +5,7 @@ require 'yaml'
 
 require_relative 'log_storage'
 require_relative 'machine_configurator'
+require_relative '../models/result'
 
 # This class checks the health of network resources
 module NetworkChecker
