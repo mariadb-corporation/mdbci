@@ -5,6 +5,7 @@ require_relative '../../services/machine_configurator'
 require_relative '../../services/terraform_service'
 require_relative '../../models/network_settings'
 require_relative 'terraform_configuration_generator'
+require_relative 'terraform_cleaner'
 require_relative '../destroy_command'
 require_relative '../../services/network_checker'
 require 'workers'
@@ -109,10 +110,8 @@ class TerraformConfigurator
   # @param nodes [Array<String>] name of nodes which needs to be destroyed.
   def destroy_nodes(nodes)
     @ui.info("Destroying nodes: #{nodes}")
-    nodes.each do |node|
-      DestroyCommand.execute(["#{@config.path}/#{node}"], @env, @ui,
-                             { keep_template: true, keep_configuration: true })
-    end
+    terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service)
+    terraform_cleaner.destroy_nodes(nodes, @config.path, @config.provider, @config.configuration_id)
   end
 
   # Up machines via Terraform.
