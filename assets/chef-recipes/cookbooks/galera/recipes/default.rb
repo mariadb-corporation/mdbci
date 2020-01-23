@@ -202,16 +202,20 @@ when "debian", "ubuntu"
   bash 'Configure Galera server.cnf - Get/Set Galera LIB_PATH' do
     code <<-EOF
       galera_library=$(ls /usr/lib/galera | grep so)
-      sed -i "s|###GALERA-LIB-PATH###|/usr/lib/galera/${galera_library}|g\" #{configuration_file}
+      sed -i "s|###GALERA-LIB-PATH###|/usr/lib/galera/${galera_library}|g" #{configuration_file}
     EOF
+    flags '-x'
+    live_stream true
   end
 when "rhel", "fedora", "centos", "suse"
   bash 'Configure Galera server.cnf - Get/Set Galera LIB_PATH' do
     code <<-EOF
       galera_package=$(rpm -qa | grep galera | head -n 1)
       galera_library=$(rpm -ql "$galera_package" | grep so)
-      sed -i "s|###GALERA-LIB-PATH###|${galera_library}|g\" #{configuration_file}
+      sed -i "s|###GALERA-LIB-PATH###|${galera_library}|g" #{configuration_file}
     EOF
+    flags '-x'
+    live_stream true
   end
 end
 
@@ -221,6 +225,8 @@ if provider == "aws"
         node_address=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
         sed -i "s|###NODE-ADDRESS###|$node_address|g" #{configuration_file}
     EOF
+    flags '-x'
+    live_stream true
   end
 else
   bash 'Configure Galera server.cnf - Get node IP address' do
@@ -228,11 +234,15 @@ else
         node_address=$(/sbin/ifconfig eth0 | grep -o -P '(?<=inet ).*(?=  netmask)')
         sed -i "s|###NODE-ADDRESS###|$node_address|g" #{configuration_file}
     EOF
+    flags '-x'
+    live_stream true
   end
 end
 
 bash 'Configure Galera server.cnf - Get/Set Galera NODE_NAME' do
   code <<-EOF
-      sed -i "s|###NODE-NAME###|#{Shellwords.escape(node['galera']['node_name'])}|g\" #{configuration_file}
+      sed -i "s|###NODE-NAME###|#{Shellwords.escape(node['galera']['node_name'])}|g" #{configuration_file}
   EOF
+  flags '-x'
+  live_stream true
 end
