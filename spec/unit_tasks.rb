@@ -8,7 +8,6 @@ namespace :run_unit do
   task :task_boxes_manager do |t| RakeTaskManager.new(t).run_unit end
   task :task_repos_manager do |t| RakeTaskManager.new(t).run_unit end
   task :task_session do |t| RakeTaskManager.new(t).run_unit end
-  task :task_6812_show_repo_manager_exceptions do |t| RakeTaskManager.new(t).run_unit end
   task :task_6863_tests_for_6821_show_box do |t| RakeTaskManager.new(t).run_unit end
   task :task_7185_helper_functions do |t| RakeTaskManager.new(t).run_unit end
   task :task_6641_setup_exit_code do |t| RakeTaskManager.new(t).run_unit end
