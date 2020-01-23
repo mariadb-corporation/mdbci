@@ -144,13 +144,9 @@ class TerraformConfigurator
       result = retrieve_network_settings(node).and_then do |node_network|
         wait_for_node_availability(node, node_network)
       end.and_then do |node_network|
+        NetworkChecker.resources_available?(@machine_configurator, node_network, logger)
+      end.and_then do |node_network|
         @network_settings.add_network_configuration(node, node_network)
-        if NetworkChecker.resources_available?(@machine_configurator, @network_settings.node_settings(node), logger)
-          Result.ok('')
-        else
-          Result.error('Network resources not available!')
-        end
-      end.and_then do
         configure_with_chef(node, logger)
       end
 

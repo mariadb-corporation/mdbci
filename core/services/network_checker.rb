@@ -12,19 +12,22 @@ module NetworkChecker
   NETWORK_RESOURCES_BY_DEFAULT = '../../config/required-network-resources.yaml'
 
   # Check all resources for availability
-  # @return [Boolean] true if all resources available
+  # @return [Result::Base] success if all resources available
   def self.resources_available?(machine_configurator, machine, logger)
     resources = load_resources
-    return true if resources.nil?
+    return Result.ok(machine) if resources.nil?
 
     tool = if check_available_tool?('curl', machine_configurator, machine, logger)
              :curl
            else
              :wget
            end
-    random_resources(resources).all? do |resource|
+    result = random_resources(resources).all? do |resource|
       check_resource?(tool, machine_configurator, machine, resource, logger)
     end
+    return Result.error('Network resources not available!') unless result
+
+    Result.ok(machine)
   end
 
   # Load network resources from the user's configuration file if the file is available
@@ -50,11 +53,10 @@ module NetworkChecker
              end
     if result
       logger.debug("#{resource} is available on the remote server")
-      return true
     else
       logger.error("#{resource} is not available on the remote server")
-      return false
     end
+    result
   end
 
   # Randomly selects three resources
