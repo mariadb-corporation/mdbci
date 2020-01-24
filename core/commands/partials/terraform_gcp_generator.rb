@@ -30,7 +30,7 @@ class TerraformGcpGenerator
   # @param configuration_file_path [String] path to generated Terraform infrastructure file.
   # @return [Result::Base] generation result.
   def generate_configuration_file(node_params, configuration_file_path)
-    raise 'Google Cloud Platform is not configured' if @gcp_config.nil?
+    return Result.error('Google Cloud Platform is not configured') if @gcp_config.nil?
 
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
