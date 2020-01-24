@@ -110,7 +110,7 @@ class TerraformConfigurator
   # @param nodes [Array<String>] name of nodes which needs to be destroyed.
   def destroy_nodes(nodes)
     @ui.info("Destroying nodes: #{nodes}")
-    terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service)
+    terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service)
     terraform_cleaner.destroy_nodes(nodes, @config.path, @config.provider, @config.configuration_id)
   end
 

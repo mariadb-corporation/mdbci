@@ -27,6 +27,7 @@ require_relative 'models/tool_configuration'
 require_relative 'out'
 require_relative 'services/repo_manager'
 require_relative 'services/aws_service'
+require_relative 'services/digitalocean_service'
 require_relative 'services/gcp_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
@@ -68,6 +69,7 @@ class Session
   attr_accessor :snapshot_name
   attr_accessor :ipv6
   attr_reader :aws_service
+  attr_reader :digitalocean_service
   attr_reader :gcp_service
   attr_reader :tool_config
   attr_reader :rhel_credentials
@@ -120,6 +122,7 @@ EOF
     @box_definitions = BoxDefinitions.new(@boxes_location)
     @repos = RepoManager.new($out, @box_definitions, @repo_dir)
     @aws_service = AwsService.new(@tool_config['aws'], $out)
+    @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
     @gcp_service = GcpService.new(@tool_config['gcp'], $out)
     @rhel_credentials = @tool_config['rhel']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)

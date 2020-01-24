@@ -3,6 +3,7 @@
 require_relative '../../services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_gcp_generator'
+require_relative 'terraform_digitalocean_generator'
 
 # Class allows to clean up the machines that were created by Terraform
 class TerraformCleaner
@@ -10,10 +11,11 @@ class TerraformCleaner
   # you must wait for the destruction of all network-dependent resources
   GCP_WAITING_TIME = 100
 
-  def initialize(logger, aws_service, gcp_service)
+  def initialize(logger, aws_service, gcp_service, digitalocean_service)
     @ui = logger
     @aws_service = aws_service
     @gcp_service = gcp_service
+    @digitalocean_service = digitalocean_service
   end
 
   # Stop machines specified in the configuration or in a node
@@ -68,6 +70,10 @@ class TerraformCleaner
       @gcp_service.delete_firewall(TerraformGcpGenerator.generate_firewall_name(configuration_id))
       sleep(GCP_WAITING_TIME)
       @gcp_service.delete_network(TerraformGcpGenerator.generate_network_name(configuration_id))
+    when 'digitalocean'
+      @ui.info('Cleaning-up leftover additional resources using Digital Ocean')
+      key_pair_name = TerraformDigitaloceanGenerator.generate_key_pair_name(configuration_id, configuration_path)
+      @digitalocean_service.delete_ssh_key(key_pair_name)
     else
       @ui.error("Skipping of destroying additional resources for provider: #{provider}.")
     end
@@ -82,6 +88,10 @@ class TerraformCleaner
       @ui.info("Cleaning-up leftover machine using Google Cloud #{node}")
       instance_name = TerraformGcpGenerator.generate_instance_name(configuration_id, node)
       @gcp_service.delete_instance(instance_name)
+    when 'digitalocean'
+      @ui.info("Cleaning-up leftover machine using Digital Ocean #{node}")
+      instance_name = TerraformDigitaloceanGenerator.generate_instance_name(configuration_id, node)
+      @digitalocean_service.delete_instance(instance_name)
     else
       @ui.error("Unknown provider #{provider}. Can not manually destroy virtual machines.")
     end
