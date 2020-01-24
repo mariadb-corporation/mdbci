@@ -5,7 +5,6 @@ require_relative '../../core/session'
 require_relative '../../core/node_product'
 require_relative '../../core/out'
 require_relative '../../core/services/repo_manager'
-require_relative '../../core/exception_handler'
 
 describe 'Session.showBoxes' do
 
@@ -15,7 +14,6 @@ describe 'Session.showBoxes' do
     $out = Out.new($session)
     $session.isSilent = true
     $session.mdbciDir = Dir.pwd
-    $exception_handler = ExceptionHandler.new
     boxesPath = './BOXES'
     $session.boxes = BoxesManager.new boxesPath
     reposPath = './config/repo.d'

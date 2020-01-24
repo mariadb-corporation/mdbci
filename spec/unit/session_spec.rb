@@ -6,7 +6,6 @@ require_relative '../../core/session'
 require_relative '../../core/node_product'
 require_relative '../../core/out'
 require_relative '../../core/services/repo_manager'
-require_relative '../../core/exception_handler'
 
 describe 'Session' do
   before :all do
@@ -16,7 +15,6 @@ describe 'Session' do
     @session = $session
     @session.isSilent = true
     @session.mdbciDir = Dir.pwd
-    $exception_handler = ExceptionHandler.new
     @session.boxes = BoxesManager.new './BOXES'
     @session.repos = RepoManager.new './config/repo.d'
   end

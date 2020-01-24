@@ -44,14 +44,12 @@ $mdbci_exec_dir = File.expand_path(__dir__)
 
 require_relative 'core/session'
 require_relative 'core/out'
-require_relative 'core/exception_handler'
 require_relative 'core/services/version'
 require_relative 'core/models/result'
 
 session = Session.new
 $session = session
 session.template_file = 'instance.json'
-$exception_handler = ExceptionHandler.new
 session.ipv6 = false
 
 Dir.chdir ENV['OLD_CWD'] unless ENV['OLD_CWD'].nil?

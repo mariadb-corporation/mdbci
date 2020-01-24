@@ -1,7 +1,6 @@
 require 'rspec'
 require_relative '../spec_helper'
 require_relative '../../core/out'
-require_relative '../../core/exception_handler'
 require_relative '../../core/boxes_manager'
 require_relative '../../core/session'
 
@@ -15,7 +14,6 @@ describe 'Session' do
     $out = Out.new($session)
     $session.isSilent = true
     $session.mdbciDir = Dir.pwd
-    $exception_handler = ExceptionHandler.new
     $session.boxes_dir = 'spec/configs/boxes/'
     $session.boxes = BoxesManager.new $session.boxes_dir
     reposPath = './config/repo.d'
