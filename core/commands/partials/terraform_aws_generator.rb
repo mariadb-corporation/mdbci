@@ -30,7 +30,7 @@ class TerraformAwsGenerator
   # @return [Result::Base] generation result.
   # rubocop:disable Metrics/MethodLength
   def generate_configuration_file(node_params, configuration_file_path)
-    raise 'AWS is not configured' if @aws_config.nil?
+    return Result.error('AWS is not configured') if @aws_config.nil?
 
     need_vpc = false
     need_standard_security_group = false

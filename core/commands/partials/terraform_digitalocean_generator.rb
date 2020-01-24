@@ -29,7 +29,7 @@ class TerraformDigitaloceanGenerator
   # @param configuration_file_path [String] path to generated Terraform infrastructure file.
   # @return [Result::Base] generation result.
   def generate_configuration_file(node_params, configuration_file_path)
-    raise 'Digital Ocean is not configured' if @digitalocean_config.nil?
+    return Result.error('Digital Ocean is not configured') if @digitalocean_config.nil?
 
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
