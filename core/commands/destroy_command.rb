@@ -103,9 +103,10 @@ Labels should be separated with commas, do not contain any whitespaces.
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_vm_list = vagrant_cleaner.vm_list
     aws_vm_list = @aws_service.instances_names_list
+    digitalocean_vm_list = @digitalocean_service.instances_names_list
     gcp_vm_list = @gcp_service.instances_list
 
-    vm_list = vagrant_vm_list.values.flatten + aws_vm_list + gcp_vm_list
+    vm_list = vagrant_vm_list.values.flatten + aws_vm_list + gcp_vm_list + digitalocean_vm_list
     @ui.info("Virtual machines list: #{vm_list}")
   end
 
@@ -114,6 +115,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     vagrant_cleaner = VagrantCleaner.new(@env, @ui)
     vagrant_vm_list = vagrant_cleaner.vm_list
     aws_vm_list = @aws_service.instances_names_list
+    digitalocean_vm_list = @digitalocean_service.instances_names_list
     gcp_vm_list = @gcp_service.instances_list
 
     filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
@@ -121,7 +123,10 @@ Labels should be separated with commas, do not contain any whitespaces.
     end.to_h
     filtered_aws_vm_list = filter_nodes_by_name(aws_vm_list, @env.node_name)
     filtered_gcp_vm_list = filter_nodes_by_name(gcp_vm_list, @env.node_name)
-    @ui.info("Virtual machines to destroy: #{filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list + filtered_gcp_vm_list}")
+    filtered_digitalocean_vm_list = filter_nodes_by_name(digitalocean_vm_list, @env.node_name)
+    summary_filtered_vm_list = filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list +
+      filtered_gcp_vm_list + filtered_digitalocean_vm_list
+    @ui.info("Virtual machines to destroy: #{summary_filtered_vm_list}")
     return unless @ui.prompt('Do you want to continue? [y/n]')[0].casecmp('y').zero?
 
     filtered_vagrant_vm_list.each do |provider, nodes|
@@ -129,6 +134,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
     filtered_aws_vm_list.each { |node| @aws_service.terminate_instance_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
+    filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
   end
 
   # Handle case when command calling with configuration.
@@ -139,7 +145,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       docker_cleaner.destroy_stack(configuration)
       Result.ok('')
     elsif configuration.terraform_configuration?
-      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service)
+      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service)
       result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
       return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
 
@@ -169,6 +175,7 @@ Labels should be separated with commas, do not contain any whitespaces.
 
     @aws_service = @env.aws_service
     @gcp_service = @env.gcp_service
+    @digitalocean_service = @env.digitalocean_service
     if @env.node_name
       destroy_by_node_name
     elsif @env.list
