@@ -4,6 +4,7 @@ require 'date'
 require 'erb'
 require 'socket'
 require_relative '../../models/result'
+require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Digital Ocean provider
 class TerraformDigitaloceanGenerator
@@ -50,14 +51,7 @@ class TerraformDigitaloceanGenerator
   # @param node_name [String] name of the node.
   # @return [String] generated instance name.
   def self.generate_instance_name(configuration_id, node_name)
-    "#{configuration_id}-#{format_string(node_name)}"
-  end
-
-  # Format string (only letters, numbers and hyphen).
-  # @param string [String] string for format
-  # @return [String] formatted string.
-  def self.format_string(string)
-    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
+    "#{configuration_id}-#{TerraformService.format_string(node_name)}"
   end
 
   # Generate key pair name by configuration id.
@@ -156,9 +150,9 @@ class TerraformDigitaloceanGenerator
   # @param node_params [Hash] list of the node parameters
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
-    tags = @configuration_tags.merge(hostname: self.class.format_string(Socket.gethostname),
-                                     username: self.class.format_string(node_params[:user]),
-                                     machinename: self.class.format_string(node_params[:name]))
+    tags = @configuration_tags.merge(hostname: TerraformService.format_string(Socket.gethostname),
+                                     username: TerraformService.format_string(node_params[:user]),
+                                     machinename: TerraformService.format_string(node_params[:name]))
     instance_resources(node_params.merge(tags: tags))
   end
 end

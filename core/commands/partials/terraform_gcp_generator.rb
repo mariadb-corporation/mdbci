@@ -4,6 +4,7 @@ require 'date'
 require 'erb'
 require 'socket'
 require_relative '../../models/result'
+require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Google Cloud Platform provider
 class TerraformGcpGenerator
@@ -52,7 +53,7 @@ class TerraformGcpGenerator
   # @param node_name [String] name of the node.
   # @return [String] generated instance name.
   def self.generate_instance_name(configuration_id, node_name)
-    "#{configuration_id}-#{format_string(node_name)}"
+    "#{configuration_id}-#{TerraformService.format_string(node_name)}"
   end
 
   # Generate the vpc network name.
@@ -67,13 +68,6 @@ class TerraformGcpGenerator
   # @return [String] generated firewall name.
   def self.generate_firewall_name(configuration_id)
     "#{configuration_id}-firewall"
-  end
-
-  # Format string to format supported by Google Cloud Platform (only letters, numbers and hyphen).
-  # @param string [String] string for format
-  # @return [String] formatted string.
-  def self.format_string(string)
-    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
   end
 
   private
@@ -245,9 +239,9 @@ class TerraformGcpGenerator
   # @param node_params [Hash] list of the node parameters
   # @return [String] node definition for the configuration file.
   def generate_node_definition(node_params)
-    labels = @configuration_labels.merge(hostname: self.class.format_string(Socket.gethostname),
-                                         username: self.class.format_string(@user),
-                                         machinename: self.class.format_string(node_params[:name]))
+    labels = @configuration_labels.merge(hostname: TerraformService.format_string(Socket.gethostname),
+                                         username: TerraformService.format_string(@user),
+                                         machinename: TerraformService.format_string(node_params[:name]))
     instance_resources(node_params.merge(labels: labels))
   end
 end
