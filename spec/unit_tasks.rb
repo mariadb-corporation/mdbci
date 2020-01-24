@@ -9,10 +9,8 @@ namespace :run_unit do
   task :task_repos_manager do |t| RakeTaskManager.new(t).run_unit end
   task :task_session do |t| RakeTaskManager.new(t).run_unit end
   task :task_6863_tests_for_6821_show_box do |t| RakeTaskManager.new(t).run_unit end
-  task :task_7185_helper_functions do |t| RakeTaskManager.new(t).run_unit end
   task :task_6641_setup_exit_code do |t| RakeTaskManager.new(t).run_unit end
   task :task_6818_search_box_name_by_config do |t| RakeTaskManager.new(t).run_unit end
-  task :task_7435_comments_in_pull_284 do |t| RakeTaskManager.new(t).run_unit  end
   task :task_show_tests_info do RakeTaskManager.get_failed_tests_info end
 end
 

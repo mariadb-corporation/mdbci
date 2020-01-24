@@ -1,9 +1,5 @@
 namespace :run_unit_parametrized do
 
-  task :task_7222_testing_environment_check do |t| RakeTaskManager.new(t).run_unit_parametrized([DOCKER, LIBVIRT, PPC]) end
-  task :task_7364_devide_param_test_by_config_docker do |t| RakeTaskManager.new(t).run_unit_parametrized([DOCKER]) end
-  task :task_7364_devide_param_test_by_config_libvirt do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT]) end
-  task :task_7364_devide_param_test_by_config_ppc do |t| RakeTaskManager.new(t).run_unit_parametrized([PPC]) end
   task :task_6640_sudo_exit_code do |t| RakeTaskManager.new(t).run_unit_parametrized([DOCKER, LIBVIRT]) end
   task :task_6645_public_keys_exit_code do |t| RakeTaskManager.new(t).run_unit_parametrized([LIBVIRT, PPC]) end
   task :task_6821_show_box_config_node do |t| RakeTaskManager.new(t).run_unit_parametrized([DOCKER])  end
