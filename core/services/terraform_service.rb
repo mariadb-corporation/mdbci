@@ -119,4 +119,11 @@ module TerraformService
       .select { |resource| resource[:type] == resource_type }
       .map { |resource| resource[:name] }
   end
+
+  # Format string (only letters, numbers and hyphen).
+  # @param string [String] string for format
+  # @return [String] formatted string.
+  def self.format_string(string)
+    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
+  end
 end
