@@ -124,10 +124,26 @@ class TerraformDigitaloceanGenerator
       private_networking = true
       <%= tags_block %>
       ssh_keys = [digitalocean_ssh_key.default.fingerprint]
+      connection {
+        type = "ssh"
+        private_key = file("<%= key_file %>")
+        timeout = "10m"
+        agent = false
+        user = "<%= user %>"
+        host = self.ipv4_address
+      }
+      provisioner "remote-exec" {
+          inline = [
+            "adduser --home /home/mdbci --disabled-password --gecos '' --quiet mdbci || adduser  mdbci",
+            "cp -r .ssh /home/mdbci/",
+            "chown mdbci:mdbci /home/mdbci -R",
+            "echo 'mdbci    ALL=(ALL:ALL)  NOPASSWD:ALL' >  /etc/sudoers.d/mdbci"
+          ]
+        }
     }
     output "<%= name %>_network" {
       value = {
-        user = "<%= user %>"
+        user = "mdbci"
         private_ip = digitalocean_droplet.<%= name %>.ipv4_address_private
         public_ip = digitalocean_droplet.<%= name %>.ipv4_address
         key_file = "<%= key_file %>"
