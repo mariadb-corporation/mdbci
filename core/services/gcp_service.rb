@@ -116,4 +116,16 @@ class GcpService
   rescue StandardError => e
     @logger.error(e.message)
   end
+
+  # Fetch machines types list for current zone.
+  # @return [Array<Hash>] instance types in format { ram, cpu, type }.
+  def machine_types_list
+    return [] unless configured?
+
+    @service.fetch_all do |token|
+      @service.list_machine_types(@gcp_config['project'], @gcp_config['zone'], page_token: token)
+    end.map do |machine_type|
+      { ram: machine_type.memory_mb, cpu: machine_type.guest_cpus, type: machine_type.name }
+    end
+  end
 end
