@@ -232,7 +232,7 @@ class TerraformConfigurationGenerator < BaseCommand
     when 'aws'
       Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui, @configuration_path, @ssh_keys))
     when 'gcp'
-      Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path, @ssh_keys))
+      Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path, @ssh_keys, @env.gcp_service))
     when 'digitalocean'
       Result.ok(TerraformDigitaloceanGenerator.new(@configuration_id, @digitalocean_config, @ui, @configuration_path, @ssh_keys))
     else Result.error("Unknown provider #{@provider}")

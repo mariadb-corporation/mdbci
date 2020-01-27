@@ -8,14 +8,18 @@ require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Google Cloud Platform provider
 class TerraformGcpGenerator
+  DEFAULT_CPU_COUNT = 1
+  DEFAULT_MEMORY_SIZE = 1024
+
   # Initializer.
   # @param configuration_id [String] configuration id
   # @param gcp_config [Hash] hash of Google Cloud Platform configuration
   # @param logger [Out] logger
   # @param configuration_path [String] path to directory of generated configuration
   # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
+  # @param gcp_service [GcpService] Google Cloud Compute service
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, gcp_config, logger, configuration_path, ssh_keys)
+  def initialize(configuration_id, gcp_config, logger, configuration_path, ssh_keys, gcp_service)
     @configuration_id = configuration_id
     @gcp_config = gcp_config
     @ui = logger
@@ -24,6 +28,7 @@ class TerraformGcpGenerator
     @public_key_value = ssh_keys[:public_key_value]
     @private_key_file_path = ssh_keys[:private_key_file_path]
     @user = ssh_keys[:login]
+    @gcp_service = gcp_service
   end
 
   # Generate a Terraform configuration file.
@@ -37,8 +42,9 @@ class TerraformGcpGenerator
     file.puts(file_header)
     file.puts(provider_resource)
     node_params.each do |node|
-      print_node_info(node)
-      file.puts(generate_node_definition(node))
+      instance_params = generate_instance_params(node)
+      print_node_info(instance_params)
+      file.puts(instance_resources(instance_params))
     end
     file.puts(vpc_resources) unless use_existing_network?
     file.close
@@ -71,6 +77,19 @@ class TerraformGcpGenerator
   end
 
   private
+
+  # Selects the type of machine depending on the parameters of the cpu and memory.
+  # @param cpu [Number] the number of virtual CPUs that are available to the instance
+  # @param ram [Number] the amount of physical memory available to the instance, defined in MB
+  # @return [String] instance type name.
+  def choose_instance_type(cpu, ram)
+    machine_types = @gcp_service.machine_types_list.sort_by{ |t| [t[:cpu], t[:ram]] }
+    type = machine_types.select do |machine_type|
+      (machine_type[:cpu] >= (cpu || DEFAULT_CPU_COUNT)) &&
+          (machine_type[:ram] >= (ram || DEFAULT_MEMORY_SIZE))
+    end.first || machine_types.last
+    type[:type]
+  end
 
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
@@ -139,18 +158,13 @@ class TerraformGcpGenerator
   end
 
   # Generate instance resources.
-  # @param node_params [Hash] list of the node parameters
+  # @param instance_params [Hash] list of the instance parameters
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
-  def instance_resources(node_params)
-    instance_name = self.class.generate_instance_name(@configuration_id, node_params[:name])
+  def instance_resources(instance_params)
     ssh_metadata = ssh_data
-    network = network_name
     tags_block = tags_partial(instance_tags)
-    labels_block = labels_partial(node_params[:labels])
-    user = @user
-    is_own_vpc = !use_existing_network?
-    key_file = @private_key_file_path
+    labels_block = labels_partial(instance_params[:labels])
     template = ERB.new <<-INSTANCE_RESOURCES
     resource "google_compute_instance" "<%= name %>" {
       name = "<%= instance_name %>"
@@ -185,7 +199,7 @@ class TerraformGcpGenerator
       }
     }
     INSTANCE_RESOURCES
-    template.result(OpenStruct.new(node_params).instance_eval { binding })
+    template.result(OpenStruct.new(instance_params).instance_eval { binding })
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -228,20 +242,28 @@ class TerraformGcpGenerator
   # Returns instance network tags for current configuration.
   # Returns generated new network tags if a new vpc resources need to be generated for the current
   # configuration, otherwise returns network tags configured in the mdbci configuration.
-  # @return [String] network name.
+  # @return [Array<String>] list of instance tags.
   def instance_tags
     return ['allow-all-traffic'] unless use_existing_network?
 
     @gcp_config['tags']
   end
 
-  # Generate a node definition for the configuration file.
+  # Generate a instance params for the configuration file.
   # @param node_params [Hash] list of the node parameters
-  # @return [String] node definition for the configuration file.
-  def generate_node_definition(node_params)
+  # @return [Hash] instance params
+  def generate_instance_params(node_params)
     labels = @configuration_labels.merge(hostname: TerraformService.format_string(Socket.gethostname),
                                          username: TerraformService.format_string(@user),
                                          machinename: TerraformService.format_string(node_params[:name]))
-    instance_resources(node_params.merge(labels: labels))
+    node_params.merge(
+        labels: labels,
+        instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
+        network: network_name,
+        user: @user,
+        is_own_vpc: use_existing_network?,
+        key_file: @private_key_file_path,
+        machine_type: choose_instance_type(node_params['cpu_count']&.to_i, node_params['memory_size']&.to_i)
+    )
   end
 end
