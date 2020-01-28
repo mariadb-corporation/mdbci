@@ -3,75 +3,111 @@
     "provider": "gcp",
     "image": "debian-cloud/debian-9",
     "platform": "debian",
-    "platform_version": "stretch"
+    "platform_version": "stretch",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "debian_buster_gcp": {
     "provider": "gcp",
     "image": "debian-cloud/debian-10",
     "platform": "debian",
-    "platform_version": "buster"
+    "platform_version": "buster",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "centos_6_gcp": {
     "provider": "gcp",
     "image": "centos-cloud/centos-6",
     "platform": "centos",
-    "platform_version": "6"
+    "platform_version": "6",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "centos_7_gcp": {
     "provider": "gcp",
     "image": "centos-cloud/centos-7",
     "platform": "centos",
-    "platform_version": "7"
+    "platform_version": "7",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "centos_8_gcp": {
     "provider": "gcp",
     "image": "centos-cloud/centos-8",
     "platform": "centos",
-    "platform_version": "8"
+    "platform_version": "8",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "ubuntu_bionic_gcp": {
     "provider": "gcp",
     "image": "ubuntu-os-cloud/ubuntu-1804-lts",
     "platform": "ubuntu",
-    "platform_version": "bionic"
+    "platform_version": "bionic",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "ubuntu_xenial_gcp": {
     "provider": "gcp",
     "image": "ubuntu-os-cloud/ubuntu-1604-lts",
     "platform": "ubuntu",
-    "platform_version": "xenial"
+    "platform_version": "xenial",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "rhel_6_gcp": {
     "provider": "gcp",
     "image": "rhel-cloud/rhel-6",
     "platform": "rhel",
     "platform_version": "6",
-    "configure_subscription_manager": "true"
+    "configure_subscription_manager": "true",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "rhel_7_gcp": {
     "provider": "gcp",
     "image": "rhel-cloud/rhel-7",
     "platform": "rhel",
     "platform_version": "7",
-    "configure_subscription_manager": "true"
+    "configure_subscription_manager": "true",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "rhel_8_gcp": {
     "provider": "gcp",
     "image": "rhel-cloud/rhel-8",
     "platform": "rhel",
     "platform_version": "8",
-    "configure_subscription_manager": "true"
+    "configure_subscription_manager": "true",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "sles_12_gcp": {
     "provider": "gcp",
     "image": "suse-cloud/sles-12",
     "platform": "sles",
-    "platform_version": "12"
+    "platform_version": "12",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "sles_15_gcp": {
     "provider": "gcp",
     "image": "suse-cloud/sles-15",
     "platform": "sles",
-    "platform_version": "15"
+    "platform_version": "15",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   }
 }
