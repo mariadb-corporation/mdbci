@@ -159,7 +159,13 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Hash] list of the node parameters.
   def make_node_params(node, box_params)
     symbolic_box_params = Hash[box_params.map { |k, v| [k.to_sym, v] }]
-    { name: node[0].to_s, host: node[1]['hostname'].to_s }.merge(symbolic_box_params)
+    {
+        name: node[0].to_s,
+        host: node[1]['hostname'].to_s,
+        machine_type: node[1]['machine_type']&.to_s,
+        memory_size: node[1]['memory_size']&.to_i,
+        cpu_count: node[1]['cpu_count']&.to_i
+    }.compact.merge(symbolic_box_params)
   end
 
   # Parse path to the products configurations directory from configuration of node.

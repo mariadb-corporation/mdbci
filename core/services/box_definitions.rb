@@ -88,7 +88,7 @@ class BoxDefinitions
 
   REQUIRED_KEYS = %w[provider platform platform_version].freeze
   AWS_KEYS = %w[ami user default_instance_type].freeze
-  GCP_KEYS = %w[image].freeze
+  GCP_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
   DIGITALOCEAN_KEYS = %w[image size user].freeze
 
   # @param box_definition [Hash] check that provided box description contains required keys
