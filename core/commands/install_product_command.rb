@@ -3,6 +3,7 @@
 require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 require_relative '../services/configuration_generator'
+require_relative '../models/result'
 
 # This class installs the product on selected node
 class InstallProduct < BaseCommand
@@ -51,8 +52,13 @@ class InstallProduct < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     @mdbci_config = Configuration.new(@args.first, @env.labels)
-    @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+    result = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+    if result.error?
+      @ui.error(result.error)
+      return ARGUMENT_ERROR_RESULT
+    end
 
+    @network_settings = result.value
     @product = @env.nodeProduct
     @product_version = @env.productVersion
     if @product.nil? || @product_version.nil?

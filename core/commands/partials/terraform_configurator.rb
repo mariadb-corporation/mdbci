@@ -23,11 +23,13 @@ class TerraformConfigurator
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
-    @network_settings = if File.exist?(config.network_settings_file)
-                          NetworkSettings.from_file(config.network_settings_file)
-                        else
-                          NetworkSettings.new
-                        end
+    if File.exist?(config.network_settings_file)
+      result = NetworkSettings.from_file(config.network_settings_file)
+      @network_settings = result.value if result.success?
+      @network_settings = NetworkSettings.new if result.error?
+    else
+      @network_settings = NetworkSettings.new
+    end
     @threads_count = @config.node_names.length
     Workers.pool.resize(@threads_count)
   end

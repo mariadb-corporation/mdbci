@@ -7,7 +7,9 @@ class NetworkSettings
   def self.from_file(path)
     document = IniParse.parse(File.read(path))
     settings = parse_document(document)
-    NetworkSettings.new(settings)
+    Result.ok(NetworkSettings.new(settings))
+  rescue IniParse::ParseError => e
+    Result.error(e.message)
   end
 
   def initialize(settings = {})

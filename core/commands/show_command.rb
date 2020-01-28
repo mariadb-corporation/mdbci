@@ -81,7 +81,10 @@ class ShowCommand < BaseCommand
 
   def show_private_ip_address(params)
     Configuration.from_spec(params.first).and_then do |config|
-      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      result = NetworkSettings.from_file(config.network_settings_file)
+      return result if result.error?
+
+      network_settings = result.value
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['private_ip'])
@@ -92,7 +95,10 @@ class ShowCommand < BaseCommand
 
   def show_network_interface_configuration(params)
     Configuration.from_spec(params.first).and_then do |config|
-      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      result = NetworkSettings.from_file(config.network_settings_file)
+      return result if result.error?
+
+      network_settings = result.value
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['network'])
@@ -103,7 +109,10 @@ class ShowCommand < BaseCommand
 
   def show_box_key_file(params)
     Configuration.from_spec(params.first).and_then do |config|
-      network_settings = NetworkSettings.from_file(config.network_settings_file)
+      result = NetworkSettings.from_file(config.network_settings_file)
+      return result if result.error?
+
+      network_settings = result.value
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['keyfile'])
