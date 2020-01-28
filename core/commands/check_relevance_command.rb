@@ -3,6 +3,7 @@
 require_relative '../models/network_settings'
 require_relative 'base_command'
 require_relative '../services/machine_configurator'
+require_relative '../models/result'
 
 # This class checks relevance network config
 class CheckRelevanceCommand < BaseCommand
@@ -30,7 +31,10 @@ The _network_config file is relevant, if the connection was successful to all no
   def check_relevance
     return Result.error("#{@args} does not exist") unless File.file?(@args)
 
-    network_settings = NetworkSettings.from_file(@args)
+    result = NetworkSettings.from_file(@args)
+    return result if result.error?
+
+    network_settings = result.value
     all_nodes = network_settings.node_name_list
     machine = MachineConfigurator.new(@ui)
     all_nodes.each do |node|

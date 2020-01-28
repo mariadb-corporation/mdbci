@@ -74,7 +74,10 @@ Specifies the command.
       return Result.error('Network settings are not exists for configuration')
     end
 
-    network_settings = NetworkSettings.from_file(@config.network_settings_file)
+    result = NetworkSettings.from_file(@config.network_settings_file)
+    return result if result.error?
+
+    network_settings = result.value
     results = @config.node_names.map do |node|
       node_settings = network_settings.node_settings(node)
       result = TerraformService.ssh_command(node_settings, @command, @ui)

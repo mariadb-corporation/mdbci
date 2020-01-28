@@ -2,6 +2,7 @@
 
 require_relative '../models/network_settings'
 require_relative '../services/machine_configurator'
+require_relative '../models/result'
 require 'net/ssh'
 
 # This class loads ssh keys to configuration or selected nodes.
@@ -65,7 +66,7 @@ class PublicKeysCommand < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
     begin
-      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file).value
     rescue StandardError
       @ui.error('Network settings file is not found for the configuration')
       return ARGUMENT_ERROR_RESULT
