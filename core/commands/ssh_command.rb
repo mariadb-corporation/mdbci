@@ -74,18 +74,16 @@ Specifies the command.
       return Result.error('Network settings are not exists for configuration')
     end
 
-    result = NetworkSettings.from_file(@config.network_settings_file)
-    return result if result.error?
+    NetworkSettings.from_file(@config.network_settings_file).and_then do |network_settings|
+      results = @config.node_names.map do |node|
+        node_settings = network_settings.node_settings(node)
+        result = TerraformService.ssh_command(node_settings, @command, @ui)
+        return Result.error("Error of the executing ssh-command on node #{node}") if result.error?
 
-    network_settings = result.value
-    results = @config.node_names.map do |node|
-      node_settings = network_settings.node_settings(node)
-      result = TerraformService.ssh_command(node_settings, @command, @ui)
-      return Result.error("Error of the executing ssh-command on node #{node}") if result.error?
-
-      result.value.chomp
+        result.value.chomp
+      end
+      Result.ok(results)
     end
-    Result.ok(results)
   end
 
   def ssh_vagrant

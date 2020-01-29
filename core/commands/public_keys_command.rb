@@ -65,12 +65,13 @@ class PublicKeysCommand < BaseCommand
       @ui.error('Please specify the key file to put to nodes')
       return ARGUMENT_ERROR_RESULT
     end
-    begin
-      @network_settings = NetworkSettings.from_file(@mdbci_config.network_settings_file).value
-    rescue StandardError
-      @ui.error('Network settings file is not found for the configuration')
+    result = NetworkSettings.from_file(@mdbci_config.network_settings_file)
+    if result.error?
+      @ui.error(result.error)
       return ARGUMENT_ERROR_RESULT
     end
+
+    @network_settings = result.value
     SUCCESS_RESULT
   end
 
