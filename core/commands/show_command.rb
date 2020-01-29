@@ -81,10 +81,10 @@ class ShowCommand < BaseCommand
 
   def show_private_ip_address(params)
     Configuration.from_spec(params.first).and_then do |config|
-      result = NetworkSettings.from_file(config.network_settings_file)
-      return result if result.error?
-
-      network_settings = result.value
+      NetworkSettings.from_file(config.network_settings_file).and_then do |network_settings|
+        Result.ok([config, network_settings])
+      end
+    end.and_then do |config, network_settings|
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['private_ip'])
