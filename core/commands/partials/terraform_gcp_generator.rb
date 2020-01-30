@@ -218,8 +218,10 @@ class TerraformGcpGenerator
       <% end %>
       network_interface {
         network = "<%= network %>"
-        access_config {
-        }
+        <% unless use_only_private_ip %>
+          access_config {
+          }
+        <% end %>
       }
       metadata = {
         <%= ssh_metadata %>
@@ -229,7 +231,11 @@ class TerraformGcpGenerator
       value = {
         user = "<%= user %>"
         private_ip = google_compute_instance.<%= name %>.network_interface.0.network_ip
-        public_ip = google_compute_instance.<%= name %>.network_interface.0.access_config.0.nat_ip
+        <% if use_only_private_ip %>
+          public_ip = google_compute_instance.<%= name %>.network_interface.0.network_ip
+        <% else %>
+          public_ip = google_compute_instance.<%= name %>.network_interface.0.access_config.0.nat_ip
+        <% end %>
         key_file = "<%= key_file %>"
         hostname = "<%= instance_name %>"
       }
@@ -304,7 +310,8 @@ class TerraformGcpGenerator
         network: network_name,
         user: @user,
         is_own_vpc: !use_existing_network?,
-        key_file: @private_key_file_path
+        key_file: @private_key_file_path,
+        use_only_private_ip: use_only_private_ip?
     )
     choose_instance_type(@gcp_service.machine_types_list, node_params).and_then do |machine_type|
       Result.ok(node_params.merge(machine_type: machine_type))
