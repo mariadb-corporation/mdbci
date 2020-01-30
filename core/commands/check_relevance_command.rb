@@ -29,8 +29,6 @@ The _network_config file is relevant, if the connection was successful to all no
   end
 
   def check_relevance
-    return Result.error("#{@args} does not exist") unless File.file?(@args)
-
     NetworkSettings.from_file(@args).and_then do |network_settings|
       all_nodes = network_settings.node_name_list
       machine = MachineConfigurator.new(@ui)

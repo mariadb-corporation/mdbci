@@ -5,11 +5,17 @@ require 'iniparse'
 # Class provides access to the configuration of machines
 class NetworkSettings
   def self.from_file(path)
+    return Result.error('Incorrect path') if path.nil?
+
     document = IniParse.parse(File.read(path))
     settings = parse_document(document)
     Result.ok(NetworkSettings.new(settings))
   rescue IniParse::ParseError => e
     Result.error(e.message)
+  rescue Errno::ENOENT
+    Result.error("File #{path} not found")
+  rescue Errno::EISDIR
+    Result.error("#{path} is a directory")
   end
 
   def initialize(settings = {})

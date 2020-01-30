@@ -80,11 +80,7 @@ class ShowCommand < BaseCommand
   end
 
   def show_private_ip_address(params)
-    Configuration.from_spec(params.first).and_then do |config|
-      NetworkSettings.from_file(config.network_settings_file).and_then do |network_settings|
-        Result.ok([config, network_settings])
-      end
-    end.and_then do |config, network_settings|
+    configuration_from_file(params).and_then do |config, network_settings|
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['private_ip'])
@@ -94,11 +90,7 @@ class ShowCommand < BaseCommand
   end
 
   def show_network_interface_configuration(params)
-    Configuration.from_spec(params.first).and_then do |config|
-      NetworkSettings.from_file(config.network_settings_file).and_then do |network_settings|
-        Result.ok([config, network_settings])
-      end
-    end.and_then do |config, network_settings|
+    configuration_from_file(params).and_then do |config, network_settings|
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['network'])
@@ -108,11 +100,7 @@ class ShowCommand < BaseCommand
   end
 
   def show_box_key_file(params)
-    Configuration.from_spec(params.first).and_then do |config|
-      NetworkSettings.from_file(config.network_settings_file).and_then do |network_settings|
-        Result.ok([config, network_settings])
-      end
-    end.and_then do |config, network_settings|
+    configuration_from_file(params).and_then do |config, network_settings|
       config.node_names.map do |node|
         node_settings = network_settings.node_settings(node)
         @ui.out(node_settings['keyfile'])
@@ -246,5 +234,13 @@ class ShowCommand < BaseCommand
     versions = boxes.map { |_, definition| definition['platform_version'] }.uniq
     @ui.out(versions)
     true
+  end
+
+  def configuration_from_file(params)
+    Configuration.from_spec(params.first).and_then do |config|
+      NetworkSettings.from_file(config.network_settings_file).and_then do |network_settings|
+        Result.ok([config, network_settings])
+      end
+    end
   end
 end
