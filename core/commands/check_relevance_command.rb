@@ -31,20 +31,18 @@ The _network_config file is relevant, if the connection was successful to all no
   def check_relevance
     return Result.error("#{@args} does not exist") unless File.file?(@args)
 
-    result = NetworkSettings.from_file(@args)
-    return result if result.error?
-
-    network_settings = result.value
-    all_nodes = network_settings.node_name_list
-    machine = MachineConfigurator.new(@ui)
-    all_nodes.each do |node|
-      Timeout.timeout(AVAILABLE_TIME) do
-        machine.run_command(network_settings.node_settings(node), '')
+    NetworkSettings.from_file(@args).and_then do |network_settings|
+      all_nodes = network_settings.node_name_list
+      machine = MachineConfigurator.new(@ui)
+      all_nodes.each do |node|
+        Timeout.timeout(AVAILABLE_TIME) do
+          machine.run_command(network_settings.node_settings(node), '')
+        end
+      rescue StandardError
+        return Result.error("#{@args} is not relevant")
       end
-    rescue StandardError
-      return Result.error("#{@args} is not relevant")
+      @ui.info("#{@args} is relevant")
+      Result.ok("#{@args} is relevant")
     end
-    @ui.info("#{@args} is relevant")
-    Result.ok("#{@args} is relevant")
   end
 end
