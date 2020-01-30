@@ -24,9 +24,10 @@ class TerraformConfigurator
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
     if File.exist?(config.network_settings_file)
-      result = NetworkSettings.from_file(config.network_settings_file)
-      @network_settings = result.value if result.success?
-      @network_settings = NetworkSettings.new if result.error?
+      NetworkSettings.from_file(config.network_settings_file).match(
+        { ok: ->(result) { @network_settings = result },
+          error: -> { @network_settings = NetworkSettings.new } }
+      )
     else
       @network_settings = NetworkSettings.new
     end
