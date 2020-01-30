@@ -143,7 +143,7 @@ Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for
       'network' => read_topic('Please input Google Cloud Platform network name',
                               @configuration.dig('gcp', 'network')),
       'tags' => read_topic('Please input Google Cloud Platform network tags with a space',
-                           @configuration.dig('gcp', 'tags')).split(' '),
+                           @configuration.dig('gcp', 'tags').join(' ')).split(' '),
       'use_only_private_ip' => read_topic('Use only private ip and do not generate external ip for Google Compute instances?', 'y')
                                    .casecmp('y').zero?)
   end
