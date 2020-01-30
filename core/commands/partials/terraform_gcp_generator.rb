@@ -117,8 +117,9 @@ class TerraformGcpGenerator
   # @param ram [Number] the amount of physical memory available to the instance, defined in MB
   # @return [Result::Base] instance type name.
   def instance_type_by_preferences(machine_types_list, cpu, ram)
-    machine_types = machine_types_list.sort_by{ |t| [t[:cpu], t[:ram]] }
-    type = machine_types.select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }.first
+    type = machine_types_list
+               .sort_by{ |t| [t[:cpu], t[:ram]] }
+               .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }.first
     return Result.error('The type of machine that meets the specified parameters can not be found') if type.nil?
 
     Result.ok(type[:type])
