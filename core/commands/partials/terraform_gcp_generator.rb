@@ -38,19 +38,20 @@ class TerraformGcpGenerator
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
+    file.puts(vpc_resources) unless use_existing_network?
+    result = Result.ok('')
     node_params.each do |node|
-      instance_result = generate_instance_params(node).and_then do |instance_params|
+       result = generate_instance_params(node).and_then do |instance_params|
         print_node_info(instance_params)
         file.puts(instance_resources(instance_params))
         Result.ok('')
       end
-      raise instance_result.error if instance_result.error?
+      break if result.error?
     end
-    file.puts(vpc_resources) unless use_existing_network?
   rescue StandardError => e
     Result.error(e.message)
   else
-    Result.ok('')
+    result
   ensure
     file.close unless file.nil? || file.closed?
   end
