@@ -266,6 +266,12 @@ class TerraformGcpGenerator
     @gcp_config['use_existing_network']
   end
 
+  # Returns true if an external ip generation is not required for a new instance.
+  # @return [Boolean] result.
+  def use_only_private_ip?
+    @gcp_config['use_only_private_ip']
+  end
+
   # Returns network name for current configuration if a new vpc resources need to be generated for the current
   # configuration, otherwise returns network name configured in the mdbci configuration.
   # @return [String] network name.
