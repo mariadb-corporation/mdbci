@@ -296,7 +296,7 @@ class TerraformGcpGenerator
         instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
         network: network_name,
         user: @user,
-        is_own_vpc: use_existing_network?,
+        is_own_vpc: !use_existing_network?,
         key_file: @private_key_file_path
     )
     choose_instance_type(@gcp_service.machine_types_list, node_params).and_then do |machine_type|
