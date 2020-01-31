@@ -153,15 +153,28 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   def create_libvirt_pool
     delete_libvirt_pool if run_command('sudo virsh pool-info default')[:value].success?
     images_dir = "#{ENV['HOME']}/libvirt-images"
-    result = run_sequence([
-                   "sudo mkdir -p #{images_dir}",
-                   "sudo virsh pool-create-as default dir --target #{images_dir}"
-                 ])[:value]
+    all_commands = [
+      "sudo mkdir -p #{images_dir}",
+      "sudo virsh pool-create-as default dir --target #{images_dir}"
+    ] + all_allow_commands(images_dir)
+    result = run_sequence(all_commands)[:value]
     if result.success?
       Result.ok('Successfully installed vagrant plugins')
     else
       Result.error('Could not install vagrant plugins')
     end
+  end
+
+  # Creates a list of chmod commands
+  # @returns [Array] commands
+  def all_allow_commands(images_dir)
+    all_commands = []
+    current_command = 'sudo chmod o+r ' + images_dir
+    images_dir.count('/').times do
+      all_commands << current_command
+      current_command += '/..'
+    end
+    all_commands
   end
 
   # Deletes previously setup environment
