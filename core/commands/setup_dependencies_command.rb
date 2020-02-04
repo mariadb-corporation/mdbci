@@ -156,7 +156,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
     all_commands = [
       "sudo mkdir -p #{images_dir}",
       "sudo virsh pool-create-as default dir --target #{images_dir}"
-    ] + all_allow_commands(images_dir)
+    ].concat(allow_others_recursively_commands(images_dir))
     result = run_sequence(all_commands)[:value]
     if result.success?
       Result.ok('Successfully installed vagrant plugins')
@@ -165,9 +165,10 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
     end
   end
 
-  # Creates a list of chmod commands
+  # Creates a list of commands that give other users read access
+  # to the libvirt-images directory and directories located on the path to it
   # @returns [Array] commands
-  def all_allow_commands(images_dir)
+  def allow_others_recursively_commands(images_dir)
     all_commands = []
     current_command = 'sudo chmod o+r ' + images_dir
     images_dir.count('/').times do
