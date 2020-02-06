@@ -69,3 +69,9 @@ execute 'Chown ~.gnupg/ directory to sudo user' do
   command "sudo chown -R #{user}: #{gnupg_dir}"
   only_if { Dir.exist?(gnupg_dir) }
 end
+
+group 'docker' do
+  action :modify
+  members user
+  append true
+end
