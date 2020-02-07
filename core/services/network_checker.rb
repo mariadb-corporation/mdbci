@@ -23,9 +23,14 @@ module NetworkChecker
            else
              :wget
            end
-    result = resources.all? do |resource|
-      check_resource?(tool, machine_configurator, machine, resource, logger)
+    result = true
+    table = ['Network resource availability check:']
+    resources.each do |resource|
+      unless check_resource?(tool, machine_configurator, machine, resource, logger, table)
+        result = false
+      end
     end
+    print_table(table, logger)
     return Result.error('Network resources not available!') unless result
 
     Result.ok(machine)
@@ -45,18 +50,18 @@ module NetworkChecker
     YAML.safe_load(File.read(path))
   end
 
-  def self.check_resource?(tool, machine_configurator, machine, resource, logger)
+  def self.check_resource?(tool, machine_configurator, machine, resource, logger, availability_table)
     result = case tool
              when :curl
                check_resource_by_curl?(machine_configurator, machine, resource, logger)
              else
                check_resource_by_wget?(machine_configurator, machine, resource, logger)
              end
-    if result
-      logger.debug("#{resource} is available on the remote server")
-    else
-      logger.error("#{resource} is not available on the remote server")
-    end
+    availability_table << if result
+                            "#{resource}: Ok"
+                          else
+                            "#{resource}: Error"
+                          end
     result
   end
 
@@ -90,5 +95,11 @@ module NetworkChecker
     end
     logger.debug("#{tool} is not available")
     false
+  end
+
+  def self.print_table(table, logger)
+    table.each do |string|
+      logger.debug(string)
+    end
   end
 end
