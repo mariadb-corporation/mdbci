@@ -147,15 +147,12 @@ class VagrantConfigurator
       next unless VagrantService.node_running?(node, logger)
 
       @network_config.add_nodes([node])
-      if NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger).error?
-        logger.error('Network resources not available!')
-        return false
-      end
+      checker_result = NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger)
+      return checker_result if checker_result.error?
 
-      return true if configure(node, logger)
+      return SUCCESS_RESULT if configure(node, logger)
     end
-    @ui.error("Node '#{node}' was not configured.")
-    false
+    Result.error("Node '#{node}' was not configured.")
   end
 
   # Get the logger. Depending on the number of threads returns a unique logger or @ui.
@@ -180,7 +177,7 @@ class VagrantConfigurator
 
   # Brings up nodes
   #
-  # @return [Number] execution status
+  # @return [Result] execution status
   def up
     nodes = @config.node_names
     run_in_directory(@config.path) do
@@ -188,7 +185,9 @@ class VagrantConfigurator
       @network_config.store_network_config
       up_results = Workers.map(nodes) { |node| up_node(node) }
       up_results.each { |up_result| up_result[1].print_to_stdout } if use_log_storage?
-      return ERROR_RESULT unless up_results.detect { |up_result| !up_result[0] }.nil?
+      up_results.each do |up_result|
+        return up_result[0] if up_result[0].error?
+      end
     end
     @network_config.generate_config_information
     SUCCESS_RESULT
