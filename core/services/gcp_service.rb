@@ -6,6 +6,7 @@ require 'google/apis/compute_v1'
 # This class allows to execute commands in accordance to the Google Cloud Compute
 class GcpService
   SCOPE = %w[https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/compute]
+  Google::Apis::RequestOptions.default.retries = 5
 
   def initialize(gcp_config, logger)
     @logger = logger
