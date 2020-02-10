@@ -38,7 +38,6 @@ require_relative 'commands/check_relevance_command'
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
 # These responsibilites should be split between several classes.
 class Session
-  attr_reader :box_definitions
   attr_accessor :configs
   attr_accessor :configuration_file
   attr_accessor :versions
@@ -49,7 +48,6 @@ class Session
   attr_accessor :override
   attr_accessor :isSilent
   attr_accessor :command
-  attr_accessor :repos
   attr_accessor :repo_dir
   attr_accessor :mdbciNodes # mdbci nodes
   attr_accessor :attempts
@@ -119,13 +117,27 @@ EOF
     $out.info('Loading MDBCI configuration file')
     @tool_config = ToolConfiguration.load
     $out.info('Loading repository configuration files')
-    @box_definitions = BoxDefinitions.new(@boxes_location)
-    @repos = RepoManager.new($out, @box_definitions, @repo_dir)
     @aws_service = AwsService.new(@tool_config['aws'], $out)
     @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
     @gcp_service = GcpService.new(@tool_config['gcp'], $out)
     @rhel_credentials = @tool_config['rhel']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
+  end
+
+  def repos
+    if @repos.nil?
+      @repos = RepoManager.new($out, box_definitions, @repo_dir)
+    else
+      @repos
+    end
+  end
+
+  def box_definitions
+    if @box_definitions.nil?
+      @box_definitions = BoxDefinitions.new(@boxes_location)
+    else
+      @box_definitions
+    end
   end
 
   # Search for a configuration file in all known configuration locations that include
