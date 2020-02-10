@@ -71,4 +71,16 @@ class DigitaloceanService
 
     @client.ssh_keys.delete(id: ssh_key_id)
   end
+
+  # Fetch machines types list .
+  # @return [Array<Hash>] instance types in format { ram, cpu, type, disk, price_hourly }.
+  def machine_types_list
+    return [] unless configured?
+
+    @client.sizes.all.select do |size|
+      size.available && size.regions.include?(@digitalocean_config['region'])
+    end.map do |size|
+      { ram: size.memory, cpu: size.vcpus, type: size.slug, disk: size.disk, price_hourly: size.price_hourly }
+    end
+  end
 end

@@ -4,10 +4,13 @@ require 'date'
 require 'erb'
 require 'socket'
 require_relative '../../models/result'
+require_relative '../../services/cloud_services'
 require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Google Cloud Platform provider
 class TerraformGcpGenerator
+  include CloudServices
+
   # Initializer.
   # @param configuration_id [String] configuration id
   # @param gcp_config [Hash] hash of Google Cloud Platform configuration
@@ -41,7 +44,7 @@ class TerraformGcpGenerator
     file.puts(vpc_resources) unless use_existing_network?
     result = Result.ok('')
     node_params.each do |node|
-       result = generate_instance_params(node).and_then do |instance_params|
+      result = generate_instance_params(node).and_then do |instance_params|
         print_node_info(instance_params)
         file.puts(instance_resources(instance_params))
         Result.ok('')
@@ -79,53 +82,6 @@ class TerraformGcpGenerator
   end
 
   private
-
-  # Checks for the existence of a machine type in the list of machine types.
-  # @param machine_types_list [Array<Hash>] list of machine types in format { cpu, ram, type }
-  # @param machine_type [String] machine type name
-  # @return [Boolean] true if machine type is available.
-  def machine_type_available?(machine_types_list, machine_type)
-    !machine_types_list.detect { |type| type[:type] == machine_type }.nil?
-  end
-
-  # Selects the type of machine depending on the node parameters.
-  # @param machine_types_list [Array<Hash>] list of machine types in format { cpu, ram, type }
-  # @param node [Hash] node parameters
-  # @return [Result::Base] instance type name.
-  def choose_instance_type(machine_types_list, node)
-    if node[:machine_type].nil? && node[:cpu_count].nil? && node[:memory_size].nil?
-      if machine_type_available?(machine_types_list, node[:default_machine_type])
-        Result.ok(node[:default_machine_type])
-      else
-        cpu = node[:default_cpu_count].to_i
-        ram = node[:default_memory_size].to_i
-        instance_type_by_preferences(machine_types_list, cpu, ram)
-      end
-    elsif node[:machine_type].nil?
-      cpu = node[:cpu_count]&.to_i || node[:default_cpu_count].to_i
-      ram = node[:memory_size]&.to_i || node[:default_memory_size].to_i
-      instance_type_by_preferences(machine_types_list, cpu, ram)
-    elsif machine_type_available?(machine_types_list, node[:machine_type])
-      Result.ok(node[:machine_type])
-    else
-      Result.error("#{node[:machine_type]} machine type not available in current region")
-    end
-  end
-
-  # Selects the type of machine depending on the parameters of the cpu and memory.
-  # @param machine_types_list [Array<Hash>] list of machine types in format { cpu, ram, type }
-  # @param cpu [Number] the number of virtual CPUs that are available to the instance
-  # @param ram [Number] the amount of physical memory available to the instance, defined in MB
-  # @return [Result::Base] instance type name.
-  def instance_type_by_preferences(machine_types_list, cpu, ram)
-    type = machine_types_list
-               .sort_by{ |t| [t[:cpu], t[:ram]] }
-               .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }
-               .first
-    return Result.error('The type of machine that meets the specified parameters can not be found') if type.nil?
-
-    Result.ok(type[:type])
-  end
 
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
@@ -313,7 +269,7 @@ class TerraformGcpGenerator
         key_file: @private_key_file_path,
         use_only_private_ip: use_only_private_ip?
     )
-    choose_instance_type(@gcp_service.machine_types_list, node_params).and_then do |machine_type|
+    CloudServices.choose_instance_type(@gcp_service.machine_types_list, node_params).and_then do |machine_type|
       Result.ok(node_params.merge(machine_type: machine_type))
     end
   end

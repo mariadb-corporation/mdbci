@@ -4,18 +4,22 @@ require 'date'
 require 'erb'
 require 'socket'
 require_relative '../../models/result'
+require_relative '../../services/cloud_services'
 require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Digital Ocean provider
 class TerraformDigitaloceanGenerator
+  include CloudServices
+
   # Initializer.
   # @param configuration_id [String] configuration id
   # @param digitalocean_config [Hash] hash of Digital Ocean configuration
   # @param logger [Out] logger
   # @param configuration_path [String] path to directory of generated configuration
   # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
+  # @param digitalocean_service [DigitaloceanService] Digital Ocean service
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, digitalocean_config, logger, configuration_path, ssh_keys)
+  def initialize(configuration_id, digitalocean_config, logger, configuration_path, ssh_keys, digitalocean_service)
     @configuration_id = configuration_id
     @digitalocean_config = digitalocean_config
     @ui = logger
@@ -23,6 +27,7 @@ class TerraformDigitaloceanGenerator
     @configuration_tags = { configuration_id: @configuration_id }
     @public_key_value = ssh_keys[:public_key_value]
     @private_key_file_path = ssh_keys[:private_key_file_path]
+    @digitalocean_service = digitalocean_service
   end
 
   # Generate a Terraform configuration file.
@@ -35,15 +40,21 @@ class TerraformDigitaloceanGenerator
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
+    result = Result.ok('')
     node_params.each do |node|
-      print_node_info(node)
-      file.puts(generate_node_definition(node))
+      result = generate_instance_params(node).and_then do |instance_params|
+        print_node_info(instance_params)
+        file.puts(instance_resources(instance_params))
+        Result.ok('')
+      end
+      break if result.error?
     end
-    file.close
   rescue StandardError => e
     Result.error(e.message)
   else
-    Result.ok('')
+    result
+  ensure
+    file.close unless file.nil? || file.closed?
   end
 
   # Generate the instance name.
@@ -72,7 +83,7 @@ class TerraformDigitaloceanGenerator
   # @param node_params [Hash] list of the node parameters.
   def print_node_info(node_params)
     @ui.info("Digital Ocean definition for host: #{node_params[:host]}, "\
-             "image:#{node_params[:image]}, size:#{node_params[:size]}")
+             "image:#{node_params[:image]}, size:#{node_params[:machine_type]}")
   end
 
   def file_header
@@ -111,16 +122,13 @@ class TerraformDigitaloceanGenerator
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(node_params)
-    instance_name = self.class.generate_instance_name(@configuration_id, node_params[:name])
     tags_block = tags_partial(node_params[:tags])
-    region = @digitalocean_config['region']
-    key_file = @private_key_file_path
     template = ERB.new <<-INSTANCE_RESOURCES
     resource "digitalocean_droplet" "<%= name %>" {
       image = "<%= image %>"
       name = "<%= instance_name %>"
       region = "<%= region %>"
-      size = "<%= size %>"
+      size = "<%= machine_type %>"
       private_networking = true
       <%= tags_block %>
       ssh_keys = [digitalocean_ssh_key.default.fingerprint]
@@ -162,13 +170,21 @@ class TerraformDigitaloceanGenerator
     "tags = [#{tags.map { |name, value| "\"#{name}-#{value}\"" }.join(', ')}]"
   end
 
-  # Generate a node definition for the configuration file.
+  # Generate a instance params for the configuration file.
   # @param node_params [Hash] list of the node parameters
-  # @return [String] node definition for the configuration file.
-  def generate_node_definition(node_params)
+  # @return [Result::Base] instance params
+  def generate_instance_params(node_params)
     tags = @configuration_tags.merge(hostname: TerraformService.format_string(Socket.gethostname),
                                      username: TerraformService.format_string(node_params[:user]),
                                      machinename: TerraformService.format_string(node_params[:name]))
-    instance_resources(node_params.merge(tags: tags))
+    node_params = node_params.merge(
+        instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
+        tags: tags,
+        key_file: @private_key_file_path,
+        region: @digitalocean_config['region']
+    )
+    CloudServices.choose_instance_type(@digitalocean_service.machine_types_list, node_params).and_then do |machine_type|
+      Result.ok(node_params.merge(machine_type: machine_type))
+    end
   end
 end
