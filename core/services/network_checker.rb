@@ -23,16 +23,14 @@ module NetworkChecker
            else
              :wget
            end
-    result = true
-    table = ['Network resource availability check:']
+    table = {}
     resources.each do |resource|
-      unless check_resource?(tool, machine_configurator, machine, resource, logger, table)
-        result = false
-      end
+      check_resource?(tool, machine_configurator, machine, resource, logger, table)
     end
-    print_table(table, logger)
+    result = parse_table(table, logger)
     return Result.error('Network resources not available!') unless result
 
+    logger.debug('Network resources available!')
     Result.ok(machine)
   end
 
@@ -57,12 +55,11 @@ module NetworkChecker
              else
                check_resource_by_wget?(machine_configurator, machine, resource, logger)
              end
-    availability_table << if result
-                            "#{resource}: Ok"
-                          else
-                            "#{resource}: Error"
-                          end
-    result
+    availability_table[resource] = if result
+                                     'Ok'
+                                   else
+                                     'Error'
+                                   end
   end
 
   # Check single resource for availability by curl
@@ -97,9 +94,14 @@ module NetworkChecker
     false
   end
 
-  def self.print_table(table, logger)
-    table.each do |string|
-      logger.debug(string)
+  # Prints table and return results of the network resource availability check
+  def self.parse_table(table, logger)
+    result = true
+    logger.debug('Network resource availability check:')
+    table.each do |resource, result_string|
+      logger.debug("#{resource}: #{result_string}")
+      result = false if result_string == 'Error'
     end
+    result
   end
 end
