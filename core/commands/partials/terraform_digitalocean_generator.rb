@@ -9,8 +9,6 @@ require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Digital Ocean provider
 class TerraformDigitaloceanGenerator
-  include CloudServices
-
   # Initializer.
   # @param configuration_id [String] configuration id
   # @param digitalocean_config [Hash] hash of Digital Ocean configuration
@@ -19,7 +17,9 @@ class TerraformDigitaloceanGenerator
   # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
   # @param digitalocean_service [DigitaloceanService] Digital Ocean service
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, digitalocean_config, logger, configuration_path, ssh_keys, digitalocean_service)
+  # rubocop:disable Metrics/ParameterLists
+  def initialize(configuration_id, digitalocean_config, logger,
+                 configuration_path, ssh_keys, digitalocean_service)
     @configuration_id = configuration_id
     @digitalocean_config = digitalocean_config
     @ui = logger
@@ -29,11 +29,13 @@ class TerraformDigitaloceanGenerator
     @private_key_file_path = ssh_keys[:private_key_file_path]
     @digitalocean_service = digitalocean_service
   end
+  # rubocop:enable Metrics/ParameterLists
 
   # Generate a Terraform configuration file.
   # @param node_params [Array<Hash>] list of node params.
   # @param configuration_file_path [String] path to generated Terraform infrastructure file.
   # @return [Result::Base] generation result.
+  # rubocop:disable Metrics/MethodLength
   def generate_configuration_file(node_params, configuration_file_path)
     return Result.error('Digital Ocean is not configured') if @digitalocean_config.nil?
 
@@ -56,6 +58,7 @@ class TerraformDigitaloceanGenerator
   ensure
     file.close unless file.nil? || file.closed?
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Generate the instance name.
   # @param configuration_id [String] configuration id.
@@ -174,17 +177,20 @@ class TerraformDigitaloceanGenerator
   # @param node_params [Hash] list of the node parameters
   # @return [Result::Base] instance params
   def generate_instance_params(node_params)
-    tags = @configuration_tags.merge(hostname: TerraformService.format_string(Socket.gethostname),
-                                     username: TerraformService.format_string(node_params[:user]),
-                                     machinename: TerraformService.format_string(node_params[:name]))
+    tags = @configuration_tags
+           .merge({ hostname: TerraformService.format_string(Socket.gethostname),
+                    machinename: TerraformService.format_string(node_params[:name]),
+                    username: TerraformService.format_string(node_params[:user]) })
     node_params = node_params.merge(
+      {
         instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
         tags: tags,
         key_file: @private_key_file_path,
         region: @digitalocean_config['region']
+      }
     )
-    CloudServices.choose_instance_type(@digitalocean_service.machine_types_list, node_params).and_then do |machine_type|
-      Result.ok(node_params.merge(machine_type: machine_type))
-    end
+    CloudServices
+      .choose_instance_type(@digitalocean_service.machine_types_list, node_params)
+      .and_then { |machine_type| Result.ok(node_params.merge({ machine_type: machine_type })) }
   end
 end

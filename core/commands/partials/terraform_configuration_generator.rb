@@ -12,7 +12,8 @@ require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
 
-# The class generates the MDBCI configuration for AWS provider nodes for use in pair with Terraform backend
+# The class generates the MDBCI configuration for AWS provider nodes for use in pair
+# with Terraform backend
 class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
   KEY_FILE_NAME = 'maxscale.pem'
@@ -66,21 +67,26 @@ class TerraformConfigurationGenerator < BaseCommand
     private_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
     File.open(private_key_file_path, 'w') { |file| file.write(key.to_pem) }
     File.chmod(0o400, private_key_file_path)
-    @ssh_keys = { public_key_value: public_key_value, private_key_file_path: private_key_file_path, login: login }
+    @ssh_keys = { public_key_value: public_key_value,
+                  private_key_file_path: private_key_file_path,
+                  login: login }
   end
 
   # Make product config and recipe name for install it to the VM.
   #
   # @param product [Hash] parameters of product to configure from configuration file
   # @param box [String] name of the box
-  # @return [Result<Hash>] recipe name and product config in format { recipe: String, config: Hash }.
+  # @return [Result::Base<Hash>] recipe name and product config
+  #                              in format { recipe: String, config: Hash }.
   # rubocop:disable Metrics/MethodLength
   def make_product_config_and_recipe_name(product, box)
     repo = nil
     if !product['repo'].nil?
       repo_name = product['repo']
       @ui.info("Repo name: #{repo_name}")
-      return Result.error("Unknown key for repo #{repo_name} will be skipped") unless @env.repos.knownRepo?(repo_name)
+      unless @env.repos.knownRepo?(repo_name)
+        return Result.error("Unknown key for repo #{repo_name} will be skipped")
+      end
 
       @ui.info("Repo specified [#{repo_name}] (CORRECT), other product params will be ignored")
       repo = @env.repos.getRepo(repo_name)
@@ -90,12 +96,13 @@ class TerraformConfigurationGenerator < BaseCommand
     end
     recipe_name = @env.repos.recipe_name(product_name)
     if product_name != 'packages'
-      ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo, @provider)
+      ConfigurationGenerator.generate_product_config(@env.repos, product_name,
+                                                     product, box, repo, @provider)
     else
       Result.ok({})
     end.and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
-      Result.ok(recipe: recipe_name, config: product_config)
+      Result.ok({ recipe: recipe_name, config: product_config })
     end
   end
   # rubocop:enable Metrics/MethodLength
@@ -103,9 +110,10 @@ class TerraformConfigurationGenerator < BaseCommand
   # Generate the role description for the specified node.
   #
   # @param name [String] internal name of the machine specified in the template
-  # @param products [Array<Hash>] list of parameters of products to configure from configuration file
+  # @param products [Array<Hash>] list of parameters of products to configure
+  #                               from configuration file
   # @param box [String] name of the box
-  # @return [Result<String>] pretty formatted role description in JSON format
+  # @return [Result::Base<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box)
     products_configs = {}
     recipes_names = []
@@ -118,18 +126,21 @@ class TerraformConfigurationGenerator < BaseCommand
         recipes_names << recipe_and_config[:recipe]
       end
     end
-    role_description = ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
-                                                                   box, @env.box_definitions, @env.rhel_credentials)
+    role_description = ConfigurationGenerator.generate_json_format(
+      name, recipes_names, products_configs, box, @env.box_definitions, @env.rhel_credentials
+    )
     Result.ok(role_description)
   end
 
   # Check for the existence of a path, create it if path is not exists or clear path
   # if it is exists and override parameter is true.
   #
-  # @return [Bool] false if directory path is already exists and override is false, otherwise - true.
+  # @return [Bool] false if directory path is already exists and override is false,
+  #                otherwise - true.
   def check_path
     if Dir.exist?(@configuration_path) && !@override
-      @ui.error("Folder already exists: #{@configuration_path}. Please specify another name or delete")
+      @ui.error("Folder already exists: #{@configuration_path}."\
+                ' Please specify another name or delete')
       return false
     end
     FileUtils.rm_rf(@configuration_path)
@@ -160,11 +171,11 @@ class TerraformConfigurationGenerator < BaseCommand
   def make_node_params(node, box_params)
     symbolic_box_params = Hash[box_params.map { |k, v| [k.to_sym, v] }]
     {
-        name: node[0].to_s,
-        host: node[1]['hostname'].to_s,
-        machine_type: node[1]['machine_type']&.to_s,
-        memory_size: node[1]['memory_size']&.to_i,
-        cpu_count: node[1]['cpu_count']&.to_i
+      name: node[0].to_s,
+      host: node[1]['hostname'].to_s,
+      machine_type: node[1]['machine_type']&.to_s,
+      memory_size: node[1]['memory_size']&.to_i,
+      cpu_count: node[1]['cpu_count']&.to_i
     }.compact.merge(symbolic_box_params)
   end
 
@@ -181,7 +192,12 @@ class TerraformConfigurationGenerator < BaseCommand
   # @param node [Array] internal name of the machine specified in the template
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node)
-    [{ 'name' => 'packages' }].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    [{ 'name' => 'packages' }]
+      .push(node[1]['product'])
+      .push(node[1]['products'])
+      .flatten
+      .compact
+      .uniq
   end
 
   # Make a list of node parameters, generate the role file content.
@@ -194,7 +210,7 @@ class TerraformConfigurationGenerator < BaseCommand
     products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box).and_then do |role|
-      Result.ok(node_params: node_params, role_file_content: role)
+      Result.ok({ node_params: node_params, role_file_content: role })
     end
   end
 
@@ -205,12 +221,13 @@ class TerraformConfigurationGenerator < BaseCommand
   def create_role_files(node_name, role_file_content)
     IO.write(self.class.role_file_name(@configuration_path, node_name), role_file_content)
     IO.write(self.class.node_config_file_name(@configuration_path, node_name),
-             JSON.pretty_generate('run_list' => ["role[#{node_name}]"]))
+             JSON.pretty_generate({ 'run_list' => ["role[#{node_name}]"] }))
   end
 
   # Generate a Terraform configuration file.
   #
   # @return [Result::Base] generation result.
+  # rubocop:disable Metrics/MethodLength
   def generate_configuration_file
     nodes_info = @config.map do |node|
       next if node[1]['box'].nil?
@@ -220,15 +237,18 @@ class TerraformConfigurationGenerator < BaseCommand
 
       node_info.value
     end.compact
-
     node_params = nodes_info.map { |node_info| node_info[:node_params] }
     retrieve_configuration_file_generator.and_then do |generator|
-      generator.generate_configuration_file(node_params, File.join(@configuration_path, CONFIGURATION_FILE_NAME))
+      generator.generate_configuration_file(node_params,
+                                            File.join(@configuration_path, CONFIGURATION_FILE_NAME))
     end.and_then do
-      nodes_info.each { |node_info| create_role_files(node_info[:node_params][:name], node_info[:role_file_content]) }
+      nodes_info.each do |node_info|
+        create_role_files(node_info[:node_params][:name], node_info[:role_file_content])
+      end
       Result.ok('')
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Get configuration file generator by nodes provider.
   #
@@ -236,20 +256,22 @@ class TerraformConfigurationGenerator < BaseCommand
   def retrieve_configuration_file_generator
     case @provider
     when 'aws'
-      Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui, @configuration_path, @ssh_keys))
+      Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui,
+                                          @configuration_path, @ssh_keys))
     when 'gcp'
       Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path,
                                           @ssh_keys, @env.gcp_service))
     when 'digitalocean'
       Result.ok(TerraformDigitaloceanGenerator.new(@configuration_id, @digitalocean_config, @ui,
-                                                   @configuration_path, @ssh_keys, @env.digitalocean_service))
+                                                   @configuration_path, @ssh_keys,
+                                                   @env.digitalocean_service))
     else Result.error("Unknown provider #{@provider}")
     end
   end
 
   # Check parameters and generate a Terraform configuration file.
   #
-  # @return [Integer] SUCCESS_RESULT if the execution of the method passed without errors,
+  # @return [Result::Base] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
     checks_result = check_path && check_nodes_names
@@ -258,7 +280,9 @@ class TerraformConfigurationGenerator < BaseCommand
     generate_ssh_keys
     generation_result = generate_configuration_file.and_then do
       TerraformService.fmt(@ui, @configuration_path)
-      return SUCCESS_RESULT unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
+      unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
+        return SUCCESS_RESULT
+      end
 
       Result.error('Generated configuration file is empty!')
     end
@@ -288,8 +312,9 @@ class TerraformConfigurationGenerator < BaseCommand
   #
   # @return [Boolean] true if all boxes exist.
   def check_nodes_boxes_and_setup_provider
-    nodes = @config.map { |node| %w[aws_config cookbook_path].include?(node[0]) ? nil : node }.compact.to_h
-    nodes.each do |node_name, node_params|
+    nodes = @config.map do |node|
+      %w[aws_config cookbook_path].include?(node[0]) ? nil : node
+    end.compact.to_h.each do |node_name, node_params|
       box = node_params['box'].to_s
       if box.empty?
         @ui.error("Box in #{node_name} is not found")

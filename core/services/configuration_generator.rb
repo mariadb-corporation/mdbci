@@ -7,7 +7,7 @@ module ConfigurationGenerator
   # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param name [String] node name
   # @param product_configs [Hash] list of the product parameters
-  # @param recipes_names [String] name of the recipe
+  # @param recipes_names [Array<String>] name of the recipe
   # @param box [String] name of the box
   # @param rhel_credentials redentials for subscription manager
   def self.generate_json_format(name, recipes_names, product_configs = {},
