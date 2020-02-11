@@ -56,6 +56,13 @@ module NetworkChecker
     end
   end
 
+  # Randomly selects three resources
+  # @return [Array<String>] the list of resources
+  def self.random_resources(resources)
+    shuffle_resources = resources.shuffle
+    shuffle_resources.first(3)
+  end
+
   # Check single resource for availability by curl
   # @return [Boolean] true if resource available
   def self.check_resource_by_curl?(machine_configurator, machine, resource, logger)
