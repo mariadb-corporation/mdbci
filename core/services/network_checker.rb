@@ -25,10 +25,10 @@ module NetworkChecker
            end
     table = {}
     resources.each do |resource|
-      check_resource?(tool, machine_configurator, machine, resource, logger, table)
+      table[resource] = check_resource?(tool, machine_configurator, machine, resource, logger)
     end
-    result = parse_table(table, logger)
-    return Result.error('Network resources not available!') unless result
+    print_table(table, logger)
+    return Result.error('Network resources not available!') unless test_result(table)
 
     logger.debug('Network resources available!')
     Result.ok(machine)
@@ -48,22 +48,17 @@ module NetworkChecker
     YAML.safe_load(File.read(path))
   end
 
-  def self.check_resource?(tool, machine_configurator, machine, resource, logger, availability_table)
-    result = case tool
-             when :curl
-               check_resource_by_curl?(machine_configurator, machine, resource, logger)
-             else
-               check_resource_by_wget?(machine_configurator, machine, resource, logger)
-             end
-    availability_table[resource] = if result
-                                     'Ok'
-                                   else
-                                     'Error'
-                                   end
+  def self.check_resource?(tool, machine_configurator, machine, resource, logger)
+    case tool
+    when :curl
+      check_resource_by_curl?(machine_configurator, machine, resource, logger)
+    else
+      check_resource_by_wget?(machine_configurator, machine, resource, logger)
+    end
   end
 
   # Check single resource for availability by curl
-  #  @return [Boolean] true if resource available
+  # @return [Boolean] true if resource available
   def self.check_resource_by_curl?(machine_configurator, machine, resource, logger)
     result = machine_configurator.run_command(machine, "curl -Is #{resource} | head -n 1", logger)
     curl_responce_successfull?(result.value)
@@ -94,14 +89,23 @@ module NetworkChecker
     false
   end
 
-  # Prints table and return results of the network resource availability check
-  def self.parse_table(table, logger)
-    result = true
+  def self.print_table(table, logger)
     logger.debug('Network resource availability check:')
     table.each do |resource, result_string|
-      logger.debug("#{resource}: #{result_string}")
-      result = false if result_string == 'Error'
+      if result_string
+        logger.debug("#{resource}: Ok")
+      else
+        logger.debug("#{resource}: Error")
+      end
     end
-    result
+  end
+
+  # @return [Boolean] false if one of the results failed
+  def self.test_result(table)
+    table.each do |_resource, result_string|
+      return false unless result_string
+    end
+    true
   end
 end
+
