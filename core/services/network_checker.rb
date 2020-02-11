@@ -23,7 +23,7 @@ module NetworkChecker
            else
              :wget
            end
-    result = random_resources(resources).all? do |resource|
+    result = resources.all? do |resource|
       check_resource?(tool, machine_configurator, machine, resource, logger)
     end
     return Result.error('Network resources not available!') unless result
@@ -58,13 +58,6 @@ module NetworkChecker
       logger.error("#{resource} is not available on the remote server")
     end
     result
-  end
-
-  # Randomly selects three resources
-  # @return [Array<String>] the list of resources
-  def self.random_resources(resources)
-    shuffle_resources = resources.shuffle
-    shuffle_resources.first(3)
   end
 
   # Check single resource for availability by curl
