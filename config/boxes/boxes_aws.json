@@ -86,9 +86,9 @@
   },
   "debian_jessie_aws" : {
     "provider": "aws",
-    "ami": "ami-3291be54",
+    "ami": "ami-a72a7ad4",
     "user": "admin",
-    "default_instance_type": "m1.medium",
+    "default_instance_type": "t2.medium",
     "platform": "debian",
     "platform_version": "jessie",
     "vpc": "true"
