@@ -9,8 +9,6 @@ require_relative '../../services/terraform_service'
 
 # The class generates the Terraform infrastructure file for Google Cloud Platform provider
 class TerraformGcpGenerator
-  include CloudServices
-
   # Initializer.
   # @param configuration_id [String] configuration id
   # @param gcp_config [Hash] hash of Google Cloud Platform configuration
