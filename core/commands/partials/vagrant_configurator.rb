@@ -147,8 +147,7 @@ class VagrantConfigurator
       next unless VagrantService.node_running?(node, logger)
 
       @network_config.add_nodes([node])
-      checker_result = NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger)
-      next if checker_result.error?
+      next if NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger).error?
 
       return SUCCESS_RESULT if configure(node, logger)
     end
