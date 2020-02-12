@@ -9,6 +9,7 @@ require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
 require_relative '../../services/network_checker'
+require_relative '../../services/product_atributes'
 require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
@@ -89,7 +90,7 @@ class VagrantConfigurator
       next if cnf_template.nil?
 
       product = product_info['name']
-      files_location = @repos.files_location(product)
+      files_location = ProductAtributes.files_location(product)
       next if files_location.nil?
 
       [File.join(cnf_template_path, cnf_template),
