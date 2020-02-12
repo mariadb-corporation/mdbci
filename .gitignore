@@ -8,3 +8,5 @@ vms/
 repository_generator/*.log
 scripts/tools/test_dirs/
 spec/examples.txt
+.terraform/
+*.tfstate
