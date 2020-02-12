@@ -183,8 +183,20 @@ Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for
       @ui.error('You have provided inappropriate information.')
       return nil unless read_topic('Try again?', 'y').casecmp('y').zero?
     end
-    { 'access_key_id' => key_id, 'secret_access_key' => secret_key,
-      'region' => region, 'availability_zone' => availability_zone }
+    settings = { 'access_key_id' => key_id,
+                 'secret_access_key' => secret_key,
+                 'region' => region,
+                 'availability_zone' => availability_zone,
+                 'use_existing_vpc' => false }
+    return settings unless read_topic('Use existing VPC for AWS instances?', 'y').casecmp('y').zero?
+
+    settings.merge(
+        'use_existing_vpc' => true,
+        'vpc_id' => read_topic('Please input existing AWS VPC id',
+                                @configuration.dig('aws', 'vpc_id')),
+        'subnet_id' => read_topic('Please input existing AWS VPC subnet id (public)',
+                             @configuration.dig('aws', 'subnet_id'))
+    )
   end
 
   # Ask user to input non-empty string as value
