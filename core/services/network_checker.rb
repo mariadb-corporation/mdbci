@@ -23,14 +23,13 @@ module NetworkChecker
            else
              :wget
            end
-    table = {}
-    resources.each do |resource|
+    availability_table = resources.each_with_object({}) do |resource, table|
       table[resource] = check_resource?(tool, machine_configurator, machine, resource, logger)
     end
-    print_table(table, logger)
-    return Result.error('Network resources not available!') unless test_result(table)
+    print_table(availability_table, logger)
+    return Result.error('Network resources are not available.') unless test_result(availability_table)
 
-    logger.debug('Network resources available!')
+    logger.debug('Network resources are available.')
     Result.ok(machine)
   end
 
@@ -102,10 +101,8 @@ module NetworkChecker
 
   # @return [Boolean] false if one of the results failed
   def self.test_result(table)
-    table.each do |_resource, result_string|
-      return false unless result_string
+    table.all? do |_resource, result_string|
+      result_string
     end
-    true
   end
 end
-
