@@ -4,6 +4,7 @@ require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 require_relative '../services/configuration_generator'
 require_relative '../models/result'
+require_relative '../services/product_atributes'
 
 # This class installs the product on selected node
 class InstallProduct < BaseCommand
@@ -97,7 +98,7 @@ class InstallProduct < BaseCommand
       next if cnf_template.nil?
 
       product = product_info['name']
-      files_location = @repos.files_location(product)
+      files_location = ProductAtributes.files_location(product)
       next if files_location.nil?
 
       [File.join(cnf_template_path, cnf_template),
@@ -111,7 +112,7 @@ class InstallProduct < BaseCommand
     node = @mdbci_config.node_configurations[name]
     box = node['box'].to_s
     recipes_names = []
-    recipes_names.push(@env.repos.recipe_name(@product))
+    recipes_names.push(ProductAtributes.recipe_name(@product))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
     product = { 'name' => @product, 'version' => @product_version.to_s }
     ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil, @mdbci_config.provider).and_then do |configs|

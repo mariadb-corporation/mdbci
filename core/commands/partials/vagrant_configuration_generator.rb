@@ -13,6 +13,7 @@ require_relative '../../out'
 require_relative '../../models/configuration.rb'
 require_relative '../../services/shell_commands'
 require_relative '../../../core/services/configuration_generator'
+require_relative '../../services/product_atributes'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
 # rubocop:disable Metrics/ClassLength
@@ -161,7 +162,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     else
       product_name = product['name']
     end
-    recipe_name = @env.repos.recipe_name(product_name)
+    recipe_name = ProductAtributes.recipe_name(product_name)
     if product_name != 'packages'
       ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo, @provider)
     else

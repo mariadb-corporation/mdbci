@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../models/result'
+require_relative 'product_atributes'
 
 # The class provides methods for generating the role of the file.
 module ConfigurationGenerator
@@ -52,9 +53,9 @@ module ConfigurationGenerator
   # @param product_name [String] name of the product for install
   # @return [Result::Base] product config
   def self.setup_product_license_if_need(repos, product_config, product_name)
-    return Result.ok(product_config) unless repos.need_product_license?(product_name)
+    return Result.ok(product_config) unless ProductAtributes.need_product_license?(product_name)
 
-    repos.product_license(product_name).and_then do |license|
+    ProductAtributes.product_license(product_name).and_then do |license|
       product_config['license'] = license
       Result.ok(product_config)
     end
@@ -76,12 +77,12 @@ module ConfigurationGenerator
       config['cnf_template'] = product['cnf_template']
       config['cnf_template_path'] = product['cnf_template_path']
     end
-    repo_file_name = repos.repo_file_name(product_name)
+    repo_file_name = ProductAtributes.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['provider'] = provider
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
     setup_product_license_if_need(repos, config, product_name).and_then do |updated_config|
-      attribute_name = repos.attribute_name(product_name)
+      attribute_name = ProductAtributes.attribute_name(product_name)
       return Result.ok("#{attribute_name}": updated_config)
     end
   end
