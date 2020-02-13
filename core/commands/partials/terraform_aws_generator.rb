@@ -89,22 +89,32 @@ class TerraformAwsGenerator
   end
 
   def provider_resource
-    <<-PROVIDER
+    aws_config = @aws_config
+    use_existing_vpc = use_existing_vpc?
+    template = ERB.new <<-PROVIDER
     provider "aws" {
       version = "~> 2.33"
       profile = "default"
-      region = "#{@aws_config['region']}"
-      access_key = "#{@aws_config['access_key_id']}"
-      secret_key = "#{@aws_config['secret_access_key']}"
+      region = "<%= aws_config['region'] %>"
+      access_key = "<%= aws_config['access_key_id'] %>"
+      secret_key = "<%= aws_config['secret_access_key'] %>"
+    }
+    locals {
+      <% unless use_existing_vpc %>
+        cidr_vpc = "10.1.0.0/16" # CIDR block for the VPC
+        cidr_subnet = "10.1.0.0/24" # CIDR block for the subnet
+      <% end %>
+      availability_zone = "<%= aws_config['availability_zone'] %>" # availability zone to create subnet
     }
     #{key_pair_resource}
     PROVIDER
+    template.result(binding)
   end
 
   def vpc_resources
     <<-VPC_RESOURCES
     resource "aws_vpc" "vpc" {
-      cidr_block = "10.1.0.0/16"
+      cidr_block = local.cidr_vpc
       enable_dns_support = true
       enable_dns_hostnames = true
       #{tags_partial(@configuration_tags)}
@@ -115,9 +125,9 @@ class TerraformAwsGenerator
     }
     resource "aws_subnet" "subnet_public" {
       vpc_id = aws_vpc.vpc.id
-      cidr_block = "10.1.0.0/24"
+      cidr_block = local.cidr_subnet
       map_public_ip_on_launch = true
-      availability_zone = "#{@aws_config['availability_zone']}"
+      availability_zone = local.availability_zone
       #{tags_partial(@configuration_tags)}
     }
     resource "aws_route_table" "rtb_public" {
