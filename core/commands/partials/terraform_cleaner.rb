@@ -59,10 +59,10 @@ class TerraformCleaner
     case provider
     when 'aws'
       @ui.info('Cleaning-up leftover additional resources using AWS EC2')
-      @aws_service.delete_vpc_by_config_id(configuration_id)
-      @aws_service.delete_security_group_by_config_id(configuration_id)
+      @aws_service.delete_security_groups_by_config_id(configuration_id)
       key_pair_name = TerraformAwsGenerator.generate_key_pair_name(configuration_id, configuration_path)
       @aws_service.delete_key_pair(key_pair_name)
+      @aws_service.delete_vpc_by_config_id(configuration_id) unless @aws_service.use_existing_vpc?
     when 'gcp'
       return if @gcp_service.use_existing_network?
 

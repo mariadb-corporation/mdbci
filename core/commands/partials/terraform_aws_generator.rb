@@ -37,22 +37,25 @@ class TerraformAwsGenerator
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
+    result = Result.ok('')
     node_params.each do |node|
-      print_node_info(node)
-      file.puts(generate_node_definition(node))
-      if node[:vpc]
-        need_vpc = true
-      else
-        need_standard_security_group = true
+      result = generate_instance_params(node).and_then do |instance_params|
+        print_node_info(instance_params)
+        file.puts(instance_resources(instance_params))
+        need_vpc ||= node[:vpc] == 'true'
+        need_standard_security_group ||= node[:vpc] != 'true'
+        Result.ok('')
       end
+      break if result.error?
     end
-    file.puts(security_group_resource) if need_standard_security_group
-    file.puts(vpc_resources) if need_vpc
-    file.close
+    file.puts(standard_security_group_resource) if need_standard_security_group
+    file.puts(vpc_partial) if need_vpc
   rescue Errno::ENOENT => e
     Result.error(e.message)
   else
-    Result.ok('')
+    result
+  ensure
+    file.close unless file.nil? || file.closed?
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -94,11 +97,6 @@ class TerraformAwsGenerator
       access_key = "#{@aws_config['access_key_id']}"
       secret_key = "#{@aws_config['secret_access_key']}"
     }
-    locals {
-      cidr_vpc = "10.1.0.0/16" # CIDR block for the VPC
-      cidr_subnet = "10.1.0.0/24" # CIDR block for the subnet
-      availability_zone = "#{@aws_config['availability_zone']}" # availability zone to create subnet
-    }
     #{key_pair_resource}
     PROVIDER
   end
@@ -106,7 +104,7 @@ class TerraformAwsGenerator
   def vpc_resources
     <<-VPC_RESOURCES
     resource "aws_vpc" "vpc" {
-      cidr_block = local.cidr_vpc
+      cidr_block = "10.1.0.0/16"
       enable_dns_support = true
       enable_dns_hostnames = true
       #{tags_partial(@configuration_tags)}
@@ -117,9 +115,9 @@ class TerraformAwsGenerator
     }
     resource "aws_subnet" "subnet_public" {
       vpc_id = aws_vpc.vpc.id
-      cidr_block = local.cidr_subnet
+      cidr_block = "10.1.0.0/24"
       map_public_ip_on_launch = true
-      availability_zone = local.availability_zone
+      availability_zone = "#{@aws_config['availability_zone']}"
       #{tags_partial(@configuration_tags)}
     }
     resource "aws_route_table" "rtb_public" {
@@ -134,8 +132,13 @@ class TerraformAwsGenerator
       subnet_id = aws_subnet.subnet_public.id
       route_table_id = aws_route_table.rtb_public.id
     }
-    #{security_group_resource(true)}
     VPC_RESOURCES
+  end
+
+  def vpc_partial
+    resources = [vpc_security_group_resource]
+    resources << vpc_resources unless use_existing_vpc?
+    resources.join("\n")
   end
 
   # Generate a connection block for AWS instance resource.
@@ -165,43 +168,51 @@ class TerraformAwsGenerator
     template.result(binding)
   end
 
-  # Generate a security_group resource definition for AWS infrastructure.
-  # @param vpc [Boolean] true if it's vpc security group
-  # @return [String] security group resource definition.
-  # rubocop:disable Metrics/MethodLength
-  def security_group_resource(vpc = false)
+  def standard_security_group_resource
     group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
     tags_block = tags_partial(@configuration_tags)
     template = ERB.new <<-SECURITY_GROUP
-    resource "aws_security_group" "security_group<%= vpc ? '_vpc' : '' %>" {
+    resource "aws_security_group" "security_group" {
       name = "<%= group_name %>"
       description = "MDBCI <%= group_name %> auto generated"
       ingress {
         from_port = 0
-        <% if vpc %>
-          protocol = "-1"
-          to_port = 0
-        <% else %>
-          protocol = "tcp"
-          to_port = 65535
-        <% end %>
+        protocol = "tcp"
+        to_port = 65535
         cidr_blocks = ["0.0.0.0/0"]
       }
-      <% if vpc %>
-        vpc_id = aws_vpc.vpc.id
-        egress {
-          from_port = 0
-          to_port = 0
-          protocol = -1
-          cidr_blocks = ["0.0.0.0/0"]
-        }
-      <% end %>
       <%= tags_block %>
     }
     SECURITY_GROUP
     template.result(binding)
   end
-  # rubocop:enable Metrics/MethodLength
+
+  # Generate a security_group resource definition for AWS infrastructure.
+  # @return [String] security group resource definition.
+  def vpc_security_group_resource
+    group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
+    tags_block = tags_partial(@configuration_tags)
+    <<-SECURITY_GROUP
+    resource "aws_security_group" "security_group_vpc" {
+      name = "#{group_name}"
+      description = "MDBCI #{group_name} auto generated"
+      ingress {
+        from_port = 0
+        protocol = "-1"
+        to_port = 0
+        cidr_blocks = ["0.0.0.0/0"]
+      }
+      vpc_id = #{vpc_id}
+      egress {
+        from_port = 0
+        to_port = 0
+        protocol = -1
+        cidr_blocks = ["0.0.0.0/0"]
+      }
+      #{tags_block}
+    }
+    SECURITY_GROUP
+  end
 
   # Generate Terraform configuration resources for instance.
   # @param node_params [Hash] list of the node parameters
@@ -210,7 +221,6 @@ class TerraformAwsGenerator
   def instance_resources(node_params)
     connection_block = connection_partial(node_params[:user])
     tags_block = tags_partial(node_params[:tags])
-    key_file = @private_key_file_path
     template = ERB.new <<-AWS
     resource "aws_instance" "<%= name %>" {
       ami = "<%= ami %>"
@@ -218,8 +228,10 @@ class TerraformAwsGenerator
       key_name = aws_key_pair.ec2key.key_name
       <% if vpc %>
         vpc_security_group_ids = [aws_security_group.security_group_vpc.id]
-        subnet_id = aws_subnet.subnet_public.id
-        depends_on = [aws_route_table_association.rta_subnet_public, aws_route_table.rtb_public]
+        subnet_id = <%= subnet_id %>
+        <% unless use_existing_vpc %>
+          depends_on = [aws_route_table_association.rta_subnet_public, aws_route_table.rtb_public]
+        <% end %>
       <% else %>
         security_groups = ["default", aws_security_group.security_group.name]
       <% end %>
@@ -232,25 +244,6 @@ class TerraformAwsGenerator
       #!/bin/bash
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
-      <% if template_path %>
-        provisioner "remote-exec" {
-          inline = [
-            "mkdir -p /home/<%= user %>/cnf_templates",
-            "sudo mkdir /vagrant",
-            "sudo bash -c 'echo \\"<%= provider %>\\" > /vagrant/provider'"
-          ]
-        }
-        provisioner "file" {
-          source = "<%= template_path %>"
-          destination = "/home/<%= user %>/cnf_templates"
-        }
-        provisioner "remote-exec" {
-          inline = [
-            "sudo mkdir -p /home/vagrant/",
-            "sudo mv /home/<%= user %>/cnf_templates /home/vagrant/cnf_templates"
-          ]
-        }
-      <% end %>
     }
     output "<%= name %>_network" {
       value = {
@@ -276,14 +269,36 @@ class TerraformAwsGenerator
     KEY_PAIR_RESOURCE
   end
 
-  # Generate a node definition for the configuration file.
+  def vpc_id
+    return "\"#{@aws_config['vpc_id']}\"" if use_existing_vpc?
+
+    'aws_vpc.vpc.id'
+  end
+
+  def subnet_id
+    return "\"#{@aws_config['subnet_id']}\"" if use_existing_vpc?
+
+    'aws_subnet.subnet_public.id'
+  end
+
+  # Returns false if a new vpc resources need to be generated for the current configuration, otherwise true.
+  # @return [Boolean] result.
+  def use_existing_vpc?
+    @aws_config['use_existing_vpc']
+  end
+
+  # Generate a instance params for the configuration file.
   # @param node_params [Hash] list of the node parameters
-  # @return [String] node definition for the configuration file.
-  def generate_node_definition(node_params)
+  # @return [Result::Base] instance params
+  def generate_instance_params(node_params)
     tags = @configuration_tags.merge(hostname: Socket.gethostname,
                                      username: Etc.getlogin,
                                      machinename: node_params[:name],
                                      full_config_path: @configuration_path)
-    instance_resources(node_params.merge(tags: tags))
+    node_params = node_params.merge({ tags: tags,
+                                      key_file: @private_key_file_path,
+                                      subnet_id: subnet_id,
+                                      use_existing_vpc: use_existing_vpc? })
+    Result.ok(node_params)
   end
 end

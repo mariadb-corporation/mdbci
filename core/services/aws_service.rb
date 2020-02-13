@@ -30,10 +30,11 @@ class AwsService
       return
     end
 
+    @aws_config = aws_config
     @client = Aws::EC2::Client.new(
-      access_key_id: aws_config['access_key_id'],
-      secret_access_key: aws_config['secret_access_key'],
-      region: aws_config['region']
+      access_key_id: @aws_config['access_key_id'],
+      secret_access_key: @aws_config['secret_access_key'],
+      region: @aws_config['region']
     )
     @configured = true
   end
@@ -113,12 +114,13 @@ class AwsService
     end
   end
 
-  # Get the security group specified by the configuration id
+  # Get the security groups specified by the configuration id
   # @param [String] configuration_id configuration id
-  def get_security_group_by_config_id(configuration_id)
-    return nil unless configured?
+  # @return [Array] security_group list in format [{ group_id, configuration_id }]
+  def get_security_groups_by_config_id(configuration_id)
+    return [] unless configured?
 
-    security_group_list(configuration_id: configuration_id).first
+    security_group_list(configuration_id: configuration_id)
   end
 
   # Delete security group specified by the group id
@@ -131,11 +133,12 @@ class AwsService
 
   # Delete security group specified by the configuration id
   # @param [String] configuration_id configuration id
-  def delete_security_group_by_config_id(configuration_id)
+  def delete_security_groups_by_config_id(configuration_id)
     return if configuration_id.nil? || !configured?
 
-    security_group = get_security_group_by_config_id(configuration_id)
-    delete_security_group(security_group[:group_id]) unless security_group.nil?
+    get_security_groups_by_config_id(configuration_id).each do |security_group|
+      delete_security_group(security_group[:group_id])
+    end
   end
 
   # Delete key pair specified by it name
@@ -238,6 +241,14 @@ class AwsService
         instance[:configuration_id] == configuration_id
     end
     found_instance.nil? ? nil : found_instance[:instance_id]
+  end
+
+  # Returns false if a new vpc resources need to be generated for the current configuration, otherwise true.
+  # @return [Boolean] result.
+  def use_existing_vpc?
+    return false unless configured?
+
+    @aws_config['use_existing_vpc']
   end
 
   private
