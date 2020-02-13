@@ -97,7 +97,7 @@ class TerraformConfigurator
       next if cnf_template.nil?
 
       product = product_info['name']
-      files_location = ProductAtributes.files_location(product)
+      files_location = ProductAtributes.chef_recipe_files_location(product)
       next if files_location.nil?
 
       [File.join(cnf_template_path, cnf_template),

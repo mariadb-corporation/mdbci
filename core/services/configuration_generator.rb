@@ -2,6 +2,7 @@
 
 require_relative '../models/result'
 require_relative 'product_atributes'
+require_relative '../models/tool_configuration'
 
 # The class provides methods for generating the role of the file.
 module ConfigurationGenerator
@@ -55,7 +56,8 @@ module ConfigurationGenerator
   def self.setup_product_license_if_need(repos, product_config, product_name)
     return Result.ok(product_config) unless ProductAtributes.need_product_license?(product_name)
 
-    ProductAtributes.product_license(product_name).and_then do |license|
+    file_name = ProductAtributes.product_license(product_name)
+    ToolConfiguration.load_license_file(file_name).and_then do |license|
       product_config['license'] = license
       Result.ok(product_config)
     end

@@ -79,26 +79,27 @@ module ProductAtributes
     PRODUCT_ATTRIBUTES[product][:name]
   end
 
+  # Get the existence of the product license for the product
   def self.need_product_license?(product)
     !PRODUCT_ATTRIBUTES[product][:license_file_name].nil?
   end
 
-  def self.files_location(product)
+  # Get the path to the chef recipe for the product
+  def self.chef_recipe_files_location(product)
     PRODUCT_ATTRIBUTES[product][:files_location]
   end
 
-  # Get the product license
-  # @param product [String] product name
-  # @return [Result::Base] product license value
+  # Get the product license for the product
   def self.product_license(product)
-    file_name = PRODUCT_ATTRIBUTES[product][:license_file_name]
-    ToolConfiguration.load_license_file(file_name)
+    PRODUCT_ATTRIBUTES[product][:license_file_name]
   end
 
+  # Get the existence of the repository for the product
   def self.check_repository?(product)
     !PRODUCT_ATTRIBUTES[product].key?(:repository)
   end
 
+  # Get the repository for the product
   def self.repository(product)
     PRODUCT_ATTRIBUTES[product][:repository]
   end
