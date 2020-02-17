@@ -32,15 +32,8 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
     action :start
   end
 elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
-  yum_package 'epel-release'
-  yum_repository 'docker-repo' do
-    description 'Docker Repo'
-    baseurl 'https://yum.dockerproject.org/repo/main/centos/$releasever/'
-    gpgkey 'https://yum.dockerproject.org/gpg'
-  end
-  yum_package 'docker-engine' do
-    version docker_version unless docker_version.nil?
-    action :install
+  execute 'Install docker package' do
+    command 'sudo yum install -y https://get.docker.com/rpm/1.7.0/centos-6/RPMS/x86_64/docker-engine-1.7.0-1.el6.x86_64.rpm'
   end
   service 'docker' do
     action :enable
