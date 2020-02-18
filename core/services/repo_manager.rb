@@ -3,7 +3,7 @@
 require 'json'
 require_relative '../models/return_codes'
 require_relative '../models/tool_configuration'
-require_relative 'product_atributes'
+require_relative 'product_attributes'
 
 # A class that provides access to list of repositories that are defined in MDBCI
 class RepoManager
@@ -38,7 +38,7 @@ class RepoManager
 
   def find_repository(product_name, product, box)
     @ui.info('Looking for repo')
-    if ProductAtributes.check_repository?(product_name)
+    if ProductAttributes.check_repository?(product_name)
       @ui.warning('MDBCI cannot determine the existence/correctness of the specified version of the product!')
       return { 'version' => product['version'] }
     end
@@ -47,7 +47,7 @@ class RepoManager
       repo = find_last_repository_version(product, repository_key)
     else
       version = product['version']
-      repository_name = ProductAtributes.repository(product_name)
+      repository_name = ProductAttributes.repository(product_name)
       repo_key = "#{repository_name}@#{version}+#{repository_key}"
       repo = @repos[repo_key]
     end

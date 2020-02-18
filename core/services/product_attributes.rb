@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # The module provides information about product atributes
-module ProductAtributes
+module ProductAttributes
   PRODUCT_ATTRIBUTES = {
     'mariadb' => {
       recipe: 'mariadb::install_community',
