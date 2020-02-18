@@ -11,7 +11,7 @@ require_relative '../../../core/services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
-require_relative '../../services/product_atributes'
+require_relative '../../services/product_attributes'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend
@@ -95,7 +95,7 @@ class TerraformConfigurationGenerator < BaseCommand
     else
       product_name = product['name']
     end
-    recipe_name = ProductAtributes.recipe_name(product_name)
+    recipe_name = ProductAttributes.recipe_name(product_name)
     if product_name != 'packages'
       ConfigurationGenerator.generate_product_config(@env.repos, product_name,
                                                      product, box, repo, @provider)

@@ -4,7 +4,7 @@ require_relative '../services/configuration_generator'
 require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 require_relative '../models/result'
-require_relative '../services/product_atributes'
+require_relative '../services/product_attributes'
 
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
@@ -88,7 +88,7 @@ class RemoveProductCommand < BaseCommand
   # @param name [String] node name
   def generate_role_file(name)
     recipe_name = []
-    recipe_name.push(ProductAtributes.recipe_name("#{@product}_remove"))
+    recipe_name.push(ProductAttributes.recipe_name("#{@product}_remove"))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
     role_json_file = ConfigurationGenerator.generate_json_format(name, recipe_name)
     IO.write(role_file_path, role_json_file)
