@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The module provides information about product atributes
+# The module provides information about product attributes
 module ProductAttributes
   PRODUCT_ATTRIBUTES = {
     'mariadb' => {
@@ -64,7 +64,7 @@ module ProductAttributes
     }
   }.freeze
 
-  # Get the recipe name for the product
+  # Get the Chef recipe name for the product
   def self.recipe_name(product)
     PRODUCT_ATTRIBUTES[product][:recipe]
   end
@@ -79,7 +79,7 @@ module ProductAttributes
     PRODUCT_ATTRIBUTES[product][:name]
   end
 
-  # Get the existence of the product license for the product
+  # Check whether product needs a licence to function
   def self.need_product_license?(product)
     !PRODUCT_ATTRIBUTES[product][:license_file_name].nil?
   end
@@ -89,13 +89,13 @@ module ProductAttributes
     PRODUCT_ATTRIBUTES[product][:files_location]
   end
 
-  # Get the product license for the product
+  # Get the product license file name for the product
   def self.product_license(product)
     PRODUCT_ATTRIBUTES[product][:license_file_name]
   end
 
   # Get the existence of the repository for the product
-  def self.check_repository?(product)
+  def self.uses_repository?(product)
     !PRODUCT_ATTRIBUTES[product].key?(:repository)
   end
 

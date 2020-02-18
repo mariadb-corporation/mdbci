@@ -38,7 +38,7 @@ class RepoManager
 
   def find_repository(product_name, product, box)
     @ui.info('Looking for repo')
-    if ProductAttributes.check_repository?(product_name)
+    if ProductAttributes.uses_repository?(product_name)
       @ui.warning('MDBCI cannot determine the existence/correctness of the specified version of the product!')
       return { 'version' => product['version'] }
     end
