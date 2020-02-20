@@ -118,6 +118,7 @@ class TerraformConfigurationGenerator < BaseCommand
   def get_role_description(name, products, box)
     products_configs = {}
     recipes_names = []
+    recipes_names << 'grow-root-fs' if %w[aws gcp].include?(@provider)
     products.each do |product|
       recipe_and_config_result = make_product_config_and_recipe_name(product, box)
       return recipe_and_config_result if recipe_and_config_result.error?

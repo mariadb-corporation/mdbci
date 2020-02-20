@@ -1,0 +1,6 @@
+name             'grow-root-fs'
+maintainer       'mariadb-corporation'
+maintainer_email 'evgeny.vlasov@fruct.org'
+license          'All rights reserved'
+description      'Grow root disk partition to full empty disk space'
+version          '0.1.0'
