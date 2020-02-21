@@ -90,7 +90,7 @@ class RemoveProductCommand < BaseCommand
     recipe_name = []
     recipe_name.push(ProductAttributes.recipe_name("#{@product}_remove"))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
-    role_json_file = ConfigurationGenerator.generate_json_format(name, recipe_name)
+    role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_name)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end

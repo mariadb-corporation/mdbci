@@ -115,11 +115,12 @@ class InstallProduct < BaseCommand
     recipes_names.push(ProductAttributes.recipe_name(@product))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
     product = { 'name' => @product, 'version' => @product_version.to_s }
-    ConfigurationGenerator.generate_product_config(@env.repos, @product, product, box, nil, @mdbci_config.provider).and_then do |configs|
-      role_json_file = ConfigurationGenerator.generate_json_format(name, recipes_names, configs,
-                                                                   box, @env.box_definitions, @env.rhel_credentials)
+    ConfigurationGenerator
+        .generate_product_config(@env.repos, @product, product, box, nil, @mdbci_config.provider)
+        .and_then do |configs|
+      role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipes_names, configs)
       IO.write(role_file_path, role_json_file)
-      return Result.ok(role_file_path)
+      Result.ok(role_file_path)
     end
   end
 end

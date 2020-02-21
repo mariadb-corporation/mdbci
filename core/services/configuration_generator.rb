@@ -6,25 +6,14 @@ require_relative '../models/tool_configuration'
 
 # The class provides methods for generating the role of the file.
 module ConfigurationGenerator
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
   # @param name [String] node name
+  # @param recipe_names [Array<String>] list of recipe names
   # @param product_configs [Hash] list of the product parameters
-  # @param recipes_names [Array<String>] name of the recipe
-  # @param box [String] name of the box
-  # @param rhel_credentials redentials for subscription manager
-  def self.generate_json_format(name, recipes_names, product_configs = {},
-                                box = nil, box_definitions = nil, rhel_credentials = nil)
+  # @return [String] generated JSON description of role file
+  def self.generate_role_json_description(name, recipe_names, product_configs = {})
     run_list = ['recipe[mdbci_provision_mark::remove_mark]',
-                *recipes_names.map { |recipe_name| "recipe[#{recipe_name}]" },
+                *recipe_names.map { |recipe_name| "recipe[#{recipe_name}]" },
                 'recipe[mdbci_provision_mark::default]']
-    unless box_definitions.nil?
-      if check_subscription_manager(box_definitions, box)
-        raise 'RHEL credentials for Red Hat Subscription-Manager are not configured' if rhel_credentials.nil?
-
-        run_list.insert(1, 'recipe[subscription-manager]')
-        product_configs.merge!('subscription-manager': rhel_credentials)
-      end
-    end
     role = { name: name,
              default_attributes: {},
              override_attributes: product_configs,
@@ -33,13 +22,6 @@ module ConfigurationGenerator
              chef_type: 'role',
              run_list: run_list }
     JSON.pretty_generate(role)
-  end
-
-  # Check whether box needs to be subscribed or not
-  # @param box_definitions [BoxDefinitions] the list of BoxDefinitions that are configured in the application
-  # @param box [String] name of the box
-  def self.check_subscription_manager(box_definitions, box)
-    box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
   end
 
   # Make list of not-null product attributes
