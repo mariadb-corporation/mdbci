@@ -70,7 +70,8 @@ class Session
   attr_reader :digitalocean_service
   attr_reader :gcp_service
   attr_reader :tool_config
-  attr_reader :rhel_credentials
+  attr_reader :rhel_config
+  attr_reader :suse_config
   attr_reader :mdbe_private_key
   attr_accessor :show_help
   attr_accessor :reinstall
@@ -120,7 +121,8 @@ EOF
     @aws_service = AwsService.new(@tool_config['aws'], $out)
     @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
     @gcp_service = GcpService.new(@tool_config['gcp'], $out)
-    @rhel_credentials = @tool_config['rhel']
+    @rhel_config = @tool_config['rhel']
+    @suse_config = @tool_config['suse']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
   end
 

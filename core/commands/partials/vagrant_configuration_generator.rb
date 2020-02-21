@@ -147,7 +147,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   #
   # @param product [Hash] parameters of product to configure from configuration file
   # @param box [String] name of the box
-  # @return [Result<Hash>] recipe name and product config in format { recipe: String, config: Hash }.
+  # @return [Result::Base] recipe name and product config in format { recipe: String, config: Hash }.
   # rubocop:disable Metrics/MethodLength
   def make_product_config_and_recipe_name(product, box)
     repo = nil
@@ -174,26 +174,54 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   end
   # rubocop:enable Metrics/MethodLength
 
+  # Initialize product configs Hash and recipe names list with necessary recipes
+  # and configurations on which the box depends.
+  #
+  # @param box [String] name of the box
+  # @return [Result::Base] Hash in format { recipe_names: [], product_configs: {} }
+  def init_product_configs_and_recipes(box)
+    product_configs = {}
+    recipe_names = []
+    recipe_names << 'grow-root-fs' if %w[aws gcp].include?(@provider)
+
+    if @env.box_definitions.get_box(box)['configure_subscription_manager'].to_s == 'true'
+      return Result.error('Credentials for Red Hat Subscription-Manager are not configured') if @env.rhel_config.nil?
+
+      recipe_names << 'subscription-manager'
+      product_configs.merge!('subscription-manager': @env.rhel_config)
+    end
+
+    if @env.box_definitions.get_box(box)['configure_suse_connect'].to_s == 'true'
+      return Result.error('Credentials for SUSEConnect are not configured') if @env.suse_config.nil?
+
+      recipe_names << 'suse-connect'
+      product_configs.merge!('suse-connect': @env.suse_config)
+    end
+    Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
+  end
+
   # Generate the role description for the specified node.
   #
   # @param name [String] internal name of the machine specified in the template
   # @param products [Array<Hash>] list of parameters of products to configure from configuration file
   # @param box [String] name of the box
-  # @return [Result<String>] pretty formatted role description in JSON format
+  # @return [Result::Base<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box)
-    products_configs = {}
-    recipes_names = []
+    recipes_result = init_product_configs_and_recipes(box)
+    return recipes_result if recipes_result.error?
+
+    product_configs = recipes_result.value[:product_configs]
+    recipe_names = recipes_result.value[:recipe_names]
     products.each do |product|
       recipe_and_config_result = make_product_config_and_recipe_name(product, box)
       return recipe_and_config_result if recipe_and_config_result.error?
 
       recipe_and_config_result.and_then do |recipe_and_config|
-        products_configs.merge!(recipe_and_config[:config])
-        recipes_names << recipe_and_config[:recipe]
+        product_configs.merge!(recipe_and_config[:config])
+        recipe_names << recipe_and_config[:recipe]
       end
     end
-    role_description = ConfigurationGenerator.generate_json_format(name, recipes_names, products_configs,
-                                                                   box, @env.box_definitions, @env.rhel_credentials)
+    role_description = ConfigurationGenerator.generate_role_json_description(name, recipe_names, product_configs)
     Result.ok(role_description)
   end
 
