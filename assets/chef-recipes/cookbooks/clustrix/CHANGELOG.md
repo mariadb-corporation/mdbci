@@ -1,7 +1,7 @@
 clustrix CHANGELOG
 ==============
 
-This file is used to list changes made in each version of the subscription-manager cookbook.
+This file is used to list changes made in each version of the clustrix cookbook.
 
 0.1.0
 -----
