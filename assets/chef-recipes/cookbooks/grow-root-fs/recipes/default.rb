@@ -19,10 +19,11 @@ ruby_block 'Get filesystem information' do
 end
 
 if node['platform'] == 'debian' && node['platform_version'].to_i == 8
+  # We do not have growpart on Debian Jessie. We use parted 3.2 to resize the root partition
   package 'parted'
   execute 'PARTED_RESIZEPART' do
     command lazy {
-      "parted #{node.run_state[:fs_data][:device_base_name]} unit B "\
+      "parted ---pretend-input-tty #{node.run_state[:fs_data][:device_base_name]} unit % "\
         "resizepart #{node.run_state[:fs_data][:device_number]} Yes 100%"
     }
     returns [0, 1]
