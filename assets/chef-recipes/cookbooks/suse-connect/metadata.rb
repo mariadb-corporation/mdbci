@@ -1,0 +1,6 @@
+name             'suse-connect'
+maintainer       'mariadb-corporation'
+maintainer_email 'evgeny.vlasov@fruct.org'
+license          'All rights reserved'
+description      'Configure SUSE subscription'
+version          '0.1.0'
