@@ -42,8 +42,8 @@ class TerraformAwsGenerator
       result = generate_instance_params(node).and_then do |instance_params|
         print_node_info(instance_params)
         file.puts(instance_resources(instance_params))
-        need_vpc ||= node[:vpc] == 'true'
-        need_standard_security_group ||= node[:vpc] != 'true'
+        need_vpc ||= node[:vpc]&.to_s == 'true'
+        need_standard_security_group ||= node[:vpc]&.to_s != 'true'
         Result.ok('')
       end
       break if result.error?
