@@ -6,6 +6,15 @@ require_relative '../services/shell_commands'
 
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
+  SUPPORTED_PRODUCTS = {
+      'aws' =>'AWS',
+      'gcp' => 'Google Cloud Platform',
+      'digitalocean' => 'Digital Ocean',
+      'rhel' => 'RHEL subscription',
+      'suse' => 'SUSE subscription',
+      'mdbe' => 'MariaDB Enterprise',
+      'docker' => 'MaxScale CI Docker Registry subscription'
+  }
 
   def self.synopsis
     'Creates configuration file for MDBCI'
@@ -18,15 +27,16 @@ class ConfigureCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-'configure' command creates configuration for MDBCI to use AWS, Google Cloud Platform, Digital Ocean, RHEL subscription, MariaDB Enterprise and MaxScale CI Docker Registry subscription.
+'configure' command creates configuration for MDBCI to use #{SUPPORTED_PRODUCTS.values.join(', ')}.
 
-You can configure AWS, Google Cloud Platform, Digital Ocean, RHEL credentials, MariaDB Enterprise and MaxScale CI Docker Registry subscription:
+You can configure all products (except, Docker):
   mdbci configure
 
-Or you can configure only AWS, only RHEL credentials, only MariaDB Enterprise or only MaxScale CI Docker Registry subscription (for example, AWS):
+Or you can configure only AWS, only Docker or any other product from the list of supported products (for example, AWS):
   mdbci configure --product aws
 
-Use 'aws' as product option for AWS, 'gcp' for Google Cloud Platform, 'rhel' for RHEL subscription, 'mdbe' for MariaDB Enterprise and 'docker' for MaxScale CI Docker Registry subscription.
+Use the following short product names to configure them:
+#{SUPPORTED_PRODUCTS.map { |name, description| "  - `#{name}` for #{description}" }.join(", \n")}
     HELP
     @ui.info(info)
   end
