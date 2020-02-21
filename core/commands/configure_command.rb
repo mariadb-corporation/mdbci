@@ -29,7 +29,7 @@ class ConfigureCommand < BaseCommand
     info = <<-HELP
 'configure' command creates configuration for MDBCI to use #{SUPPORTED_PRODUCTS.values.join(', ')}.
 
-You can configure all products (except, Docker):
+You can configure all products:
   mdbci configure
 
 Or you can configure only AWS, only Docker or any other product from the list of supported products (for example, AWS):
@@ -41,31 +41,31 @@ Use the following short product names to configure them:
     @ui.info(info)
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity
   def execute
     if @env.show_help
       show_help
       return SUCCESS_RESULT
     end
-    configure_results = []
 
-    configure_results << configure_aws if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('aws').zero?
-    configure_results << configure_gcp if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('gcp').zero?
-    configure_results << configure_digitalocean if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('digitalocean').zero?
-    configure_results << configure_rhel if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('rhel').zero?
-    configure_results << configure_mdbe if @env.nodeProduct.nil? || @env.nodeProduct.casecmp('mdbe').zero?
-    configure_results << configure_docker if @env.nodeProduct.casecmp('docker').zero?
-
-
+    configure_results = SUPPORTED_PRODUCTS.keys.map do |name|
+      send("configure_#{name}".to_sym) if need_configure_product?(name)
+    end.compact
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
     return ERROR_RESULT if @configuration.save(@ui) == ERROR_RESULT
 
     SUCCESS_RESULT
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
 
   private
+
+  def need_configure_product?(name)
+    if @env.nodeProduct.nil?
+      read_topic("Configure the #{SUPPORTED_PRODUCTS[name]}?", 'y').casecmp('y').zero?
+    else
+      @env.nodeProduct.casecmp(name).zero?
+    end
+  end
 
   def check_dock_credentials(docker_credentials)
     cmd = "docker login --username #{docker_credentials['username']}" \
@@ -116,6 +116,14 @@ Use the following short product names to configure them:
     SUCCESS_RESULT
   end
 
+  def configure_suse
+    suse_credentials = input_suse_subscription_credentials
+    return ERROR_RESULT if suse_credentials.nil?
+
+    @configuration['suse'] = suse_credentials
+    SUCCESS_RESULT
+  end
+
   def input_docker_credentials
     {
       'username' => read_topic('Please input username for Docker Registry',
@@ -162,6 +170,13 @@ Use the following short product names to configure them:
     {
       'region' => read_topic('Please input Digital Ocean region', @configuration.dig('digitalocean', 'region')),
       'token' => read_topic('Please input Digital Ocean token', @configuration.dig('digitalocean', 'token'))
+    }
+  end
+
+  def input_suse_subscription_credentials
+    {
+        'email' => read_topic('Please input email for SUSEConnect', @configuration.dig('suse', 'email')),
+        'key' => read_topic('Please input key for SUSEConnect', @configuration.dig('suse', 'key'))
     }
   end
 
