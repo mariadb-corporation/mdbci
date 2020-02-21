@@ -179,7 +179,7 @@ class TerraformAwsGenerator
   end
 
   def standard_security_group_resource
-    group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
+    group_name = "#{@configuration_id}-standard-security-group"
     tags_block = tags_partial(@configuration_tags)
     template = ERB.new <<-SECURITY_GROUP
     resource "aws_security_group" "security_group" {
@@ -200,7 +200,7 @@ class TerraformAwsGenerator
   # Generate a security_group resource definition for AWS infrastructure.
   # @return [String] security group resource definition.
   def vpc_security_group_resource
-    group_name = "#{Socket.gethostname}_#{Time.now.strftime('%s')}"
+    group_name = "#{@configuration_id}-vpc-security-group"
     tags_block = tags_partial(@configuration_tags)
     <<-SECURITY_GROUP
     resource "aws_security_group" "security_group_vpc" {
