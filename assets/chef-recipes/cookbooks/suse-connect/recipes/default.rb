@@ -1,3 +1,5 @@
+require 'json'
+
 execute 'Cleanup registration' do
   command 'SUSEConnect --cleanup'
 end
@@ -7,18 +9,24 @@ execute 'Register system' do
   command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"
 end
 
-products = []
+
+cmd = Mixlib::ShellOut.new('SUSEConnect --status')
+cmd.run_command
+products = JSON.parse(cmd.stdout)
+
+products = remove_product('SLES', products)
 
 if node['platform_version'].to_i == 12
-  products << 'sle-sdk/12.5/x86_64'
+  products = move_products_to_begin(['sle-sdk'], products)
 elsif node['platform_version'].to_i == 15
-  products << 'sle-module-desktop-applications/15.1/x86_64'
-  products << 'sle-module-development-tools/15.1/x86_64'
+  products = move_products_to_begin(%w[sle-module-desktop-applications sle-module-development-tools], products)
 end
 
 products.each do |product|
-  execute "Activate PRODUCT #{product}" do
-    sensitive true
-    command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']} -p #{product}"
-  end
+    execute "Activate PRODUCT #{product['identifier']}" do
+      sensitive true
+      command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"\
+        " -p #{product['identifier']}/#{product['version']}/#{product['arch']}"
+      ignore_failure
+    end
 end
