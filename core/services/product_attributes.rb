@@ -63,6 +63,10 @@ module ProductAttributes
       name: 'clustrix',
       repository: 'clustrix',
       license_file_name: 'clustrix_license'
+    },
+    'mdbe_build' => {
+        recipe: 'mdbe_build',
+        name: 'mdbe_build'
     }
   }.freeze
 
