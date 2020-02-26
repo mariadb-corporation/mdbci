@@ -1,13 +1,17 @@
 require 'mixlib/shellout'
 
-DEVICE_REGEX = /(\/dev\/[a-zA-Z0-9]+)(\d+)/
+DEVICE_REGEX = /\/dev\/[a-zA-Z0-9]+(\d+)/
 
 ruby_block 'Get filesystem information' do
   block do
-    cmd = Mixlib::ShellOut.new('df -Th /')
-    cmd.run_command
-    device_name, fs_type = cmd.stdout.lines.last.split(' ')
-    device_base_name, device_number = device_name.match(DEVICE_REGEX).captures
+    lsblk_cmd = Mixlib::ShellOut.new('lsblk --output NAME --list')
+    lsblk_cmd.run_command
+    device_base_name = "/dev/#{lsblk_cmd.stdout.lines[1].chomp}"
+
+    df_cmd = Mixlib::ShellOut.new('df -Th /')
+    df_cmd.run_command
+    device_name, fs_type = df_cmd.stdout.lines.last.split(' ')
+    device_number = device_name.match(DEVICE_REGEX).captures.first
     node.run_state[:fs_data] = {
         device_name: device_name,
         device_base_name: device_base_name,
