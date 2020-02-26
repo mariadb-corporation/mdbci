@@ -182,7 +182,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def init_product_configs_and_recipes(box)
     product_configs = {}
     recipe_names = []
-    recipe_names << 'grow-root-fs' if %w[aws gcp].include?(@provider)
 
     if @env.box_definitions.get_box(box)['configure_subscription_manager'].to_s == 'true'
       return Result.error('Credentials for Red Hat Subscription-Manager are not configured') if @env.rhel_config.nil?
