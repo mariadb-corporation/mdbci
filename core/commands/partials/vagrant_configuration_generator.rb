@@ -183,14 +183,14 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     product_configs = {}
     recipe_names = []
 
-    if @env.box_definitions.get_box(box)['configure_subscription_manager'].to_s == 'true'
+    if @env.box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
       return Result.error('Credentials for Red Hat Subscription-Manager are not configured') if @env.rhel_config.nil?
 
       recipe_names << 'subscription-manager'
       product_configs.merge!('subscription-manager': @env.rhel_config)
     end
 
-    if @env.box_definitions.get_box(box)['configure_suse_connect'].to_s == 'true'
+    if @env.box_definitions.get_box(box)['configure_suse_connect'] == 'true'
       return Result.error('Credentials for SUSEConnect are not configured') if @env.suse_config.nil?
 
       recipe_names << 'suse-connect'
