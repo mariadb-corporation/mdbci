@@ -178,7 +178,8 @@
     "default_instance_type": "t3.medium",
     "platform": "sles",
     "platform_version": "12",
-    "vpc": "true"
+    "vpc": "true",
+    "configure_suse_connect": "true"
   },
   "suse_15_aws" : {
     "provider": "aws",

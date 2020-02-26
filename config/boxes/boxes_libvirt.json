@@ -70,7 +70,8 @@
     "provider": "libvirt",
     "box": "elastic/sles-12-x86_64",
     "platform": "sles",
-    "platform_version": "12"
+    "platform_version": "12",
+    "configure_suse_connect": "true"
   },
   "rhel_8_libvirt": {
     "provider": "libvirt",
