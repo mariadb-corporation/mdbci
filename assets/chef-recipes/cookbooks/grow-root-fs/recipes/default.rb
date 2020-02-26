@@ -1,6 +1,6 @@
 require 'mixlib/shellout'
 
-DEVICE_REGEX = /(\/dev\/[a-zA-Z]+)(\d+)/
+DEVICE_REGEX = /(\/dev\/[a-zA-Z0-9]+)(\d+)/
 
 ruby_block 'Get filesystem information' do
   block do
