@@ -13,6 +13,7 @@ class ConfigureCommand < BaseCommand
       'rhel' => 'RHEL subscription',
       'suse' => 'SUSE subscription',
       'mdbe' => 'MariaDB Enterprise',
+      'mdbe_ci' => 'MariaDB Enterprise CI repository',
       'docker' => 'MaxScale CI Docker Registry subscription'
   }
 
@@ -190,6 +191,21 @@ Use the following short product names to configure them:
 
   def input_mdbe_settings
     { 'key' => read_topic('Please input the private key for MariaDB Enterprise', @configuration.dig('mdbe', 'key')) }
+  end
+
+  def configure_mdbe_ci
+    mdbe_ci_settings = input_mdbe_ci_settings
+    return ERROR_RESULT if mdbe_ci_settings.nil?
+
+    @configuration['mdbe_ci'] = mdbe_ci_settings
+    SUCCESS_RESULT
+  end
+
+  def input_mdbe_ci_settings
+    {
+        'username' => read_topic('Please input the username for MDBE CI repository', @configuration.dig('mdbe_ci', 'username')),
+        'password' => read_topic('Please input the password for MDBE CI repository', @configuration.dig('mdbe_ci', 'password'))
+    }
   end
 
   def input_aws_credentials
