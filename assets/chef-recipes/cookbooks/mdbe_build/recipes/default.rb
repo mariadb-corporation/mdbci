@@ -1,41 +1,118 @@
 # frozen_string_literal: true
 
-if node[:platform_family] == 'debian'
-  if node[:platform_version].to_i != 9 && node[:platform_version].to_f != 14.04 && node[:platform_version].to_i != 8
-    package 'libzstd-dev'
-  end
-  if node[:platform_version].to_f != 14.04 # Trysty
-    package 'gnutls-dev'
+case node[:platform]
+when 'debian'
+  package 'apt-utils'
+  package 'build-essential'
+  package 'python-dev'
+  package 'sudo'
+  package 'git'
+  package 'devscripts'
+  package 'equivs'
+  package 'libcurl4-openssl-dev'
+  package 'ccache'
+  package 'python3'
+  package 'python3-pip'
+  package 'curl'
+  package 'libssl-dev'
+  package 'libevent-dev'
+  package 'dpatch'
+  package 'gawk'
+  package 'gdb'
+  package 'libboost-dev'
+  package 'libcrack2-dev'
+  package 'libjudy-dev'
+  package 'libnuma-dev'
+  package 'libsnappy-dev'
+  package 'libxml2-dev'
+  package 'unixodbc-dev'
+  package 'uuid-dev'
+  package 'fakeroot'
+  package 'iputils-ping'
+  package 'libmhash-dev'
+  package 'gnutls-dev'
+  package 'libaio-dev'
+  package 'libpam-dev'
+  package 'scons'
+  package 'libboost-program-options-dev'
+  package 'libboost-system-dev'
+  package 'libboost-filesystem-dev'
+  package 'check'
+  package 'libxml-simple-perl'
+  package 'net-tools'
+  package 'expect'
+  package 'software-properties-common'
+  package 'dirmngr'
+  package 'rsync'
+  package 'netcat'
+  package 'libboost-all-dev'
+  package 'flex'
+  package 'socat'
+  package 'lsof'
+  package 'valgrind'
+  package 'apt-transport-https'
+  case node[:platform_version].to_i
+  when 8 # Debian Jessie
+    execute 'enable apt sources' do
+      command "sudo cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
+    end
+    execute 'update apt cache' do
+      command 'sudo apt-get update'
+    end
+    execute 'install dependencies mariadb-server' do
+      command 'sudo apt-get -y build-dep -q mariadb-server'
+    end
+    package 'libdbd-mysql-perl'
+    package 'libdbi-perl'
+    package 'libhtml-template-perl'
+    package 'libterm-readkey-perl'
+    package 'dh-systemd'
+    package 'libkrb5-dev'
     package 'libsystemd-dev'
-    package 'libcurl3-dev'
-    package 'libcurl4-openssl-dev'
+    package 'libjemalloc1'
+    package 'autoconf'
+    package 'automake'
+    package 'libtool'
+    package 'pkg-config'
+
+  when 9 # Debian Stretch
+    execute 'install dependencies mariadb-server' do
+      command 'sudo apt-get -y build-dep -q mariadb-server'
+    end
+    package 'libzstd-dev'
+    package 'libjemalloc1'
+
+  when 10 # Debian Buster
+    execute 'enable apt sources' do
+      command "sudo cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
+    end
+    execute 'update apt cache' do
+      command 'sudo apt-get update'
+    end
+    execute 'install dependencies mariadb-server' do
+      command 'sudo apt-get -y build-dep -q mariadb-server'
+    end
+    package 'libzstd-dev'
+    package 'dh-systemd'
+    package 'libjemalloc2'
+    package 'pkg-config'
   end
-  if node[:platform_version].to_f != 16.04 # Xenial
-    package 'libboost-dev'
-    package 'libboost-system-dev'
-    package 'libboost-filesystem-dev'
-    package 'libboost-all-dev'
-  end
+
+when 'ubuntu'
   package 'git'
   package 'build-essential'
-  package 'cmake'
-  package 'make'
   package 'libaio-dev'
   package 'libssl-dev'
-  package 'libncurses5-dev'
-  package 'devscripts'
   package 'libnuma-dev'
   package 'libsnappy-dev'
   package 'uuid-dev'
   package 'dh-systemd'
-  package 'libaio-dev'
-  package 'perl-modules'
   package 'libmhash-dev'
   package 'libxml-simple-perl'
-  package 'patch'
   package 'apt-utils'
   package 'python-dev'
   package 'sudo'
+  package 'devscripts'
   package 'equivs'
   package 'ccache'
   package 'python3'
@@ -66,166 +143,264 @@ if node[:platform_family] == 'debian'
   package 'flex'
   package 'expect'
   package 'net-tools'
-  package 'dh-apparmor'
-  package 'libjemalloc-dev'
-  package 'libkrb5-dev'
-  package 'libreadline-gplv2-dev'
-  package 'libbison-dev'
-  package 'chrpath'
-  package 'libgnutls28-dev'
-  package 'libgcrypt20-dev'
-  if node[:platform_version].to_f != 18.04 && node[:platform_version].to_f != 16.04
+  package 'libboost-dev'
+  package 'libboost-system-dev'
+  package 'libboost-filesystem-dev'
+  package 'libboost-all-dev'
+  case node[:platform_version].to_f
+  when 14.04 # Ubuntu Trusty
+    package 'cmake'
+    package 'make'
+    package 'libncurses5-dev'
+    package 'perl-modules'
+    package 'patch'
+    package 'dh-apparmor'
+    package 'libjemalloc-dev'
+    package 'libkrb5-dev'
+    package 'libreadline-gplv2-dev'
+    package 'libbison-dev'
+    package 'chrpath'
+    package 'libgnutls28-dev'
+    package 'libgcrypt20-dev'
     execute 'install dependencies mariadb-server' do
       command 'sudo apt-get build-dep mariadb-server -y'
     end
+    package 'libgcrypt11-dev'
+    package 'libgnutls-dev'
+    package 'librtmp-dev'
+    package 'libcurl4-openssl-dev'
+
+  when 16.04 # Ubuntu Xenial
+    execute 'enable apt sources' do
+      command "sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+    end
+    execute 'update apt cache' do
+      command 'sudo apt-get update'
+    end
+    execute 'install dependencies mariadb-server' do
+      command 'sudo apt-get -y build-dep -q mariadb-server'
+    end
+    package 'libcurl4-openssl-dev'
+    package 'libzstd-dev'
+    package 'libkrb5-dev'
+    package 'libsystemd-dev'
+    execute 'fix missing package' do
+      command 'sudo apt-get update --fix-missing'
+    end
+    package 'gnutls-dev'
+    package 'libjemalloc1'
+    package 'autoconf'
+    package 'automake'
+    package 'libtool'
+
+  when 18.04 # Ubuntu Bionic
+    execute 'enable apt sources' do
+      command "sudo echo '#{node['mdbe_build']['bionic_sources_list']}' > /etc/apt/sources.list"
+    end
+    execute 'update apt cache' do
+      command 'sudo apt-get update'
+    end
+    execute 'install dependencies mariadb-server' do
+      command 'sudo apt-get -y build-dep -q mariadb-server'
+    end
+    package 'libcurl4-openssl-dev'
+    package 'libzstd-dev'
+    package 'gnutls-dev'
+    package 'libasan2'
+    package 'libjemalloc1'
+    execute 'fix for broken debhelper' do
+      command 'sudo apt-get -y -t bionic-backports install debhelper'
+    end
   end
+when 'centos'
+  package 'git'
+  package 'libffi-devel'
+  package 'openssl-devel'
+  package 'redhat-rpm-config'
+  package 'curl'
+  package 'ncurses-devel'
+  package 'valgrind-devel'
+  package 'sudo'
+  package 'pam-devel'
+  package 'curl-devel'
+  package 'libxml2-devel'
+  package 'libaio-devel'
+  package 'which'
+  package 'boost-devel'
+  package 'check-devel'
+  package 'perl-XML-Simple'
+  package 'rsync'
+  package 'socat'
+  package 'lsof'
+  package 'perl-Time-HiRes'
+  package 'expect'
+  package 'net-tools'
+  case node[:platform_version].to_i
+  when 6 # CentOS 6
+    package 'wget'
+    execute 'install development tools' do
+      command "sudo yum -y groupinstall 'Development Tools'"
+    end
+    package 'ccache'
+    package 'subversion'
+    package 'python-devel'
+    package 'python-pip'
+    package 'bison'
+    package 'libaio'
+    package 'lsof'
+    package 'perl-DBI'
+    package 'boost-program-options'
+    package 'clang'
+    package 'perl-Test-HTTP-Server-Simple'
+    package 'mhash-devel'
+    package 'scons'
+    package 'Judy-devel'
+    package 'cracklib-devel'
+    package 'snappy-devel'
+    package 'perl-CPAN.x86_64'
+    execute 'set RPM-GPG-KEY-cern' do
+      command 'cd /etc/pki/rpm-gpg && sudo wget http://linuxsoft.cern.ch/cern/scl/RPM-GPG-KEY-cern'
+    end
+    execute 'set slc6-scl.repo' do
+      command 'cd /etc/yum.repos.d && sudo wget http://linuxsoft.cern.ch/cern/scl/slc6-scl.repo'
+    end
+    package 'devtoolset-3-gcc-c++'
+    package 'devtoolset-3-valgrind-devel'
+    package 'devtoolset-3-libasan-devel'
+    package 'clang'
+    execute 'enable devtoolset-3' do
+     command '. /opt/rh/devtoolset-3/enable'
+    end
+  when 7 # CentOS 7
+    execute 'yum groups' do
+      command 'sudo yum groups mark convert'
+    end
+    execute 'install epel-release' do
+      command 'sudo yum -y --enablerepo=extras install epel-release'
+    end
+    execute 'install development tools' do
+      command "sudo yum -y groupinstall 'Development Tools'"
+    end
+    package 'ccache'
+    package 'subversion'
+    package 'python-devel'
+    package 'python-pip'
+    package 'libasan'
+    package 'clang'
+    package 'checkpolicy'
+    package 'policycoreutils-python'
+    package 'mhash-devel'
+    package 'gnutls-devel'
+    package 'scons'
+    package 'systemd-devel'
+    package 'cracklib-devel'
+    package 'Judy-devel'
+    package 'patch'
+    package 'perl-Test-Base'
+    package 'jemalloc'
+  when 8 # CentOS 8
+    package 'cmake'
+    package 'checkpolicy'
+    package 'bison'
+    package 'lz4-devel'
+    package 'kernel-headers'
+    package 'libasan'
+    package 'policycoreutils'
+    package 'gnutls-devel'
+    package 'Judy'
+    package 'systemd-devel'
+    package 'cracklib'
+    package 'patch'
+    package 'redhat-lsb-core'
+    package 'patch'
+    package 'perl-Memoize.noarch'
+    package 'perl-Getopt-Long'
+    package 'jemalloc'
+    execute 'install epel-release' do
+      command 'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
+    end
+    execute 'install development tools' do
+      command "sudo dnf -y groupinstall 'Development Tools'"
+    end
+  end
+when 'opensuseleap' # Suse 15
+  package 'gcc-c++'
+  package 'cmake'
+  package 'libaio-devel'
+  package 'pam-devel'
+  package 'wget'
+  package 'libgnutls-devel'
+  package 'bison'
+  package 'ncurses-devel'
+  package 'libxml2-devel'
+  package 'libcurl-devel'
+  package 'rsync'
+  package 'socat'
+  package 'lsof'
+  package 'tar'
+  package 'gzip'
+  package 'bzip2'
+  package 'rpm-build'
+  package 'checkpolicy'
+  package 'policycoreutils'
+  package 'curl'
+  package 'perl'
+  package 'valgrind-devel'
+  package 'sudo'
+  package 'git'
+  package 'scons'
+  package 'perl-XML-Simple'
+  package 'systemd-devel'
+  package 'check-devel'
+  package 'snappy-devel'
+  package 'expect'
+  package 'jemalloc'
+  package 'net-tools'
+  package 'flex'
+  package 'libboost_*-devel'
+  package 'autoconf'
+  package 'automake'
+  package 'libtool'
+when 'suse' # Sles 12
+  package 'gcc-c++'
+  package 'libaio-devel'
+  package 'pam-devel'
+  package 'perl-XML-Simple'
+  package 'libgnutls-devel'
+  package 'bison'
+  package 'systemd-devel'
+  package 'ncurses-devel'
+  package 'libxml2-devel'
+  package 'libcurl-devel'
+  package 'rsync'
+  package 'socat'
+  package 'lsof'
+  package 'tar'
+  package 'gzip'
+  package 'bzip2'
+  package 'rpm-build'
+  package 'checkpolicy'
+  package 'policycoreutils'
+  package 'curl'
+  package 'perl'
+  package 'check-devel'
+  package 'valgrind-devel'
+  package 'wget'
+  package 'sudo'
+  package 'git'
+  package 'scons'
+  package 'boost-devel'
+  package 'snappy-devel'
+  package 'expect'
+  package 'net-tools'
+  package 'flex'
+  package 'autoconf'
+  package 'automake'
+  package 'libtool'
 end
 
-if node[:platform_family] == 'rhel' && (node[:platform_version].to_i == 7 || node[:platform_version].to_i == 6)
-  if node[:platform_version].to_i != 6
-    yum_package 'perl-Data-Dumper'
-    yum_package 'systemd-devel'
-  end
-  yum_package 'yum-utils'
-  execute 'install Development Tools' do
-    command "sudo yum -y groupinstall 'Development Tools'"
-  end
-  yum_package 'gcc'
-  yum_package 'gcc-c++'
-  yum_package 'make'
-  yum_package 'cmake'
-  yum_package 'yum-utils'
-  yum_package 'libaio-devel'
-  yum_package 'openssl-devel'
-  yum_package 'gnutls-devel'
-  yum_package 'libgcrypt-devel'
-  yum_package 'pam-devel'
-  yum_package 'ncurses-devel'
-  yum_package 'bison'
-  yum_package 'zlib-devel'
-  yum_package 'libevent-devel'
-  yum_package 'wget'
-  yum_package 'rpm-build'
-  yum_package 'rpmdevtools'
-  yum_package 'libaio-devel'
-  yum_package 'libxml2-devel'
-  yum_package 'boost-devel'
-  yum_package 'check-devel'
-  yum_package 'which'
-  yum_package 'cracklib-devel'
-  yum_package 'rsync'
-  yum_package 'socat'
-  yum_package 'lsof'
-  yum_package 'patch'
-  yum_package 'valgrind-devel'
-  yum_package 'snappy-devel'
-  yum_package 'expect'
-  yum_package 'net-tools'
-  yum_package 'mhash-devel'
-  yum_package 'scons'
-  yum_package 'Judy-devel'
-  yum_package 'jemalloc'
-  yum_package 'clang'
-end
-
-if node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
-  dnf_package 'perl-Data-Dumper'
-  dnf_package 'systemd-devel'
-  dnf_package 'yum-utils'
-  execute 'install Development Tools' do
-    command "sudo yum -y groupinstall 'Development Tools'"
-  end
-  dnf_package 'gcc'
-  dnf_package 'gcc-c++'
-  dnf_package 'make'
-  dnf_package 'cmake'
-  dnf_package 'yum-utils'
-  dnf_package 'libaio-devel'
-  dnf_package 'openssl-devel'
-  dnf_package 'gnutls-devel'
-  dnf_package 'libgcrypt-devel'
-  dnf_package 'pam-devel'
-  dnf_package 'ncurses-devel'
-  dnf_package 'bison'
-  dnf_package 'zlib-devel'
-  dnf_package 'libevent-devel'
-  dnf_package 'wget'
-  dnf_package 'rpm-build'
-  dnf_package 'rpmdevtools'
-  dnf_package 'libaio-devel'
-  dnf_package 'libxml2-devel'
-  dnf_package 'boost-devel'
-  dnf_package 'check-devel'
-  dnf_package 'which'
-  dnf_package 'rsync'
-  dnf_package 'socat'
-  dnf_package 'lsof'
-  dnf_package 'patch'
-  dnf_package 'valgrind-devel'
-  dnf_package 'expect'
-  dnf_package 'net-tools'
-  dnf_package 'mhash-devel'
-  dnf_package 'jemalloc'
-  dnf_package 'clang'
-end
-
-if node[:platform_family] == 'suse'
-  zypper_package 'boost-devel' if node[:platform_version].to_f == 12.4 # Sles 12
-  zypper_package 'perl-Data-Dump' if node[:platform_version].to_f == 15.1 # Suse 15
-  zypper_package 'cmake'
-  zypper_package 'make'
-  zypper_package 'gcc'
-  zypper_package 'wget'
-  zypper_package 'gcc-c++'
-  zypper_package 'libaio-devel'
-  zypper_package 'perl-XML-Simple'
-  zypper_package 'bison'
-  zypper_package 'libopenssl-devel'
-  zypper_package 'ncurses-devel'
-  zypper_package 'rsync'
-  zypper_package 'socat'
-  zypper_package 'lsof'
-  zypper_package 'tar'
-  zypper_package 'gzip'
-  zypper_package 'bzip2'
-  zypper_package 'rpm-build'
-  zypper_package 'checkpolicy'
-  zypper_package 'policycoreutils'
-  zypper_package 'curl'
-  zypper_package 'perl'
-  zypper_package 'wget'
-  zypper_package 'sudo'
-  zypper_package 'git-core'
-  zypper_package 'expect'
-  zypper_package 'net-tools'
-  zypper_package 'flex'
-  zypper_package 'autoconf'
-  zypper_package 'automake'
-  zypper_package 'libtool'
-  zypper_package 'perl-XML-LibXML'
-  zypper_package 'patch'
-  zypper_package 'zlib-devel'
-  zypper_package 'libgcrypt-devel'
-  zypper_package 'libxml2-devel'
-  zypper_package 'libcurl-devel'
-  zypper_package 'snappy-devel'
-  zypper_package 'valgrind-devel'
-  zypper_package 'check-devel'
-  zypper_package 'libevent-devel'
-  zypper_package 'libgnutls-devel'
-  zypper_package 'pam-devel'
-  zypper_package 'systemd-devel'
-  zypper_package 'libgnutls-devel'
-  zypper_package 'rpm-build'
-  zypper_package 'scons'
-  execute 'install mariadb' do
-    command 'sudo zypper -n source-install -d mariadb'
-  end
-end
-
-CMAKE_VER = '3.16.4'
 execute 'install cmake' do
-  command "wget -q https://github.com/Kitware/CMake/releases/download/v#{CMAKE_VER}/cmake-#{CMAKE_VER}-Linux-x86_64.tar.gz --no-check-certificate &&
-sudo tar xzf cmake-#{CMAKE_VER}-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
-rm cmake-#{CMAKE_VER}-Linux-x86_64.tar.gz"
+  command "wget -q https://github.com/Kitware/CMake/releases/download/v#{node['mdbe_build']['cmake_version']}/cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz --no-check-certificate &&
+sudo tar xzf cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
+rm cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz"
 end
