@@ -1,5 +1,3 @@
-require 'json'
-
 execute 'Cleanup registration' do
   command 'SUSEConnect --cleanup'
 end
@@ -23,24 +21,30 @@ execute 'Register system' do
   command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"
 end
 
-
-cmd = Mixlib::ShellOut.new('SUSEConnect --status')
-cmd.run_command
-products = JSON.parse(cmd.stdout)
-
-products = remove_product('SLES', products)
-
-if node['platform_version'].to_i == 12
-  products = move_products_to_begin(['sle-sdk'], products)
-elsif node['platform_version'].to_i == 15
-  products = move_products_to_begin(%w[sle-module-desktop-applications sle-module-development-tools], products)
+ruby_block 'Get filesystem information' do
+  block do
+    require 'json'
+    cmd = Mixlib::ShellOut.new('SUSEConnect --status')
+    cmd.run_command
+    products = JSON.parse(cmd.stdout)
+    products = SuseConnectHelpers.remove_product('SLES', products)
+    if node['platform_version'].to_i == 12
+      products = SuseConnectHelpers.move_products_to_begin(['sle-sdk'], products)
+    elsif node['platform_version'].to_i == 15
+      products = SuseConnectHelpers.move_products_to_begin(%w[sle-module-desktop-applications sle-module-development-tools], products)
+    end
+    node.run_state[:products] = products
+  end
+  action :run
 end
 
-products.each do |product|
-    execute "Activate PRODUCT #{product['identifier']}" do
-      sensitive true
-      command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"\
+bash 'Activate available products' do
+  sensitive true
+  ignore_failure
+  code lazy {
+    node.run_state[:products].map do |product|
+      "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"\
         " -p #{product['identifier']}/#{product['version']}/#{product['arch']}"
-      ignore_failure
-    end
+    end.join(' && ')
+  }
 end
