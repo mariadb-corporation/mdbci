@@ -129,7 +129,7 @@ class TerraformConfigurationGenerator < BaseCommand
       return Result.error('Credentials for SUSEConnect are not configured') if @env.suse_config.nil?
 
       recipe_names << 'suse-connect'
-      product_configs.merge!('suse-connect': @env.suse_config)
+      product_configs.merge!('suse-connect': @env.suse_config.merge({ provider: @provider }))
     end
     Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
   end

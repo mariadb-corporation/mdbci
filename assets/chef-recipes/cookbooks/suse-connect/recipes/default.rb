@@ -10,11 +10,14 @@ CLEANUP_COMMANDS = [
   '/usr/sbin/registercloudguest --force-new'
 ]
 
-# CLEANUP_COMMANDS.each do |command|
-#   execute "Cleanup SUSEConnect settings: #{command}" do
-#     command command
-#   end
-# end
+CLEANUP_COMMANDS.each do |command|
+  execute "Cleanup SUSEConnect settings: #{command}" do
+    command command
+    ignore_failure
+    returns [0, 1]
+    only_if { node['suse-connect']['provider'] == 'aws' }
+  end
+ end
 
 execute 'Register system' do
   sensitive true
