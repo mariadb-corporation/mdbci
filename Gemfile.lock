@@ -23,7 +23,7 @@ GEM
     coderay (1.1.2)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
-    concurrent-ruby (1.1.5)
+    concurrent-ruby (1.1.6)
     declarative (0.0.10)
     declarative-option (0.1.0)
     descendants_tracker (0.0.4)
