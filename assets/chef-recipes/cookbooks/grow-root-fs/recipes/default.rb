@@ -4,9 +4,9 @@ DEVICE_REGEX = /\/dev\/[a-zA-Z0-9]+(\d+)/
 
 ruby_block 'Get filesystem information' do
   block do
-    lsblk_cmd = Mixlib::ShellOut.new('lsblk --output NAME --list')
+    lsblk_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,TYPE | grep disk | awk '{print $1}'")
     lsblk_cmd.run_command
-    device_base_name = "/dev/#{lsblk_cmd.stdout.lines[1].chomp}"
+    device_base_name = "/dev/#{lsblk_cmd.stdout.lines[0].chomp}"
 
     df_cmd = Mixlib::ShellOut.new('df -Th /')
     df_cmd.run_command
@@ -35,10 +35,14 @@ if node['platform'] == 'debian' && node['platform_version'].to_i == 8
     ignore_failure
   end
 else
-  if node['platform_family'] == 'debian'
-    package 'cloud-utils'
-  else
-    package 'cloud-utils-growpart'
+  package 'Install growpart' do
+    not_if 'which growpart'
+
+    if node['platform_family'] == 'debian'
+      package_name 'cloud-utils'
+    else
+      package_name 'cloud-utils-growpart'
+    end
   end
   execute 'GROWPART' do
     command lazy {
