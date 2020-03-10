@@ -107,7 +107,7 @@ EOF
     @mdbci_dir = __dir__ unless @mdbci_dir
     @working_dir = Dir.pwd unless @working_dir
     @configuration_directories = [
-      File.join(XDG['CONFIG_HOME'].to_s, 'mdbci'),
+      File.join(XDG::Config.new.home, 'mdbci'),
       File.join(@mdbci_dir, 'config')
     ]
   end
@@ -143,7 +143,7 @@ EOF
   end
 
   # Search for a configuration file in all known configuration locations that include
-  # XDG['CONFIG'] directories and mdbci/config directory.
+  # XDG configuration directories and mdbci/config directory.
   # @param [String] name of the file or directory to locate in the configuration.
   # @return [String] absolute path to the found resource in one of the directories.
   # @raise [RuntimeError] if unable to find the specified configuration resource.
@@ -159,7 +159,7 @@ EOF
   # @param [String] name of the resource in the configuration directory
   # @return [String] full path to the resource
   def configuration_path(name = '')
-    configuration_dir = File.join(XDG['CONFIG_HOME'].to_s, 'mdbci')
+    configuration_dir = File.join(XDG::Config.new.home, 'mdbci')
     FileUtils.mkdir_p(configuration_dir)
     File.join(configuration_dir, name)
   end
@@ -167,7 +167,7 @@ EOF
   # Get the path to the user data directory
   # @param [String] name of the resource in data directory
   def data_path(name = '')
-    data_dir = File.join(XDG['DATA_HOME'].to_s, 'mdbci')
+    data_dir = File.join(XDG::Data.new.home, 'mdbci')
     FileUtils.mkdir_p(data_dir)
     File.join(data_dir, name)
   end

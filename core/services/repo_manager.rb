@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'xdg'
 require 'json'
 require_relative '../models/return_codes'
 require_relative '../models/tool_configuration'
@@ -15,7 +16,7 @@ class RepoManager
   # The list of the directories to search data in. The last directory takes presence over the first one
   BOX_DIRECTORIES = [
     File.expand_path('../../config/repo.d/', __dir__),
-    File.join(XDG['CONFIG_HOME'].to_s, 'mdbci', 'repo.d')
+    File.join(XDG::Config.new.home, 'mdbci', 'repo.d')
   ].freeze
 
   def initialize(logger, box_definitions, extra_path = nil)
