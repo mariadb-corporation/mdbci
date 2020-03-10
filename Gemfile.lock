@@ -135,7 +135,7 @@ GEM
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
     workers (0.6.1)
-    xdg (2.2.3)
+    xdg (3.1.1)
     yard (0.9.24)
 
 PLATFORMS

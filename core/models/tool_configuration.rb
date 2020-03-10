@@ -13,6 +13,7 @@ class ToolConfiguration
 
   def initialize(config = {})
     @config = config
+    @config_home_location = XDG::Config.new.home
   end
 
   CONFIG_FILE_NAME='mdbci/config.yaml'
@@ -20,7 +21,8 @@ class ToolConfiguration
   # Load configuration file from the disk and create ToolConfiguration file
   # @return [ToolConfiguration] read from the file
   def self.load
-    XDG['CONFIG'].each do |config_dir|
+    config = XDG::Config.new
+    config.all.each do |config_dir|
       path = File.expand_path(CONFIG_FILE_NAME, config_dir)
       next unless File.exist?(path)
       return ToolConfiguration.new(YAML.load(File.read(path)))
@@ -32,7 +34,8 @@ class ToolConfiguration
   # @param file_name [String] name of the license file
   # @return [Result::Base] read from the file
   def self.load_license_file(file_name)
-    XDG['CONFIG'].each do |config_dir|
+    config = XDG::Config.new
+    config.all.each do |config_dir|
       path = File.expand_path(File.join('mdbci', file_name), config_dir)
       next unless File.exist?(path)
 
@@ -48,7 +51,7 @@ class ToolConfiguration
       file = File.new("#{directory}/new-config.yaml", 'w')
       file.write(YAML.dump(@config))
       file.close
-      config_file = File.expand_path(CONFIG_FILE_NAME, XDG['CONFIG_HOME'].to_s)
+      config_file = File.expand_path(CONFIG_FILE_NAME, @config_home_location)
       return ERROR_RESULT if check_config_dir(config_file, logger) == ERROR_RESULT
 
       FileUtils.cp(file.path, config_file)

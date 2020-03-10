@@ -37,7 +37,8 @@ module NetworkChecker
   # Load default network resources if the file is not available
   # @return [Array<String>] resources read from the file
   def self.load_resources
-    XDG['CONFIG'].each do |config_dir|
+    config = XDG::Config.new
+    config.all.each do |config_dir|
       path = File.expand_path(NETWORK_RESOURCES_BY_USER, config_dir)
       next unless File.exist?(path)
 

@@ -2,6 +2,7 @@
 
 require 'find'
 require 'forwardable'
+require 'xdg'
 
 # The list of BoxDefinitions that are configured in the application
 class BoxDefinitions
@@ -10,7 +11,7 @@ class BoxDefinitions
   # The list of the directories to search data in. The last directory takes presence over the first one
   BOX_DIRECTORIES = [
     File.expand_path('../../config/boxes/', __dir__),
-    File.join(XDG['CONFIG_HOME'].to_s, 'mdbci', 'boxes')
+    File.join(XDG::Config.new.home, 'mdbci', 'boxes')
   ].freeze
 
   # @param extra_path [String] path to the JSON document or a folder that contains JSON documents
