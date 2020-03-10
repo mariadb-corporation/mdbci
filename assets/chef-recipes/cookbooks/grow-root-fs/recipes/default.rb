@@ -32,37 +32,42 @@ if node['platform'] == 'debian' && node['platform_version'].to_i == 8
     }
     returns [0, 1]
     live_stream true
-    notifies :run, "execute[RESIZE2FS]", :immediately
-    notifies :run, "execute[XFS_GROWFS]", :immediately
     ignore_failure
   end
 else
+  if node['platform_family'] == 'debian'
+    package 'cloud-utils'
+  else
+    package 'cloud-utils-growpart'
+  end
   execute 'GROWPART' do
     command lazy {
       "growpart #{node.run_state[:fs_data][:device_base_name]} #{node.run_state[:fs_data][:device_number]}"
     }
     returns [0, 1]
     live_stream true
-    notifies :run, "execute[RESIZE2FS]", :immediately
-    notifies :run, "execute[XFS_GROWFS]", :immediately
     ignore_failure
   end
 end
 
+package 'xfsprogs' do
+  only_if { node.run_state[:fs_data][:fs_type] == 'xfs' }
+end
 execute 'XFS_GROWFS' do
   command 'xfs_growfs /'
   returns [0, 1]
   ignore_failure
-  action :nothing
   only_if { node.run_state[:fs_data][:fs_type] == 'xfs' }
 end
 
+package 'e2fsprogs' do
+  only_if { node.run_state[:fs_data][:fs_type].include?('ext') }
+end
 execute 'RESIZE2FS' do
   command lazy {
     "resize2fs #{node.run_state[:fs_data][:device_name]}"
   }
   returns [0, 1]
   ignore_failure
-  action :nothing
   only_if { node.run_state[:fs_data][:fs_type].include?('ext') }
 end
