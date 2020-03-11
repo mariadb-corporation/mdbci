@@ -40,6 +40,8 @@ end
 
 bash 'Activate available products' do
   sensitive true
+  retries 3
+  retry_delay 15
   ignore_failure
   code lazy {
     node.run_state[:products].map do |product|
