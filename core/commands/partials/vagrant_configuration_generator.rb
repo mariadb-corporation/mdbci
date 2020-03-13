@@ -163,14 +163,12 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       product_name = product['name']
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
-    if product_name != 'packages'
-      ConfigurationGenerator.generate_product_config(@env.repos, product_name, product, box, repo, @provider)
-    else
-      Result.ok({})
-    end.and_then do |product_config|
-      @ui.info("Recipe #{recipe_name}")
-      Result.ok(recipe: recipe_name, config: product_config)
-    end
+    ConfigurationGenerator
+      .generate_product_config(@env.repos, product_name, product, box, repo, @provider)
+      .and_then do |product_config|
+        @ui.info("Recipe #{recipe_name}")
+        Result.ok(recipe: recipe_name, config: product_config)
+      end
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -196,6 +194,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       recipe_names << 'suse-connect'
       product_configs.merge!('suse-connect': @env.suse_config)
     end
+
+    recipe_names << 'packages'
     Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
   end
 
@@ -314,7 +314,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param node [Array] internal name of the machine specified in the template
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node)
-    [{ 'name' => 'packages' }].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
   end
 
   # Make a list of node parameters, create the role and node_config files, generate

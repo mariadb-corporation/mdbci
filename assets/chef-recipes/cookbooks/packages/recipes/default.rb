@@ -7,6 +7,12 @@
 # All rights reserved - Do Not Redistribute
 #
 
+if platform_family?('suse')
+  execute 'Refresh zypper repos' do
+    command 'zypper --gpg-auto-import-keys refresh'
+  end
+end
+
 include_recipe 'packages::configure_apt'
 
 # install additional packages for all platform

@@ -37,10 +37,6 @@ module ProductAttributes
       repository: 'mysql',
       files_location: 'cookbooks/mysql/files'
     },
-    'packages' => {
-      recipe: 'packages',
-      name: 'packages'
-    },
     'columnstore' => {
       recipe: 'mariadb_columnstore',
       name: 'columnstore',

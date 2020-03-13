@@ -111,5 +111,14 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024",
     "configure_suse_connect": "true"
+  },
+  "suse_15_gcp": {
+    "provider": "gcp",
+    "image": "opensuse-leap-15-1-v20190618",
+    "platform": "opensuse",
+    "platform_version": "15",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   }
 }
