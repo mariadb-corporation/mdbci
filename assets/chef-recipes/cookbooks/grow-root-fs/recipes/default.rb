@@ -4,28 +4,36 @@ DEVICE_REGEX = /\/dev\/[a-zA-Z0-9]+(\d+)/
 
 ruby_block 'Get filesystem information' do
   block do
-    lsblk_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,TYPE | grep disk | awk '{print $1}'")
+    lsblk_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,SIZE,TYPE | grep disk")
     lsblk_cmd.run_command
-    device_base_name = "/dev/#{lsblk_cmd.stdout.lines[0].chomp}"
+    root_disk_name, root_disk_size = lsblk_cmd.stdout.chomp.split(' ')
+    device_base_name = "/dev/#{root_disk_name}"
 
-    df_cmd = Mixlib::ShellOut.new('df -Th /')
+    df_cmd = Mixlib::ShellOut.new('df -Th / -BG')
     df_cmd.run_command
-    device_name, fs_type = df_cmd.stdout.lines.last.split(' ')
-    device_number = device_name.match(DEVICE_REGEX).captures.first
-    node.run_state[:fs_data] = {
-        device_name: device_name,
-        device_base_name: device_base_name,
-        device_number: device_number,
-        fs_type: fs_type
-    }
+    device_name, fs_type, device_size = df_cmd.stdout.lines.last.split(' ')
+    if device_size == root_disk_size
+      node.run_state[:need_grow_root_fs] = false
+    else
+      node.run_state[:need_grow_root_fs] = true
+      node.run_state[:fs_data] = {
+          device_name: device_name,
+          device_base_name: device_base_name,
+          device_number: device_name.match(DEVICE_REGEX).captures.first,
+          fs_type: fs_type
+      }
+    end
   end
   action :run
 end
 
 if node['platform'] == 'debian' && node['platform_version'].to_i == 8
   # We do not have growpart on Debian Jessie. We use parted 3.2 to resize the root partition
-  package 'parted'
+  package 'parted' do
+    only_if { node.run_state[:need_grow_root_fs] }
+  end
   execute 'PARTED_RESIZEPART' do
+    only_if { node.run_state[:need_grow_root_fs] }
     command lazy {
       "parted ---pretend-input-tty #{node.run_state[:fs_data][:device_base_name]} unit % "\
         "resizepart #{node.run_state[:fs_data][:device_number]} Yes 100%"
@@ -36,6 +44,7 @@ if node['platform'] == 'debian' && node['platform_version'].to_i == 8
   end
 else
   package 'Install growpart' do
+    only_if { node.run_state[:need_grow_root_fs] }
     not_if 'which growpart'
 
     if node['platform_family'] == 'debian'
@@ -45,6 +54,7 @@ else
     end
   end
   execute 'GROWPART' do
+    only_if { node.run_state[:need_grow_root_fs] }
     command lazy {
       "growpart #{node.run_state[:fs_data][:device_base_name]} #{node.run_state[:fs_data][:device_number]}"
     }
@@ -55,23 +65,27 @@ else
 end
 
 package 'xfsprogs' do
+  only_if { node.run_state[:need_grow_root_fs] }
   only_if { node.run_state[:fs_data][:fs_type] == 'xfs' }
 end
 execute 'XFS_GROWFS' do
+  only_if { node.run_state[:need_grow_root_fs] }
+  only_if { node.run_state[:fs_data][:fs_type] == 'xfs' }
   command 'xfs_growfs /'
   returns [0, 1]
   ignore_failure
-  only_if { node.run_state[:fs_data][:fs_type] == 'xfs' }
 end
 
 package 'e2fsprogs' do
+  only_if { node.run_state[:need_grow_root_fs] }
   only_if { node.run_state[:fs_data][:fs_type].include?('ext') }
 end
 execute 'RESIZE2FS' do
+  only_if { node.run_state[:need_grow_root_fs] }
+  only_if { node.run_state[:fs_data][:fs_type].include?('ext') }
   command lazy {
     "resize2fs #{node.run_state[:fs_data][:device_name]}"
   }
   returns [0, 1]
   ignore_failure
-  only_if { node.run_state[:fs_data][:fs_type].include?('ext') }
 end
