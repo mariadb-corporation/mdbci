@@ -24,7 +24,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mdbe' => 'mdbe',
     'mysql' => 'mysql',
     'maxscale_ci_docker' => 'maxscale_ci_docker',
-    'clustrix' => 'clustrix'
+    'clustrix' => 'clustrix',
+    'mdbe_ci' => 'mdbe_ci'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -167,12 +168,15 @@ In order to specify the number of retries for repository configuration use --att
 
   # Links that look like directories from the list of all links
   # @param url [String] path to the site to be checked
+  # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
   # rubocop:disable Security/Open
-  def get_directory_links(url)
+  def get_directory_links(url, auth = nil)
     uri = url.gsub(%r{([^:])\/+}, '\1/')
     @logger.info("Loading URLs '#{uri}'")
-    doc = Nokogiri::HTML(open(uri))
+    options = {}
+    options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
+    doc = Nokogiri::HTML(open(uri, options).read)
     all_links = doc.css('a')
     all_links.select do |link|
       dir_link?(link)
@@ -196,7 +200,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale_ci_rpm_repository(config)
     parse_repository(
-      config['path'], config['key'], 'maxscale_ci',
+      config['path'], nil, config['key'], 'maxscale_ci',
       save_as_field(:version),
       append_url(%w[mariadb-maxscale]),
       split_rpm_platforms,
@@ -211,7 +215,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale_ci_deb_repository(config)
     parse_repository(
-      config['path'], config['key'], 'maxscale_ci',
+      config['path'], nil, config['key'], 'maxscale_ci',
       save_as_field(:version),
       append_url(%w[mariadb-maxscale]),
       append_url(%w[debian ubuntu], :platform, true),
@@ -283,7 +287,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale_rpm_repository(config)
     parse_repository(
-      config['path'], config['key'], 'maxscale',
+      config['path'], nil, config['key'], 'maxscale',
       save_as_field(:version),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -297,7 +301,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_maxscale_deb_repository(config)
     parse_repository(
-      config['path'], config['key'], 'maxscale',
+      config['path'], nil, config['key'], 'maxscale',
       save_as_field(:version),
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
@@ -388,7 +392,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_mariadb_rpm_repository(config, product, version_regexp)
     parse_repository(
-      config['path'], config['key'], product,
+      config['path'], nil, config['key'], product,
       extract_field(:version, version_regexp),
       append_url(%w[centos rhel sles opensuse], :platform),
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -402,7 +406,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_mariadb_deb_repository(config, product, version_regexp)
     parse_repository(
-      config['path'], config['key'], product,
+      config['path'], nil, config['key'], product,
       extract_field(:version, version_regexp),
       save_as_field(:platform, true),
       append_url(%w[dists]),
@@ -423,7 +427,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_columnstore_rpm_repository(config)
     parse_repository(
-      config['path'], config['key'], 'columnstore',
+      config['path'], nil, config['key'], 'columnstore',
       save_as_field(:version),
       append_url(%w[yum]),
       split_rpm_platforms,
@@ -438,7 +442,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_columnstore_deb_repository(config)
     parse_repository(
-      config['path'], config['key'], 'columnstore',
+      config['path'], nil, config['key'], 'columnstore',
       save_as_field(:version),
       append_url(%w[repo]),
       extract_field(:platform, %r{^(\p{Alpha}+)\p{Digit}+\/?$}, true),
@@ -460,7 +464,7 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_mysql_deb_repository(config)
     parse_repository(
-      config['path'], config['key'], 'mysql',
+      config['path'], nil, config['key'], 'mysql',
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
@@ -476,7 +480,7 @@ In order to specify the number of retries for repository configuration use --att
   # http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
   def parse_mysql_rpm_repository(config)
     parse_repository(
-      config['path'], config['key'], 'mysql',
+      config['path'], nil, config['key'], 'mysql',
       extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
       split_rpm_platforms,
       save_as_field(:platform_version),
@@ -509,6 +513,51 @@ In order to specify the number of retries for repository configuration use --att
     end.flatten
   end
 
+  def parse_mdbe_ci(config)
+    raise 'Product mdbe_ci is not configured' if @env.mdbe_ci_config.nil?
+
+    releases = []
+    releases.concat(parse_mdbe_ci_rpm_repository(config['repo']['rpm']))
+    releases.concat(parse_mdbe_ci_deb_repository(config['repo']['deb']))
+    releases
+  end
+
+  def add_auth_to_url(url, auth)
+    url.dup.insert(url.index('://') + 3, "#{auth['username']}:#{auth['password']}@")
+  end
+
+  def parse_mdbe_ci_rpm_repository(config)
+    auth = @env.mdbe_ci_config
+    parse_repository(
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+        save_as_field(:version),
+        append_url(%w[yum]),
+        split_rpm_platforms,
+        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+        lambda do |release, _|
+          release[:repo] = add_auth_to_url(release[:url], auth)
+          release
+        end
+    )
+  end
+
+  def parse_mdbe_ci_deb_repository(config)
+    auth = @env.mdbe_ci_config
+    parse_repository(
+        config['path'], auth, nil, 'mdbe_ci',
+        save_as_field(:version),
+        append_url(%w[apt]),
+        append_url(%w[dists]),
+        extract_deb_platforms,
+        lambda do |release, _|
+          repo_path = add_auth_to_url(release[:url], auth)
+          release[:repo] = repo_path
+          release[:repo_key] = "#{repo_path}/#{config['key_name']}"
+          release
+        end
+    )
+  end
+
   STORED_KEYS = %i[repo repo_key platform platform_version product version].freeze
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
@@ -531,12 +580,12 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Parse the repository and provide required configurations
-  def parse_repository(base_url, key, product, *steps)
+  def parse_repository(base_url, auth, key, product, *steps)
     # Recursively go through the site and apply steps on each level
     result = steps.reduce([{ url: base_url }]) do |releases, step|
       next_releases = Workers.map(releases) do |release|
         begin
-          links = get_directory_links(release[:url])
+          links = get_directory_links(release[:url], auth)
         rescue OpenURI::HTTPError, SocketError, Net::OpenTimeout => error
           error_and_log("Unable to get information from link '#{release[:url]}', message: '#{error.message}'")
           next
@@ -554,7 +603,7 @@ In order to specify the number of retries for repository configuration use --att
   # @param product [String] name of the product
   def add_key_and_product_to_releases(releases, key, product)
     releases.each do |release|
-      release[:repo_key] = key
+      release[:repo_key] = key unless key.nil?
       release[:product] = product
     end
   end
@@ -595,6 +644,28 @@ In order to specify the number of retries for repository configuration use --att
         }
         result[:repo_url] = "#{release[:url]}#{link[:href]}" if save_path
         result
+      end
+    end
+  end
+
+  DEB_PLATFORMS = {
+      'bionic' => 'ubuntu',
+      'buster' => 'debian',
+      'focal' => 'ubuntu',
+      'jessie' => 'debian',
+      'stretch' => 'debian',
+      'xenial' => 'ubuntu'
+  }.freeze
+  def extract_deb_platforms
+    lambda do |release, links|
+      links.map do |link|
+        link.content.delete('/')
+      end.select do |link|
+        DEB_PLATFORMS.keys.any? { |platform| link.start_with?(platform) }
+      end.map do |link|
+        { url: "#{release[:url]}#{link}/",
+          platform: DEB_PLATFORMS[link],
+          platform_version: link }
       end
     end
   end

@@ -72,3 +72,11 @@ clustrix:
   path: http://files.clustrix.com/releases/software/clustrix-$VERSION$.el7.tar.bz2
   platforms: ["centos_7"]
   versions: ["9.1.2", "9.1.3", "9.1.4"]
+mdbe_ci:
+  repo:
+    rpm:
+      path: https://mdbe-ci-repo.mariadb.net/ci-repos/
+      key: https://mdbe-ci-repo.mariadb.net/repository/logs/RPM-GPG-KEY-platform-qa
+    deb:
+      path: https://mdbe-ci-repo.mariadb.net/ci-repos/
+      key_name: Release.gpg
