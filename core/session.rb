@@ -73,6 +73,7 @@ class Session
   attr_reader :rhel_config
   attr_reader :suse_config
   attr_reader :mdbe_private_key
+  attr_reader :mdbe_ci_config
   attr_accessor :show_help
   attr_accessor :reinstall
   attr_accessor :recreate
@@ -124,6 +125,7 @@ EOF
     @rhel_config = @tool_config['rhel']
     @suse_config = @tool_config['suse']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
+    @mdbe_ci_config = @tool_config['mdbe_ci']
   end
 
   def repos
