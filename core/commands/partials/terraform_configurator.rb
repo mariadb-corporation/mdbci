@@ -129,7 +129,7 @@ class TerraformConfigurator
         TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
           target_nodes = target_nodes.reject { |_node, resource| running_resources.include?(resource) }
         end
-        return Result.ok('') if target_nodes.empty?
+        return retrieve_all_network_settings(nodes) if target_nodes.empty?
       end
       Result.error("Error up of machines: #{target_nodes.keys}")
     end
@@ -165,9 +165,6 @@ class TerraformConfigurator
   # @return [Result::Base]
   def configure_nodes(nodes)
     @ui.info("Configure machines: #{nodes}")
-    retrieving_result = retrieve_all_network_settings(nodes)
-    return Result.error(retrieving_result.error) if retrieving_result.error?
-
     use_log_storage = @threads_count > 1 && @config.node_names.size > 1
     configure_results = Workers.map(nodes) do |node|
       logger = if use_log_storage
