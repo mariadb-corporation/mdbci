@@ -544,15 +544,14 @@ In order to specify the number of retries for repository configuration use --att
   def parse_mdbe_ci_deb_repository(config)
     auth = @env.mdbe_ci_config
     parse_repository(
-        config['path'], auth, nil, 'mdbe_ci',
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         save_as_field(:version),
         append_url(%w[apt]),
         append_url(%w[dists]),
         extract_deb_platforms,
         lambda do |release, _|
           repo_path = add_auth_to_url(release[:url], auth)
-          release[:repo] = repo_path
-          release[:repo_key] = "#{repo_path}/#{config['key_name']}"
+          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
           release
         end
     )
@@ -603,7 +602,7 @@ In order to specify the number of retries for repository configuration use --att
   # @param product [String] name of the product
   def add_key_and_product_to_releases(releases, key, product)
     releases.each do |release|
-      release[:repo_key] = key unless key.nil?
+      release[:repo_key] = key
       release[:product] = product
     end
   end
