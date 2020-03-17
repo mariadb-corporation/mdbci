@@ -76,7 +76,7 @@ mdbe_ci:
   repo:
     rpm:
       path: https://mdbe-ci-repo.mariadb.net/ci-repos/
-      key: https://mdbe-ci-repo.mariadb.net/repository/logs/RPM-GPG-KEY-platform-qa
+      key: https://mdbe-ci-repo.mariadb.net/MDBE.public
     deb:
       path: https://mdbe-ci-repo.mariadb.net/ci-repos/
-      key_name: Release.gpg
+      key: https://mdbe-ci-repo.mariadb.net/MDBE.public

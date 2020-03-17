@@ -15,6 +15,12 @@ module ProductAttributes
       repository: 'mdbe',
       files_location: 'cookbooks/mariadb/files'
     },
+    'mdbe_ci' => {
+        recipe: 'mariadb::install_enterprise',
+        name: 'mariadb',
+        repository: 'mdbe_ci',
+        files_location: 'cookbooks/mariadb/files'
+    },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       name: 'maxscale',
