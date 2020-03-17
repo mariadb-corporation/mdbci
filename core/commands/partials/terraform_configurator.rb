@@ -188,7 +188,7 @@ class TerraformConfigurator
   def retrieve_all_network_settings(nodes)
     @all_nodes_network_settings = nodes.map do |node|
       @ui.info("Retrieve network settings for node '#{node}'")
-      TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
+      network_settings = TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
         result = {
             'keyfile' => node_network['key_file'],
             'private_ip' => node_network['private_ip'],
@@ -197,9 +197,10 @@ class TerraformConfigurator
             'hostname' => node_network['hostname']
         }
         Result.ok(result)
-      end.and_then do |network_settings|
-        [node, network_settings]
       end
+      next if network_settings.error?
+
+      [node, network_settings.value]
     end.compact.to_h
   end
 
