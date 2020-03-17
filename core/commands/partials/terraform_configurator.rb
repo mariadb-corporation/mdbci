@@ -140,9 +140,8 @@ class TerraformConfigurator
     result = nil
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
-      result = retrieve_network_settings(node).and_then do |node_network|
-        wait_for_node_availability(node, node_network)
-      end.and_then do |node_network|
+      network_settings = retrieve_network_settings(node)
+      result = wait_for_node_availability(node, network_settings).and_then do |node_network|
         NetworkChecker.resources_available?(@machine_configurator, node_network, logger)
       end.and_then do |node_network|
         @network_settings.add_network_configuration(node, node_network)
@@ -166,7 +165,9 @@ class TerraformConfigurator
   # @return [Result::Base]
   def configure_nodes(nodes)
     @ui.info("Configure machines: #{nodes}")
-    retrieve_all_network_settings(nodes)
+    retrieving_result = retrieve_all_network_settings(nodes)
+    return Result.error(retrieving_result.error) if retrieving_result.error?
+
     use_log_storage = @threads_count > 1 && @config.node_names.size > 1
     configure_results = Workers.map(nodes) do |node|
       logger = if use_log_storage
@@ -198,16 +199,15 @@ class TerraformConfigurator
         }
         Result.ok(result)
       end
-      next if network_settings.error?
+      return Result.error("Network settings for #{node} do not exist") if network_settings.error?
 
       [node, network_settings.value]
-    end.compact.to_h
+    end.to_h
+    Result.ok('')
   end
 
   def retrieve_network_settings(node)
-    return Result.error("Network settings for #{node} do not exist") if @all_nodes_network_settings[node].nil?
-
-    Result.ok(@all_nodes_network_settings[node])
+    @all_nodes_network_settings[node]
   end
 
   def wait_for_node_availability(node, node_network)
