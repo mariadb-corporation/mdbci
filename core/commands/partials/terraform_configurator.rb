@@ -166,6 +166,7 @@ class TerraformConfigurator
   # @return [Result::Base]
   def configure_nodes(nodes)
     @ui.info("Configure machines: #{nodes}")
+    retrieve_all_network_settings(nodes)
     use_log_storage = @threads_count > 1 && @config.node_names.size > 1
     configure_results = Workers.map(nodes) do |node|
       logger = if use_log_storage
@@ -184,18 +185,28 @@ class TerraformConfigurator
     Result.ok('')
   end
 
+  def retrieve_all_network_settings(nodes)
+    @all_nodes_network_settings = nodes.map do |node|
+      @ui.info("Retrieve network settings for node '#{node}'")
+      TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
+        result = {
+            'keyfile' => node_network['key_file'],
+            'private_ip' => node_network['private_ip'],
+            'network' => node_network['public_ip'],
+            'whoami' => node_network['user'],
+            'hostname' => node_network['hostname']
+        }
+        Result.ok(result)
+      end.and_then do |network_settings|
+        [node, network_settings]
+      end
+    end.compact.to_h
+  end
+
   def retrieve_network_settings(node)
-    @ui.info("Generating network configuration file for node '#{node}'")
-    TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
-      node_network = {
-        'keyfile' => node_network['key_file'],
-        'private_ip' => node_network['private_ip'],
-        'network' => node_network['public_ip'],
-        'whoami' => node_network['user'],
-        'hostname' => node_network['hostname']
-      }
-      Result.ok(node_network)
-    end
+    return Result.error("Network settings for #{node} do not exist") if @all_nodes_network_settings[node].nil?
+
+    Result.ok(@all_nodes_network_settings[node])
   end
 
   def wait_for_node_availability(node, node_network)
