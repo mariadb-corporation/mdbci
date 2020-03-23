@@ -177,8 +177,8 @@ class TerraformConfigurator
     end
     configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage
     configure_results.each { |result| @ui.info("Configuration result of node '#{result[:node]}': #{result[:result].success?}") }
-    error_nodes = configure_results.reject { |result| result[:result] }
-    return Result.error(error_nodes) unless error_nodes.empty?
+    error_nodes = configure_results.select { |result| result[:result].error? }
+    return Result.error(error_nodes) if error_nodes.any?
 
     Result.ok('')
   end
