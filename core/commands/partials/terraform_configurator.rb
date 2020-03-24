@@ -129,10 +129,35 @@ class TerraformConfigurator
         TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
           target_nodes = target_nodes.reject { |_node, resource| running_resources.include?(resource) }
         end
-        return retrieve_all_network_settings(nodes) if target_nodes.empty?
+        next unless target_nodes.empty?
+
+        nodes_network_result = retrieve_all_nodes_network(nodes)
+        return Result.ok('') if nodes_network_result.success?
+
+        target_nodes = TerraformService.nodes_to_resources(nodes_network_result.error, resource_type)
       end
       Result.error("Error up of machines: #{target_nodes.keys}")
     end
+  end
+
+  def retrieve_all_nodes_network(nodes)
+    retrieve_all_network_settings(nodes).and_then do |all_nodes_network_settings|
+      network_results = Workers.map(nodes) do |node|
+        network_settings = all_nodes_network_settings[node]
+        node_network = wait_for_node_availability(node, network_settings)
+        @ui.error("Node #{node} is unavailable: #{node_network.error}") if node_network.error?
+        [node, node_network]
+      end.to_h
+      error_nodes = network_results.reject { |_node, result| result.success? }.keys
+      return Result.error(error_nodes) if error_nodes.any?
+
+      @all_nodes_network = network_results.map { |node, result| [node, result.value] }.to_h
+      Result.ok('')
+    end
+  end
+
+  def retrieve_node_network(node)
+    @all_nodes_network[node]
   end
 
   # rubocop:disable Metrics/MethodLength
@@ -140,10 +165,8 @@ class TerraformConfigurator
     result = nil
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
-      network_settings = retrieve_network_settings(node)
-      result = wait_for_node_availability(node, network_settings).and_then do |node_network|
-        NetworkChecker.resources_available?(@machine_configurator, node_network, logger)
-      end.and_then do |node_network|
+      node_network = retrieve_node_network(node)
+      result = NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
         @network_settings.add_network_configuration(node, node_network)
         configure_with_chef(node, logger)
       end
@@ -184,7 +207,7 @@ class TerraformConfigurator
   end
 
   def retrieve_all_network_settings(nodes)
-    @all_nodes_network_settings = nodes.map do |node|
+    all_nodes_network_settings = nodes.map do |node|
       @ui.info("Retrieve network settings for node '#{node}'")
       network_settings = TerraformService.resource_network(node, @ui, @config.path).and_then do |node_network|
         result = {
@@ -200,28 +223,17 @@ class TerraformConfigurator
 
       [node, network_settings.value]
     end.to_h
-    Result.ok('')
-  end
-
-  def retrieve_network_settings(node)
-    @all_nodes_network_settings[node]
+    Result.ok(all_nodes_network_settings)
   end
 
   def wait_for_node_availability(node, node_network)
     @ui.info("Waiting for node '#{node}' to become available")
     private_network = node_network.merge({ 'network' => node_network['private_ip'] })
-    has_connection = SSH_ATTEMPTS.times.any? do
-      if can_connect?(node_network) || can_connect?(private_network)
-        true
-      else
-        sleep(15)
-        false
-      end
-    end
-    if has_connection
+    SSH_ATTEMPTS.times do
       return Result.ok(private_network) if can_connect?(private_network)
-
       return Result.ok(node_network) if can_connect?(node_network)
+
+      sleep(15)
     end
     Result.error("Unable to establish connection with remote node '#{node}'.")
   end
