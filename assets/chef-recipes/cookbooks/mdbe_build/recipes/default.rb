@@ -44,7 +44,6 @@ debian_and_ubuntu_packages = %w[
   libxml-simple-perl
   libxml2-dev
   netcat
-  python-dev
   python3
   python3-pip
   scons
@@ -57,6 +56,7 @@ debian_and_ubuntu_packages = %w[
 debian_packages = %w[
   gnutls-dev
   libcurl4-openssl-dev
+  python-dev
 ]
 
 debian_jessie_packages = %w[
@@ -108,6 +108,7 @@ ubuntu_trusty_packages = %w[
   make
   patch
   perl-modules
+  python-dev
 ]
 
 ubuntu_xenial_packages = %w[
@@ -120,6 +121,7 @@ ubuntu_xenial_packages = %w[
   libsystemd-dev
   libtool
   libzstd-dev
+  python-dev
 ]
 
 ubuntu_bionic_packages = %w[
@@ -128,6 +130,18 @@ ubuntu_bionic_packages = %w[
   libcurl4-openssl-dev
   libjemalloc1
   libzstd-dev
+  python-dev
+]
+
+ubuntu_focal_packages = %w[
+  gnutls-dev
+  libasan5
+  libcurl4-openssl-dev
+  libjemalloc2
+  libzstd-dev
+  lsof
+  pkg-config
+  python-dev-is-python3
 ]
 
 centos_packages = %w[
@@ -153,6 +167,7 @@ centos_6_packages = %w[
   boost-program-options
   ccache
   clang
+  cmake
   cracklib-devel
   devtoolset-3-gcc-c++
   devtoolset-3-libasan-devel
@@ -175,6 +190,7 @@ centos_7_packages = %w[
   ccache
   checkpolicy
   clang
+  cmake
   cracklib-devel
   gnutls-devel
   jemalloc
@@ -188,6 +204,7 @@ centos_7_packages = %w[
   scons
   subversion
   systemd-devel
+  wget
 ]
 
 centos_8_packages = %w[
@@ -207,6 +224,7 @@ centos_8_packages = %w[
   policycoreutils
   redhat-lsb-core
   systemd-devel
+  wget
 ]
 
 suse_and_sles_packages = %w[
@@ -214,6 +232,7 @@ suse_and_sles_packages = %w[
   automake
   bison
   bzip2
+  cmake
   check-devel
   checkpolicy
   flex
@@ -230,7 +249,6 @@ suse_and_sles_packages = %w[
   perl-XML-Simple
   policycoreutils
   rpm-build
-  scons
   snappy-devel
   systemd-devel
   tar
@@ -239,13 +257,21 @@ suse_and_sles_packages = %w[
 ]
 
 suse_packages = %w[
-  cmake
   jemalloc
   libboost_*-devel
+  scons
 ]
 
-sles_packages = %w[
+sles_12_packages = %w[
   boost-devel
+  scons
+]
+
+sles_15_packages = %w[
+  libopenssl-devel
+  lsof
+  jemalloc
+  libboost_*-devel
 ]
 
 case node[:platform]
@@ -288,6 +314,11 @@ when 'ubuntu'
     execute 'fix for broken debhelper' do
       command 'sudo apt-get -y -t bionic-backports install debhelper'
     end
+  when 20.04 # Ubuntu Focal
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_focal_packages)
+    execute 'enable apt sources' do
+      command "sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+    end
   end
   apt_update 'update apt cache' do
     action :update
@@ -295,7 +326,7 @@ when 'ubuntu'
   execute 'install dependencies mariadb-server' do
     command 'sudo apt-get -y build-dep -q mariadb-server'
   end
-when 'centos'
+when 'centos', 'redhat'
   case node[:platform_version].to_i
   when 6 # CentOS 6
     packages = general_packages.concat(centos_packages).concat(centos_6_packages)
@@ -324,9 +355,6 @@ when 'centos'
     execute 'yum groups' do
       command 'sudo yum groups mark convert'
     end
-    execute 'install epel-release' do
-      command 'sudo yum -y --enablerepo=extras install epel-release'
-    end
     execute 'install development tools' do
       command "sudo yum -y groupinstall 'Development Tools'"
     end
@@ -344,8 +372,13 @@ when 'centos'
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
-when 'suse' # Sles 12
-  packages = general_packages.concat(suse_and_sles_packages).concat(sles_packages)
+when 'suse'
+  case node[:platform_version].to_i
+  when 12 # Sles 12
+    packages = general_packages.concat(suse_and_sles_packages).concat(sles_12_packages)
+  when 15 # Sles 15
+    packages = general_packages.concat(suse_and_sles_packages).concat(sles_15_packages)
+  end
 end
 
 packages.each do |package_name|
