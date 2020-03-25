@@ -61,6 +61,10 @@ module ProductAttributes
       name: 'clustrix',
       repository: 'clustrix',
       license_file_name: 'clustrix_license'
+    },
+    'maxscale_build' => {
+        recipe: 'maxscale_build',
+        name: 'maxscale_build'
     }
   }.freeze
 
