@@ -155,14 +155,15 @@ directory db_config_dir do
   action :create
 end
 
-configuration_file = File.join(db_config_dir, node['mariadb']['cnf_template'])
-
-cookbook_file configuration_file do
-  source node['mariadb']['cnf_template']
-  action :create
-  owner 'root'
-  group 'root'
-  mode '0644'
+unless node['mariadb']['cnf_template'].nil?
+  configuration_file = File.join(db_config_dir, node['mariadb']['cnf_template'])
+  cookbook_file configuration_file do
+    source node['mariadb']['cnf_template']
+    action :create
+    owner 'root'
+    group 'root'
+    mode '0644'
+  end
 end
 
 if node['mariadb']['version'] == '5.1'
