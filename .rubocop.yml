@@ -1,8 +1,19 @@
 AllCops:
   TargetRubyVersion: 2.6
 
+Layout/HeredocIndentation:
+  Enabled: false
+
 Metrics/AbcSize:
   Enabled: false
+
+Metrics/BlockLength:
+  ExcludedMethods:
+    - context
+    - describe
+
+Metrics/ClassLength:
+  Max: 400
 
 Layout/LineLength:
   Max: 100
@@ -10,22 +21,18 @@ Layout/LineLength:
 Metrics/MethodLength:
   Max: 15
 
-Metrics/ClassLength:
-  Max: 400
+Style/HashEachMethods:
+  Enabled: true
 
-Metrics/BlockLength:
-  ExcludedMethods:
-    - describe
-    - context
+Style/HashTransformKeys:
+  Enabled: true
 
-Style/NegatedIf:
-  Enabled: false
-
-Layout/HeredocIndentation:
-  Enabled: false
+Style/HashTransformValues:
+  Enabled: true
 
 Style/MultilineBlockChain:
   Enabled: false
 
-Style/BracesAroundHashParameters:
-  EnforcedStyle: braces
+Style/NegatedIf:
+  Enabled: false
+
