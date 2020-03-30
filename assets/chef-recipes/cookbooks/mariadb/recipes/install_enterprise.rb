@@ -1,3 +1,4 @@
+include_recipe "mariadb::galerarepos"
 include_recipe "mariadb::mdberepos"
 include_recipe "chrony::default"
 
