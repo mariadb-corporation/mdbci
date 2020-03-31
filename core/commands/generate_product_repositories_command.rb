@@ -326,8 +326,16 @@ In order to specify the number of retries for repository configuration use --att
     path.sub('$PRIVATE_KEY$', @env.mdbe_private_key)
   end
 
-  def generate_mdbe_repo_path(path, version)
-    replace_template_by_mdbe_private_key(path).sub('$MDBE_VERSION$', version)
+  MDBE_PLATFORMS = {
+      'centos' => 'rhel',
+      'rhel' => 'rhel',
+      'sles' => 'sles'
+  }
+  def generate_mdbe_repo_path(path, version, platform, platform_version)
+    replace_template_by_mdbe_private_key(path)
+        .sub('$MDBE_VERSION$', version)
+        .sub('$PLATFORM$', MDBE_PLATFORMS[platform] || '')
+        .sub('$PLATFORM_VERSION$', platform_version)
   end
 
   def mdbe_release_link?(link)
@@ -360,7 +368,7 @@ In order to specify the number of retries for repository configuration use --att
 
   # rubocop:disable Metrics/ParameterLists
   def generate_mdbe_release_info(baseurl, key, version, platform, platform_version, deb_repo = false)
-    repo_path = generate_mdbe_repo_path(baseurl, version)
+    repo_path = generate_mdbe_repo_path(baseurl, version, platform, platform_version)
     repo_path = "#{repo_path} #{platform_version}" if deb_repo
     {
       repo: repo_path,

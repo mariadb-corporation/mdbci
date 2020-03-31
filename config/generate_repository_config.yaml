@@ -53,7 +53,7 @@ mdbe:
     rpm:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
       key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
-      baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/rpm/rhel/$releasever/$basearch
+      baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/rpm/$PLATFORM$/$PLATFORM_VERSION$/$basearch
       platforms: ["centos_6", "centos_7", "centos_8", "rhel_6", "rhel_7", "rhel_8", "sles_12", "sles_15"]
     deb:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
