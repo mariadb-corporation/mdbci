@@ -13,7 +13,7 @@ when 'debian', 'ubuntu'
     uri "http://downloads.mariadb.com/galera-test/#{galera_repo}/deb"
     components ['main']
     distribution repo_distribution
-    key "0xF1656F24C74CD1D8"
+    key "0xCE1A3DD5E3C94F49"
     keyserver 'keyserver.ubuntu.com'
     sensitive true
   end
