@@ -56,6 +56,8 @@ debian_and_ubuntu_packages = %w[
 debian_packages = %w[
   gnutls-dev
   libcurl4-openssl-dev
+  libgcrypt20-dev
+  lsof
   python-dev
 ]
 
@@ -68,6 +70,7 @@ debian_jessie_packages = %w[
   libhtml-template-perl
   libjemalloc1
   libkrb5-dev
+  libperl4-corelibs-perl
   libsystemd-dev
   libterm-readkey-perl
   libtool
@@ -75,6 +78,8 @@ debian_jessie_packages = %w[
 ]
 
 debian_stretch_packages = %w[
+  libgnutls28-dev
+  libgnutls30
   libjemalloc1
   libzstd-dev
 ]
@@ -116,6 +121,7 @@ ubuntu_xenial_packages = %w[
   automake
   gnutls-dev
   libcurl4-openssl-dev
+  libgcrypt20-dev
   libjemalloc1
   libkrb5-dev
   libsystemd-dev
@@ -128,6 +134,7 @@ ubuntu_bionic_packages = %w[
   gnutls-dev
   libasan2
   libcurl4-openssl-dev
+  libgcrypt20-dev
   libjemalloc1
   libzstd-dev
   python-dev
@@ -142,12 +149,14 @@ ubuntu_focal_packages = %w[
   lsof
   pkg-config
   python-dev-is-python3
+  python2-dev
 ]
 
 centos_packages = %w[
-  boost-devel
   check-devel
   curl-devel
+  gnutls-devel
+  jemalloc
   libaio-devel
   libffi-devel
   libxml2-devel
@@ -155,14 +164,17 @@ centos_packages = %w[
   openssl-devel
   pam-devel
   perl-Time-HiRes
+  perl-XML-LibXML
   perl-XML-Simple
   redhat-rpm-config
+  rpmdevtools
+  snappy-devel
   valgrind-devel
   which
 ]
 
 centos_6_packages = %w[
-  Judy-devel
+  libevent-devel
   bison
   boost-program-options
   ccache
@@ -172,6 +184,7 @@ centos_6_packages = %w[
   devtoolset-3-gcc-c++
   devtoolset-3-libasan-devel
   devtoolset-3-valgrind-devel
+  Judy-devel
   libaio
   mhash-devel
   perl-CPAN.x86_64
@@ -179,22 +192,24 @@ centos_6_packages = %w[
   perl-Test-HTTP-Server-Simple
   python-devel
   python-pip
+  rh-mariadb101-boost-devel
   scons
-  snappy-devel
   subversion
   wget
 ]
 
 centos_7_packages = %w[
   Judy-devel
+  boost-devel
   ccache
   checkpolicy
   clang
   cmake
   cracklib-devel
-  gnutls-devel
-  jemalloc
   libasan
+  libevent-devel
+  libgcrypt-devel
+  lsof
   mhash-devel
   patch
   perl-Test-Base
@@ -205,19 +220,25 @@ centos_7_packages = %w[
   subversion
   systemd-devel
   wget
+  yum-utils
 ]
 
 centos_8_packages = %w[
-  Judy
   bison
+  boost-devel
+  ccache
   checkpolicy
   cmake
   cracklib
-  gnutls-devel
-  jemalloc
+  cracklib-devel
+  Judy
   kernel-headers
   libasan
+  libevent-devel
+  libgcrypt-devel
+  lsof
   lz4-devel
+  mhash-devel
   patch
   perl-Getopt-Long
   perl-Memoize.noarch
@@ -225,6 +246,7 @@ centos_8_packages = %w[
   redhat-lsb-core
   systemd-devel
   wget
+  yum-utils
 ]
 
 suse_and_sles_packages = %w[
@@ -232,15 +254,18 @@ suse_and_sles_packages = %w[
   automake
   bison
   bzip2
-  cmake
   check-devel
   checkpolicy
+  cmake
   flex
   gcc-c++
   gzip
   libaio-devel
   libcurl-devel
+  libevent-devel
+  libgcrypt-devel
   libgnutls-devel
+  libgpg-error-devel
   libtool
   libxml2-devel
   ncurses-devel
@@ -258,20 +283,21 @@ suse_and_sles_packages = %w[
 
 suse_packages = %w[
   jemalloc
-  libboost_*-devel
   scons
 ]
 
 sles_12_packages = %w[
   boost-devel
+  libopenssl-1_0_0-devel
+  libopenssl-devel
   scons
 ]
 
 sles_15_packages = %w[
+  jemalloc
   libopenssl-devel
   lsof
-  jemalloc
-  libboost_*-devel
+  perl-Data-Dump
 ]
 
 case node[:platform]
@@ -350,6 +376,9 @@ when 'centos', 'redhat'
     execute 'enable devtoolset-3' do
       command "echo 'source /opt/rh/devtoolset-3/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
     end
+    execute 'enable boost' do
+      command "echo 'source /opt/rh/rh-mariadb101/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
+    end
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
     execute 'yum groups' do
@@ -378,6 +407,12 @@ when 'suse'
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_12_packages)
   when 15 # Sles 15
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_15_packages)
+    execute 'install libboost-devel' do
+      command 'sudo zypper -n install libboost_*-devel'
+    end
+  end
+  execute 'install mariadb dependencies' do
+    command 'sudo zypper -n source-install -d mariadb'
   end
 end
 
