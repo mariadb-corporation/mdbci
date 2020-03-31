@@ -30,14 +30,17 @@ when 'rhel', 'fedora', 'centos'
     options({ 'module_hotfixes' => '1' })
   end
 when 'suse', 'opensuse', 'sles', nil
-  # Add the repo
-  template "/etc/zypp/repos.d/#{repo_file_name}.repo" do
-    source 'mariadb.suse.erb'
-    action :create
+  zypper_repository 'mariadb' do
+    action :remove
+  end
+  zypper_repository 'mariadb' do
+    action :add
+    baseurl node['mariadb']['repo']
+    gpgkey node['mariadb']['repo_key']
+    gpgcheck
     sensitive true
   end
-
-  execute 'Update zypper cache' do
-    command "zypper refresh"
+  zypper_repository 'MariaDB' do
+    action :refresh
   end
 end
