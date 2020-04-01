@@ -153,6 +153,7 @@ ubuntu_focal_packages = %w[
 ]
 
 centos_packages = %w[
+  boost-devel
   check-devel
   curl-devel
   gnutls-devel
@@ -192,7 +193,6 @@ centos_6_packages = %w[
   perl-Test-HTTP-Server-Simple
   python-devel
   python-pip
-  rh-mariadb101-boost-devel
   scons
   subversion
   wget
@@ -200,7 +200,6 @@ centos_6_packages = %w[
 
 centos_7_packages = %w[
   Judy-devel
-  boost-devel
   ccache
   checkpolicy
   clang
@@ -225,7 +224,6 @@ centos_7_packages = %w[
 
 centos_8_packages = %w[
   bison
-  boost-devel
   ccache
   checkpolicy
   cmake
