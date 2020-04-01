@@ -374,9 +374,6 @@ when 'centos', 'redhat'
     execute 'enable devtoolset-3' do
       command "echo 'source /opt/rh/devtoolset-3/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
     end
-    execute 'enable boost' do
-      command "echo 'source /opt/rh/rh-mariadb101/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
-    end
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
     execute 'yum groups' do
