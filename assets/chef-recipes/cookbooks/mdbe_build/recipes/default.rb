@@ -70,6 +70,7 @@ debian_jessie_packages = %w[
   libhtml-template-perl
   libjemalloc1
   libkrb5-dev
+  libpcre3-dev
   libperl4-corelibs-perl
   libsystemd-dev
   libterm-readkey-perl
@@ -78,6 +79,7 @@ debian_jessie_packages = %w[
 ]
 
 debian_stretch_packages = %w[
+  libpcre2-dev
   libgnutls28-dev
   libgnutls30
   libjemalloc1
@@ -86,12 +88,14 @@ debian_stretch_packages = %w[
 
 debian_buster_packages = %w[
   dh-systemd
+  libpcre2-dev
   libjemalloc2
   libzstd-dev
   pkg-config
 ]
 
 ubuntu_packages = %w[
+  libpcre2-dev
   dh-systemd
 ]
 
