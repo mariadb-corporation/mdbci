@@ -522,7 +522,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_mdbe_ci(config)
-    raise 'Product mdbe_ci is not configured' if @env.mdbe_ci_config.nil?
+    return nil if @env.mdbe_ci_config.nil?
 
     releases = []
     releases.concat(parse_mdbe_ci_rpm_repository(config['repo']['rpm']))
@@ -593,8 +593,8 @@ In order to specify the number of retries for repository configuration use --att
       next_releases = Workers.map(releases) do |release|
         begin
           links = get_directory_links(release[:url], auth)
-        rescue OpenURI::HTTPError, SocketError, Net::OpenTimeout => error
-          error_and_log("Unable to get information from link '#{release[:url]}', message: '#{error.message}'")
+        rescue OpenURI::HTTPError, SocketError, Net::OpenTimeout, Errno::ECONNRESET, OpenSSL::SSL::SSLError, RuntimeError => e
+          error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
           next
         end
         apply_step_to_links(step, links, release)
@@ -780,22 +780,34 @@ In order to specify the number of retries for repository configuration use --att
     info_and_log("Generating repository configuration for #{product}")
     begin
       releases = send("parse_#{product}".to_sym, @config[product])
-    rescue StandardError => error
-      error_and_log("#{product} was not generated. Try again.")
-      error_and_log_error(error)
-      return false
+      if releases
+        write_product(product, releases)
+        [false, product]
+      else
+        error_and_log("#{product} was not generated. Skiped.")
+        [nil, product]
+      end
+    rescue StandardError => e
+      error_and_log("Error message: #{e.message}")
+      error_and_log("#{product} was not generated.")
+      [true, product]
     end
-    write_product(product, releases)
-    true
   end
 
   # Print summary information about the created products
   # @param products_with_errors [Array<String>] product names that were not generated
-  def print_summary(products_with_errors)
+  def print_summary(products)
     info_and_log("\n--------\nSUMMARY:\n")
-    @products.sort.each do |product|
-      result = products_with_errors.include?(product) ? '-' : '+'
-      info_and_log("  #{product}: #{result}")
+    products.each do |product|
+      case (product[0])
+      when false
+        result = '+'
+      when nil
+        result = '?'
+      when true
+        result = '-'
+      end
+      info_and_log("  #{product[1]}: #{result}")
     end
   end
 
@@ -806,14 +818,18 @@ In order to specify the number of retries for repository configuration use --att
       return SUCCESS_RESULT
     end
     return ARGUMENT_ERROR_RESULT unless configure_command
+
     remainning_products = @products.dup
-    @attempts.times do
-      remainning_products = remainning_products.reject do |product|
-        create_repository(product)
+    result_products = []
+    result = nil
+    remainning_products.each do |product|
+      @attempts.times do
+        result = create_repository(product)
+        break unless result[0]
       end
-      break if remainning_products.empty?
+      result_products << result
     end
-    print_summary(remainning_products)
+    print_summary(result_products)
     SUCCESS_RESULT
   end
 end
