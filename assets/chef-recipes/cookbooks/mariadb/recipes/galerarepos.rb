@@ -1,4 +1,4 @@
-minor_version = node['mariadb']['version'].split('.')[1]
+minor_version = node['mariadb']['version'].split(/[-|.]/)[1]
 
 galera_repo = if %w[2 3].include?(minor_version)
                 'repo3'
