@@ -554,11 +554,11 @@ In order to specify the number of retries for repository configuration use --att
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         save_as_field(:version),
-        append_url(%w[apt]),
+        append_url(%w[apt], nil, true),
         append_url(%w[dists]),
         extract_deb_platforms,
         lambda do |release, _|
-          repo_path = add_auth_to_url(release[:url], auth)
+          repo_path = add_auth_to_url(release[:repo_url], auth)
           release[:repo] = "#{repo_path} #{release[:platform_version]} main"
           release
         end
