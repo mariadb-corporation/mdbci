@@ -33,11 +33,16 @@ when 'suse', 'opensuse', 'sles', nil
   zypper_repository 'mariadb' do
     action :remove
   end
+  remote_file File.join('tmp', 'rpm.key') do
+    source node['mariadb']['repo_key']
+    action :create
+  end
+  execute 'Import rpm key' do
+    command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
+  end
   zypper_repository 'mariadb' do
     action :add
     baseurl node['mariadb']['repo']
-    gpgkey node['mariadb']['repo_key']
-    gpgcheck
     sensitive true
   end
   zypper_repository 'MariaDB' do
