@@ -30,10 +30,16 @@ when 'suse', 'opensuse', 'sles', nil
   zypper_repository 'Galera-Enterprise' do
     action :remove
   end
+  remote_file File.join('tmp', 'rpm.key') do
+    source 'https://downloads.mariadb.com/MariaDB/RPM-GPG-KEY-MariaDB-Ent'
+    action :create
+  end
+  execute 'Import rpm key' do
+    command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
+  end
   zypper_repository 'Galera-Enterprise' do
+    autorefresh true
     action :add
     baseurl "http://downloads.mariadb.com/galera-test/#{galera_repo}/rpm/sles/#{platform_release}/x86_64/"
-    gpgkey 'https://downloads.mariadb.com/MariaDB/RPM-GPG-KEY-MariaDB-Ent'
-    gpgcheck
   end
 end
