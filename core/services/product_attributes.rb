@@ -21,6 +21,11 @@ module ProductAttributes
         repository: 'mdbe_ci',
         files_location: 'cookbooks/mariadb/files'
     },
+    'mariadb_remove' => {
+        recipe: 'mariadb::uninstall',
+        name: 'maxscale',
+        repository: 'maxscale'
+    },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       name: 'maxscale',
