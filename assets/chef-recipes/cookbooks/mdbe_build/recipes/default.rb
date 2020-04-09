@@ -249,7 +249,6 @@ centos_8_packages = %w[
   policycoreutils
   redhat-lsb-core
   systemd-devel
-  wget
   yum-utils
 ]
 
@@ -278,6 +277,7 @@ suse_and_sles_packages = %w[
   perl-XML-Simple
   policycoreutils
   rpm-build
+  scons
   snappy-devel
   systemd-devel
   tar
@@ -288,14 +288,12 @@ suse_and_sles_packages = %w[
 
 suse_packages = %w[
   jemalloc
-  scons
 ]
 
 sles_12_packages = %w[
   boost-devel
   libopenssl-1_0_0-devel
   libopenssl-devel
-  scons
 ]
 
 sles_15_packages = %w[
@@ -400,6 +398,19 @@ when 'centos', 'redhat'
     execute 'update cache' do
       command 'sudo  dnf update -y --releasever=8'
     end
+    package 'wget'
+    bash 'install scons' do
+      cwd '/tmp'
+      code <<-EOH
+      wget http://prdownloads.sourceforge.net/scons/scons-3.1.1.tar.gz
+      tar xzfv scons-3.1.1.tar.gz
+      cd scons-3.1.1
+      python3 setup.py install
+      ln -s /usr/bin/python3 /usr/bin/python
+      cd ..
+      rm -rf scons-3.1.1.tar.gz scons-3.1.1
+      EOH
+    end
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
@@ -409,6 +420,11 @@ when 'suse'
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_12_packages)
   when 15 # Sles 15
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_15_packages)
+    zypper_repository 'enable a repository for scons' do
+      action :add
+      gpgcheck false
+      baseurl 'http://download.opensuse.org/repositories/devel:/tools:/building/SLE_15/'
+    end
     execute 'install libboost-devel' do
       command 'sudo zypper -n install libboost_*-devel'
     end
