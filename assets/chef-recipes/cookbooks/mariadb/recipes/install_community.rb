@@ -27,17 +27,9 @@ if node[:platform] == "centos" and node["platform_version"].to_f >= 6.0
   end
 end  # Turn off SElinux
 
-# Remove mysql-libs for MariaDB-Server 5.1
-if node['mariadb']['version'] == "5.1"
-  execute "Remove mysql-libs for MariaDB-Server 5.1" do
-    case node[:platform]
-      when "ubuntu", "debian"
-        break if node[:platform_version] == "14.04"
-        command "apt-get -y remove mysql-libs"
-      when "rhel", "centos"
-        command "yum remove -y mysql-libs"
-    end
-  end
+# Remove mysql-libs
+package 'mysql-libs' do
+  action :remove
 end
 
 # check and install iptables

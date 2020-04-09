@@ -23,16 +23,9 @@ if node[:platform] == "centos" and node["platform_version"].to_f >= 6.0
   end
 end  # Turn off SElinux
 
-# Remove mysql-libs for MariaDB-Server 5.1
-if node['mariadb']['version'] == "5.1"
-  execute "Remove mysql-libs for MariaDB-Server 5.1" do
-    case node[:platform]
-      when "ubuntu", "debian"
-        command "apt-get -y remove mysql-libs"
-      when "rhel", "centos"
-        command "yum remove -y mysql-libs"
-    end
-  end
+# Remove mysql-libs
+package 'mysql-libs' do
+  action :remove
 end
 
 system 'echo Platform family: '+node[:platform_family]
@@ -158,9 +151,11 @@ else
 end
 
 # Starts service
-case node[:platform_family]
-when "windows"
-else
+if platform?('redhat') && node[:platform_version].to_i == 6
+  service "mysql" do
+    action :start
+  end
+elsif !platform_family?('windows')
   service "mariadb" do
     action :start
   end
