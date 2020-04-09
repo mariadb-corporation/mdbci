@@ -44,6 +44,7 @@ debian_and_ubuntu_packages = %w[
   libxml-simple-perl
   libxml2-dev
   netcat
+  odbcinst
   python3
   python3-pip
   scons
@@ -167,6 +168,7 @@ centos_packages = %w[
   libxml2-devel
   ncurses-devel
   openssl-devel
+  unixODBC-devel
   pam-devel
   perl-Time-HiRes
   perl-XML-LibXML
@@ -279,6 +281,7 @@ suse_and_sles_packages = %w[
   snappy-devel
   systemd-devel
   tar
+  unixODBC-devel
   valgrind-devel
   wget
 ]
