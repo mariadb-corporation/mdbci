@@ -73,6 +73,10 @@ module ProductAttributes
     'mdbe_build' => {
         recipe: 'mdbe_build',
         name: 'mdbe_build'
+    },
+    'xpand' => {
+        recipe: 'xpand',
+        name: 'xpand'
     }
   }.freeze
 

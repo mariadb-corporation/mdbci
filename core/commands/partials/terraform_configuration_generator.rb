@@ -6,12 +6,11 @@ require 'fileutils'
 require 'json'
 require 'socket'
 require_relative '../base_command'
-require_relative '../../../core/services/configuration_generator'
 require_relative '../../../core/services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
-require_relative '../../services/product_attributes'
+require_relative '../../services/attributes_generator'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend
@@ -73,138 +72,6 @@ class TerraformConfigurationGenerator < BaseCommand
                   login: login }
   end
 
-  # Make product config and recipe name for install it to the VM.
-  #
-  # @param product [Hash] parameters of product to configure from configuration file
-  # @param box [String] name of the box
-  # @return [Result::Base<Hash>] recipe name and product config
-  #                              in format { recipe: String, config: Hash }.
-  # rubocop:disable Metrics/MethodLength
-  def make_product_config_and_recipe_name(product, box)
-    repo = nil
-    if !product['repo'].nil?
-      repo_name = product['repo']
-      @ui.info("Repo name: #{repo_name}")
-      unless @env.repos.knownRepo?(repo_name)
-        return Result.error("Unknown key for repo #{repo_name} will be skipped")
-      end
-
-      @ui.info("Repo specified [#{repo_name}] (CORRECT), other product params will be ignored")
-      repo = @env.repos.getRepo(repo_name)
-      product_name = @env.repos.productName(repo_name)
-    else
-      product_name = product['name']
-    end
-    recipe_name = ProductAttributes.recipe_name(product_name)
-    ConfigurationGenerator
-      .generate_product_config(@env.repos, product_name, product, box, repo, @provider)
-      .and_then do |product_config|
-        @ui.info("Recipe #{recipe_name}")
-        Result.ok({ recipe: recipe_name, config: product_config })
-      end
-  end
-  # rubocop:enable Metrics/MethodLength
-
-  # Initialize product configs Hash and recipe names list with necessary recipes
-  # and configurations on which the box depends.
-  #
-  # @param box [String] name of the box
-  # @return [Result::Base] Hash in format { recipe_names: [], product_configs: {} }
-  def init_product_configs_and_recipes(box)
-    product_configs = {}
-    recipe_names = []
-
-    if @env.box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
-      return Result.error('Credentials for Red Hat Subscription-Manager are not configured') if @env.rhel_config.nil?
-
-      recipe_names << 'subscription-manager'
-      product_configs.merge!('subscription-manager': @env.rhel_config)
-    end
-
-    if @env.box_definitions.get_box(box)['configure_suse_connect'] == 'true'
-      return Result.error('Credentials for SUSEConnect are not configured') if @env.suse_config.nil?
-
-      recipe_names << 'suse-connect'
-      product_configs.merge!('suse-connect': @env.suse_config.merge({ provider: @provider }))
-    end
-
-    recipe_names << 'packages'
-    recipe_names << 'grow-root-fs' if %w[aws gcp].include?(@provider)
-    Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
-  end
-
-  # Generate the role description for the specified node.
-  #
-  # @param name [String] internal name of the machine specified in the template
-  # @param products [Array<Hash>] list of parameters of products to configure
-  #                               from configuration file
-  # @param box [String] name of the box
-  # @return [Result::Base<String>] pretty formatted role description in JSON format
-  def get_role_description(name, products, box)
-    recipes_result = init_product_configs_and_recipes(box)
-    return recipes_result if recipes_result.error?
-
-    product_configs = recipes_result.value[:product_configs]
-    recipe_names = recipes_result.value[:recipe_names]
-    products.each do |product|
-      recipe_and_config_result = make_product_config_and_recipe_name(product, box)
-      return recipe_and_config_result if recipe_and_config_result.error?
-
-      recipe_and_config_result.and_then do |recipe_and_config|
-        product_configs.merge!(recipe_and_config[:config])
-        recipe_names << recipe_and_config[:recipe]
-      end
-    end
-    role_description = ConfigurationGenerator.generate_role_json_description(name, recipe_names, product_configs)
-    Result.ok(role_description)
-  end
-
-  # Check for the existence of a path, create it if path is not exists or clear path
-  # if it is exists and override parameter is true.
-  #
-  # @return [Bool] false if directory path is already exists and override is false,
-  #                otherwise - true.
-  def check_path
-    if Dir.exist?(@configuration_path) && !@override
-      @ui.error("Folder already exists: #{@configuration_path}."\
-                ' Please specify another name or delete')
-      return false
-    end
-    FileUtils.rm_rf(@configuration_path)
-    Dir.mkdir(@configuration_path)
-    true
-  end
-
-  # Check for MDBCI node names defined in the template to be valid Ruby object names.
-  #
-  # @return [Bool] true if all nodes names are valid, otherwise - false.
-  def check_nodes_names
-    invalid_names = @config.map do |node|
-      (node[0] =~ /^[a-zA-Z_]+[a-zA-Z_\d]*$/).nil? ? node[0] : nil
-    end.compact
-    return true if invalid_names.empty?
-
-    @ui.error("Invalid nodes names: #{invalid_names}. "\
-              'Nodes names defined in the template to be valid Ruby object names.')
-    false
-  end
-
-  # Make a hash list of node parameters by a node configuration and
-  # information of the box parameters.
-  #
-  # @param node [Array] information of the node from configuration file
-  # @param box_params [Hash] information of the box parameters
-  # @return [Hash] list of the node parameters.
-  def make_node_params(node, box_params)
-    symbolic_box_params = Hash[box_params.map { |k, v| [k.to_sym, v] }]
-    {
-      name: node[0].to_s,
-      host: node[1]['hostname'].to_s,
-      machine_type: node[1]['machine_type']&.to_s,
-      memory_size: node[1]['memory_size']&.to_i,
-      cpu_count: node[1]['cpu_count']&.to_i
-    }.compact.merge(symbolic_box_params)
-  end
 
   # Parse path to the products configurations directory from configuration of node.
   #
@@ -214,24 +81,16 @@ class TerraformConfigurationGenerator < BaseCommand
     node[1]['cnf_template_path'] || node[1]['product']&.fetch('cnf_template_path', nil)
   end
 
-  # Parse the products lists from configuration of node.
-  #
-  # @param node [Array] internal name of the machine specified in the template
-  # @return [Array<Hash>] list of parameters of products.
-  def parse_products_info(node)
-    [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
-  end
-
   # Make a list of node parameters, generate the role file content.
   #
   # @param node [String] internal name of the machine specified in the template
   # @return [Result::Base<Hash>] node info in format { node_params, role_file_content }.
   def generate_node_info(node)
     box = node[1]['box'].to_s
-    node_params = make_node_params(node, @boxes.get_box(box))
-    products = parse_products_info(node)
+    node_params = AttributesGenerator.make_node_params(node, @boxes.get_box(box), :terraform, @env)
+    products = AttributesGenerator.parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    get_role_description(node_params[:name], products, box).and_then do |role|
+    AttributesGenerator.get_role_description(node_params[:name], products, box, @ui, @env).and_then do |role|
       Result.ok({ node_params: node_params, role_file_content: role })
     end
   end
@@ -296,7 +155,7 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Result::Base] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
-    checks_result = check_path && check_nodes_names
+    checks_result = AttributesGenerator.check_path(@configuration_path, @override, @ui) && AttributesGenerator.check_nodes_names(@config, @ui)
     return ARGUMENT_ERROR_RESULT unless checks_result
 
     generate_ssh_keys
