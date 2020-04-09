@@ -80,3 +80,11 @@ mdbe_ci:
     deb:
       path: https://mdbe-ci-repo.mariadb.net/ci-repos/
       key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+galera_enterprise_ci:
+  repo:
+    rpm:
+      path: https://mdbe-ci-repo.mariadb.net/galera/
+      key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+    deb:
+      path: https://mdbe-ci-repo.mariadb.net/galera/
+      key: https://mdbe-ci-repo.mariadb.net/MDBE.public

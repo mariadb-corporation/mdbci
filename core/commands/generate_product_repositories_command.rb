@@ -25,7 +25,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mysql' => 'mysql',
     'maxscale_ci_docker' => 'maxscale_ci_docker',
     'clustrix' => 'clustrix',
-    'mdbe_ci' => 'mdbe_ci'
+    'mdbe_ci' => 'mdbe_ci',
+    'galera_enterprise_ci' => 'galera_enterprise_ci'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -553,6 +554,49 @@ In order to specify the number of retries for repository configuration use --att
     auth = @env.mdbe_ci_config
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+        save_as_field(:version),
+        append_url(%w[apt], nil, true),
+        append_url(%w[dists]),
+        extract_deb_platforms,
+        lambda do |release, _|
+          repo_path = add_auth_to_url(release[:repo_url], auth)
+          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+          release
+        end
+    )
+  end
+
+  def parse_galera_enterprise_ci(config)
+    raise 'Product mdbe_ci is not configured' if @env.mdbe_ci_config.nil?
+
+    auth = @env.mdbe_ci_config
+    releases = []
+    releases.concat(parse_galera_enterprise_ci_rpm_repository(config['repo']['rpm'], auth))
+    releases.concat(parse_galera_enterprise_ci_deb_repository(config['repo']['deb'], auth))
+    releases
+  end
+
+  def add_auth_to_url(url, auth)
+    url.dup.insert(url.index('://') + 3, "#{auth['username']}:#{auth['password']}@")
+  end
+
+  def parse_galera_enterprise_ci_rpm_repository(config, auth)
+    parse_repository(
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
+        save_as_field(:version),
+        append_url(%w[yum]),
+        split_rpm_platforms,
+        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+        lambda do |release, _|
+          release[:repo] = add_auth_to_url(release[:url], auth)
+          release
+        end
+    )
+  end
+
+  def parse_galera_enterprise_ci_deb_repository(config, auth)
+    parse_repository(
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
         save_as_field(:version),
         append_url(%w[apt], nil, true),
         append_url(%w[dists]),
