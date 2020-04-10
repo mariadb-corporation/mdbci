@@ -3,6 +3,16 @@ require 'shellwords'
 include_recipe "galera::galera_repos"
 include_recipe "chrony::default"
 
+PACKAGE_NAMES = %w[MariaDB-server
+                   MariaDB-Galera-server
+                   galera
+                   mariadb-galera-server
+                   galera-3
+                   galera-4
+                   galera-enterprise-4
+                   galera-enterprise-3
+                   mariadb-server]
+
 provider = node['galera']['provider']
 
 # Install default packages
@@ -162,10 +172,19 @@ when "rhel", "fedora", "centos"
   end
 
 when "debian"
-  if node['galera']['version'] != "5.5" && node['galera']['version'] != "10.0"
-    package 'mariadb-server'
-  else
-    package 'mariadb-galera-server'
+  ruby_block 'Get available galera package' do
+    block do
+      require 'uri'
+      uri = URI(node['galera']['repo'].split(' ').first)
+      cmd = Mixlib::ShellOut.new("grep ^Package: /var/lib/apt/lists/#{uri.host}*_Packages")
+      cmd.run_command
+      available_packages = cmd.stdout.lines.map { |line| line.split(' ')[1] }
+      node.run_state[:galera_package_name] = (PACKAGE_NAMES & available_packages).first
+    end
+    action :run
+  end
+  package "Install galera package" do
+    package_name lazy { node.run_state[:galera_package_name] }
   end
 else
   package 'MariaDB-Galera-server'
