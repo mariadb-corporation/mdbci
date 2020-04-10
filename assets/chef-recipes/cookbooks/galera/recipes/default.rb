@@ -143,34 +143,31 @@ end # save iptables rules
 # Install packages
 case node[:platform_family]
 when "suse"
-  if node['galera']['version'] != "5.5" && node['galera']['version'] != "10.0"
-    package "Galera 10.X" do
-      package_name 'MariaDB-server'
-    end
-  else
-    package "Galera 10.0 and 5.5" do
-      package_name 'MariaDB-Galera-server'
+  ruby_block 'Get available galera package' do
+    block do
+      cmd = Mixlib::ShellOut.new('zypper pa -r galera')
+      cmd.run_command
+      lines = cmd.stdout.lines
+      packages_start_line_index = lines.index { |line| line =~ /--+/ } + 1
+      available_packages = lines[packages_start_line_index...lines.length].map do |line|
+        line.split(/\|/).map { |column| column.strip.chomp }[2]
+      end
+      node.run_state[:galera_package_name] = (PACKAGE_NAMES & available_packages).first
     end
   end
-
 when "rhel", "fedora", "centos"
-  if node['galera']['version'] != "5.5" && node['galera']['version'] != "10.0"
-    package 'Galera 10.X' do
-      package_name 'MariaDB-server'
-    end
-  elsif node['galera']['version'] == "10.0"
-    package 'Galera 10.0' do
-      package_name 'MariaDB-Galera-server'
-    end
-    package 'Galera 10.0' do
-      package_name 'galera'
-    end
-  else
-    package 'Galera 5.5' do
-      package_name 'MariaDB-Galera-server'
+  ruby_block 'Get available galera package' do
+    block do
+      cmd = Mixlib::ShellOut.new('yum --disablerepo="*" --enablerepo="galera" list available')
+      cmd.run_command
+      lines = cmd.stdout.lines
+      packages_start_line_index = lines.index {|x| x =~ /Available Packages/} + 1
+      available_packages = lines[packages_start_line_index...lines.length].map do |line|
+        line.split('\s').first.split('.').first
+      end
+      node.run_state[:galera_package_name] = (PACKAGE_NAMES & available_packages).first
     end
   end
-
 when "debian"
   ruby_block 'Get available galera package' do
     block do
@@ -181,13 +178,13 @@ when "debian"
       available_packages = cmd.stdout.lines.map { |line| line.split(' ')[1] }
       node.run_state[:galera_package_name] = (PACKAGE_NAMES & available_packages).first
     end
-    action :run
-  end
-  package "Install galera package" do
-    package_name lazy { node.run_state[:galera_package_name] }
   end
 else
-  package 'MariaDB-Galera-server'
+  node.run_state[:galera_package_name] = 'MariaDB-Galera-server'
+end
+
+package "Install galera package" do
+  package_name lazy { node.run_state[:galera_package_name] }
 end
 
 # Copy server.cnf configuration file to configuration
