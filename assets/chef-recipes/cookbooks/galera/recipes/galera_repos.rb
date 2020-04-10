@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'uri'
 
 %w[net-tools psmisc].each do |pkg|
   package pkg do
@@ -9,21 +10,28 @@ end
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
-  execute 'Add repository key' do
-    command "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{node['galera']['repo_key']}"
+  if node['galera']['repo_key'] =~ URI::regexp
+    remote_file File.join('tmp', 'apt.key') do
+      source node['galera']['repo_key']
+      action :create
+    end
+    execute 'Import apt key' do
+      command 'apt-key add /tmp/apt.key && rm -f /tmp/apt.key'
+    end
+    key = nil
+  else
+    key = node['galera']['repo_key']
   end
-
-  file '/etc/apt/sources.list.d/galera.list' do
-    content "deb #{node['galera']['repo']}"
-    owner 'root'
-    group 'root'
-    mode '0644'
-    action :create
+  uri, repo_distribution = node['galera']['repo'].split(/\s+/)
+  apt_repository 'galera' do
+    uri uri
+    components ['main']
+    distribution repo_distribution
+    key key unless key.nil?
+    keyserver 'keyserver.ubuntu.com'
+    sensitive true
   end
-
-  execute 'Update repository cache' do
-    command 'apt-get update'
-  end
+  apt_update
 when 'rhel', 'fedora', 'centos'
   yum_repository 'galera' do
     action :create
