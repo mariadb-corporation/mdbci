@@ -13,6 +13,7 @@ when 'debian', 'ubuntu'
   if node['galera']['repo_key'] =~ URI::regexp
     remote_file File.join('tmp', 'apt.key') do
       source node['galera']['repo_key']
+      sensitive true
       action :create
     end
     execute 'Import apt key' do
@@ -33,16 +34,32 @@ when 'debian', 'ubuntu'
   end
   apt_update
 when 'rhel', 'fedora', 'centos'
-  yum_repository 'galera' do
+  remote_file File.join('tmp', 'rpm.key') do
+    source node['galera']['repo_key']
     action :create
-    baseurl node['galera']['repo']
-    gpgkey node['galera']['repo_key']
-    options({ 'module_hotfixes' => '1' })
+    sensitive true
   end
-when 'suse'
+  execute 'Import rpm key' do
+    command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
+  end
+  yum_repository 'galera' do
+    baseurl node['galera']['repo']
+    options({ 'module_hotfixes' => '1' })
+    sensitive true
+    gpgcheck
+  end
+when 'suse', 'opensuse', 'sles', nil
+  remote_file File.join('tmp', 'rpm.key') do
+    source node['galera']['repo_key']
+    action :create
+    sensitive true
+  end
+  execute 'Import rpm key' do
+    command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
+  end
   zypper_repository 'galera' do
     action :add
     baseurl node['galera']['repo']
-    gpgkey node['galera']['repo_key']
+    sensitive true
   end
 end
