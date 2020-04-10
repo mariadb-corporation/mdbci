@@ -22,29 +22,14 @@ rsync sed sudo util-linux].each do |pkg|
   package pkg
 end
 
-case node[:platform_family]
-when "rhel", "fedora", "centos"
-  if node['platform_version'].to_f < 7
-    package 'nc'
-  else
-    package 'nmap-ncat'
-  end
-else # debian, suse
+if platform_family?('debian')
   package "netcat"
 end
 
 # Install socat package
 if (node[:platform_family] == 'centos' || node[:platform_family] == 'rhel') &&
     node['platform_version'].to_f < 7
-  execute 'install Fedora EPEL repository' do
-    case node['platform_version'].to_f
-    when 6...7
-      command 'rpm -Uvh https://mirror.linux-ia64.org/epel/6/x86_64/epel-release-6-8.noarch.rpm'
-    when 5...6
-      # This is no longer supported
-      command 'rpm -Uvh http://archives.fedoraproject.org/pub/archive/epel/epel-release-latest-5.noarch.rpm'
-    end
-  end
+  package 'epel-release'
 end
 package "socat"
 
@@ -76,7 +61,7 @@ when "debian", "ubuntu"
     command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
   end
 when "rhel", "fedora", "centos"
-  if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
+  if node["platform_version"].to_f >= 7.0
     bash 'Install and configure iptables' do
       code <<-EOF
         yum --assumeyes install iptables-services
@@ -87,7 +72,7 @@ when "rhel", "fedora", "centos"
   else
     bash 'Configure iptables' do
       code <<-EOF
-        /sbin/service start iptables
+        service iptables start
         chkconfig iptables on
       EOF
     end
@@ -161,7 +146,7 @@ when "rhel", "fedora", "centos"
       cmd = Mixlib::ShellOut.new('yum --disablerepo="*" --enablerepo="galera" list available')
       cmd.run_command
       lines = cmd.stdout.lines
-      packages_start_line_index = lines.index {|x| x =~ /Available Packages/} + 1
+      packages_start_line_index = lines.index {|x| x =~ /galera/}
       available_packages = lines[packages_start_line_index...lines.length].map do |line|
         line.split('\s').first.split('.').first
       end
