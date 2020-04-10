@@ -248,7 +248,9 @@ centos_8_packages = %w[
   perl-Memoize.noarch
   policycoreutils
   redhat-lsb-core
+  python3-scons
   systemd-devel
+  wget
   yum-utils
 ]
 
@@ -397,19 +399,6 @@ when 'centos', 'redhat'
     end
     execute 'update cache' do
       command 'sudo  dnf update -y --releasever=8'
-    end
-    package 'wget'
-    bash 'install scons' do
-      cwd '/tmp'
-      code <<-EOH
-      wget http://prdownloads.sourceforge.net/scons/scons-3.1.1.tar.gz
-      tar xzfv scons-3.1.1.tar.gz
-      cd scons-3.1.1
-      python3 setup.py install
-      ln -s /usr/bin/python3 /usr/bin/python
-      cd ..
-      rm -rf scons-3.1.1.tar.gz scons-3.1.1
-      EOH
     end
   end
 when 'opensuseleap' # Suse 15
