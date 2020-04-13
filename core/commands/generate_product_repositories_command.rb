@@ -177,7 +177,7 @@ In order to specify the number of retries for repository configuration use --att
     @logger.info("Loading URLs '#{uri}'")
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
-    doc = Nokogiri::HTML(open(uri, options).read)
+    doc = Nokogiri::HTML(URI.open(uri, options).read)
     all_links = doc.css('a')
     all_links.select do |link|
       dir_link?(link)
@@ -238,7 +238,7 @@ In order to specify the number of retries for repository configuration use --att
   def get_maxscale_ci_release_version_for_docker(base_url, username, password)
     uri_with_tags = URI.join(base_url, '/v2/mariadb/maxscale-ci/tags/list')
     begin
-      doc_tags = JSON.parse(open(uri_with_tags, http_basic_authentication: [username, password]).read)
+      doc_tags = JSON.parse(URI.open(uri_with_tags, http_basic_authentication: [username, password]).read)
       doc_tags.dig('tags')
     rescue OpenURI::HTTPError => error
       @ui.error("Failed to get tags for docker from #{uri_with_tags}: #{error}")
@@ -346,7 +346,7 @@ In order to specify the number of retries for repository configuration use --att
   # rubocop:disable Security/Open
   def get_mdbe_release_links(path)
     uri = path.gsub(%r{([^:])\/+}, '\1/')
-    doc = Nokogiri::HTML(open(uri))
+    doc = Nokogiri::HTML(URI.open(uri))
     all_links = doc.css('ul:not(.nav) a')
     all_links.select do |link|
       mdbe_release_link?(link)
