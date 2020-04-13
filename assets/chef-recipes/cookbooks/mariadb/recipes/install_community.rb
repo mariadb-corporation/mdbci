@@ -38,8 +38,8 @@ case node[:platform_family]
     execute "Install iptables-persistent" do
       command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
     end
-  when "rhel", "fedora", "centos"
-    if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
+  when 'rhel', 'centos', 'fedora'
+    if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
       bash 'Install and configure iptables' do
       code <<-EOF
         yum --assumeyes install iptables-services
@@ -79,9 +79,9 @@ case node[:platform_family]
       command "iptables-save > /etc/iptables/rules.v4"
       #command "/usr/sbin/service iptables-persistent save"
     end
-  when "rhel", "centos", "fedora"
-    if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
-      bash 'Save iptables rules on CentOS 7' do
+  when 'rhel', 'centos', 'fedora'
+    if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
+      bash 'Save iptables rules' do
         code <<-EOF
           iptables-save > /etc/sysconfig/iptables
         EOF
@@ -90,7 +90,7 @@ case node[:platform_family]
         retry_delay 30
       end
     else
-      bash 'Save iptables rules on CentOS >= 6.0' do
+      bash 'Save iptables rules on' do
       code <<-EOF
         /sbin/service iptables save
       EOF
