@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 name              'galera'
 maintainer        'OSLL'
 maintainer_email  'kirill.krinkin@gmail.com'
