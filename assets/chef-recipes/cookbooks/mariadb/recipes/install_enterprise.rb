@@ -155,7 +155,7 @@ if platform?('redhat') && node[:platform_version].to_i == 6
   service "mysql" do
     action :start
   end
-elsif !platform_family?('windows')
+else
   service "mariadb" do
     action :start
   end
