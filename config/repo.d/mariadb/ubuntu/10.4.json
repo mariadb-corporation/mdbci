@@ -24,6 +24,22 @@
     "version": "10.4"
   },
   {
+    "repo": "http://mirror.netinch.com/pub/mariadb/repo/10.4/ubuntu/ disco main",
+    "repo_key": "0xF1656F24C74CD1D8",
+    "platform": "ubuntu",
+    "platform_version": "disco",
+    "product": "mariadb",
+    "version": "10.4"
+  },
+  {
+    "repo": "http://mirror.netinch.com/pub/mariadb/repo/10.4/ubuntu/ eoan main",
+    "repo_key": "0xF1656F24C74CD1D8",
+    "platform": "ubuntu",
+    "platform_version": "eoan",
+    "product": "mariadb",
+    "version": "10.4"
+  },
+  {
     "repo": "http://mirror.netinch.com/pub/mariadb/repo/10.4/ubuntu/ trusty main",
     "repo_key": "0xF1656F24C74CD1D8",
     "platform": "ubuntu",

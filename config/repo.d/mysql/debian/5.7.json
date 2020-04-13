@@ -1,5 +1,13 @@
 [
   {
+    "repo": "deb http://repo.mysql.com/apt/debian buster mysql-5.7",
+    "repo_key": "5072E1F5",
+    "platform": "debian",
+    "platform_version": "buster",
+    "product": "mysql",
+    "version": "5.7"
+  },
+  {
     "repo": "deb http://repo.mysql.com/apt/debian jessie mysql-5.7",
     "repo_key": "5072E1F5",
     "platform": "debian",

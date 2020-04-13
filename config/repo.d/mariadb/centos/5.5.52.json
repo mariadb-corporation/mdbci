@@ -14,13 +14,5 @@
     "platform_version": "6",
     "product": "mariadb",
     "version": "5.5.52"
-  },
-  {
-    "repo": "http://yum.mariadb.org/5.5.52/centos/7/x86_64/",
-    "repo_key": "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
-    "platform": "centos",
-    "platform_version": "7",
-    "product": "mariadb",
-    "version": "5.5.52"
   }
 ]

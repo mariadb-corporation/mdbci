@@ -1,5 +1,13 @@
 [
   {
+    "repo": "https://downloads.mariadb.com/MaxScale/beta/opensuse/12/x86_64/",
+    "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
+    "platform": "opensuse",
+    "platform_version": "12",
+    "product": "maxscale",
+    "version": "beta"
+  },
+  {
     "repo": "https://downloads.mariadb.com/MaxScale/beta/opensuse/15/x86_64/",
     "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
     "platform": "opensuse",

@@ -24,6 +24,14 @@
     "version": "5.7"
   },
   {
+    "repo": "deb http://repo.mysql.com/apt/ubuntu disco mysql-5.7",
+    "repo_key": "5072E1F5",
+    "platform": "ubuntu",
+    "platform_version": "disco",
+    "product": "mysql",
+    "version": "5.7"
+  },
+  {
     "repo": "deb http://repo.mysql.com/apt/ubuntu precise mysql-5.7",
     "repo_key": "5072E1F5",
     "platform": "ubuntu",
