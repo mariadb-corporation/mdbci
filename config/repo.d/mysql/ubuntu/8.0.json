@@ -24,6 +24,30 @@
     "version": "8.0"
   },
   {
+    "repo": "deb http://repo.mysql.com/apt/ubuntu disco mysql-8.0",
+    "repo_key": "5072E1F5",
+    "platform": "ubuntu",
+    "platform_version": "disco",
+    "product": "mysql",
+    "version": "8.0"
+  },
+  {
+    "repo": "deb http://repo.mysql.com/apt/ubuntu eoan mysql-8.0",
+    "repo_key": "5072E1F5",
+    "platform": "ubuntu",
+    "platform_version": "eoan",
+    "product": "mysql",
+    "version": "8.0"
+  },
+  {
+    "repo": "deb http://repo.mysql.com/apt/ubuntu focal mysql-8.0",
+    "repo_key": "5072E1F5",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "product": "mysql",
+    "version": "8.0"
+  },
+  {
     "repo": "deb http://repo.mysql.com/apt/ubuntu trusty mysql-8.0",
     "repo_key": "5072E1F5",
     "platform": "ubuntu",

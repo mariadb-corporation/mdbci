@@ -8,14 +8,6 @@
     "version": "latest"
   },
   {
-    "repo": "https://downloads.mariadb.com/MaxScale/latest/ubuntu trusty main",
-    "repo_key": "135659e928c12247",
-    "platform": "ubuntu",
-    "platform_version": "trusty",
-    "product": "maxscale",
-    "version": "latest"
-  },
-  {
     "repo": "https://downloads.mariadb.com/MaxScale/latest/ubuntu xenial main",
     "repo_key": "135659e928c12247",
     "platform": "ubuntu",
