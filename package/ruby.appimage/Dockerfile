@@ -5,7 +5,7 @@ FROM centos:6 as ruby-appimage-builder
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
 ARG BUILD_JOBS=1
-ARG RUBY_VERSION=2.6.5
+ARG RUBY_VERSION=2.7.1
 ARG RUBY_INSTALL_VERSION=0.7.0
 
 # Please update the ENTRYPOINT if changing the WORKSPACE variable
