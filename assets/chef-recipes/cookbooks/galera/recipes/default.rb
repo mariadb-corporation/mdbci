@@ -3,15 +3,17 @@ require 'shellwords'
 include_recipe "galera::galera_repos"
 include_recipe "chrony::default"
 
-PACKAGE_NAMES = %w[MariaDB-server
-                   MariaDB-Galera-server
-                   galera
-                   mariadb-galera-server
-                   galera-3
-                   galera-4
-                   galera-enterprise-4
-                   galera-enterprise-3
-                   mariadb-server]
+PACKAGE_NAMES = %w[
+  MariaDB-Galera-server
+  MariaDB-server
+  galera
+  galera-3
+  galera-4
+  galera-enterprise-3
+  galera-enterprise-4
+  mariadb-galera-server
+  mariadb-server
+]
 
 provider = node['galera']['provider']
 
