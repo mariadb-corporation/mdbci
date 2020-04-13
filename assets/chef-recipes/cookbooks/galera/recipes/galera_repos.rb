@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'uri'
 
 %w[net-tools psmisc].each do |pkg|
@@ -10,7 +11,7 @@ end
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
-  if node['galera']['repo_key'] =~ URI::regexp
+  if node['galera']['repo_key'] =~ URI::DEFAULT_PARSER.make_regexp
     remote_file File.join('tmp', 'apt.key') do
       source node['galera']['repo_key']
       sensitive true
