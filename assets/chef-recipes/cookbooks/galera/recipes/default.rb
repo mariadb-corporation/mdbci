@@ -172,7 +172,7 @@ end
 
 package 'Install galera package' do
   package_name(lazy { node.run_state[:galera_package_name] })
-  options '--force-yes' if platform_family?('debian')
+  options '--force-yes' if platform?('debian') && node[:platform_version].to_i == 8
 end
 
 # Copy server.cnf configuration file to configuration
