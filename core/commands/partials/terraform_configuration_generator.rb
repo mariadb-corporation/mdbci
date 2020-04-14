@@ -6,11 +6,12 @@ require 'fileutils'
 require 'json'
 require 'socket'
 require_relative '../base_command'
-require_relative '../../../core/services/terraform_service'
+require_relative '../../models/configuration'
+require_relative '../../services/configuration_generator'
+require_relative '../../services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
-require_relative '../../services/configuration_generator'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend
@@ -166,8 +167,8 @@ class TerraformConfigurationGenerator < BaseCommand
   #
   # @raise RuntimeError if provider or template files already exists.
   def generate_configuration_info_files
-    provider_file = File.join(@configuration_path, 'provider')
-    template_file = File.join(@configuration_path, 'template')
+    provider_file = Configuration.provider_path(@configuration_path)
+    template_file = Configuration.template_path(@configuration_path)
     configuration_id_file = File.join(@configuration_path, 'configuration_id')
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)

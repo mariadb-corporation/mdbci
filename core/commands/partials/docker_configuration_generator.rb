@@ -3,6 +3,7 @@
 require 'fileutils'
 require 'find'
 require 'yaml'
+require_relative '../../models/configuration'
 require_relative '../../models/return_codes'
 
 # The class generates the MDBCI configuration for the use in pair with Docker backend
@@ -211,8 +212,8 @@ class DockerConfigurationGenerator
 
   def write_configuration_files
     @ui.info('Placing required configuration files')
-    File.write(File.join(@configuration_path, 'provider'), 'docker')
-    File.write(File.join(@configuration_path, 'template'), @template_file)
+    File.write(Configuration.provider_path(@configuration_path), 'docker')
+    File.write(Configuration.template_path(@configuration_path), @template_file)
     SUCCESS_RESULT
   rescue IOError => error
     @ui.error('Unable to create the required configuration files.')
