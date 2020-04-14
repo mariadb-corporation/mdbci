@@ -380,14 +380,14 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return [Number] exit code for the command execution
   def execute(name)
     begin
-      path, template = setup_command(name)
+      path, config = setup_command(name)
     rescue RuntimeError => error
       @ui.error(error.message)
       return ERROR_RESULT
     end
-    nodes_checking_result = load_nodes_provider_and_check_it(template)
+    nodes_checking_result = load_nodes_provider_and_check_it(config)
     return ARGUMENT_ERROR_RESULT unless nodes_checking_result
-    
+
     generate_result = generate(path, config, @provider)
     return generate_result unless generate_result == SUCCESS_RESULT
 

@@ -157,11 +157,11 @@ class TerraformConfigurationGenerator < BaseCommand
       unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
         return SUCCESS_RESULT
       end
-      @ui.error(generation_result.error)
-      @ui.error('Configuration is invalid')
-      FileUtils.rm_rf(@configuration_path)
-      ERROR_RESULT
     end
+    @ui.error(generation_result.error)
+    @ui.error('Configuration is invalid')
+    FileUtils.rm_rf(@configuration_path)
+    ERROR_RESULT
   end
 
   # Generate provider, template and configuration_id files in the configuration directory.
