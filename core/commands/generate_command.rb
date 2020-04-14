@@ -55,7 +55,7 @@ class GenerateCommand < BaseCommand
   def read_template
     @template_file = File.expand_path(@env.template_file)
     begin
-      @template = ConfigurationTemplate.new(@template_file)
+      @template = ConfigurationTemplate.new(@template_file, @env.box_definitions)
       SUCCESS_RESULT
     rescue RuntimeError => error
       @ui.error("Unable to read template file. Error: #{error.message}")
