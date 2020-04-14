@@ -88,9 +88,13 @@ class BoxDefinitions
   end
 
   REQUIRED_KEYS = %w[provider platform platform_version].freeze
+
   AWS_KEYS = %w[ami user default_instance_type].freeze
-  GCP_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
+  DEDICATED_KEYS = %w[host user ssh_key].freeze
   DIGITALOCEAN_KEYS = %w[image user default_machine_type default_cpu_count default_memory_size].freeze
+  DOCKER_KEYS = %w[box].freeze
+  GCP_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
+  LIBVIRT_KEYS = %w[box].freeze
 
   # @param box_definition [Hash] check that provided box description contains required keys
   def check_box_definition(box_definition)
@@ -100,14 +104,15 @@ class BoxDefinitions
       end
     end
     REQUIRED_KEYS.each(&key_check)
-    if box_definition['provider'] == 'aws'
-      AWS_KEYS.each(&key_check)
-    elsif box_definition['provider'] == 'gcp'
-      GCP_KEYS.each(&key_check)
-    elsif box_definition['provider'] == 'digitalocean'
-      DIGITALOCEAN_KEYS.each(&key_check)
-    else
-      key_check.call('box')
-    end
+    keys_for_provider(box_definition['provider']).each(&key_check)
+  end
+
+  # Gets the list of keys for the specified provider
+  def keys_for_provider(provider)
+    self.class.const_get(
+        "#{provider.upcase}_KEYS"
+    )
+  rescue NameError
+    raise "Provider '#{provider}'is not supported."
   end
 end
