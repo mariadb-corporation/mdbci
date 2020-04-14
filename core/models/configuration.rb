@@ -69,6 +69,24 @@ class Configuration
     File.join(path, 'docker-configuration.yaml')
   end
 
+  # Forms the path to the provider configuration file that resides
+  # in the configuration specified by the path
+  #
+  # @param configuration_path [String] path to the configuration
+  # @return [String] path to the provider file
+  def self.provider_path(configuration_path)
+    File.join(File.expand_path(configuration_path), 'provider')
+  end
+
+  # Forms the path to the template configuration file that resides
+  # in the configuration specified by the path
+  #
+  # @param configuration_path [String] path to the configuration
+  # @return [String] path to the template file
+  def self.template_path(configuration_path)
+    File.join(File.expand_path(configuration_path), 'template')
+  end
+
   # Create the configuration based on the path specification and labels list.
   #
   # Method returns Result that may contain the Configuration

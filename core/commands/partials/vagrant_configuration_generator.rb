@@ -297,8 +297,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param provider [String] nodes provider
   # @raise RuntimeError if provider or template files already exists.
   def generate_provider_and_template_files(path, provider)
-    provider_file = File.join(path, 'provider')
-    template_file = File.join(path, 'template')
+    provider_file = Configuration.provider_path(path)
+    template_file = Configuration.template_path(path)
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
 
