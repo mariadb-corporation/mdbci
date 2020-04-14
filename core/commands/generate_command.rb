@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+
 require_relative 'base_command'
 require_relative 'partials/vagrant_configuration_generator'
 require_relative 'partials/terraform_configuration_generator'
@@ -18,15 +20,17 @@ class GenerateCommand < BaseCommand
     return check_result unless check_result == SUCCESS_RESULT
 
     case @template.template_type
-    when :vagrant
-      generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
-      generator.execute(@args.first, @env.override)
-    when :terraform
-      generator = TerraformConfigurationGenerator.new(@args, @env, @ui)
-      generator.execute(@args.first, @env.override)
     when :docker
       generator = DockerConfigurationGenerator.new(@configuration_path, @template_file, @template, @env, @ui)
       generator.generate_config
+    when :terraform
+      generator = TerraformConfigurationGenerator.new(@args, @env, @ui)
+      generator.execute(@args.first)
+    when :vagrant
+      generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
+      generator.execute(@args.first)
+    else
+      Result.error("The '#{@template.template_type}' is not supported.")
     end
   end
 
@@ -45,6 +49,7 @@ class GenerateCommand < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
 
+    FileUtils.rm_rf(@configuration_path)
     result = read_template
     return result unless result == SUCCESS_RESULT
 
