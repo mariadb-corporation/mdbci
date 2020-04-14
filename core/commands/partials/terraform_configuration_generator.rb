@@ -12,6 +12,9 @@ require_relative '../../services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
+require_relative '../../services/configuration_generator'
+require_relative '../../models/configuration'
+require_relative '../../services/product_attributes'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend

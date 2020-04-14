@@ -9,10 +9,11 @@ require 'socket'
 require 'erb'
 require 'set'
 require_relative '../base_command'
-require_relative '../../out'
-require_relative '../../models/configuration.rb'
-require_relative '../../services/shell_commands'
+require_relative '../../models/configuration'
 require_relative '../../services/configuration_generator'
+require_relative '../../services/product_attributes'
+require_relative '../../services/shell_commands'
+require_relative '../../out'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
 # rubocop:disable Metrics/ClassLength
