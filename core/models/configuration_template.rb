@@ -8,11 +8,11 @@ class ConfigurationTemplate
   extend Forwardable
   def_delegator :@node_configurations, :each, :each_node
 
-  def initialize(template_path)
+  def initialize(template_path, box_definitions)
     @template_path = template_path
     @template = read_template_file
     @node_configurations = extract_node_configurations
-    @template_type = determine_template_type
+    @template_type = determine_template_type(box_definitions)
   end
 
   private
@@ -39,27 +39,28 @@ class ConfigurationTemplate
     end
   end
 
-  # Method analyses the structure of the template
-  # @returns [Symbol] type of the template: vagrant, docker or terraform
-  def determine_template_type
-    target_boxes = @node_configurations.map { |_, node| node['box'] }
-    template_type = nil
-    target_boxes.each do |box|
-      box_provider = %w[docker aws libvirt vbox gcp digitalocean].detect { |provider| box.include?(provider) }
-      raise("Unknown provider #{box_provider}") if box_provider.nil?
+  TEMPLATE_TYPE_BY_PROVIDER = {
+      dedicated: %w[dedicated],
+      docker: %w[docker],
+      terraform: %w[aws digitalocean gcp],
+      vagrant: %w[libvirt vbox],
+  }
 
-      if template_type.nil?
-        template_type = box_provider
-      elsif template_type != box_provider
-        raise("There are several node providers defined in the template.\n"\
-              'You can specify only nodes from one provider in the template.')
+  # Method analyses the structure of the template
+  # @param box_definitions [BoxDefinitions] the provider of box definitions
+  # @returns [Symbol] type of the template: vagrant, docker or terraform
+  def determine_template_type(box_definitions)
+    @node_configurations.map { |_, node| node['box'] }.then do |box_names|
+      box_names.map{ |box_name| box_definitions.get_box(box_name)['provider'] }.uniq
+    end.then do |providers|
+      if providers.size > 1
+        raise("There are several providers defined in the template: #{providers.join(', ')}")
+      end
+      providers.first
+    end.then do |provider|
+      TEMPLATE_TYPE_BY_PROVIDER.each_pair do |template_type, providers|
+        return template_type if providers.include?(provider)
       end
     end
-    if %w[libvirt vbox].include?(template_type)
-      template_type = :vagrant
-    elsif %[aws gcp digitalocean].include?(template_type)
-      template_type = :terraform
-    end
-    template_type.to_sym
   end
 end
