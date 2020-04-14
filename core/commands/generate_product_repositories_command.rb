@@ -167,23 +167,28 @@ In order to specify the number of retries for repository configuration use --att
     true
   end
 
-  # Links that look like directories from the list of all links
+  # Get links list on the page
   # @param url [String] path to the site to be checked
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
   # rubocop:disable Security/Open
-  def get_directory_links(url, auth = nil)
+  def get_links(url, auth = nil)
     uri = url.gsub(%r{([^:])\/+}, '\1/')
     @logger.info("Loading URLs '#{uri}'")
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
     doc = Nokogiri::HTML(URI.open(uri, options).read)
-    all_links = doc.css('a')
-    all_links.select do |link|
-      dir_link?(link)
-    end
+    doc.css('a')
   end
   # rubocop:enable Security/Open
+
+  # Links that look like directories from the list of all links
+  # @param url [String] path to the site to be checked
+  # @param auth [Hash] basic auth data in format { username, password }
+  # @return [Array] possible link locations
+  def get_directory_links(url, auth = nil)
+    get_links(url, auth).select { |link| dir_link?(link) }
+  end
 
   # Check that passed link is possibly a directory or not
   # @param link link to check
@@ -584,29 +589,47 @@ In order to specify the number of retries for repository configuration use --att
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
         save_as_field(:version),
+        save_url_to_field(:release_root),
         append_url(%w[yum]),
         split_rpm_platforms,
         extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
         lambda do |release, _|
           release[:repo] = add_auth_to_url(release[:url], auth)
+          release[:has_packages] = check_packages_in_dir(
+              "#{release[:release_root]}/packages/#{release[:platform]}/#{release[:platform_version]}/", auth
+          )
           release
         end
-    )
+    ).select { |release| release[:has_packages] }
   end
 
   def parse_galera_enterprise_ci_deb_repository(config, auth)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
         save_as_field(:version),
+        save_url_to_field(:release_root),
         append_url(%w[apt], nil, true),
         append_url(%w[dists]),
         extract_deb_platforms,
         lambda do |release, _|
           repo_path = add_auth_to_url(release[:repo_url], auth)
           release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+          release[:has_packages] = check_packages_in_dir(
+              "#{release[:release_root]}/packages/#{release[:platform]}/#{release[:platform_version]}/", auth
+          )
           release
         end
-    )
+    ).select { |release| release[:has_packages] }
+  end
+
+  def check_packages_in_dir(url, auth)
+    begin
+      links = get_links(url, auth)
+    rescue StandardError => error
+      error_and_log("Unable to get information from link '#{url}', message: '#{error.message}'")
+      return false
+    end
+    links.map { |link| link.content.delete('/') }.any? { |link| link =~ /.+(.rpm|.deb)$/ }
   end
 
   STORED_KEYS = %i[repo repo_key platform platform_version product version].freeze
@@ -780,6 +803,14 @@ In order to specify the number of retries for repository configuration use --att
         repositories << repository
       end
       repositories
+    end
+  end
+
+  # Save URL to the key
+  # @param key [Symbol] field to save data to
+  def save_url_to_field(key)
+    lambda do |release, _links|
+      [release.clone.merge({ key => release[:url] })]
     end
   end
 
