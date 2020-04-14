@@ -22,11 +22,10 @@ class TerraformConfigurationGenerator < BaseCommand
   # Generate a configuration.
   #
   # @param name [String] name of the configuration file
-  # @param override [Bool] clean directory if it is already exists
   # @return [Number] exit code for the command execution
-  def execute(name, override)
+  def execute(name)
     begin
-      setup_command(name, override)
+      setup_command(name)
     rescue RuntimeError => e
       @ui.error(e.message)
       return ERROR_RESULT
@@ -64,7 +63,6 @@ class TerraformConfigurationGenerator < BaseCommand
                   private_key_file_path: private_key_file_path,
                   login: login }
   end
-
 
   # Parse path to the products configurations directory from configuration of node.
   #
@@ -146,15 +144,15 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Result::Base] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
-    @configuration_generator.create_configuration_directory(@configuration_path, @config, @override).then do
-      generate_ssh_keys
-      generation_result = generate_configuration_file.and_then do
-        TerraformService.fmt(@ui, @configuration_path)
-        unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
-          return SUCCESS_RESULT
-        end
+    Dir.mkdir(@configuration_path)
+    checks_result = @configuration_generator.check_nodes_names(@config)
+    return ARGUMENT_ERROR_RESULT unless checks_result
 
-        Result.error('Generated configuration file is empty!')
+    generate_ssh_keys
+    generation_result = generate_configuration_file.and_then do
+      TerraformService.fmt(@ui, @configuration_path)
+      unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
+        return SUCCESS_RESULT
       end
       @ui.error(generation_result.error)
       @ui.error('Configuration is invalid')
@@ -204,10 +202,9 @@ class TerraformConfigurationGenerator < BaseCommand
   # defines the path for generating the configuration, parse the config JSON-file.
   #
   # @param name [String] name of the configuration file
-  # @param override [Bool] clean directory if it is already exists
   # @return [Array<String, Hash>] path and config hash
   # @raise RuntimeError if configuration file is invalid.
-  def setup_command(name, override)
+  def setup_command(name)
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
@@ -220,7 +217,6 @@ class TerraformConfigurationGenerator < BaseCommand
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
     @digitalocean_config = @env.tool_config['digitalocean']
-    @override = override
     generate_configuration_id
   end
 end
