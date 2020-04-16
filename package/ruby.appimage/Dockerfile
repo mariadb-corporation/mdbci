@@ -51,7 +51,7 @@ COPY gen_appimage.sh $WORKSPACE
 COPY scl_wrapper.sh $WORKSPACE
 
 # Make the file executable
-RUN chmod +x $WORKSPACE/gen_appimage.sh $WORKSPACE/scl_wrapper.sh
+RUN chmod 755 $WORKSPACE/gen_appimage.sh $WORKSPACE/scl_wrapper.sh
 
 # Allow to run sudo without password for all users
 # Create seveal users for common UIDs (need to fix it in the future)
