@@ -530,9 +530,13 @@ In order to specify the number of retries for repository configuration use --att
   def parse_mdbe_ci(config)
     raise 'Product mdbe_ci is not configured' if @env.mdbe_ci_config.nil?
 
+    auth_mdbe_ci_repo = @env.mdbe_ci_config['mdbe_ci_repo']
+    auth_es_repo = @env.mdbe_ci_config['es_repo']
     releases = []
-    releases.concat(parse_mdbe_ci_rpm_repository(config['repo']['rpm']))
-    releases.concat(parse_mdbe_ci_deb_repository(config['repo']['deb']))
+    releases.concat(parse_mdbe_ci_rpm_repository(config['repo']['mdbe_ci_repo'], auth_mdbe_ci_repo))
+    releases.concat(parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], auth_mdbe_ci_repo))
+    releases.concat(parse_mdbe_ci_es_repo_rpm_repository(config['repo']['es_repo'], auth_es_repo))
+    releases.concat(parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], auth_es_repo))
     releases
   end
 
@@ -540,8 +544,7 @@ In order to specify the number of retries for repository configuration use --att
     url.dup.insert(url.index('://') + 3, "#{auth['username']}:#{auth['password']}@")
   end
 
-  def parse_mdbe_ci_rpm_repository(config)
-    auth = @env.mdbe_ci_config
+  def parse_mdbe_ci_rpm_repository(config, auth)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         save_as_field(:version),
@@ -555,8 +558,7 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
-  def parse_mdbe_ci_deb_repository(config)
-    auth = @env.mdbe_ci_config
+  def parse_mdbe_ci_deb_repository(config, auth)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         save_as_field(:version),
@@ -571,10 +573,49 @@ In order to specify the number of retries for repository configuration use --att
     )
   end
 
+  def parse_mdbe_ci_es_repo_rpm_repository(config, auth)
+    parse_repository(
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+        append_to_field(:version),
+        append_to_field(:version),
+        append_to_field(:version),
+        append_to_field(:version),
+        append_to_field(:version),
+        append_url(%w[yum]),
+        split_rpm_platforms,
+        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+        lambda do |release, _|
+          release[:version] = release[:version].join('/')
+          release[:repo] = add_auth_to_url(release[:url], auth)
+          release
+        end
+    )
+  end
+
+  def parse_mdbe_ci_es_repo_deb_repository(config, auth)
+    parse_repository(
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+        append_to_field(:version),
+        append_to_field(:version),
+        append_to_field(:version),
+        append_to_field(:version),
+        append_to_field(:version),
+        append_url(%w[apt], nil, true),
+        append_url(%w[dists]),
+        extract_deb_platforms,
+        lambda do |release, _|
+          repo_path = add_auth_to_url(release[:repo_url], auth)
+          release[:version] = release[:version].join('/')
+          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+          release
+        end
+    )
+  end
+
   def parse_galera_enterprise_ci(config)
     raise 'Product mdbe_ci is not configured' if @env.mdbe_ci_config.nil?
 
-    auth = @env.mdbe_ci_config
+    auth = @env.mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(parse_galera_enterprise_ci_rpm_repository(config['repo']['rpm'], auth))
     releases.concat(parse_galera_enterprise_ci_deb_repository(config['repo']['deb'], auth))
@@ -784,6 +825,19 @@ In order to specify the number of retries for repository configuration use --att
     end
   end
 
+  # Append all values that present in current level to fields
+  # @param field [Symbol] field to save data to
+  def append_to_field(field)
+    lambda do |release, links|
+      links.map do |link|
+        release.clone.merge({
+            link: link,
+            field => release.fetch(field, []) +  [link.content.delete('/')]
+        })
+      end
+    end
+  end
+
   # Append URL to the current search path, possibly saving it to the key
   # and saving it to repo_url for future use
   # @param paths [Array<String>] array of paths that should be checked for presence
@@ -826,7 +880,7 @@ In order to specify the number of retries for repository configuration use --att
         releases_by_version[release[:version]] << extract_release_fields(release)
       end
       releases_by_version.each_pair do |version, version_releases|
-        File.write(File.join(configuration_directory, "#{version}.json"),
+        File.write(File.join(configuration_directory, "#{version.gsub('/', '-')}.json"),
                    JSON.pretty_generate(version_releases))
       end
     end
