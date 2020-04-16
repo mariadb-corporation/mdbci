@@ -203,8 +203,14 @@ Use the following short product names to configure them:
 
   def input_mdbe_ci_settings
     {
-        'username' => read_topic('Please input the username for MDBE CI repository', @configuration.dig('mdbe_ci', 'username')),
-        'password' => read_topic('Please input the password for MDBE CI repository', @configuration.dig('mdbe_ci', 'password'))
+        'mdbe_ci_repo' => {
+            'username' => read_topic('Please input the username for MDBE CI (mdbe-ci-repo) repository', @configuration.dig('mdbe_ci', 'mdbe_ci_repo', 'username')),
+            'password' => read_topic('Please input the password for MDBE CI (mdbe-ci-repo) repository', @configuration.dig('mdbe_ci', 'mdbe_ci_repo', 'password'))
+        },
+        'es_repo' => {
+            'username' => read_topic('Please input the username for MDBE CI (es-repo) repository', @configuration.dig('mdbe_ci', 'es_repo', 'username')),
+            'password' => read_topic('Please input the password for MDBE CI (es-repo) repository', @configuration.dig('mdbe_ci', 'es_repo', 'password'))
+        }
     }
   end
 
