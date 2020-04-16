@@ -9,7 +9,8 @@ sudo yum install -y patch # This is needed for nokogiri due to installation of t
 echo "--> installing MDBCI dependencies"
 pushd "$APP_DIR/mdbci"
 gem install bundler --force --no-document
-bundle install --without development
+bundle config --local without 'development'
+bundle install --jobs=4 --retry=3
 popd
 
 echo "--> creating symlink and fixing path to ruby"

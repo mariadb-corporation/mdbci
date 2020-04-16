@@ -1,8 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# Properly setup gems with bundler
+current_dir = Dir.pwd
+Dir.chdir(__dir__)
 require 'rubygems'
 require 'bundler/setup'
+Dir.chdir(current_dir)
 
 require 'English'
 require 'getoptlong'
