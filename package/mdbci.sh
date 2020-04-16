@@ -3,9 +3,6 @@
 echo "--> copying MDBCI to AppDir"
 cp -r mdbci "$APP_DIR"
 
-echo "--> installing build dependencies"
-sudo yum install -y patch # This is needed for nokogiri due to installation of the own libxml library
-
 echo "--> installing MDBCI dependencies"
 pushd "$APP_DIR/mdbci"
 gem install bundler --force --no-document
