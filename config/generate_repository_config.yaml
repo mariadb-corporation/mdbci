@@ -74,12 +74,12 @@ clustrix:
   versions: ["9.1.2", "9.1.3", "9.1.4"]
 mdbe_ci:
   repo:
-    rpm:
+    mdbe_ci_repo:
       path: https://mdbe-ci-repo.mariadb.net/ci-repos/
       key: https://mdbe-ci-repo.mariadb.net/MDBE.public
-    deb:
-      path: https://mdbe-ci-repo.mariadb.net/ci-repos/
-      key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+    es_repo:
+      path: https://es-repo.mariadb.net/jenkins/
+      key: https://es-repo.mariadb.net/jenkins/MDBE.public
 galera_enterprise_ci:
   repo:
     rpm:
