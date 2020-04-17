@@ -56,11 +56,6 @@ case node[:platform_family]
       end
     end
   when "suse"
-    if node['platform_version'].to_i == 15
-      package 'susefirewall2-to-firewalld'
-    else
-      package 'SuSEfirewall2'
-    end
     package 'iptables'
 end
 
