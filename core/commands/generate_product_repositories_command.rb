@@ -194,7 +194,7 @@ In order to specify the number of retries for repository configuration use --att
   # @param link link to check
   # @return [Boolean] whether link is directory or not
   def dir_link?(link)
-    !(link.content =~ %r{\/$} || link[:href] =~ %r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$}).nil?
+    link.content.match?(%r{\/$}) || link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$})
   end
 
   # Check that passed link is possibly a parent directory link or not
