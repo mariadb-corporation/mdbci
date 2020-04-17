@@ -194,7 +194,9 @@ In order to specify the number of retries for repository configuration use --att
   # @param link link to check
   # @return [Boolean] whether link is directory or not
   def dir_link?(link)
-    link.content =~ %r{\/$} || link[:href] =~ %r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$}
+    !(link.content =~ %r{\/$} ||
+        link[:href] =~ %r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$}).nil? &&
+        link[:href] != '../'
   end
 
   def parse_maxscale_ci(config)
