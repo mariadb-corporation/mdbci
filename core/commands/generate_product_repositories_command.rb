@@ -708,7 +708,7 @@ In order to specify the number of retries for repository configuration use --att
       next_releases = Workers.map(releases) do |release|
         begin
           links = get_directory_links(release[:url], auth)
-        rescue OpenURI::HTTPError, SocketError, Net::OpenTimeout, Errno::ECONNRESET, OpenSSL::SSL::SSLError, RuntimeError => e
+        rescue StandardError => e
           error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
           next
         end
@@ -916,17 +916,17 @@ In order to specify the number of retries for repository configuration use --att
     info_and_log("Generating repository configuration for #{product}")
     begin
       releases = send("parse_#{product}".to_sym, @config[product])
-      if releases
-        write_product(product, releases)
-        [false, product]
-      else
+      if releases.nil?
         error_and_log("#{product} was not generated. Skiped.")
-        [nil, product]
+        nil
+      else
+        write_product(product, releases)
+        Result.ok(product)
       end
     rescue StandardError => e
       error_and_log("Error message: #{e.message}")
       error_and_log("#{product} was not generated.")
-      [true, product]
+      Result.error(product)
     end
   end
 
@@ -935,19 +935,18 @@ In order to specify the number of retries for repository configuration use --att
   def print_summary(products)
     info_and_log("\n--------\nSUMMARY:\n")
     products.each do |product|
-      case (product[0])
-      when false
-        result = '+'
-      when nil
-        result = '?'
-      when true
-        result = '-'
+      if product.success?
+        info_and_log("  #{product.value}: +")
+      else
+        info_and_log("  #{product.error}: -")
       end
-      info_and_log("  #{product[1]}: #{result}")
     end
   end
 
   # Starting point of the application
+  #
+  # The result is equal to nil when additional information from the product is needed
+  # but the information is not in the config
   def execute
     if @env.show_help
       show_help
@@ -961,9 +960,9 @@ In order to specify the number of retries for repository configuration use --att
     remainning_products.each do |product|
       @attempts.times do
         result = create_repository(product)
-        break unless result[0]
+        break if result.nil? || result.success?
       end
-      result_products << result
+      result_products << result if !result.nil?
     end
     print_summary(result_products)
     SUCCESS_RESULT
