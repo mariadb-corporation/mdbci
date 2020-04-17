@@ -187,16 +187,21 @@ In order to specify the number of retries for repository configuration use --att
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
   def get_directory_links(url, auth = nil)
-    get_links(url, auth).select { |link| dir_link?(link) }
+    get_links(url, auth).select { |link| dir_link?(link) && !parent_dir_link?(link) }
   end
 
   # Check that passed link is possibly a directory or not
   # @param link link to check
   # @return [Boolean] whether link is directory or not
   def dir_link?(link)
-    !(link.content =~ %r{\/$} ||
-        link[:href] =~ %r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$}).nil? &&
-        link[:href] != '../'
+    !(link.content =~ %r{\/$} || link[:href] =~ %r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$}).nil?
+  end
+
+  # Check that passed link is possibly a parent directory link or not
+  # @param link link to check
+  # @return [Boolean] whether link is parent directory link or not
+  def parent_dir_link?(link)
+    link[:href] == '../'
   end
 
   def parse_maxscale_ci(config)
