@@ -12,7 +12,7 @@ require_relative '../base_command'
 require_relative '../../out'
 require_relative '../../models/configuration.rb'
 require_relative '../../services/shell_commands'
-require_relative '../../services/attributes_generator'
+require_relative '../../services/configuration_generator'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
 # rubocop:disable Metrics/ClassLength
@@ -21,14 +21,6 @@ class VagrantConfigurationGenerator < BaseCommand
 
   def self.synopsis
     'Generate a configuration based on the template.'
-  end
-
-  def self.role_file_name(path, role)
-    "#{path}/#{role}.json"
-  end
-
-  def self.node_config_file_name(path, role)
-    "#{path}/#{role}-config.json"
   end
 
   def vagrant_file_header
@@ -207,20 +199,10 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # rubocop:disable Metrics/MethodLength
   # Further decomposition of the method will complicate the code.
   def node_definition(node, path, cookbook_path)
-    box = node[1]['box'].to_s
-    unless box.empty?
-      node_params = AttributesGenerator.make_node_params(node, @boxes.get_box(box), :vagrant, @env)
-      print_node_info(node_params, box)
-    end
-    products = AttributesGenerator.parse_products_info(node)
-    @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    AttributesGenerator.get_role_description(node_params[:name], products, box, @ui, @env).and_then do |role|
-      IO.write(self.class.role_file_name(path, node_params[:name]), role)
-      IO.write(self.class.node_config_file_name(path, node_params[:name]),
-               JSON.pretty_generate('run_list' => ["role[#{node_params[:name]}]"]))
-      # generate node definition
-      if box_valid?(box)
-        Result.ok(generate_node_defenition(node_params, cookbook_path, path))
+    @configuration_generator.generate_node_info(node, @boxes, :vagrant).and_then do |info|
+      @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
+      if box_valid?(info[:box])
+        Result.ok(generate_node_defenition(info[:node_params], cookbook_path, path))
       else
         @ui.warning("Box #{box} is not installed or configured ->SKIPPING")
         Result.ok('')
@@ -273,7 +255,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate(path, config, override, provider)
     # TODO: MariaDb Version Validator
-    checks_result = AttributesGenerator.check_path(path, override, @ui) && AttributesGenerator.check_nodes_names(config, @ui)
+    checks_result = @configuration_generator.check_information(path, config, override)
     return ARGUMENT_ERROR_RESULT unless checks_result
 
     cookbook_path = if config['cookbook_path'].nil?
@@ -360,6 +342,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @raise RuntimeError if configuration file is invalid.
   def setup_command(name)
     @boxes = @env.box_definitions
+    @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
     begin
       instance_config_file = IO.read(@env.template_file)

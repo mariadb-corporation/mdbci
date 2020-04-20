@@ -10,6 +10,7 @@ require_relative '../destroy_command'
 require_relative '../../services/log_storage'
 require_relative '../../services/network_checker'
 require_relative '../../services/product_attributes'
+require_relative '../../services/configuration_generator'
 require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
@@ -59,14 +60,14 @@ class VagrantConfigurator
   # @return [Boolean] whether we were successful or not
   def configure(node, logger)
     solo_config = "#{node}-config.json"
-    role_file = VagrantConfigurationGenerator.role_file_name(@config.path, node)
+    role_file = ConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
       logger.info("Machine '#{node}' should not be configured. Skipping.")
       return true
     end
     extra_files = [
       [role_file, "roles/#{node}.json"],
-      [VagrantConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
+      [ConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
     extra_files.concat(cnf_extra_files(node))
     CHEF_CONFIGURATION_ATTEMPTS.times do

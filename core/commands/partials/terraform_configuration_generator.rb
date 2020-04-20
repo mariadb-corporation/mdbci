@@ -10,21 +10,13 @@ require_relative '../../../core/services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
-require_relative '../../services/attributes_generator'
+require_relative '../../services/configuration_generator'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend
 class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
   KEY_FILE_NAME = 'maxscale.pem'
-
-  def self.role_file_name(path, role)
-    "#{path}/#{role}.json"
-  end
-
-  def self.node_config_file_name(path, role)
-    "#{path}/#{role}-config.json"
-  end
 
   # Generate a configuration.
   #
@@ -81,29 +73,6 @@ class TerraformConfigurationGenerator < BaseCommand
     node[1]['cnf_template_path'] || node[1]['product']&.fetch('cnf_template_path', nil)
   end
 
-  # Make a list of node parameters, generate the role file content.
-  #
-  # @param node [String] internal name of the machine specified in the template
-  # @return [Result::Base<Hash>] node info in format { node_params, role_file_content }.
-  def generate_node_info(node)
-    box = node[1]['box'].to_s
-    node_params = AttributesGenerator.make_node_params(node, @boxes.get_box(box), :terraform, @env)
-    products = AttributesGenerator.parse_products_info(node)
-    @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    AttributesGenerator.get_role_description(node_params[:name], products, box, @ui, @env).and_then do |role|
-      Result.ok({ node_params: node_params, role_file_content: role })
-    end
-  end
-
-  # Create role and node_config files for specified node.
-  #
-  # @param node_name [String] internal name of the machine specified in the template
-  # @param role_file_content [String] role description in JSON format.
-  def create_role_files(node_name, role_file_content)
-    IO.write(self.class.role_file_name(@configuration_path, node_name), role_file_content)
-    IO.write(self.class.node_config_file_name(@configuration_path, node_name),
-             JSON.pretty_generate({ 'run_list' => ["role[#{node_name}]"] }))
-  end
 
   # Generate a Terraform configuration file.
   #
@@ -113,7 +82,7 @@ class TerraformConfigurationGenerator < BaseCommand
     nodes_info = @config.map do |node|
       next if node[1]['box'].nil?
 
-      node_info = generate_node_info(node)
+      node_info = @configuration_generator.generate_node_info(node, @boxes, :terraform)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -124,7 +93,7 @@ class TerraformConfigurationGenerator < BaseCommand
                                             File.join(@configuration_path, CONFIGURATION_FILE_NAME))
     end.and_then do
       nodes_info.each do |node_info|
-        create_role_files(node_info[:node_params][:name], node_info[:role_file_content])
+        @configuration_generator.create_role_files(@configuration_path, node_info[:node_params][:name], node_info[:role_file_content])
       end
       Result.ok('')
     end
@@ -155,7 +124,7 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Result::Base] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
-    checks_result = AttributesGenerator.check_path(@configuration_path, @override, @ui) && AttributesGenerator.check_nodes_names(@config, @ui)
+    checks_result = @configuration_generator.check_information(@configuration_path, @config, @override)
     return ARGUMENT_ERROR_RESULT unless checks_result
 
     generate_ssh_keys
@@ -219,6 +188,7 @@ class TerraformConfigurationGenerator < BaseCommand
   # @raise RuntimeError if configuration file is invalid.
   def setup_command(name, override)
     @boxes = @env.box_definitions
+    @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
     begin
       instance_config_file = IO.read(@env.template_file)
