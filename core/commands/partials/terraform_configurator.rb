@@ -9,6 +9,7 @@ require_relative 'terraform_cleaner'
 require_relative '../destroy_command'
 require_relative '../../services/network_checker'
 require_relative '../../services/product_attributes'
+require_relative '../../services/configuration_generator'
 require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
@@ -70,14 +71,14 @@ class TerraformConfigurator
   def configure_with_chef(node, logger)
     node_settings = @network_settings.node_settings(node)
     solo_config = "#{node}-config.json"
-    role_file = TerraformConfigurationGenerator.role_file_name(@config.path, node)
+    role_file = ConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
       @ui.info("Machine '#{node}' should not be configured. Skipping.")
       return Result.ok('')
     end
     extra_files = [
       [role_file, "roles/#{node}.json"],
-      [TerraformConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
+      [ConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
     ]
     extra_files.concat(cnf_extra_files(node))
     @machine_configurator.configure(node_settings, solo_config, logger, extra_files).and_then do
