@@ -91,6 +91,8 @@ class MachineConfigurator
     else
       Result.error(output)
     end
+  rescue IOError
+    Result.error('The network is overloaded')
   end
   # rubocop:enable Metrics/MethodLength
 
