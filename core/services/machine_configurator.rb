@@ -107,6 +107,8 @@ class MachineConfigurator
     else
       Result.error("Unable to upload #{source} to #{target}")
     end
+  rescue Net::SCP::Error
+    Result.error("The network is overloaded. Unable to upload #{source} to #{target}")
   end
 
   private
