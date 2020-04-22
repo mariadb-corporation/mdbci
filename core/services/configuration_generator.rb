@@ -9,7 +9,10 @@ require_relative '../models/tool_configuration'
 class ConfigurationGenerator
   def initialize(log, env)
     @ui = log
-    @env = env
+    @repository_manager = env.repos
+    @box_definitions = env.box_definitions
+    @rhel_config = env.rhel_config
+    @suse_config = env.suse_config
   end
 
   # Make product config and recipe name for install it to the VM.
@@ -23,18 +26,18 @@ class ConfigurationGenerator
     if !product['repo'].nil?
       repo_name = product['repo']
       @ui.info("Repo name: #{repo_name}")
-      unless @env.repos.knownRepo?(repo_name)
+      unless @repository_manager.knownRepo?(repo_name)
         return Result.error("Unknown key for repo #{repo_name} will be skipped")
       end
 
       @ui.info("Repo specified [#{repo_name}] (CORRECT), other product params will be ignored")
-      repo = @env.repos.getRepo(repo_name)
-      product_name = @env.repos.productName(repo_name)
+      repo = @repository_manager.getRepo(repo_name)
+      product_name = @repository_manager.productName(repo_name)
     else
       product_name = product['name']
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
-    generate_product_config(@env.repos, product_name, product, box, repo, @provider)
+    generate_product_config(@repository_manager, product_name, product, box, repo, @provider)
       .and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
       Result.ok({ recipe: recipe_name, config: product_config })
@@ -50,20 +53,20 @@ class ConfigurationGenerator
     product_configs = {}
     recipe_names = []
 
-    if @env.box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
-      if @env.rhel_config.nil?
+    if @box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
+      if @rhel_config.nil?
         return Result.error('Credentials for Red Hat Subscription-Manager are not configured')
       end
 
       recipe_names << 'subscription-manager'
-      product_configs.merge!('subscription-manager': @env.rhel_config)
+      product_configs.merge!('subscription-manager': @rhel_config)
     end
 
-    if @env.box_definitions.get_box(box)['configure_suse_connect'] == 'true'
-      return Result.error('Credentials for SUSEConnect are not configured') if @env.suse_config.nil?
+    if @box_definitions.get_box(box)['configure_suse_connect'] == 'true'
+      return Result.error('Credentials for SUSEConnect are not configured') if @suse_config.nil?
 
       recipe_names << 'suse-connect'
-      product_configs.merge!('suse-connect': @env.suse_config.merge({ provider: @provider }))
+      product_configs.merge!('suse-connect': @suse_config.merge({ provider: @provider }))
     end
 
     recipe_names << 'packages'
@@ -98,27 +101,25 @@ class ConfigurationGenerator
     Result.ok(role_description)
   end
 
-  DEPENDENCE = {
-    'xpand' => 'mdbe_ci',
-    'mariadb_test' => 'mdbe_ci'
-  }.freeze
-
+  # Add all required product dependencies
   def extend_template(products)
     dependences = create_dependences(products)
     main_products = create_main_products(products)
     products.delete_if do |product|
-      DEPENDENCE.keys.include?(product['name']) || DEPENDENCE.values.include?(product['name'])
+      ProductAttributes.need_dependence?(product['name']) || ProductAttributes.is_dependence?(product['name'])
     end
     products.concat(dependences).concat(main_products)
   end
 
+  # Create a dependency list
+  # Add a dependency if it is needed or it already occurs
   def create_dependences(products)
     dependences = []
     products.each do |product|
-      if DEPENDENCE.key?(product['name'])
-        dependences << { 'name' => DEPENDENCE[product['name']], 'version' => product['version'] }
+      if ProductAttributes.need_dependence?(product['name'])
+        dependences << { 'name' => ProductAttributes.dependence_for_product(product['name']), 'version' => product['version'] }
       end
-      if DEPENDENCE.value?(product['name'])
+      if ProductAttributes.is_dependence?(product['name'])
         dependences << { 'name' => product['name'], 'version' => product['version'] }
       end
     end
@@ -128,10 +129,11 @@ class ConfigurationGenerator
     dependences.uniq
   end
 
+  # Create a list of products requiring dependencies
   def create_main_products(products)
     main_products = []
     products.each do |product|
-      main_products << { 'name' => product['name'] } if DEPENDENCE.key?(product['name'])
+      main_products << { 'name' => product['name'] } if ProductAttributes.need_dependence?(product['name'])
     end
     main_products
   end
@@ -167,40 +169,6 @@ class ConfigurationGenerator
     false
   end
 
-  # Make a hash list of node parameters by a node configuration and
-  # information of the box parameters.
-  #
-  # @param node [Array] information of the node from configuration file
-  # @param box_params [Hash] information of the box parameters
-  # @return [Hash] list of the node parameters.
-  def make_node_params(node, box_params, type)
-    symbolic_box_params = box_params.transform_keys(&:to_sym)
-    symbolic_box_params.merge!(
-      {
-        name: node[0].to_s,
-        host: node[1]['hostname'].to_s
-      }
-    )
-    if type == :terraform
-      symbolic_box_params.merge!(
-        {
-          machine_type: node[1]['machine_type']&.to_s,
-          memory_size: node[1]['memory_size']&.to_i,
-          cpu_count: node[1]['cpu_count']&.to_i
-        }
-      ).compact!
-    end
-    if type == :vagrant
-      symbolic_box_params.merge!(
-        {
-          vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
-          vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
-        }
-      )
-    end
-    symbolic_box_params
-  end
-
   # Parse the products lists from configuration of node.
   #
   # @param node [Array] internal name of the machine specified in the template
@@ -231,9 +199,8 @@ class ConfigurationGenerator
     "#{path}/#{role}-config.json"
   end
 
-  def generate_node_info(node, boxes, type)
+  def generate_node_info(node, node_params)
     box = node[1]['box'].to_s
-    node_params = make_node_params(node, boxes.get_box(box), type)
     products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box).and_then do |role|

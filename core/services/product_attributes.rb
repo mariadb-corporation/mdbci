@@ -77,8 +77,29 @@ module ProductAttributes
     'xpand' => {
         recipe: 'xpand',
         name: 'xpand'
+    },
+    'mariadb_test' => {
+        recipe: 'mariadb_test',
+        name: 'mariadb_test'
     }
   }.freeze
+
+  DEPENDENCE = {
+      'xpand' => 'mdbe_ci',
+      'mariadb_test' => 'mdbe_ci'
+  }.freeze
+
+  def self.need_dependence?(product)
+    DEPENDENCE.key?(product)
+  end
+
+  def self.is_dependence?(product)
+    DEPENDENCE.value?(product)
+  end
+
+  def self.dependence_for_product(product)
+    DEPENDENCE[product]
+  end
 
   # Get the Chef recipe name for the product
   def self.recipe_name(product)

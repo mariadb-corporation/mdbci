@@ -199,7 +199,9 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # rubocop:disable Metrics/MethodLength
   # Further decomposition of the method will complicate the code.
   def node_definition(node, path, cookbook_path)
-    @configuration_generator.generate_node_info(node, @boxes, :vagrant).and_then do |info|
+    box = node[1]['box'].to_s
+    node_params = make_node_params(node, @boxes.get_box(box))
+    @configuration_generator.generate_node_info(node, node_params).and_then do |info|
       @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
       if box_valid?(info[:box])
         Result.ok(generate_node_defenition(info[:node_params], cookbook_path, path))
@@ -210,6 +212,25 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     end
   end
   # rubocop:enable Metrics/MethodLength
+
+
+  # Make a hash list of node parameters by a node configuration and
+  # information of the box parameters.
+  #
+  # @param node [Array] information of the node from configuration file
+  # @param box_params [Hash] information of the box parameters
+  # @return [Hash] list of the node parameters.
+  def make_node_params(node, box_params)
+    symbolic_box_params = box_params.transform_keys(&:to_sym)
+    symbolic_box_params.merge!(
+        {
+            name: node[0].to_s,
+            host: node[1]['hostname'].to_s,
+            vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
+            vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
+        }
+    )
+  end
 
   # Generate a Vagrantfile.
   #
