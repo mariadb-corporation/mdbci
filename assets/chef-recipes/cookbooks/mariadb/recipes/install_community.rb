@@ -64,7 +64,7 @@ case node[:platform_family]
   when "debian", "ubuntu", "rhel", "fedora", "centos", "suse"
     execute "Opening MariaDB ports" do
       command "iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT"
-      command "iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW"
+      command "iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW"
     end
 end # iptables rules
 

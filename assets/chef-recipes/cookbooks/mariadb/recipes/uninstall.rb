@@ -1,9 +1,12 @@
+service 'mysql' do
+  action :stop
+end
 service 'mariadb' do
   action :stop
 end
 
 execute 'Reset iptables settings' do
-  command 'iptables -D INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW'
+  command 'iptables -D INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW'
 end
 
 case node[:platform_family]
@@ -11,8 +14,14 @@ when 'debian'
   package 'mariadb-common' do
     action :purge
   end
-  file '/etc/apt/sources.list.d/mariadb.list' do
-    action :delete
+  execute 'delete unnecessary packages' do
+    command 'apt autoremove -y'
+  end
+  apt_repository 'mariadb' do
+    action :remove
+  end
+  apt_repository 'galera' do
+    action :remove
   end
   apt_update 'update apt cache' do
     action :update
@@ -25,7 +34,13 @@ when 'rhel', 'centos'
   package 'MariaDB-common' do
     action :remove
   end
-  file '/etc/yum.repos.d/mariadb.repo' do
+  execute 'remove galera' do
+    command 'yum remove -y galera-*'
+  end
+  yum_repository 'mariadb' do
+    action :delete
+  end
+  yum_repository 'galera' do
     action :delete
   end
   execute 'Save iptables settings' do
@@ -40,8 +55,14 @@ when 'suse'
   package 'MariaDB-common' do
     action :remove
   end
-  file '/etc/zypp/repos.d/mariadb.repo*' do
-    action :delete
+  execute 'remove galera' do
+    command 'zypper remove -y galera*'
+  end
+  zypper_repository 'mariadb' do
+    action :remove
+  end
+  zypper_repository 'Galera-Enterprise' do
+    action :remove
   end
   execute 'Save iptables settings' do
     command 'iptables-save > /etc/sysconfig/iptables'
