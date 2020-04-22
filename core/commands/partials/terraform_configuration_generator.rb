@@ -81,8 +81,10 @@ class TerraformConfigurationGenerator < BaseCommand
   def generate_configuration_file
     nodes_info = @config.map do |node|
       next if node[1]['box'].nil?
+      box = node[1]['box'].to_s
+      node_params = make_node_params(node, @boxes.get_box(box))
 
-      node_info = @configuration_generator.generate_node_info(node, @boxes, :terraform)
+      node_info = @configuration_generator.generate_node_info(node, node_params)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -99,6 +101,25 @@ class TerraformConfigurationGenerator < BaseCommand
     end
   end
   # rubocop:enable Metrics/MethodLength
+
+  # Make a hash list of node parameters by a node configuration and
+  # information of the box parameters.
+  #
+  # @param node [Array] information of the node from configuration file
+  # @param box_params [Hash] information of the box parameters
+  # @return [Hash] list of the node parameters.
+  def make_node_params(node, box_params)
+    symbolic_box_params = box_params.transform_keys(&:to_sym)
+    symbolic_box_params.merge(
+      {
+          name: node[0].to_s,
+          host: node[1]['hostname'].to_s,
+          machine_type: node[1]['machine_type']&.to_s,
+          memory_size: node[1]['memory_size']&.to_i,
+          cpu_count: node[1]['cpu_count']&.to_i
+      }
+    )
+  end
 
   # Get configuration file generator by nodes provider.
   #
