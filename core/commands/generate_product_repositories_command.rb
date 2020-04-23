@@ -522,7 +522,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_mdbe_ci(config)
-    return nil if @env.mdbe_ci_config.nil?
+    return [] if @env.mdbe_ci_config.nil?
 
     releases = []
     releases.concat(parse_mdbe_ci_rpm_repository(config['repo']['rpm']))
@@ -780,30 +780,27 @@ In order to specify the number of retries for repository configuration use --att
     info_and_log("Generating repository configuration for #{product}")
     begin
       releases = send("parse_#{product}".to_sym, @config[product])
-      if releases.nil?
+      if releases.empty?
         error_and_log("#{product} was not generated. Skiped.")
-        nil
+        true
       else
         write_product(product, releases)
-        Result.ok(product)
+        true
       end
     rescue StandardError => e
       error_and_log("Error message: #{e.message}")
       error_and_log("#{product} was not generated.")
-      Result.error(product)
+      false
     end
   end
 
   # Print summary information about the created products
   # @param products_with_errors [Array<String>] product names that were not generated
-  def print_summary(products)
+  def print_summary(products_with_errors)
     info_and_log("\n--------\nSUMMARY:\n")
-    products.each do |product|
-      if product.success?
-        info_and_log("  #{product.value}: +")
-      else
-        info_and_log("  #{product.error}: -")
-      end
+    @products.sort.each do |product|
+      result = products_with_errors.include?(product) ? '-' : '+'
+      info_and_log("  #{product}: #{result}")
     end
   end
 
@@ -817,18 +814,14 @@ In order to specify the number of retries for repository configuration use --att
       return SUCCESS_RESULT
     end
     return ARGUMENT_ERROR_RESULT unless configure_command
-
     remainning_products = @products.dup
-    result_products = []
-    result = nil
-    remainning_products.each do |product|
-      @attempts.times do
-        result = create_repository(product)
-        break if result.nil? || result.success?
+    @attempts.times do
+      remainning_products = remainning_products.reject do |product|
+        create_repository(product)
       end
-      result_products << result if !result.nil?
+      break if remainning_products.empty?
     end
-    print_summary(result_products)
+    print_summary(remainning_products)
     SUCCESS_RESULT
   end
 end
