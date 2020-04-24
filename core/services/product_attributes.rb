@@ -23,8 +23,8 @@ module ProductAttributes
     },
     'mariadb_remove' => {
         recipe: 'mariadb::uninstall',
-        name: 'maxscale',
-        repository: 'maxscale'
+        name: 'mariadb',
+        repository: 'mariadb'
     },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
