@@ -81,12 +81,17 @@ module ProductAttributes
     'mariadb_test' => {
         recipe: 'mariadb_test',
         name: 'mariadb_test'
-    }
+    },
+    'columnstore' => {
+        recipe: 'columnstore',
+        name: 'columnstore'
+    },
   }.freeze
 
   DEPENDENCE = {
       'xpand' => 'mdbe_ci',
-      'mariadb_test' => 'mdbe_ci'
+      'mariadb_test' => 'mdbe_ci',
+      'columnstore' => 'mdbe_ci',
   }.freeze
 
   def self.need_dependence?(product)
