@@ -183,7 +183,7 @@ class ConfigurationGenerator
   # @param override [Bool] clean directory if it is already exists
   # @return [Bool] false if directory path is already exists and override is false, otherwise - true.
   def create_directory(path, override)
-    if Dir.exist?(path) && !override
+    if File.exist?(path) && !override
       return Result.error("Folder already exists: #{path}. Please specify another name or delete")
     end
     FileUtils.rm_rf(path)
