@@ -275,22 +275,20 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return [Integer] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate(path, config, override, provider)
-    # TODO: MariaDb Version Validator
-    checks_result = @configuration_generator.check_information(path, config, override)
-    return ARGUMENT_ERROR_RESULT unless checks_result
+    @configuration_generator.create_configuration_directory(path, config, override).then do
+      cookbook_path = if config['cookbook_path'].nil?
+                        File.join(@env.mdbci_dir, 'assets', 'chef-recipes', 'cookbooks') # default cookbook path
+                      else
+                        config['cookbook_path']
+                      end
+      @ui.info("Global cookbook_path = #{cookbook_path}")
+      @ui.info("Nodes provider = #{provider}")
+      return ERROR_RESULT if generate_vagrant_file(path, config, provider, cookbook_path) == ERROR_RESULT
+      return SUCCESS_RESULT unless File.size?(File.join(path, 'Vagrantfile')).nil?
 
-    cookbook_path = if config['cookbook_path'].nil?
-                      File.join(@env.mdbci_dir, 'assets', 'chef-recipes', 'cookbooks') # default cookbook path
-                    else
-                      config['cookbook_path']
-                    end
-    @ui.info("Global cookbook_path = #{cookbook_path}")
-    @ui.info("Nodes provider = #{provider}")
-    return ERROR_RESULT if generate_vagrant_file(path, config, provider, cookbook_path) == ERROR_RESULT
-    return SUCCESS_RESULT unless File.size?(File.join(path, 'Vagrantfile')).nil?
-
-    @ui.error('Generated Vagrantfile is empty! Please check configuration file and regenerate it.')
-    ERROR_RESULT
+      @ui.error('Generated Vagrantfile is empty! Please check configuration file and regenerate it.')
+      ERROR_RESULT
+    end
   end
 
   # Generate provider and template files in the configuration directory.
@@ -381,15 +379,15 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return [Number] exit code for the command execution
   def execute(name, override)
     begin
-      path, config = setup_command(name)
+      path, template = setup_command(name)
     rescue RuntimeError => error
       @ui.error(error.message)
       return ERROR_RESULT
     end
-    nodes_checking_result = load_nodes_provider_and_check_it(config)
+    nodes_checking_result = load_nodes_provider_and_check_it(template)
     return ARGUMENT_ERROR_RESULT unless nodes_checking_result
 
-    generate_result = generate(path, config, override, @provider)
+    generate_result = generate(path, template, override, @provider)
     return generate_result unless generate_result == SUCCESS_RESULT
 
     @ui.info "Generating config in #{path}"

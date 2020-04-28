@@ -7,6 +7,14 @@ require_relative '../models/tool_configuration'
 
 # The class provides methods for generating attributes for configuration generator
 class ConfigurationGenerator
+  def self.role_file_name(path, role)
+    "#{path}/#{role}.json"
+  end
+
+  def self.node_config_file_name(path, role)
+    "#{path}/#{role}-template.json"
+  end
+
   def initialize(log, env)
     @ui = log
     @repository_manager = env.repos
@@ -15,11 +23,41 @@ class ConfigurationGenerator
     @suse_config = env.suse_config
   end
 
-  # Make product config and recipe name for install it to the VM.
+  # Create configuration directory and check node names
+  #
+  # @return [Result::Base] with information about check
+  def create_configuration_directory(path, template, override)
+    check_nodes_names(template).then do
+      create_directory(path, override)
+    end
+  end
+
+  def generate_node_info(node, node_params)
+    box = node[1]['box'].to_s
+    products = parse_products_info(node)
+    @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
+    get_role_description(node_params[:name], products, box).and_then do |role|
+      Result.ok({ node_params: node_params, role_file_content: role, box: box })
+    end
+  end
+
+  # Create role and node_config files for specified node.
+  #
+  # @param node_name [String] internal name of the machine specified in the template
+  # @param role_file_content [String] role description in JSON format.
+  def create_role_files(path, node_name, role_file_content)
+    IO.write(self.class.role_file_name(path, node_name), role_file_content)
+    IO.write(self.class.node_config_file_name(path, node_name),
+             JSON.pretty_generate({ 'run_list' => ["role[#{node_name}]"] }))
+  end
+
+  private
+
+  # Make product template and recipe name for install it to the VM.
   #
   # @param product [Hash] parameters of product to configure from configuration file
   # @param box [String] name of the box
-  # @return [Result::Base] recipe name and product config in format { recipe: String, config: Hash }.
+  # @return [Result::Base] recipe name and product template in format { recipe: String, template: Hash }.
   # rubocop:disable Metrics/MethodLength
   def make_product_config_and_recipe_name(product, box)
     repo = nil
@@ -144,29 +182,29 @@ class ConfigurationGenerator
   # @param path [String] path of the configuration file
   # @param override [Bool] clean directory if it is already exists
   # @return [Bool] false if directory path is already exists and override is false, otherwise - true.
-  def check_path(path, override)
+  def create_directory(path, override)
     if Dir.exist?(path) && !override
-      @ui.error("Folder already exists: #{path}. Please specify another name or delete")
-      return false
+      return Result.error("Folder already exists: #{path}. Please specify another name or delete")
     end
     FileUtils.rm_rf(path)
     Dir.mkdir(path)
-    true
+    Result.ok('Configuration directory created')
   end
 
   # Check for MDBCI node names defined in the template to be valid Ruby object names.
   #
-  # @param config [Hash] value of the configuration file
-  # @return [Bool] true if all nodes names are valid, otherwise - false.
-  def check_nodes_names(config)
-    invalid_names = config.map do |node|
+  # @param template [Hash] value of the configuration file
+  # @return [Result::Base] true if all nodes names are valid, otherwise - false.
+  def check_nodes_names(template)
+    invalid_names = template.map do |node|
       (node[0] =~ /^[a-zA-Z_]+[a-zA-Z_\d]*$/).nil? ? node[0] : nil
     end.compact
-    return true if invalid_names.empty?
-
-    @ui.error("Invalid nodes names: #{invalid_names}. "\
-                'Nodes names defined in the template to be valid Ruby object names.')
-    false
+    if invalid_names.empty?
+      Result.ok('All nodes names are valid')
+    else
+      Result.error("Invalid nodes names: #{invalid_names}. "\
+                    'Nodes names defined in the template to be valid Ruby object names.')
+    end
   end
 
   # Parse the products lists from configuration of node.
@@ -175,37 +213,6 @@ class ConfigurationGenerator
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node)
     [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
-  end
-
-  def check_information(path, config, override)
-    check_path(path, override) && check_nodes_names(config)
-  end
-
-  # Create role and node_config files for specified node.
-  #
-  # @param node_name [String] internal name of the machine specified in the template
-  # @param role_file_content [String] role description in JSON format.
-  def create_role_files(path, node_name, role_file_content)
-    IO.write(self.class.role_file_name(path, node_name), role_file_content)
-    IO.write(self.class.node_config_file_name(path, node_name),
-             JSON.pretty_generate({ 'run_list' => ["role[#{node_name}]"] }))
-  end
-
-  def self.role_file_name(path, role)
-    "#{path}/#{role}.json"
-  end
-
-  def self.node_config_file_name(path, role)
-    "#{path}/#{role}-config.json"
-  end
-
-  def generate_node_info(node, node_params)
-    box = node[1]['box'].to_s
-    products = parse_products_info(node)
-    @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    get_role_description(node_params[:name], products, box).and_then do |role|
-      Result.ok({ node_params: node_params, role_file_content: role, box: box })
-    end
   end
 
   # @param name [String] node name
@@ -233,10 +240,9 @@ class ConfigurationGenerator
   end
 
   # Add product license to the list of the product parameters if it needed
-  # @param repos [RepoManager] for products
   # @param product_config [Hash] parameters of the product
   # @param product_name [String] name of the product for install
-  # @return [Result::Base] product config
+  # @return [Result::Base] product template
   def setup_product_license_if_need(product_config, product_name)
     return Result.ok(product_config) unless ProductAttributes.need_product_license?(product_name)
 
