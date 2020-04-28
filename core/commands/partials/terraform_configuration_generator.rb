@@ -145,22 +145,21 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Result::Base] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
-    checks_result = @configuration_generator.check_information(@configuration_path, @config, @override)
-    return ARGUMENT_ERROR_RESULT unless checks_result
+    @configuration_generator.create_configuration_directory(@configuration_path, @config, @override).then do
+      generate_ssh_keys
+      generation_result = generate_configuration_file.and_then do
+        TerraformService.fmt(@ui, @configuration_path)
+        unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
+          return SUCCESS_RESULT
+        end
 
-    generate_ssh_keys
-    generation_result = generate_configuration_file.and_then do
-      TerraformService.fmt(@ui, @configuration_path)
-      unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?
-        return SUCCESS_RESULT
+        Result.error('Generated configuration file is empty!')
       end
-
-      Result.error('Generated configuration file is empty!')
+      @ui.error(generation_result.error)
+      @ui.error('Configuration is invalid')
+      FileUtils.rm_rf(@configuration_path)
+      ERROR_RESULT
     end
-    @ui.error(generation_result.error)
-    @ui.error('Configuration is invalid')
-    FileUtils.rm_rf(@configuration_path)
-    ERROR_RESULT
   end
 
   # Generate provider, template and configuration_id files in the configuration directory.
