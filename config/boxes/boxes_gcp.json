@@ -96,8 +96,7 @@
     "platform_version": "12",
     "default_machine_type": "g1-small",
     "default_cpu_count": "1",
-    "default_memory_size": "1024",
-    "configure_suse_connect": "true"
+    "default_memory_size": "1024"
   },
   "sles_15_gcp": {
     "provider": "gcp",
