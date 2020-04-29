@@ -583,11 +583,7 @@ In order to specify the number of retries for repository configuration use --att
   def parse_mdbe_ci_es_repo_rpm_repository(config, auth)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
-        append_to_field(:version),
-        append_to_field(:version),
-        append_to_field(:version),
-        append_to_field(:version),
-        append_to_field(:version),
+        { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
         append_url(%w[yum]),
         split_rpm_platforms,
         extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -602,11 +598,7 @@ In order to specify the number of retries for repository configuration use --att
   def parse_mdbe_ci_es_repo_deb_repository(config, auth)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
-        append_to_field(:version),
-        append_to_field(:version),
-        append_to_field(:version),
-        append_to_field(:version),
-        append_to_field(:version),
+        { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
         append_url(%w[apt], nil, true),
         append_url(%w[dists]),
         extract_deb_platforms,
@@ -702,19 +694,35 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Parse the repository and provide required configurations
+  # @param [Array] steps - array of lambdas or Hash in format { lambda, complete_condition }
   def parse_repository(base_url, auth, key, product, *steps)
     # Recursively go through the site and apply steps on each level
-    result = steps.reduce([{ url: base_url }]) do |releases, step|
-      next_releases = Workers.map(releases) do |release|
-        begin
-          links = get_directory_links(release[:url], auth)
-        rescue StandardError => e
-          error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
-          next
+    result = steps.reduce([{ url: base_url }]) do |input_releases, step_obj|
+      completed_releases = []
+      processed_releases = input_releases
+      step = step_obj.class == Hash ? step_obj[:lambda] : step_obj
+      # Traversing directories in depth as part of a single step. 25 - maximum depth to avoid looping
+      25.times do
+        next_releases = Workers.map(processed_releases) do |release|
+          begin
+            links = get_directory_links(release[:url], auth)
+          rescue StandardError => e
+            error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
+            next
+          end
+          release[:continue_step] = step_obj.class == Hash && !step_obj[:complete_condition].call(links)
+          if step_obj.class != Hash || release[:continue_step]
+            apply_step_to_links(step, links, release)
+          else
+            [release]
+          end
         end
-        apply_step_to_links(step, links, release)
+        next_releases = filter_releases(next_releases.flatten )
+        completed_releases += next_releases.select { |release| release[:continue_step] == false }
+        processed_releases = next_releases - completed_releases
+        break if processed_releases.empty?
       end
-      filter_releases(next_releases.flatten)
+      completed_releases
     end
     add_key_and_product_to_releases(result, key, product)
   end
@@ -767,6 +775,13 @@ In order to specify the number of retries for repository configuration use --att
         result[:repo_url] = "#{release[:url]}#{link[:href]}" if save_path
         result
       end
+    end
+  end
+
+  def has_dirs?(dirs)
+    lambda do |links|
+      repo_dirs = links.map { |link| link.content.delete('/').strip.chomp }
+      (repo_dirs & dirs).any?
     end
   end
 
