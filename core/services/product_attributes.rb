@@ -74,24 +74,64 @@ module ProductAttributes
         recipe: 'mdbe_build',
         name: 'mdbe_build'
     },
-    'xpand' => {
-        recipe: 'xpand',
-        name: 'xpand'
-    },
-    'mariadb_test' => {
-        recipe: 'mariadb_test',
-        name: 'mariadb_test'
-    },
-    'columnstore' => {
-        recipe: 'columnstore',
+    'mdbe_plugin_columnstore' => {
+        recipe: 'mdbe_plugins::columnstore',
         name: 'columnstore'
     },
+    'mdbe_plugin_connect' => {
+        recipe: 'mdbe_plugins::connect',
+        name: 'connect'
+    },
+    'mdbe_plugin_cracklib_password_check' => {
+        recipe: 'mdbe_plugins::cracklib_password_check',
+        name: 'cracklib_password_check'
+    },
+    'mdbe_plugin_gssapi_client' => {
+        recipe: 'mdbe_plugins::gssapi_client',
+        name: 'gssapi_client'
+    },
+    'mdbe_plugin_gssapi_server' => {
+        recipe: 'mdbe_plugins::gssapi_server',
+        name: 'gssapi_server'
+    },
+    'mdbe_plugin_mariadb_test' => {
+        recipe: 'mdbe_plugins::mariadb_test',
+        name: 'mariadb_test'
+    },
+    'mdbe_plugin_mroonga' => {
+        recipe: 'mdbe_plugins::mroonga',
+        name: 'mroonga'
+    },
+    'mdbe_plugin_oqgraph' => {
+        recipe: 'mdbe_plugins::oqgraph',
+        name: 'oqgraph'
+    },
+    'mdbe_plugin_rocksdb' => {
+        recipe: 'mdbe_plugins::rocksdb',
+        name: 'rocksdb'
+    },
+    'mdbe_plugin_spider' => {
+        recipe: 'mdbe_plugins::spider',
+        name: 'spider'
+    },
+    'mdbe_plugin_xpand' => {
+        recipe: 'mdbe_plugins::xpand',
+        name: 'xpand'
+    }
   }.freeze
 
   DEPENDENCE = {
-      'xpand' => 'mdbe_ci',
-      'mariadb_test' => 'mdbe_ci',
-      'columnstore' => 'mdbe_ci',
+      'mdbe_plugin_columnstore' => 'mdbe_ci',
+      'mdbe_plugin_connect' => 'mdbe_ci',
+      'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
+      'mdbe_plugin_gssapi_client' => 'mdbe_ci',
+      'mdbe_plugin_gssapi_server' => 'mdbe_ci',
+      'mdbe_plugin_mariadb_test' => 'mdbe_ci',
+      'mdbe_plugin_mroonga' => 'mdbe_ci',
+      'mdbe_plugin_oqgraph' => 'mdbe_ci',
+      'mdbe_plugin_rocksdb' => 'mdbe_ci',
+      'mdbe_plugin_spider' => 'mdbe_ci',
+      'mdbe_plugin_xpand' => 'mdbe_ci'
   }.freeze
 
   def self.need_dependence?(product)
