@@ -805,9 +805,6 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Starting point of the application
-  #
-  # The result is equal to nil when additional information from the product is needed
-  # but the information is not in the config
   def execute
     if @env.show_help
       show_help
