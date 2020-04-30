@@ -1,41 +1,84 @@
 # Plugins for MariaDB Enterprise
 
-MDBCI supports plugins for MariaDB Enterprise
+MDBCI supports installation of plugins for MariaDB Enterprise as a stand-alone product or as an additional product to
+the MDBE server. In the first case you must specify it's name in the list of products and version of the MDBE server
+you want to install. In the latter case you must provide version for the MDBE product and leave it empty for the plugin.
 
-## List of supported plugins
-* columnstore
-* connect
-* cracklib password check
-* gssapi client
-* gssapi server
-* mariadb test
-* mroonga
-* oqgraph
-* rocksdb
-* spider
-* xpand
+The list of plugins and their corresponding MDCI product names:
 
-To install a plugin, you must specify its name in the list of products and its version.
-Add before the name `mdbe_plugin_`. Example: `mdbe_plugin_cracklib_password_check`
-You don't have to specify the plugin version every time, just once.
-You don't need to specify the product `mdbe_ci`, it will be installed automatically in the same version as the plugin.
+* columnstore, `mdbe_plugin_columnstore`;
+* connect, `mdbe_plugin_connect`;
+* cracklib password check, `mdbe_plugin_cracklib_password_check`;
+* gssapi client, `mdbe_plugin_gssapi_client`;
+* gssapi server, `mdbe_plugin_gssapi_server`;
+* mariadb test, `mdbe_plugin_mariadb_test`;
+* mroonga, `mdbe_plugin_mroonga`;
+* oqgraph, `mdbe_plugin_oqgraph`;
+* rocksdb, `mdbe_plugin_rocksdb`;
+* spider, `mdbe_plugin_spider`;
+* xpand, `mdbe_plugin_xpand`.
 
-## Example
+## MDBCI template examples
 
-```
+### Install standalone plugin
+
+This will install MDBE server 10.5 and `columnstore` plugin.
+
+```json
 {
-        "node_product" : {
-                "hostname" : "host",
-                "box" : "box",
-                "products":[
-                    {
-                        "name": "xpand",
-                        "version": "version"
-                    },
-                    {
-                        "name": "gssapi_server",
-                    }
-                ]
-   }
+  "node_product" : {
+    "hostname" : "host",
+    "box" : "box",
+    "products": [
+      {
+        "name": "mdbe_plugin_columnstore",
+        "version": "10.5"
+      }
+    ]
+  }
+}
+```
+
+### Install plugin along with MDBE server
+
+This will install MDBE server 10.5 and `connect` plugin.
+
+```json
+{
+  "node_product" : {
+    "hostname" : "host",
+    "box" : "box",
+    "products": [
+      {
+        "name": "mdbe_plugin_connect"
+      },
+      {
+        "name": "mdbe",
+        "version": "10.5"
+      }
+    ]
+  }
+}
+```
+
+### Install several plugins
+
+This will install MDBE server 10.5 and two plugins: `xpand` and `gssapi server`.
+
+```json
+{
+  "node_product" : {
+    "hostname" : "host",
+    "box" : "box",
+    "products": [
+      {
+        "name": "mdbe_plugin_xpand",
+        "version": "10.5"
+      },
+      {
+        "name": "mdbe_plugin_gssapi_server"
+      }
+    ]
+  }
 }
 ```
