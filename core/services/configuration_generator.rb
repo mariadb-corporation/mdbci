@@ -12,7 +12,7 @@ class ConfigurationGenerator
   end
 
   def self.node_config_file_name(path, role)
-    "#{path}/#{role}-template.json"
+    "#{path}/#{role}-config.json"
   end
 
   def initialize(log, env)
@@ -51,6 +51,52 @@ class ConfigurationGenerator
              JSON.pretty_generate({ 'run_list' => ["role[#{node_name}]"] }))
   end
 
+  # Generate the list of the product parameters
+  # @param repos [RepoManager] for products
+  # @param product_name [String] name of the product for install
+  # @param product [Hash] parameters of the product to configure from configuration file
+  # @param box [String] name of the box
+  # @param repo [String] repo for product
+  # @param provider [String] configuration provider
+  def self.generate_product_config(repos, product_name, product, box, repo, provider)
+    repo = repos.find_repository(product_name, product, box) if repo.nil?
+    if repo.nil?
+      raise "Repo for product #{product['name']} #{product['version']} for #{box} not found"
+    end
+
+    config = make_product_attributes_hash(repo)
+    if check_product_availability(product)
+      config['cnf_template'] = product['cnf_template']
+      config['cnf_template_path'] = product['cnf_template_path']
+    end
+    repo_file_name = ProductAttributes.repo_file_name(product_name)
+    config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
+    config['provider'] = provider
+    config['node_name'] = product['node_name'] unless product['node_name'].nil?
+    setup_product_license_if_need(config, product_name).and_then do |updated_config|
+      attribute_name = ProductAttributes.attribute_name(product_name)
+      return Result.ok("#{attribute_name}": updated_config)
+    end
+  end
+
+  # @param name [String] node name
+  # @param recipe_names [Array<String>] list of recipe names
+  # @param product_configs [Hash] list of the product parameters
+  # @return [String] generated JSON description of role file
+  def self.generate_role_json_description(name, recipe_names, product_configs = {})
+    run_list = ['recipe[mdbci_provision_mark::remove_mark]',
+                *recipe_names.map { |recipe_name| "recipe[#{recipe_name}]" },
+                'recipe[mdbci_provision_mark::default]']
+    role = { name: name,
+             default_attributes: {},
+             override_attributes: product_configs,
+             json_class: 'Chef::Role',
+             description: '',
+             chef_type: 'role',
+             run_list: run_list }
+    JSON.pretty_generate(role)
+  end
+
   private
 
   # Make product template and recipe name for install it to the VM.
@@ -75,7 +121,7 @@ class ConfigurationGenerator
       product_name = product['name']
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
-    generate_product_config(@repository_manager, product_name, product, box, repo, @provider)
+    self.class.generate_product_config(@repository_manager, product_name, product, box, repo, @provider)
       .and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
       Result.ok({ recipe: recipe_name, config: product_config })
@@ -135,7 +181,7 @@ class ConfigurationGenerator
         recipe_names << recipe_and_config[:recipe]
       end
     end
-    role_description = generate_role_json_description(name, recipe_names, product_configs)
+    role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
     Result.ok(role_description)
   end
 
@@ -215,27 +261,9 @@ class ConfigurationGenerator
     [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
   end
 
-  # @param name [String] node name
-  # @param recipe_names [Array<String>] list of recipe names
-  # @param product_configs [Hash] list of the product parameters
-  # @return [String] generated JSON description of role file
-  def generate_role_json_description(name, recipe_names, product_configs = {})
-    run_list = ['recipe[mdbci_provision_mark::remove_mark]',
-                *recipe_names.map { |recipe_name| "recipe[#{recipe_name}]" },
-                'recipe[mdbci_provision_mark::default]']
-    role = { name: name,
-             default_attributes: {},
-             override_attributes: product_configs,
-             json_class: 'Chef::Role',
-             description: '',
-             chef_type: 'role',
-             run_list: run_list }
-    JSON.pretty_generate(role)
-  end
-
   # Make list of not-null product attributes
   # @param repo [Hash] repository info
-  def make_product_attributes_hash(repo)
+  def self.make_product_attributes_hash(repo)
     %w[version repo repo_key].map { |key| [key, repo[key]] unless repo[key].nil? }.compact.to_h
   end
 
@@ -243,7 +271,7 @@ class ConfigurationGenerator
   # @param product_config [Hash] parameters of the product
   # @param product_name [String] name of the product for install
   # @return [Result::Base] product template
-  def setup_product_license_if_need(product_config, product_name)
+  def self.setup_product_license_if_need(product_config, product_name)
     return Result.ok(product_config) unless ProductAttributes.need_product_license?(product_name)
 
     file_name = ProductAttributes.product_license(product_name)
@@ -253,37 +281,9 @@ class ConfigurationGenerator
     end
   end
 
-  # Generate the list of the product parameters
-  # @param repos [RepoManager] for products
-  # @param product_name [String] name of the product for install
-  # @param product [Hash] parameters of the product to configure from configuration file
-  # @param box [String] name of the box
-  # @param repo [String] repo for product
-  # @param provider [String] configuration provider
-  def generate_product_config(repos, product_name, product, box, repo, provider)
-    repo = repos.find_repository(product_name, product, box) if repo.nil?
-    if repo.nil?
-      raise "Repo for product #{product['name']} #{product['version']} for #{box} not found"
-    end
-
-    config = make_product_attributes_hash(repo)
-    if check_product_availability(product)
-      config['cnf_template'] = product['cnf_template']
-      config['cnf_template_path'] = product['cnf_template_path']
-    end
-    repo_file_name = ProductAttributes.repo_file_name(product_name)
-    config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
-    config['provider'] = provider
-    config['node_name'] = product['node_name'] unless product['node_name'].nil?
-    setup_product_license_if_need(config, product_name).and_then do |updated_config|
-      attribute_name = ProductAttributes.attribute_name(product_name)
-      return Result.ok("#{attribute_name}": updated_config)
-    end
-  end
-
   # Checks the availability of product information.
   # @param product [Hash] parameters of the product to configure from configuration file
-  def check_product_availability(product)
+  def self.check_product_availability(product)
     !product['cnf_template'].nil? && !product['cnf_template_path'].nil?
   end
 end
