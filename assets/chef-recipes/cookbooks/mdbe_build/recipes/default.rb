@@ -311,14 +311,14 @@ when 'debian'
   when 8 # Debian Jessie
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_jessie_packages)
     execute 'enable apt sources' do
-      command "sudo cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
+      command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
   when 9 # Debian Stretch
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_stretch_packages)
   when 10 # Debian Buster
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_buster_packages)
     execute 'enable apt sources' do
-      command "sudo cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
+      command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
   end
   service 'unattended-upgrades' do
@@ -328,7 +328,7 @@ when 'debian'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command 'sudo apt-get -y build-dep -q mariadb-server'
+    command 'apt-get -y build-dep -q mariadb-server'
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -337,7 +337,7 @@ when 'ubuntu'
   when 16.04 # Ubuntu Xenial
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_xenial_packages)
     execute 'enable apt sources' do
-      command "sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 18.04 # Ubuntu Bionic
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_bionic_packages)
@@ -346,12 +346,12 @@ when 'ubuntu'
       action :create
     end
     execute 'fix for broken debhelper' do
-      command 'sudo apt-get -y -t bionic-backports install debhelper'
+      command 'apt-get -y -t bionic-backports install debhelper'
     end
   when 20.04 # Ubuntu Focal
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_focal_packages)
     execute 'enable apt sources' do
-      command "sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   end
   service 'unattended-upgrades' do
@@ -361,7 +361,7 @@ when 'ubuntu'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command 'sudo apt-get -y build-dep -q mariadb-server'
+    command 'apt-get -y build-dep -q mariadb-server'
   end
 when 'centos', 'redhat'
   case node[:platform_version].to_i
@@ -382,7 +382,7 @@ when 'centos', 'redhat'
       action :create
     end
     execute 'install development tools' do
-      command "sudo yum -y groupinstall 'Development Tools'"
+      command "yum -y groupinstall 'Development Tools'"
     end
     execute 'enable devtoolset-3' do
       command "echo 'source /opt/rh/devtoolset-3/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
@@ -390,21 +390,21 @@ when 'centos', 'redhat'
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
     execute 'yum groups' do
-      command 'sudo yum groups mark convert'
+      command 'yum groups mark convert'
     end
     execute 'install development tools' do
-      command "sudo yum -y groupinstall 'Development Tools'"
+      command "yum -y groupinstall 'Development Tools'"
     end
   when 8 # CentOS 8
     packages = general_packages.concat(centos_packages).concat(centos_8_packages)
     execute 'install epel-release' do
-      command 'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
+      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
     end
     execute 'install development tools' do
-      command "sudo dnf -y groupinstall 'Development Tools'"
+      command "dnf -y groupinstall 'Development Tools'"
     end
     execute 'update cache' do
-      command 'sudo  dnf update -y --releasever=8'
+      command 'dnf update -y --releasever=8'
     end
   end
 when 'opensuseleap' # Suse 15
@@ -421,11 +421,11 @@ when 'suse'
       baseurl 'http://download.opensuse.org/repositories/devel:/tools:/building/SLE_15/'
     end
     execute 'install libboost-devel' do
-      command 'sudo zypper -n install libboost_*-devel'
+      command 'zypper -n install libboost_*-devel'
     end
   end
   execute 'install mariadb dependencies' do
-    command 'sudo zypper -n source-install -d mariadb'
+    command 'zypper -n source-install -d mariadb'
   end
 end
 
@@ -450,7 +450,7 @@ end
 
 execute 'install cmake' do
   command "wget -q https://github.com/Kitware/CMake/releases/download/v#{node['mdbe_build']['cmake_version']}/cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz --no-check-certificate &&
-sudo tar xzf cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
+tar xzf cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
 rm cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz"
   only_if { node.run_state['cmake_flag'] }
 end
