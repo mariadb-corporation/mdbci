@@ -420,16 +420,19 @@ when 'suse'
       gpgcheck false
       baseurl 'http://download.opensuse.org/repositories/devel:/tools:/building/SLE_15/'
     end
-    execute 'install libboost-devel' do
-      command 'zypper -n install libboost_*-devel'
-    end
   end
   execute 'install mariadb dependencies' do
     command 'zypper -n source-install -d mariadb'
   end
 end
 
-package packages
+package packages do
+  case node[:platform]
+  when 'redhat', 'centos'
+    flush_cache({ before: true })
+  end
+end
+
 
 ruby_block 'get cmake version' do
   node.run_state['cmake_flag'] = false
