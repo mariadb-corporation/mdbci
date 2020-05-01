@@ -10,6 +10,7 @@ general_packages = %w[
   rsync
   socat
   sudo
+  wget
 ]
 
 debian_and_ubuntu_packages = %w[
