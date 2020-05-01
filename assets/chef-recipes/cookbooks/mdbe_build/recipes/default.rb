@@ -173,6 +173,7 @@ centos_packages = %w[
   perl-Time-HiRes
   perl-XML-LibXML
   perl-XML-Simple
+  readline-devel
   redhat-rpm-config
   rpmdevtools
   snappy-devel
