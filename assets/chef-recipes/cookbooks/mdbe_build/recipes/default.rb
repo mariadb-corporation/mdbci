@@ -167,6 +167,7 @@ centos_packages = %w[
   libaio-devel
   libffi-devel
   libxml2-devel
+  mhash-devel
   ncurses-devel
   openssl-devel
   unixODBC-devel
@@ -195,7 +196,6 @@ centos_6_packages = %w[
   devtoolset-3-valgrind-devel
   Judy-devel
   libaio
-  mhash-devel
   perl-CPAN.x86_64
   perl-DBI
   perl-Test-HTTP-Server-Simple
@@ -217,7 +217,6 @@ centos_7_packages = %w[
   libevent-devel
   libgcrypt-devel
   lsof
-  mhash-devel
   patch
   perl-Test-Base
   policycoreutils-python
@@ -244,7 +243,6 @@ centos_8_packages = %w[
   libgcrypt-devel
   lsof
   lz4-devel
-  mhash-devel
   patch
   perl-Getopt-Long
   perl-Memoize.noarch
