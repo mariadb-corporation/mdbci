@@ -397,14 +397,12 @@ when 'centos', 'redhat'
     end
   when 8 # CentOS 8
     packages = general_packages.concat(centos_packages).concat(centos_8_packages)
-    execute 'install epel-release' do
-      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
+    package 'Install epel-release' do
+      source 'https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
+      flush_cache({ after: true })
     end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
-    end
-    execute 'update cache' do
-      command 'dnf update -y --releasever=8'
     end
   end
 when 'opensuseleap' # Suse 15
@@ -429,7 +427,9 @@ when 'suse'
   end
 end
 
-package packages
+package packages do
+  flush_cache({ before: true })
+end
 
 ruby_block 'get cmake version' do
   node.run_state['cmake_flag'] = false
