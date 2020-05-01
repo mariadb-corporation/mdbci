@@ -419,7 +419,7 @@ when 'suse'
     end
   end
   execute 'install libboost-devel' do
-    command 'sudo zypper -n install libboost_*-devel'
+    command 'zypper -n install libboost_*-devel'
   end
   execute 'install mariadb dependencies' do
     command 'zypper -n source-install -d mariadb'
