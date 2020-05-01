@@ -430,9 +430,7 @@ when 'suse'
   end
 end
 
-packages.each do |package_name|
-  package package_name
-end
+package packages
 
 ruby_block 'get cmake version' do
   node.run_state['cmake_flag'] = false
