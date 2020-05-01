@@ -44,6 +44,15 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
+  "ubuntu_focal_gcp": {
+    "provider": "gcp",
+    "image": "ubuntu-os-cloud/ubuntu-2004-lts",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  },
   "ubuntu_bionic_gcp": {
     "provider": "gcp",
     "image": "ubuntu-os-cloud/ubuntu-1804-lts",
