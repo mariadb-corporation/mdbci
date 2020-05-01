@@ -403,9 +403,6 @@ when 'centos', 'redhat'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    execute 'update cache' do
-      command 'dnf update -y --releasever=8'
-    end
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
@@ -420,6 +417,9 @@ when 'suse'
       gpgcheck false
       baseurl 'http://download.opensuse.org/repositories/devel:/tools:/building/SLE_15/'
     end
+  end
+  execute 'install libboost-devel' do
+    command 'sudo zypper -n install libboost_*-devel'
   end
   execute 'install mariadb dependencies' do
     command 'zypper -n source-install -d mariadb'
