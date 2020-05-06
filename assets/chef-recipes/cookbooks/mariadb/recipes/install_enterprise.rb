@@ -2,6 +2,17 @@ include_recipe "mariadb::galerarepos"
 include_recipe "mariadb::mdberepos"
 include_recipe "chrony::default"
 
+all_versions = %w[
+  10.2
+  10.3
+  10.4
+  10.5
+]
+
+all_versions.each do |version|
+  node.run_state['version'] = version if node['mariadb']['version'].include?(version)
+end
+
 # Turn off SElinux
 if node[:platform] == "centos" and node["platform_version"].to_f >= 6.0
   # TODO: centos7 don't have selinux
@@ -92,8 +103,8 @@ when "suse"
     command "zypper -n install --from mariadb MariaDB-server MariaDB-client"
   end
 when "debian"
-  package 'mariadb-server'
-  package 'mariadb-client'
+  package "mariadb-server-#{node.run_state['version']}"
+  package "mariadb-client-#{node.run_state['version']}"
 when "windows"
   windows_package "MariaDB" do
     source "#{Chef::Config[:file_cache_path]}/mariadb.msi"
@@ -101,8 +112,8 @@ when "windows"
     action :install
   end
 else
-  package 'MariaDB-server'
-  package 'MariaDB-client'
+  package "MariaDB-server-#{node.run_state['version']}*"
+  package "MariaDB-client-#{node.run_state['version']}*"
 end
 
 # Copy server.cnf configuration file to configuration
