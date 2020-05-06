@@ -6,6 +6,7 @@ require_relative 'base_command'
 require_relative 'partials/vagrant_configuration_generator'
 require_relative 'partials/terraform_configuration_generator'
 require_relative 'partials/docker_configuration_generator'
+require_relative 'partials/dedicated_configuration_generator'
 require_relative '../models/configuration_template'
 
 # Command acs as the gatekeeper for two generators: Vagrant-based configurator
@@ -28,6 +29,9 @@ class GenerateCommand < BaseCommand
       generator.execute(@args.first)
     when :vagrant
       generator = VagrantConfigurationGenerator.new(@args, @env, @ui)
+      generator.execute(@args.first)
+    when :dedicated
+      generator = DedicatedConfigurationGenerator.new(@args, @env, @ui)
       generator.execute(@args.first)
     else
       Result.error("The '#{@template.template_type}' is not supported.")

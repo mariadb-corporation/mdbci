@@ -31,7 +31,8 @@ class Configuration
       (
         File.exist?(vagrant_configuration(path)) ||
         File.exist?(docker_configuration(path)) ||
-        File.exist?(terraform_configuration(path))
+        File.exist?(terraform_configuration(path)) ||
+        File.exist?(dedicated_configuration(path))
       )
   end
   # rubocop:enable Metrics/CyclomaticComplexity
@@ -69,6 +70,10 @@ class Configuration
     File.join(path, 'docker-configuration.yaml')
   end
 
+  def self.dedicated_configuration(path)
+    File.join(path, 'public_key')
+  end
+
   # Forms the path to the provider configuration file that resides
   # in the configuration specified by the path
   #
@@ -85,6 +90,10 @@ class Configuration
   # @return [String] path to the template file
   def self.template_path(configuration_path)
     File.join(File.expand_path(configuration_path), 'template')
+  end
+
+  def self.connect_path(configuration_path)
+    File.join(File.expand_path(configuration_path), 'connect.sh')
   end
 
   # Create the configuration based on the path specification and labels list.
@@ -160,6 +169,9 @@ class Configuration
     File.exist?(self.class.terraform_configuration(@path))
   end
 
+  def dedicated_configuration?
+    File.exist?(self.class.dedicated_configuration(@path))
+  end
   # Check that configuration is Vagrant configuration
   # @return [Boolean] true if the configuration is Vagrant
   def vagrant_configuration?

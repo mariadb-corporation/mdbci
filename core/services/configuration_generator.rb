@@ -96,6 +96,23 @@ class ConfigurationGenerator
              run_list: run_list }
     JSON.pretty_generate(role)
   end
+
+  # Check for MDBCI node names defined in the template to be valid Ruby object names.
+  #
+  # @param template [Hash] value of the configuration file
+  # @return [Result::Base] true if all nodes names are valid, otherwise - false.
+  def check_nodes_names(template)
+    invalid_names = template.map do |node|
+      (node[0] =~ /^[a-zA-Z_]+[a-zA-Z_\d]*$/).nil? ? node[0] : nil
+    end.compact
+    if invalid_names.empty?
+      Result.ok('All nodes names are valid')
+    else
+      Result.error("Invalid nodes names: #{invalid_names}. "\
+                    'Nodes names defined in the template to be valid Ruby object names.')
+    end
+  end
+
   private
 
   # Make product template and recipe name for install it to the VM.
@@ -121,7 +138,7 @@ class ConfigurationGenerator
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
     self.class.generate_product_config(@repository_manager, product_name, product, box, repo, provider_by_box(box))
-      .and_then do |product_config|
+        .and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
       Result.ok({ recipe: recipe_name, config: product_config })
     end
