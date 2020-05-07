@@ -121,7 +121,7 @@ class ConfigurationGenerator
       product_name = product['name']
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
-    self.class.generate_product_config(@repository_manager, product_name, product, box, repo, @provider)
+    self.class.generate_product_config(@repository_manager, product_name, product, box, repo, provider_by_box(box))
       .and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
       Result.ok({ recipe: recipe_name, config: product_config })
@@ -136,6 +136,7 @@ class ConfigurationGenerator
   def init_product_configs_and_recipes(box)
     product_configs = {}
     recipe_names = []
+    provider = provider_by_box(box)
 
     if @box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
       if @rhel_config.nil?
@@ -150,11 +151,11 @@ class ConfigurationGenerator
       return Result.error('Credentials for SUSEConnect are not configured') if @suse_config.nil?
 
       recipe_names << 'suse-connect'
-      product_configs.merge!('suse-connect': @suse_config.merge({ provider: @provider }))
+      product_configs.merge!('suse-connect': @suse_config.merge({ provider: provider }))
     end
 
     recipe_names << 'packages'
-    recipe_names << 'grow-root-fs' if %w[aws gcp].include?(@provider)
+    recipe_names << 'grow-root-fs' if %w[aws gcp].include?(provider)
     Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
   end
   # rubocop:enable Metrics/MethodLength
@@ -259,6 +260,14 @@ class ConfigurationGenerator
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node)
     [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+  end
+
+  # Get box provider by box name.
+  #
+  # @param box [String] box name
+  # @return [String] provider name.
+  def provider_by_box(box)
+    @box_definitions.get_box(box)['provider']
   end
 
   # Make list of not-null product attributes
