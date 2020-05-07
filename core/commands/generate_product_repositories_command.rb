@@ -584,14 +584,14 @@ In order to specify the number of retries for repository configuration use --att
     parse_repository_recursive(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
-        append_url(%w[yum]),
-        split_rpm_platforms,
-        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-        lambda do |release, _|
+        { lambda: append_url(%w[yum]) },
+        { lambda: split_rpm_platforms },
+        { lambda: extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}) },
+        { lambda: lambda do |release, _|
           release[:version] = release[:version].join('/')
           release[:repo] = add_auth_to_url(release[:url], auth)
           release
-        end
+        end }
     )
   end
 
@@ -599,15 +599,15 @@ In order to specify the number of retries for repository configuration use --att
     parse_repository_recursive(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
-        append_url(%w[apt], nil, true),
-        append_url(%w[dists]),
-        extract_deb_platforms,
-        lambda do |release, _|
+        { lambda: append_url(%w[apt], nil, true) },
+        { lambda: append_url(%w[dists]) },
+        { lambda: extract_deb_platforms },
+        { lambda: lambda do |release, _|
           repo_path = add_auth_to_url(release[:repo_url], auth)
           release[:version] = release[:version].join('/')
           release[:repo] = "#{repo_path} #{release[:platform_version]} main"
           release
-        end
+        end }
     )
   end
 
@@ -712,13 +712,12 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Parse the repository and provide required configurations
-  # @param [Array] steps - array of lambdas or Hash in format { lambda, complete_condition }
+  # @param [Array] steps - array of Hash in format { lambda, complete_condition }
   def parse_repository_recursive(base_url, auth, key, product, *steps)
     # Recursively go through the site and apply steps on each level
-    result = steps.reduce([{ url: base_url }]) do |input_releases, step_obj|
+    result = steps.reduce([{ url: base_url }]) do |input_releases, step|
       completed_releases = []
       processed_releases = input_releases
-      step = step_obj.class == Hash ? step_obj[:lambda] : step_obj
       # Traversing directories in depth as part of a single step. 25 - maximum depth to avoid looping
       25.times do
         next_releases = Workers.map(processed_releases) do |release|
@@ -728,9 +727,9 @@ In order to specify the number of retries for repository configuration use --att
             error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
             next
           end
-          release[:continue_step] = step_obj.class == Hash && !step_obj[:complete_condition].call(links)
-          if step_obj.class != Hash || release[:continue_step]
-            apply_step_to_links(step, links, release)
+          release[:continue_step] = !step[:complete_condition].nil? && !step[:complete_condition].call(links)
+          if step[:complete_condition].nil? || release[:continue_step]
+            apply_step_to_links(step[:lambda], links, release)
           else
             [release]
           end
