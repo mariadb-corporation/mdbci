@@ -161,6 +161,7 @@ In order to specify the number of retries for repository configuration use --att
     load_configuration_file
     return false unless determine_products_to_parse
     return false unless determine_product_version_to_parse
+
     determine_number_of_attempts
     setup_destination_directory
     Workers.pool.resize(10)
@@ -171,7 +172,6 @@ In order to specify the number of retries for repository configuration use --att
   # @param url [String] path to the site to be checked
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
-  # rubocop:disable Security/Open
   def get_links(url, auth = nil)
     uri = url.gsub(%r{([^:])\/+}, '\1/')
     @logger.info("Loading URLs '#{uri}'")
@@ -180,7 +180,6 @@ In order to specify the number of retries for repository configuration use --att
     doc = Nokogiri::HTML(URI.open(uri, options).read)
     doc.css('a')
   end
-  # rubocop:enable Security/Open
 
   # Links that look like directories from the list of all links
   # @param url [String] path to the site to be checked
@@ -194,7 +193,8 @@ In order to specify the number of retries for repository configuration use --att
   # @param link link to check
   # @return [Boolean] whether link is directory or not
   def dir_link?(link)
-    link.content.match?(%r{\/$}) || link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$})
+    link.content.match?(%r{\/$}) ||
+      link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$})
   end
 
   # Check that passed link is possibly a parent directory link or not
@@ -250,14 +250,15 @@ In order to specify the number of retries for repository configuration use --att
   def get_maxscale_ci_release_version_for_docker(base_url, username, password)
     uri_with_tags = URI.join(base_url, '/v2/mariadb/maxscale-ci/tags/list')
     begin
-      doc_tags = JSON.parse(URI.open(uri_with_tags, http_basic_authentication: [username, password]).read)
+      doc_tags = JSON.parse(URI.open(uri_with_tags,
+                                     http_basic_authentication: [username, password]).read)
       doc_tags.dig('tags')
-    rescue OpenURI::HTTPError => error
-      @ui.error("Failed to get tags for docker from #{uri_with_tags}: #{error}")
-      return ERROR_RESULT
+    rescue OpenURI::HTTPError => e
+      @ui.error("Failed to get tags for docker from #{uri_with_tags}: #{e}")
+      ERROR_RESULT
     rescue StandardError
       @ui.error('Failed to get tags for docker')
-      return ERROR_RESULT
+      ERROR_RESULT
     end
   end
 
@@ -340,22 +341,21 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   MDBE_PLATFORMS = {
-      'centos' => 'rhel',
-      'rhel' => 'rhel',
-      'sles' => 'sles'
-  }
+    'centos' => 'rhel',
+    'rhel' => 'rhel',
+    'sles' => 'sles'
+  }.freeze
   def generate_mdbe_repo_path(path, version, platform, platform_version)
     replace_template_by_mdbe_private_key(path)
-        .sub('$MDBE_VERSION$', version)
-        .sub('$PLATFORM$', MDBE_PLATFORMS[platform] || '')
-        .sub('$PLATFORM_VERSION$', platform_version)
+      .sub('$MDBE_VERSION$', version)
+      .sub('$PLATFORM$', MDBE_PLATFORMS[platform] || '')
+      .sub('$PLATFORM_VERSION$', platform_version)
   end
 
   def mdbe_release_link?(link)
     link.content =~ /^MariaDB Enterprise Server [0-9]*\.?.*$/
   end
 
-  # rubocop:disable Security/Open
   def get_mdbe_release_links(path)
     uri = path.gsub(%r{([^:])\/+}, '\1/')
     doc = Nokogiri::HTML(URI.open(uri))
@@ -364,7 +364,6 @@ In order to specify the number of retries for repository configuration use --att
       mdbe_release_link?(link)
     end
   end
-  # rubocop:enable Security/Open
 
   def get_mdbe_release_versions(config)
     path = replace_template_by_mdbe_private_key(config['path'])
@@ -380,7 +379,8 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # rubocop:disable Metrics/ParameterLists
-  def generate_mdbe_release_info(baseurl, key, version, platform, platform_version, deb_repo = false)
+  def generate_mdbe_release_info(baseurl, key, version, platform,
+                                 platform_version, deb_repo = false)
     repo_path = generate_mdbe_repo_path(baseurl, version, platform, platform_version)
     repo_path = "#{repo_path} #{platform_version}" if deb_repo
     {
@@ -398,7 +398,8 @@ In order to specify the number of retries for repository configuration use --att
     get_mdbe_release_versions(config).map do |version|
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
-        generate_mdbe_release_info(config['baseurl'], config['key'], version, platform, platform_version, deb_repo)
+        generate_mdbe_release_info(config['baseurl'], config['key'], version,
+                                   platform, platform_version, deb_repo)
       end
     end.flatten
   end
@@ -491,7 +492,8 @@ In order to specify the number of retries for repository configuration use --att
       save_as_field(:platform_version),
       extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}),
       lambda do |release, _|
-        release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]} mysql-#{release[:version]}"
+        release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]}"\
+                         " mysql-#{release[:version]}"
         release
       end
     )
@@ -547,67 +549,65 @@ In order to specify the number of retries for repository configuration use --att
     releases
   end
 
-  def add_auth_to_url(url, auth)
-    url.dup.insert(url.index('://') + 3, "#{auth['username']}:#{auth['password']}@")
-  end
-
   def parse_mdbe_ci_rpm_repository(config, auth)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
-        save_as_field(:version),
-        append_url(%w[yum]),
-        split_rpm_platforms,
-        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-        lambda do |release, _|
-          release[:repo] = add_auth_to_url(release[:url], auth)
-          release
-        end
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      save_as_field(:version),
+      append_url(%w[yum]),
+      split_rpm_platforms,
+      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      lambda do |release, _|
+        release[:repo] = add_auth_to_url(release[:url], auth)
+        release
+      end
     )
   end
 
   def parse_mdbe_ci_deb_repository(config, auth)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
-        save_as_field(:version),
-        append_url(%w[apt], nil, true),
-        append_url(%w[dists]),
-        extract_deb_platforms,
-        lambda do |release, _|
-          repo_path = add_auth_to_url(release[:repo_url], auth)
-          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
-          release
-        end
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      save_as_field(:version),
+      append_url(%w[apt], nil, true),
+      append_url(%w[dists]),
+      extract_deb_platforms,
+      lambda do |release, _|
+        repo_path = add_auth_to_url(release[:repo_url], auth)
+        release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+        release
+      end
     )
   end
 
   def parse_mdbe_ci_es_repo_rpm_repository(config, auth)
     parse_repository_recursive(
-        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
-        { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
-        { lambda: append_url(%w[yum]) },
-        { lambda: split_rpm_platforms },
-        { lambda: extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}) },
-        { lambda: lambda do |release, _|
-          release[:version] = release[:version].join('/')
-          release[:repo] = add_auth_to_url(release[:url], auth)
-          release
-        end }
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      { lambda: append_to_field(:version),
+        complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
+      { lambda: append_url(%w[yum]) },
+      { lambda: split_rpm_platforms },
+      { lambda: extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}) },
+      { lambda: lambda do |release, _|
+        release[:version] = release[:version].join('/')
+        release[:repo] = add_auth_to_url(release[:url], auth)
+        release
+      end }
     )
   end
 
   def parse_mdbe_ci_es_repo_deb_repository(config, auth)
     parse_repository_recursive(
-        config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
-        { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
-        { lambda: append_url(%w[apt], nil, true) },
-        { lambda: append_url(%w[dists]) },
-        { lambda: extract_deb_platforms },
-        { lambda: lambda do |release, _|
-          repo_path = add_auth_to_url(release[:repo_url], auth)
-          release[:version] = release[:version].join('/')
-          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
-          release
-        end }
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      { lambda: append_to_field(:version),
+        complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
+      { lambda: append_url(%w[apt], nil, true) },
+      { lambda: append_url(%w[dists]) },
+      { lambda: extract_deb_platforms },
+      { lambda: lambda do |release, _|
+        repo_path = add_auth_to_url(release[:repo_url], auth)
+        release[:version] = release[:version].join('/')
+        release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+        release
+      end }
     )
   end
 
@@ -627,46 +627,48 @@ In order to specify the number of retries for repository configuration use --att
 
   def parse_galera_enterprise_ci_rpm_repository(config, auth)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
-        save_as_field(:version),
-        save_url_to_field(:release_root),
-        append_url(%w[yum]),
-        split_rpm_platforms,
-        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-        lambda do |release, _|
-          release[:repo] = add_auth_to_url(release[:url], auth)
-          release[:has_packages] = check_packages_in_dir(
-              "#{release[:release_root]}/packages/#{release[:platform]}/#{release[:platform_version]}/", auth
-          )
-          release
-        end
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
+      save_as_field(:version),
+      save_url_to_field(:release_root),
+      append_url(%w[yum]),
+      split_rpm_platforms,
+      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      lambda do |release, _|
+        release[:repo] = add_auth_to_url(release[:url], auth)
+        release[:has_packages] = check_packages_in_dir(
+          "#{release[:release_root]}/packages/#{release[:platform]}/#{release[:platform_version]}/",
+          auth
+        )
+        release
+      end
     ).select { |release| release[:has_packages] }
   end
 
   def parse_galera_enterprise_ci_deb_repository(config, auth)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
-        save_as_field(:version),
-        save_url_to_field(:release_root),
-        append_url(%w[apt], nil, true),
-        append_url(%w[dists]),
-        extract_deb_platforms,
-        lambda do |release, _|
-          repo_path = add_auth_to_url(release[:repo_url], auth)
-          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
-          release[:has_packages] = check_packages_in_dir(
-              "#{release[:release_root]}/packages/#{release[:platform]}/#{release[:platform_version]}/", auth
-          )
-          release
-        end
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'galera_enterprise_ci',
+      save_as_field(:version),
+      save_url_to_field(:release_root),
+      append_url(%w[apt], nil, true),
+      append_url(%w[dists]),
+      extract_deb_platforms,
+      lambda do |release, _|
+        repo_path = add_auth_to_url(release[:repo_url], auth)
+        release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+        release[:has_packages] = check_packages_in_dir(
+          "#{release[:release_root]}/packages/#{release[:platform]}/#{release[:platform_version]}/",
+          auth
+        )
+        release
+      end
     ).select { |release| release[:has_packages] }
   end
 
   def check_packages_in_dir(url, auth)
     begin
       links = get_links(url, auth)
-    rescue StandardError => error
-      error_and_log("Unable to get information from link '#{url}', message: '#{error.message}'")
+    rescue StandardError => e
+      error_and_log("Unable to get information from link '#{url}', message: '#{e.message}'")
       return false
     end
     links.map { |link| link.content.delete('/') }.any? { |link| link =~ /.+(.rpm|.deb)$/ }
@@ -676,7 +678,10 @@ In order to specify the number of retries for repository configuration use --att
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
     STORED_KEYS.each_with_object({}) do |key, sliced_hash|
-      raise "Unable to find key #{key} in repository_configuration #{release}." unless release.key?(key)
+      unless release.key?(key)
+        raise "Unable to find key #{key} in repository_configuration #{release}."
+      end
+
       sliced_hash[key] = release[key]
     end
   end
@@ -701,7 +706,8 @@ In order to specify the number of retries for repository configuration use --att
         begin
           links = get_directory_links(release[:url], auth)
         rescue StandardError => e
-          error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
+          error_and_log("Unable to get information from link '#{release[:url]}',"\
+                        " message: '#{e.message}'")
           next
         end
         apply_step_to_links(step, links, release)
@@ -718,23 +724,26 @@ In order to specify the number of retries for repository configuration use --att
     result = steps.reduce([{ url: base_url }]) do |input_releases, step|
       completed_releases = []
       processed_releases = input_releases
-      # Traversing directories in depth as part of a single step. 25 - maximum depth to avoid looping
+      # Traversing directories in depth as part of a single step.
+      # 25 - maximum depth to avoid looping
       25.times do
         next_releases = Workers.map(processed_releases) do |release|
           begin
             links = get_directory_links(release[:url], auth)
           rescue StandardError => e
-            error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
+            error_and_log("Unable to get information from link '#{release[:url]}',"\
+                          " message: '#{e.message}'")
             next
           end
-          release[:continue_step] = !step[:complete_condition].nil? && !step[:complete_condition].call(links)
+          release[:continue_step] = !step[:complete_condition].nil? &&
+                                    !step[:complete_condition].call(links)
           if step[:complete_condition].nil? || release[:continue_step]
             apply_step_to_links(step[:lambda], links, release)
           else
             [release]
           end
         end
-        next_releases = filter_releases(next_releases.flatten )
+        next_releases = filter_releases(next_releases.flatten)
         completed_releases += next_releases.select { |release| release[:continue_step] == false }
         processed_releases = next_releases - completed_releases
         break if processed_releases.empty?
@@ -803,12 +812,12 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   DEB_PLATFORMS = {
-      'bionic' => 'ubuntu',
-      'buster' => 'debian',
-      'focal' => 'ubuntu',
-      'jessie' => 'debian',
-      'stretch' => 'debian',
-      'xenial' => 'ubuntu'
+    'bionic' => 'ubuntu',
+    'buster' => 'debian',
+    'focal' => 'ubuntu',
+    'jessie' => 'debian',
+    'stretch' => 'debian',
+    'xenial' => 'ubuntu'
   }.freeze
   def extract_deb_platforms
     lambda do |release, links|
@@ -837,6 +846,7 @@ In order to specify the number of retries for repository configuration use --att
       releases = []
       RPM_PLATFORMS.each_pair do |keyword, platforms|
         next unless link_names.include?(keyword)
+
         platforms.each do |platform|
           releases << {
             url: "#{release[:url]}#{keyword}/",
@@ -869,10 +879,8 @@ In order to specify the number of retries for repository configuration use --att
   def append_to_field(field)
     lambda do |release, links|
       links.map do |link|
-        release.clone.merge({
-            link: link,
-            field => release.fetch(field, []) +  [link.content.delete('/')]
-        })
+        release.clone.merge({ link: link,
+                              field => release.fetch(field, []) + [link.content.delete('/')] })
       end
     end
   end
@@ -888,6 +896,7 @@ In order to specify the number of retries for repository configuration use --att
       repositories = []
       paths.each do |path|
         next unless link_names.include?(path)
+
         repository = {
           url: "#{release[:url]}#{path}/"
         }
@@ -916,6 +925,7 @@ In order to specify the number of retries for repository configuration use --att
       releases_by_version = Hash.new { |hash, key| hash[key] = [] }
       releases.each do |release|
         next if release[:platform] != platform
+
         releases_by_version[release[:version]] << extract_release_fields(release)
       end
       releases_by_version.each_pair do |version, version_releases|
@@ -950,11 +960,10 @@ In order to specify the number of retries for repository configuration use --att
       releases = send("parse_#{product}".to_sym, @config[product])
       if releases.empty?
         error_and_log("#{product} was not generated. Skiped.")
-        true
       else
         write_product(product, releases)
-        true
       end
+      true
     rescue StandardError => e
       error_and_log("Error message: #{e.message}")
       error_and_log("#{product} was not generated.")
@@ -979,6 +988,7 @@ In order to specify the number of retries for repository configuration use --att
       return SUCCESS_RESULT
     end
     return ARGUMENT_ERROR_RESULT unless configure_command
+
     remainning_products = @products.dup
     @attempts.times do
       remainning_products = remainning_products.reject do |product|
