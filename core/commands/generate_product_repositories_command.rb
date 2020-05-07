@@ -581,7 +581,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_mdbe_ci_es_repo_rpm_repository(config, auth)
-    parse_repository(
+    parse_repository_recursive(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
         append_url(%w[yum]),
@@ -596,7 +596,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_mdbe_ci_es_repo_deb_repository(config, auth)
-    parse_repository(
+    parse_repository_recursive(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
         { lambda: append_to_field(:version), complete_condition: has_dirs?(%w[apt yum bintar sourcetar]) },
         append_url(%w[apt], nil, true),
@@ -694,8 +694,26 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Parse the repository and provide required configurations
-  # @param [Array] steps - array of lambdas or Hash in format { lambda, complete_condition }
   def parse_repository(base_url, auth, key, product, *steps)
+    # Recursively go through the site and apply steps on each level
+    result = steps.reduce([{ url: base_url }]) do |releases, step|
+      next_releases = Workers.map(releases) do |release|
+        begin
+          links = get_directory_links(release[:url], auth)
+        rescue StandardError => e
+          error_and_log("Unable to get information from link '#{release[:url]}', message: '#{e.message}'")
+          next
+        end
+        apply_step_to_links(step, links, release)
+      end
+      filter_releases(next_releases.flatten)
+    end
+    add_key_and_product_to_releases(result, key, product)
+  end
+
+  # Parse the repository and provide required configurations
+  # @param [Array] steps - array of lambdas or Hash in format { lambda, complete_condition }
+  def parse_repository_recursive(base_url, auth, key, product, *steps)
     # Recursively go through the site and apply steps on each level
     result = steps.reduce([{ url: base_url }]) do |input_releases, step_obj|
       completed_releases = []
