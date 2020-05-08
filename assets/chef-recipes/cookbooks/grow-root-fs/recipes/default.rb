@@ -12,6 +12,12 @@ ruby_block 'Get filesystem information' do
     df_cmd = Mixlib::ShellOut.new('df -Th / -BG')
     df_cmd.run_command
     device_name, fs_type, device_size = df_cmd.stdout.lines.last.split(' ')
+    # If we can't determine the device name from the fs command then the name is taken from the mount command
+    if device_name.match(DEVICE_REGEX).nil?
+      mount_cmd = Mixlib::ShellOut.new("mount | grep 'on / '")
+      mount_cmd.run_command
+      device_name = mount_cmd.stdout.chomp.split(' ').first
+    end
     if device_size == root_disk_size
       node.run_state[:need_grow_root_fs] = false
     else
