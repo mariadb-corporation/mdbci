@@ -150,6 +150,8 @@ Labels should be separated with commas, do not contain any whitespaces.
       return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
 
       result
+    elsif configuration.dedicated_configuration?
+      Result.ok('')
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)

@@ -43,14 +43,13 @@ class DedicatedConfigurator
     result = nil
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
-      node_network = retrieve_node_network(node)
+      node_network = @network_settings.node_settings(node)
       if connect(node_network).error?
         @ui.error("Failed to establish a connection with #{node}")
         result = Result.error('A connection could not be established')
         next
       end
       result = NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
-        @network_settings.add_network_configuration(node, node_network)
         configure_with_chef(node, logger)
       end
 
@@ -74,7 +73,7 @@ class DedicatedConfigurator
 
   # Configure single node using the chef-solo respected role
   def configure_with_chef(node, logger)
-    node_settings = @all_nodes_network[node]
+    node_settings = @network_settings.node_settings(node)
     solo_config = "#{node}-config.json"
     role_file = ConfigurationGenerator.role_file_name(@config.path, node)
     unless File.exist?(role_file)
@@ -93,7 +92,7 @@ class DedicatedConfigurator
 
   # Check whether chef have provisioned the server or not
   def node_provisioned?(node)
-    node_settings = @all_nodes_network[node]
+    node_settings = @network_settings.node_settings(node)
     command = 'test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT'
     @machine_configurator.run_command(node_settings, command).and_then do |output|
       if output.chomp == 'PROVISIONED'
@@ -144,12 +143,7 @@ class DedicatedConfigurator
     Result.ok('')
   end
 
-  def retrieve_node_network(node)
-    @all_nodes_network[node]
-  end
-
   def retrieve_all_network_settings(nodes)
-    @all_nodes_network = {}
     nodes.each do |node|
       @ui.info("Retrieve network settings for node '#{node}'")
       box = @env.box_definitions.get_box(@config.node_configurations[node]['box'])
@@ -161,7 +155,7 @@ class DedicatedConfigurator
         'whoami' => box['user'],
         'hostname' => @config.node_configurations[node]['hostname']
       }
-      @all_nodes_network[node] = result
+      @network_settings.add_network_configuration(node, result)
     end
     Result.ok('')
   end
