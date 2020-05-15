@@ -32,7 +32,7 @@ class Configuration
         File.exist?(vagrant_configuration(path)) ||
         File.exist?(docker_configuration(path)) ||
         File.exist?(terraform_configuration(path)) ||
-        File.exist?(dedicated_configuration(path))
+        dedicated_configuration(path)
       )
   end
   # rubocop:enable Metrics/CyclomaticComplexity
@@ -61,6 +61,17 @@ class Configuration
     File.join(path, 'infrastructure.tf')
   end
 
+  # Returns the names of public ssh keys
+  # in the configuration specified by the path
+  #
+  # @param path [String] path to the configuration
+  # @return [Array<String>] names of public ssh keys
+  def self.dedicated_configuration(path)
+    Dir.children(path).each_with_object([]) do |file, keys|
+      keys << file if /public_key$/ =~ file
+    end
+  end
+
   # Forms the path to the Docker configuration file that resides
   # in the configuration specified by the path
   #
@@ -68,10 +79,6 @@ class Configuration
   # @return [String] path to the Docker configuration file
   def self.docker_configuration(path)
     File.join(path, 'docker-configuration.yaml')
-  end
-
-  def self.dedicated_configuration(path)
-    File.join(path, 'public_key')
   end
 
   # Forms the path to the provider configuration file that resides
@@ -169,9 +176,12 @@ class Configuration
     File.exist?(self.class.terraform_configuration(@path))
   end
 
+  # chech that configuration is Dedicated configuration
+  # @return [Boolean] true if the configuration is Dedicated configuration
   def dedicated_configuration?
-    File.exist?(self.class.dedicated_configuration(@path))
+    !self.class.dedicated_configuration(@path).empty?
   end
+
   # Check that configuration is Vagrant configuration
   # @return [Boolean] true if the configuration is Vagrant
   def vagrant_configuration?

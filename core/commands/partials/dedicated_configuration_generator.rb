@@ -11,8 +11,7 @@ class DedicatedConfigurationGenerator < BaseCommand
 
   def execute(name)
     setup_command(name)
-    return ARGUMENT_ERROR_RESULT unless check_nodes_boxes_and_setup_provider
-
+    check_nodes_boxes_and_setup_provider
     @ui.info("Nodes provider = #{@provider}")
     generate_result = generate
     return generate_result if generate_result.error?
@@ -35,34 +34,18 @@ class DedicatedConfigurationGenerator < BaseCommand
 
   # Check that all boxes specified in the the template are exist in the boxes.json.
   def check_nodes_boxes_and_setup_provider
-    nodes = @config.map do |node|
-      %w[aws_config cookbook_path].include?(node[0]) ? nil : node
-    end.compact.to_h.each do |node_name, node_params|
-      box = node_params['box'].to_s
-      if box.empty?
-        @ui.error("Box in #{node_name} is not found")
-        return false
-      end
-      unless @boxes.box_exists?(box)
-        @ui.error("Unknown box #{box}")
-        return false
-      end
-      @box = @boxes.get_box(box)
-    end
-    @provider = @boxes.get_box(nodes.values.first['box'])['provider']
-    true
+    template = ConfigurationTemplate.new(File.expand_path(@env.template_file), @env.box_definitions)
+    @provider = template.template_type
   end
 
   # Check parameters and generate configurations file.
   def generate
     Dir.mkdir(@configuration_path)
-    checks_result = @configuration_generator.check_nodes_names(@config)
-    return ARGUMENT_ERROR_RESULT unless checks_result
-
-    ssh_generate_result = generate_ssh_keys
-    return ssh_generate_result if ssh_generate_result.error?
-
-    generate_configuration_file
+    @configuration_generator.check_nodes_names(@config).and_then do
+      generate_ssh_keys.and_then do
+        generate_configuration_file
+      end
+    end
   end
 
   # Generate role file
@@ -97,9 +80,12 @@ class DedicatedConfigurationGenerator < BaseCommand
 
   # Create a symbolic link to a public ssh key
   def generate_ssh_keys
-    return Result.error("File #{@box['ssh_key']} not found") unless File.file?(@box['ssh_key'])
+    @config.map do |node_info|
+      ssh_key = @boxes.get_box(node_info[0])['ssh_key']
+      return Result.error("File #{ssh_key} not found") unless File.file?(ssh_key)
 
-    FileUtils.ln_s(@box['ssh_key'], File.join(@configuration_path, KEY_FILE_NAME))
+      FileUtils.ln_s(ssh_key, File.join(@configuration_path, "#{node_info[0]}_#{KEY_FILE_NAME}"))
+    end
     Result.ok('')
   end
 

@@ -23,15 +23,6 @@ class ConfigurationGenerator
     @suse_config = env.suse_config
   end
 
-  # Create configuration directory and check node names
-  #
-  # @return [Result::Base] with information about check
-  def create_configuration_directory(path, template, override)
-    check_nodes_names(template).then do
-      create_directory(path, override)
-    end
-  end
-
   def generate_node_info(node, node_params)
     box = node[1]['box'].to_s
     products = parse_products_info(node)
@@ -237,21 +228,6 @@ class ConfigurationGenerator
       main_products << { 'name' => product['name'] } if ProductAttributes.need_dependence?(product['name'])
     end
     main_products
-  end
-
-  # Check for the existence of a path, create it if path is not exists or clear path
-  # if it is exists and override parameter is true.
-  #
-  # @param path [String] path of the configuration file
-  # @param override [Bool] clean directory if it is already exists
-  # @return [Bool] false if directory path is already exists and override is false, otherwise - true.
-  def create_directory(path, override)
-    if File.exist?(path) && !override
-      return Result.error("Folder already exists: #{path}. Please specify another name or delete")
-    end
-    FileUtils.rm_rf(path)
-    Dir.mkdir(path)
-    Result.ok('Configuration directory created')
   end
 
   # Parse the products lists from configuration of node.
