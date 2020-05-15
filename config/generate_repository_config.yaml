@@ -75,7 +75,7 @@ clustrix:
 mdbe_ci:
   repo:
     mdbe_ci_repo:
-      path: https://mdbe-ci-repo.mariadb.net/ci-repos/
+      path: https://mdbe-ci-repo.mariadb.net/MariaDBEnterprise/
       key: https://mdbe-ci-repo.mariadb.net/MDBE.public
     es_repo:
       path: https://es-repo.mariadb.net/jenkins/
