@@ -7,10 +7,12 @@ require_relative '../../models/configuration'
 
 # The class generates the MDBCI configuration for computers that have been setup beforehand
 class DedicatedConfigurationGenerator < BaseCommand
-  KEY_FILE_NAME = 'public_key'
+  KEY_FILE_NAME_SUFFIX = 'public_key'
 
   def execute(name)
-    setup_command(name)
+    setup_result = setup_command(name)
+    return generate_result if setup_result.error?
+
     check_nodes_boxes_and_setup_provider
     @ui.info("Nodes provider = #{@provider}")
     generate_result = generate
@@ -21,15 +23,19 @@ class DedicatedConfigurationGenerator < BaseCommand
   end
 
   def setup_command(name)
+    return Result.error('Please specify destination') if name.nil?
+
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
-    @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
+    @configuration_path = File.absolute_path(name.to_s)
     begin
-      instance_config_file = IO.read(@env.template_file)
-      @config = JSON.parse(instance_config_file)
-    rescue IOError, JSON::ParserError
+      @config = ConfigurationTemplate.new(
+        File.expand_path(@env.template_file), @env.box_definitions
+      ).node_configurations
+    rescue IOError
       raise('Instance configuration file is invalid or not found!')
     end
+    Result.ok('')
   end
 
   # Check that all boxes specified in the the template are exist in the boxes.json.
@@ -42,7 +48,7 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate
     Dir.mkdir(@configuration_path)
     @configuration_generator.check_nodes_names(@config).and_then do
-      generate_ssh_keys.and_then do
+      create_links_to_ssh_keys.and_then do
         generate_configuration_file
       end
     end
@@ -53,15 +59,16 @@ class DedicatedConfigurationGenerator < BaseCommand
     nodes_info = @config.map do |node|
       next if node[1]['box'].nil?
 
-      box = node[1]['box'].to_s
-      node_params = make_node_params(node, @boxes.get_box(box))
+      node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
       node_info = @configuration_generator.generate_node_info(node, node_params)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
     end.compact
     nodes_info.each do |node_info|
-      @configuration_generator.create_role_files(@configuration_path, node_info[:node_params][:name], node_info[:role_file_content])
+      @configuration_generator.create_role_files(
+        @configuration_path, node_info[:node_params][:name], node_info[:role_file_content]
+      )
     end
     Result.ok('')
   end
@@ -69,8 +76,7 @@ class DedicatedConfigurationGenerator < BaseCommand
   # Make a hash list of node parameters by a node configuration and
   # information of the box parameters.
   def make_node_params(node, box_params)
-    symbolic_box_params = box_params.transform_keys(&:to_sym)
-    symbolic_box_params.merge(
+    box_params.transform_keys(&:to_sym).merge(
       {
         name: node[0].to_s,
         host: node[1]['hostname'].to_s
@@ -79,12 +85,15 @@ class DedicatedConfigurationGenerator < BaseCommand
   end
 
   # Create a symbolic link to a public ssh key
-  def generate_ssh_keys
+  def create_links_to_ssh_keys
     @config.map do |node_info|
-      ssh_key = @boxes.get_box(node_info[0])['ssh_key']
+      pp node_info
+      ssh_key = @boxes.get_box(node_info[1]['box'])['ssh_key']
       return Result.error("File #{ssh_key} not found") unless File.file?(ssh_key)
 
-      FileUtils.ln_s(ssh_key, File.join(@configuration_path, "#{node_info[0]}_#{KEY_FILE_NAME}"))
+      FileUtils.ln_s(ssh_key, File.join(
+                                @configuration_path, "#{node_info[0]}_#{KEY_FILE_NAME_SUFFIX}"
+                              ))
     end
     Result.ok('')
   end
@@ -93,9 +102,6 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate_configuration_info_files
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
-    raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
-    raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
-
     File.open(provider_file, 'w') { |f| f.write(@provider) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
   end

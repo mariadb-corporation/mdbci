@@ -34,15 +34,23 @@ Sample template:
 {
         "centos_dedicated_node" : {
                 "hostname" : "mdbcinode",
-                "box" : "centos_dedicated"
+                "box" : "centos_dedicated",
+                "products":[
+                  {
+                    "name": "docker",
+                    "version": "19.03"
+                  }
+                ]
         },
         "debian_dedicated_node" : {
                 "hostname" : "mdbcinode",
                 "box" : "debian_dedicated",
-                "product":{
+                "products":[
+                  {
                     "name": "mariadb",
                     "version": "10.4"
-                }
+                  }
+                ]
         }
 }
 ```
