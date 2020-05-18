@@ -4,7 +4,7 @@ require 'forwardable'
 
 # The representation of the template file that provides tools to get information out of it
 class ConfigurationTemplate
-  attr_reader :template_type
+  attr_reader :template_type, :node_configurations
   extend Forwardable
   def_delegator :@node_configurations, :each, :each_node
 
