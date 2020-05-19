@@ -35,6 +35,7 @@ debian_and_ubuntu_packages = %w[
   libboost-program-options-dev
   libboost-system-dev
   libcrack2-dev
+  libedit-dev
   libevent-dev
   libjudy-dev
   libmhash-dev
