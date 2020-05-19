@@ -122,6 +122,12 @@ module DockerCookbook
       false
     end
 
+    def focal?
+      return true if node['platform'] == 'ubuntu' && node['platform_version'] == '20.04'
+      false
+    end
+
+
     def amazon?
       return true if node['platform'] == 'amazon'
       false
@@ -143,6 +149,8 @@ module DockerCookbook
                    'artful'
                  elsif bionic?
                    'bionic'
+                elsif focal?
+                  'focal'
                  end
 
       # https://github.com/seemethere/docker-ce-packaging/blob/9ba8e36e8588ea75209d813558c8065844c953a0/deb/gen-deb-ver#L16-L20
