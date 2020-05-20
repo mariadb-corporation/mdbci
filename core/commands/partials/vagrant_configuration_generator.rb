@@ -246,9 +246,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     vagrant.puts vagrant_file_header, vagrant_config_header
     @ui.info('Generating libvirt/VirtualBox configuration')
     vagrant.puts provider_config
-    config.each do |node|
-      next if node[1]['box'].nil?
-
+    config.map do |node|
       @ui.info("Generating node definition for [#{node[0]}]")
       node_definition = node_definition(node, path, cookbook_path)
       raise node_definition.error if node_definition.error?
@@ -277,12 +275,13 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def generate(path, config, provider)
     # TODO: MariaDb Version Validator
     FileUtils.mkdir_p(path)
-    return ARGUMENT_ERROR_RESULT unless @configuration_generator.check_nodes_names(config)
+    checks_result = config.check_nodes_names
+    return checks_result if checks_result.error?
 
-    cookbook_path = if config['cookbook_path'].nil?
+    cookbook_path = if config.cookbook_path.nil?
                       File.join(@env.mdbci_dir, 'assets', 'chef-recipes', 'cookbooks') # default cookbook path
                     else
-                      config['cookbook_path']
+                      config.cookbook_path
                     end
     @ui.info("Global cookbook_path = #{cookbook_path}")
     @ui.info("Nodes provider = #{provider}")
@@ -335,11 +334,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def load_nodes_provider_and_check_it(configs)
     nodes = configs.map { |node| %w[aws_config cookbook_path].include?(node[0]) ? nil : node }.compact.to_h
     providers = nodes.map do |node_name, node_params|
-      box = node_params['box'].to_s
-      if box.empty?
-        @ui.error("Box in #{node_name} is not found")
-        return false
-      end
+      box = node_params['box']
 
       begin
         box_params = @boxes.get_box(box)
@@ -365,12 +360,9 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
-    begin
-      instance_config_file = IO.read(@env.template_file)
-      config = JSON.parse(instance_config_file)
-    rescue IOError, JSON::ParserError
-      raise('Instance configuration file is invalid or not found!')
-    end
+    config = ConfigurationTemplate.new(
+        File.expand_path(@env.template_file), @env.box_definitions
+    )
     [@configuration_path, config]
   end
 

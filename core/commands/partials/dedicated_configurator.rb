@@ -8,6 +8,7 @@ require_relative '../destroy_command'
 require_relative '../../services/network_checker'
 require_relative '../../services/product_attributes'
 require_relative '../../services/configuration_generator'
+require_relative '../../services/chef_configuration_generator'
 require 'workers'
 
 # The configurator brings up the configuration for the dedicated machines
@@ -46,7 +47,7 @@ class DedicatedConfigurator
       node_network = @network_settings.node_settings(node)
       result = connect(node_network, node).and_then do
         NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
-          configure_with_chef(node, logger)
+          ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator)
         end
       end
 
@@ -71,56 +72,6 @@ class DedicatedConfigurator
     Result.ok('')
   rescue StandardError
     Result.error("Failed to establish a connection with #{node}")
-  end
-
-  # Configure single node using the chef-solo respected role
-  def configure_with_chef(node, logger)
-    node_settings = @network_settings.node_settings(node)
-    solo_config = "#{node}-config.json"
-    role_file = ConfigurationGenerator.role_file_name(@config.path, node)
-    unless File.exist?(role_file)
-      @ui.info("Machine '#{node}' should not be configured. Skipping.")
-      return Result.ok('')
-    end
-    extra_files = [
-      [role_file, "roles/#{node}.json"],
-      [ConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
-    ]
-    extra_files.concat(cnf_extra_files(node))
-    @machine_configurator.configure(node_settings, solo_config, logger, extra_files).and_then do
-      node_provisioned?(node)
-    end
-  end
-
-  # Check whether chef have provisioned the server or not
-  def node_provisioned?(node)
-    node_settings = @network_settings.node_settings(node)
-    command = 'test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT'
-    @machine_configurator.run_command(node_settings, command).and_then do |output|
-      if output.chomp == 'PROVISIONED'
-        Result.ok("Node '#{node}' was configured.")
-      else
-        Result.error("Node '#{node}' was configured.")
-      end
-    end
-  end
-
-  # Make array of cnf files and it target path on the nodes
-  def cnf_extra_files(node)
-    cnf_template_path = @config.cnf_template_path(node)
-    return [] if cnf_template_path.nil?
-
-    @config.products_info(node).map do |product_info|
-      cnf_template = product_info['cnf_template']
-      next if cnf_template.nil?
-
-      product = product_info['name']
-      files_location = ProductAttributes.chef_recipe_files_location(product)
-      next if files_location.nil?
-
-      [File.join(cnf_template_path, cnf_template),
-       File.join(files_location, cnf_template)]
-    end.compact
   end
 
   # Configure machines via mdbci

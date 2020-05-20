@@ -81,11 +81,8 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Result::Base] generation result.
   # rubocop:disable Metrics/MethodLength
   def generate_configuration_file
-    nodes_info = @config.map do |node|
-      next if node[1]['box'].nil?
-      box = node[1]['box'].to_s
-      node_params = make_node_params(node, @boxes.get_box(box))
-
+    nodes_info = @configuration_template.map do |node|
+      node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
       node_info = @configuration_generator.generate_node_info(node, node_params)
       return Result.error(node_info.error) if node_info.error?
 
@@ -148,8 +145,8 @@ class TerraformConfigurationGenerator < BaseCommand
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
     Dir.mkdir(@configuration_path)
-    checks_result = @configuration_generator.check_nodes_names(@config)
-    return ARGUMENT_ERROR_RESULT unless checks_result
+    checks_result = @configuration_template.check_nodes_names
+    return checks_result if checks_result.error?
 
     generate_ssh_keys
     generation_result = generate_configuration_file.and_then do
@@ -184,7 +181,7 @@ class TerraformConfigurationGenerator < BaseCommand
   #
   # @return [Boolean] true if all boxes exist.
   def check_nodes_boxes_and_setup_provider
-    nodes = @config.map do |node|
+    nodes = @configuration_template.map do |node|
       %w[aws_config cookbook_path].include?(node[0]) ? nil : node
     end.compact.to_h.each do |node_name, node_params|
       box = node_params['box'].to_s
@@ -211,12 +208,9 @@ class TerraformConfigurationGenerator < BaseCommand
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
-    begin
-      instance_config_file = IO.read(@env.template_file)
-      @config = JSON.parse(instance_config_file)
-    rescue IOError, JSON::ParserError
-      raise('Instance configuration file is invalid or not found!')
-    end
+    @configuration_template = ConfigurationTemplate.new(
+        File.expand_path(@env.template_file), @env.box_definitions
+    )
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
     @digitalocean_config = @env.tool_config['digitalocean']

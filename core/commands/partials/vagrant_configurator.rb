@@ -11,6 +11,7 @@ require_relative '../../services/log_storage'
 require_relative '../../services/network_checker'
 require_relative '../../services/product_attributes'
 require_relative '../../services/configuration_generator'
+require_relative '../../services/chef_configuration_generator'
 require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
@@ -34,70 +35,6 @@ class VagrantConfigurator
     Workers.pool.resize(@threads_count)
   end
 
-  # Check whether chef have provisioned the server or not
-  #
-  # @param node [String] name of the node to check
-  # @param logger [Out] logger to log information to
-  # return [Boolean]
-  def node_provisioned?(node, logger)
-    result = VagrantService.ssh_command(node, logger,
-                                        '"test -e /var/mdbci/provisioned && printf PROVISIONED || printf NOT"',
-                                        @config.path)
-    provision_file = result[:output]
-    if provision_file == 'PROVISIONED'
-      logger.info("Node '#{node}' was configured.")
-      true
-    else
-      logger.error("Node '#{node}' is not configured.")
-      false
-    end
-  end
-
-  # Configure single node using the chef-solo respected role
-  #
-  # @param node [String] name of the node
-  # @param logger [Out] logger to log information to
-  # @return [Boolean] whether we were successful or not
-  def configure(node, logger)
-    solo_config = "#{node}-config.json"
-    role_file = ConfigurationGenerator.role_file_name(@config.path, node)
-    unless File.exist?(role_file)
-      logger.info("Machine '#{node}' should not be configured. Skipping.")
-      return true
-    end
-    extra_files = [
-      [role_file, "roles/#{node}.json"],
-      [ConfigurationGenerator.node_config_file_name(@config.path, node), "configs/#{solo_config}"]
-    ]
-    extra_files.concat(cnf_extra_files(node))
-    CHEF_CONFIGURATION_ATTEMPTS.times do
-      configuration_status = @machine_configurator.configure(@network_config[node], solo_config, logger, extra_files)
-      break if configuration_status.success?
-
-      logger.error("Error during machine configuration: #{configuration_status.error}")
-    end
-    node_provisioned?(node, logger)
-  end
-
-  # Make array of cnf files and it target path on the nodes
-  #
-  # @return [Array] array of [source_file_path, target_file_path]
-  def cnf_extra_files(node)
-    cnf_template_path = @config.cnf_template_path(node)
-    return [] if cnf_template_path.nil?
-
-    @config.products_info(node).map do |product_info|
-      cnf_template = product_info['cnf_template']
-      next if cnf_template.nil?
-
-      product = product_info['name']
-      files_location = ProductAttributes.chef_recipe_files_location(product)
-      next if files_location.nil?
-
-      [File.join(cnf_template_path, cnf_template),
-       File.join(files_location, cnf_template)]
-    end.compact
-  end
 
   # Bring up whole configuration or a machine up.
   #
@@ -151,7 +88,7 @@ class VagrantConfigurator
       @network_config.add_nodes([node])
       next if NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger).error?
 
-      return SUCCESS_RESULT if configure(node, logger)
+      return SUCCESS_RESULT if ChefConfigurationGenerator.configure_with_chef(node, logger, @network_config[node], @config, @ui, @machine_configurator).success?
     end
     Result.error("Node '#{node}' was not configured.")
   end

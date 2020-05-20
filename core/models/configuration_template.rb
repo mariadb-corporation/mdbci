@@ -4,7 +4,7 @@ require 'forwardable'
 
 # The representation of the template file that provides tools to get information out of it
 class ConfigurationTemplate
-  attr_reader :template_type, :node_configurations
+  attr_reader :template_type
   extend Forwardable
   def_delegator :@node_configurations, :each, :each_node
 
@@ -13,6 +13,32 @@ class ConfigurationTemplate
     @template = read_template_file
     @node_configurations = extract_node_configurations
     @template_type = determine_template_type(box_definitions)
+  end
+
+  def map
+    @node_configurations.map do |node|
+      yield(node)
+    end
+  end
+
+  def cookbook_path
+    @node_configurations['cookbook_path']
+  end
+
+  # Check for MDBCI node names defined in the template to be valid Ruby object names.
+  #
+  # @param template [Hash] value of the configuration file
+  # @return [Result::Base] true if all nodes names are valid, otherwise - false.
+  def check_nodes_names
+    invalid_names = @node_configurations.map do |node|
+      (node[0] =~ /^[a-zA-Z_]+[a-zA-Z_\d]*$/).nil? ? node[0] : nil
+    end.compact
+    if invalid_names.empty?
+      Result.ok('All nodes names are valid')
+    else
+      Result.error("Invalid nodes names: #{invalid_names}. "\
+                    'Nodes names defined in the template to be valid Ruby object names.')
+    end
   end
 
   private
