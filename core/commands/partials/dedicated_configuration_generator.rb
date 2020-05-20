@@ -13,8 +13,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     setup_result = setup_command(name)
     return generate_result if setup_result.error?
 
-    check_nodes_boxes_and_setup_provider
-    @ui.info("Nodes provider = #{@provider}")
+    @ui.info("Nodes provider = #{@configuration_template.template_type}")
     generate_result = generate
     return generate_result if generate_result.error?
 
@@ -28,26 +27,16 @@ class DedicatedConfigurationGenerator < BaseCommand
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = File.absolute_path(name.to_s)
-    begin
-      @config = ConfigurationTemplate.new(
+    @configuration_template = ConfigurationTemplate.new(
         File.expand_path(@env.template_file), @env.box_definitions
-      ).node_configurations
-    rescue IOError
-      raise('Instance configuration file is invalid or not found!')
-    end
+    )
     Result.ok('')
-  end
-
-  # Check that all boxes specified in the the template are exist in the boxes.json.
-  def check_nodes_boxes_and_setup_provider
-    template = ConfigurationTemplate.new(File.expand_path(@env.template_file), @env.box_definitions)
-    @provider = template.template_type
   end
 
   # Check parameters and generate configurations file.
   def generate
     Dir.mkdir(@configuration_path)
-    @configuration_generator.check_nodes_names(@config).and_then do
+    @configuration_template.check_nodes_names.and_then do
       create_links_to_ssh_keys.and_then do
         generate_configuration_file
       end
@@ -56,9 +45,7 @@ class DedicatedConfigurationGenerator < BaseCommand
 
   # Generate role file
   def generate_configuration_file
-    nodes_info = @config.map do |node|
-      next if node[1]['box'].nil?
-
+    nodes_info = @configuration_template.map do |node|
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
       node_info = @configuration_generator.generate_node_info(node, node_params)
       return Result.error(node_info.error) if node_info.error?
@@ -86,8 +73,7 @@ class DedicatedConfigurationGenerator < BaseCommand
 
   # Create a symbolic link to a public ssh key
   def create_links_to_ssh_keys
-    @config.map do |node_info|
-      pp node_info
+    @configuration_template.map do |node_info|
       ssh_key = @boxes.get_box(node_info[1]['box'])['ssh_key']
       return Result.error("File #{ssh_key} not found") unless File.file?(ssh_key)
 
@@ -102,7 +88,7 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate_configuration_info_files
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
-    File.open(provider_file, 'w') { |f| f.write(@provider) }
+    File.open(provider_file, 'w') { |f| f.write(@configuration_template.template_type) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
   end
 end
