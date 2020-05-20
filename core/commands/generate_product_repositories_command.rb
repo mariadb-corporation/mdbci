@@ -205,37 +205,41 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_maxscale_ci(config)
+    return [] if @env.mdbe_ci_config.nil?
+
+    auth = @env.mdbe_ci_config['mdbe_ci_repo']
     releases = []
-    releases.concat(parse_maxscale_ci_rpm_repository(config['repo']['rpm']))
-    releases.concat(parse_maxscale_ci_deb_repository(config['repo']['deb']))
+    releases.concat(parse_maxscale_ci_rpm_repository(config['repo'], auth))
+    releases.concat(parse_maxscale_ci_deb_repository(config['repo'], auth))
     releases
   end
 
-  def parse_maxscale_ci_rpm_repository(config)
+  def parse_maxscale_ci_rpm_repository(config, auth)
     parse_repository(
-      config['path'], nil, config['key'], 'maxscale_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'maxscale_ci',
       save_as_field(:version),
       append_url(%w[mariadb-maxscale]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       append_url(%w[x86_64]),
       lambda do |release, _|
-        release[:repo] = release[:url]
+        release[:repo] = add_auth_to_url(release[:url], auth)
         release
       end
     )
   end
 
-  def parse_maxscale_ci_deb_repository(config)
+  def parse_maxscale_ci_deb_repository(config, auth)
     parse_repository(
-      config['path'], nil, config['key'], 'maxscale_ci',
+        config['path'], auth, add_auth_to_url(config['key'], auth), 'maxscale_ci',
       save_as_field(:version),
       append_url(%w[mariadb-maxscale]),
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
       lambda do |release, _|
-        release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
+        url = add_auth_to_url(release[:url], auth)
+        release[:repo] = "#{url} #{release[:platform_version]} main"
         release
       end
     )

@@ -16,12 +16,8 @@ columnstore:
       key: "AD0DEAFDA41F5C14"
 maxscale_ci:
   repo:
-    rpm:
-      path: http://max-tst-01.mariadb.com/ci-repository/
-      key: https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY
-    deb:
-      path: http://max-tst-01.mariadb.com/ci-repository/
-      key: "135659e928c12247"
+    path: https://mdbe-ci-repo.mariadb.net/Maxscale/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
 maxscale:
   repo:
     rpm:
