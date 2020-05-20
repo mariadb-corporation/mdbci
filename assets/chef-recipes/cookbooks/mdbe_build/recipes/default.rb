@@ -322,9 +322,6 @@ when 'debian'
       command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
   end
-  service 'unattended-upgrades' do
-    action :stop
-  end
   apt_update 'update apt cache' do
     action :update
   end
@@ -354,9 +351,6 @@ when 'ubuntu'
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
-  end
-  service 'unattended-upgrades' do
-    action :stop
   end
   apt_update 'update apt cache' do
     action :update
