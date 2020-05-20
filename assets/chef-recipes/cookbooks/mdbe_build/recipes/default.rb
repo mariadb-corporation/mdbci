@@ -45,6 +45,7 @@ debian_and_ubuntu_packages = %w[
   libssl-dev
   libxml-simple-perl
   libxml2-dev
+  liblz4-dev
   netcat
   odbcinst
   python3
