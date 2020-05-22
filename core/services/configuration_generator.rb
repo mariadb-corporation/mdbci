@@ -23,11 +23,11 @@ class ConfigurationGenerator
     @suse_config = env.suse_config
   end
 
-  def generate_node_info(node, node_params)
+  def generate_node_info(node, node_params, product_registry)
     box = node[1]['box'].to_s
     products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    get_role_description(node_params[:name], products, box).and_then do |role|
+    get_role_description(node_params[:name], products, box, product_registry).and_then do |role|
       Result.ok({ node_params: node_params, role_file_content: role, box: box })
     end
   end
@@ -157,13 +157,14 @@ class ConfigurationGenerator
   # @param products [Array<Hash>] list of parameters of products to configure from configuration file
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
-  def get_role_description(name, products, box)
+  def get_role_description(name, products, box, product_registry)
     extend_template(products)
     recipes_result = init_product_configs_and_recipes(box)
     return recipes_result if recipes_result.error?
 
     product_configs = recipes_result.value[:product_configs]
     recipe_names = recipes_result.value[:recipe_names]
+    generate_product_registry(product_registry, name, products, recipe_names)
     products.each do |product|
       recipe_and_config_result = make_product_config_and_recipe_name(product, box)
       return recipe_and_config_result if recipe_and_config_result.error?
@@ -175,6 +176,13 @@ class ConfigurationGenerator
     end
     role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
     Result.ok(role_description)
+  end
+
+  def generate_product_registry(product_registry, name, products, recipe_names)
+    product_registry.add_products(name, recipe_names)
+    products.each do |product|
+      product_registry.add_product(name, product['name'])
+    end
   end
 
   # Add all required product dependencies

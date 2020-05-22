@@ -14,6 +14,7 @@ require_relative '../../services/configuration_generator'
 require_relative '../../services/product_attributes'
 require_relative '../../services/shell_commands'
 require_relative '../../out'
+require_relative '../../services/product_registry'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
 # rubocop:disable Metrics/ClassLength
@@ -202,7 +203,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def node_definition(node, path, cookbook_path)
     box = node[1]['box'].to_s
     node_params = make_node_params(node, @boxes.get_box(box))
-    @configuration_generator.generate_node_info(node, node_params).and_then do |info|
+    @configuration_generator.generate_node_info(node, node_params, @product_registry).and_then do |info|
       @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
       if box_valid?(info[:box])
         Result.ok(generate_node_defenition(info[:node_params], cookbook_path, path))
@@ -300,11 +301,13 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def generate_provider_and_template_files(path, provider)
     provider_file = Configuration.provider_path(path)
     template_file = Configuration.template_path(path)
+    product_registry_path = Configuration.product_registry_path(path)
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
 
     File.open(provider_file, 'w') { |f| f.write(provider) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
+    @product_registry.save_registry(product_registry_path)
   end
 
   # Check that all boxes specified in the the template are identical.
@@ -363,6 +366,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     config = ConfigurationTemplate.new(
         File.expand_path(@env.template_file), @env.box_definitions
     )
+    @product_registry = ProductRegistry.new
     [@configuration_path, config]
   end
 

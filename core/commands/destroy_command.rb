@@ -8,6 +8,7 @@ require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
 require_relative 'partials/terraform_cleaner'
 require_relative '../services/network_config'
+require_relative '../services/product_registry'
 
 require 'fileutils'
 
@@ -151,6 +152,12 @@ Labels should be separated with commas, do not contain any whitespaces.
 
       result
     elsif configuration.dedicated_configuration?
+      network_settings = NetworkSettings.from_file(configuration.network_settings_file)
+      if network_settings.error?
+        @ui.error('Network settings file not found.')
+      else
+        uninstall_products(configuration, network_settings.value)
+      end
       Result.ok('')
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
@@ -163,6 +170,33 @@ Labels should be separated with commas, do not contain any whitespaces.
     end.and_then do
       remove_files(configuration, @env.keep_template) unless @env.keep_configuration
     end
+  end
+
+  def uninstall_products(configuration, network_settings)
+    configuration.node_names.each do |name|
+      products = ProductRegistry.new.from_file(Configuration.product_registry_path(configuration.path)).generate_reverse_products(name)
+      unless products.empty?
+        role_file_path = generate_role_file(configuration, name, products)
+        target_path = "roles/#{name}.json"
+        role_file_path_config = "#{configuration.path}/#{name}-config.json"
+        target_path_config = "configs/#{name}-config.json"
+        extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
+        node_settings = network_settings.node_settings(name)
+        MachineConfigurator.new(@ui).configure(node_settings, "#{name}-config.json", @ui, extra_files)
+      end
+    end
+  end
+
+  # Create a role file to install the product from the chef
+  def generate_role_file(configuration, name, products)
+    recipe_names = []
+    products.each do |product|
+      recipe_names.push(ProductAttributes.recipe_name("#{product}_remove"))
+    end
+    role_file_path = "#{configuration.path}/#{name}.json"
+    role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_names)
+    IO.write(role_file_path, role_json_file)
+    role_file_path
   end
 
   # Update network_configuration and configured_labels files
