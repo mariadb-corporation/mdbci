@@ -4,6 +4,7 @@ require 'fileutils'
 
 require_relative '../../services/configuration_generator'
 require_relative '../../models/configuration'
+require_relative '../../services/product_registry'
 
 # The class generates the MDBCI configuration for computers that have been setup beforehand
 class DedicatedConfigurationGenerator < BaseCommand
@@ -30,6 +31,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     @configuration_template = ConfigurationTemplate.new(
         File.expand_path(@env.template_file), @env.box_definitions
     )
+    @product_registry = ProductRegistry.new
     Result.ok('')
   end
 
@@ -47,7 +49,7 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate_configuration_file
     nodes_info = @configuration_template.map do |node|
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
-      node_info = @configuration_generator.generate_node_info(node, node_params)
+      node_info = @configuration_generator.generate_node_info(node, node_params, @product_registry)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -88,7 +90,9 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate_configuration_info_files
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
+    product_registry_path = Configuration.product_registry_path(@configuration_path)
     File.open(provider_file, 'w') { |f| f.write(@configuration_template.template_type) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
+    @product_registry.save_registry(product_registry_path)
   end
 end

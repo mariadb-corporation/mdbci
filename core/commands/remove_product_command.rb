@@ -5,6 +5,7 @@ require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 require_relative '../models/result'
 require_relative '../services/product_attributes'
+require_relative '../services/product_registry'
 
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
@@ -81,7 +82,15 @@ class RemoveProductCommand < BaseCommand
     target_path_config = "configs/#{name}-config.json"
     extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
     node_settings = @network_settings.node_settings(name)
+    rewrite_product_registry(name)
     @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
+  end
+
+  def rewrite_product_registry(name)
+    path = Configuration.product_registry_path(@mdbci_config.path)
+    product_registry = ProductRegistry.new.from_file(path)
+    product_registry.remove_product(name, @product)
+    product_registry.save_registry(path)
   end
 
   # Create a role file to install the product from the chef

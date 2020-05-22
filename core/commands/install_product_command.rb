@@ -5,6 +5,7 @@ require_relative '../models/configuration'
 require_relative '../services/configuration_generator'
 require_relative '../models/result'
 require_relative '../services/product_attributes'
+require_relative '../services/product_registry'
 
 # This class installs the product on selected node
 class InstallProduct < BaseCommand
@@ -82,8 +83,16 @@ class InstallProduct < BaseCommand
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
       extra_files.concat(cnf_extra_files(name))
       node_settings = @network_settings.node_settings(name)
+      rewrite_product_registry(name)
       @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
     end
+  end
+
+  def rewrite_product_registry(name)
+    path = Configuration.product_registry_path(@mdbci_config.path)
+    product_registry = ProductRegistry.new.from_file(path)
+    product_registry.add_product(name, @product)
+    product_registry.save_registry(path)
   end
 
   # Make array of cnf files and it target path on the nodes

@@ -90,6 +90,15 @@ class Configuration
     File.join(File.expand_path(configuration_path), 'provider')
   end
 
+  # Forms the path to the product registry configuration file that resides
+  # in the configuration specified by the path
+  #
+  # @param configuration_path [String] path to the configuration
+  # @return [String] path to the product registry file
+  def self.product_registry_path(configuration_path)
+    File.join(File.expand_path(configuration_path), 'product_registry.yaml')
+  end
+
   # Forms the path to the template configuration file that resides
   # in the configuration specified by the path
   #

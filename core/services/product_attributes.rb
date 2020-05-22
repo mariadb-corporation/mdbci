@@ -139,14 +139,30 @@ module ProductAttributes
       'mdbe_plugin_xpand' => 'mdbe_ci'
   }.freeze
 
+  REVERSE = {
+      'mariadb' => 'mariadb',
+      'mdbe' => 'mariadb',
+      'mdbe_ci' => 'mariadb',
+      'maxscale' => 'maxscale',
+      'maxscale_ci' => 'maxscale'
+  }.freeze
+
+  # Get the reverse product name for the product
+  def self.reverse_product(product)
+    REVERSE[product]
+  end
+
+  # Check whether product needs a dependence to function
   def self.need_dependence?(product)
     DEPENDENCE.key?(product)
   end
 
+  # Check whether product is main or dependence
   def self.is_dependence?(product)
     DEPENDENCE.value?(product)
   end
 
+  # Get the dependence name for the product
   def self.dependence_for_product(product)
     DEPENDENCE[product]
   end

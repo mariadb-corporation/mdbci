@@ -1,8 +1,9 @@
-module ChefConfigurationGenerator
+# frozen_string_literal: true
 
+# The module configures the node using chef
+module ChefConfigurationGenerator
   # Configure single node using the chef-solo respected role
   def self.configure_with_chef(node, logger, network_settings, config, ui, machine_configurator)
-    #   node_settings = network_settings.node_settings(node)
     solo_config = "#{node}-config.json"
     role_file = ConfigurationGenerator.role_file_name(config.path, node)
     unless File.exist?(role_file)
@@ -10,8 +11,8 @@ module ChefConfigurationGenerator
       return Result.ok('')
     end
     extra_files = [
-        [role_file, "roles/#{node}.json"],
-        [ConfigurationGenerator.node_config_file_name(config.path, node), "configs/#{solo_config}"]
+      [role_file, "roles/#{node}.json"],
+      [ConfigurationGenerator.node_config_file_name(config.path, node), "configs/#{solo_config}"]
     ]
     extra_files.concat(cnf_extra_files(node, config))
     machine_configurator.configure(network_settings, solo_config, logger, extra_files).and_then do
