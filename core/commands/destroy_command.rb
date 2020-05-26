@@ -141,6 +141,9 @@ Labels should be separated with commas, do not contain any whitespaces.
   # Handle case when command calling with configuration.
   def destroy_by_configuration
     configuration = Configuration.new(@args.first, @env.labels)
+    network_settings = NetworkSettings.from_file(configuration.network_settings_file)
+    product_registry = ProductRegistry.new.from_file(Configuration.product_registry_path(configuration.path))
+    unsubscribe_from_subscriptions(configuration, network_settings, product_registry)
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
@@ -152,11 +155,10 @@ Labels should be separated with commas, do not contain any whitespaces.
 
       result
     elsif configuration.dedicated_configuration?
-      network_settings = NetworkSettings.from_file(configuration.network_settings_file)
       if network_settings.error?
         @ui.error('Network settings file not found.')
       else
-        uninstall_products(configuration, network_settings.value)
+        uninstall_products(configuration, network_settings.value, product_registry)
       end
       Result.ok('')
     else
@@ -172,31 +174,56 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
   end
 
-  def uninstall_products(configuration, network_settings)
-    configuration.node_names.each do |name|
-      products = ProductRegistry.new.from_file(Configuration.product_registry_path(configuration.path)).generate_reverse_products(name)
-      unless products.empty?
-        role_file_path = generate_role_file(configuration, name, products)
-        target_path = "roles/#{name}.json"
-        role_file_path_config = "#{configuration.path}/#{name}-config.json"
-        target_path_config = "configs/#{name}-config.json"
-        extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-        node_settings = network_settings.node_settings(name)
-        MachineConfigurator.new(@ui).configure(node_settings, "#{name}-config.json", @ui, extra_files)
+  def unsubscribe_from_subscriptions(configuration, network_settings, product_registry)
+    if network_settings.success?
+      configuration.node_names.each do |name|
+        subscription = product_registry.get_subscription(name)
+        if subscription.success?
+          role_file_path = generate_role_file_unsub(configuration, name, subscription.value)
+         configure(role_file_path, name, configuration, network_settings.value)
+        end
       end
     end
   end
 
-  # Create a role file to install the product from the chef
-  def generate_role_file(configuration, name, products)
-    recipe_names = []
-    products.each do |product|
-      recipe_names.push(ProductAttributes.recipe_name("#{product}_remove"))
+  def uninstall_products(configuration, network_settings, product_registry)
+    configuration.node_names.each do |name|
+      products = product_registry.generate_reverse_products(name)
+      unless products.empty?
+        role_file_path = generate_role_file_remove(configuration, name, products)
+        configure(role_file_path, name, configuration, network_settings)
+      end
     end
+  end
+
+  def configure(role_file_path, name, configuration, network_settings)
+    target_path = "roles/#{name}.json"
+    role_file_path_config = "#{configuration.path}/#{name}-config.json"
+    target_path_config = "configs/#{name}-config.json"
+    extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
+    node_settings = network_settings.node_settings(name)
+    MachineConfigurator.new(@ui).configure(node_settings, "#{name}-config.json", @ui, extra_files)
+  end
+
+  def generate_role_file_unsub(configuration, name, subscription)
+    recipe_name = ["#{subscription}::unsubscription"]
+    generate_role_file(configuration, name, recipe_name)
+  end
+
+  # Create a role file to install the product from the chef
+  def generate_role_file(configuration, name, recipe_names)
     role_file_path = "#{configuration.path}/#{name}.json"
     role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_names)
     IO.write(role_file_path, role_json_file)
     role_file_path
+  end
+
+  def generate_role_file_remove(configuration, name, products)
+  recipe_names = []
+    products.each do |product|
+      recipe_names.push(ProductAttributes.recipe_name("#{product}_remove"))
+    end
+  generate_role_file(configuration, name, recipe_names)
   end
 
   # Update network_configuration and configured_labels files
