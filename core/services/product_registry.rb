@@ -41,9 +41,16 @@ class ProductRegistry
   # Create an array of reverse products
   def generate_reverse_products(node)
     products = []
-    @registry[node].each do |installed_products|
-      products << ProductAttributes.reverse_product(installed_products)
+    @registry[node].each do |installed_product|
+      products << ProductAttributes.reverse_product(installed_product)
     end
     products.compact.uniq
+  end
+  
+  def get_subscription(node)
+    @registry[node].each do |installed_product|
+      return Result.ok(installed_product) if ProductAttributes.subscription?(installed_product)
+    end
+    Result.error('No subscriptions')
   end
 end

@@ -147,6 +147,16 @@ module ProductAttributes
       'maxscale_ci' => 'maxscale'
   }.freeze
 
+  SUBSCRIPTION = %w[
+    subscription-manager
+    suse-connect
+  ]
+
+  # Check whether the product is a subscription
+  def self.subscription?(product)
+    SUBSCRIPTION.include?(product)
+  end
+
   # Get the reverse product name for the product
   def self.reverse_product(product)
     REVERSE[product]
