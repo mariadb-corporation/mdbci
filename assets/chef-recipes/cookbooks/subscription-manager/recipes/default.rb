@@ -22,7 +22,9 @@ end
 ENABLE_REPOSITORIES = %w(rhel-8-for-x86_64-baseos-rpms
                          rhel-8-for-x86_64-supplementary-rpms
                          rhel-8-for-x86_64-appstream-rpms
-                         codeready-builder-for-rhel-8-*-rpms)
+                         codeready-builder-for-rhel-8-x86_64-rpms
+                         codeready-builder-for-rhel-8-x86_64-debug-rpms
+                         codeready-builder-for-rhel-8-x86_64-source-rpms)
 
 ENABLE_REPOSITORIES.each do |repo|
   execute "Enable #{repo} repo" do
