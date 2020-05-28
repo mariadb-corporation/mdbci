@@ -26,23 +26,17 @@ class TerraformConfigurationGenerator < BaseCommand
   # Generate a configuration.
   #
   # @param name [String] name of the configuration file
-  # @return [Number] exit code for the command execution
+  # @return [Result::Base] exit code for the command execution
   def execute(name)
-    begin
-      setup_command(name)
-    rescue RuntimeError => e
-      @ui.error(e.message)
-      return ERROR_RESULT
+    setup_command(name).and_then do
+      @ui.info("Nodes provider = #{@provider}")
+      generate_result = generate
+      return generate_result unless generate_result == SUCCESS_RESULT
+
+      @ui.info "Generating config in #{@configuration_path}"
+      generate_configuration_info_files
+      SUCCESS_RESULT
     end
-    return ARGUMENT_ERROR_RESULT unless check_nodes_boxes_and_setup_provider
-
-    @ui.info("Nodes provider = #{@provider}")
-    generate_result = generate
-    return generate_result unless generate_result == SUCCESS_RESULT
-
-    @ui.info "Generating config in #{@configuration_path}"
-    generate_configuration_info_files
-    SUCCESS_RESULT
   end
 
   private
@@ -205,19 +199,18 @@ class TerraformConfigurationGenerator < BaseCommand
   # defines the path for generating the configuration, parse the config JSON-file.
   #
   # @param name [String] name of the configuration file
-  # @return [Array<String, Hash>] path and config hash
-  # @raise RuntimeError if configuration file is invalid.
   def setup_command(name)
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
-    @configuration_template = ConfigurationTemplate.new(
-        File.expand_path(@env.template_file), @env.box_definitions
-    )
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
     @digitalocean_config = @env.tool_config['digitalocean']
     @product_registry = ProductRegistry.new
     generate_configuration_id
+    ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
+      @configuration_template = template
+      Result.ok('Configuration complete')
+    end
   end
 end

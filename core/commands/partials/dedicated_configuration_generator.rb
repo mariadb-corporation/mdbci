@@ -11,15 +11,12 @@ class DedicatedConfigurationGenerator < BaseCommand
   KEY_FILE_NAME_SUFFIX = 'public_key'
 
   def execute(name)
-    setup_result = setup_command(name)
-    return generate_result if setup_result.error?
-
-    @ui.info("Nodes provider = #{@configuration_template.template_type}")
-    generate_result = generate
-    return generate_result if generate_result.error?
-
-    generate_configuration_info_files
-    SUCCESS_RESULT
+    setup_command(name).and_then do
+      generate
+    end.and_then do
+      generate_configuration_info_files
+      Result.ok('Generation has completed')
+    end
   end
 
   def setup_command(name)
@@ -28,20 +25,20 @@ class DedicatedConfigurationGenerator < BaseCommand
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = File.absolute_path(name.to_s)
-    @configuration_template = ConfigurationTemplate.new(
-        File.expand_path(@env.template_file), @env.box_definitions
-    )
     @product_registry = ProductRegistry.new
-    Result.ok('')
+    ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
+      @configuration_template = template
+      Result.ok('')
+    end
   end
 
   # Check parameters and generate configurations file.
   def generate
     Dir.mkdir(@configuration_path)
     @configuration_template.check_nodes_names.and_then do
-      create_links_to_ssh_keys.and_then do
-        generate_configuration_file
-      end
+      create_links_to_ssh_keys
+    end.and_then do
+      generate_configuration_file
     end
   end
 
@@ -91,7 +88,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
     product_registry_path = Configuration.product_registry_path(@configuration_path)
-    File.open(provider_file, 'w') { |f| f.write(@configuration_template.template_type) }
+    File.open(provider_file, 'w') { |f| f.write('dedicated') }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
     @product_registry.save_registry(product_registry_path)
   end
