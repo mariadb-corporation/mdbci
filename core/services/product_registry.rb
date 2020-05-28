@@ -8,14 +8,8 @@ class ProductRegistry
     @registry = {}
   end
 
-  # Add a single product to the register
-  def add_product(node, product)
-    @registry[node] = [] if @registry[node].nil?
-    @registry[node] << product
-  end
-
   # Add multiple products to the register
-  def add_products(node, products)
+  def add_products(node, *products)
     @registry[node] = [] if @registry[node].nil?
     @registry[node].concat(products)
   end
@@ -46,7 +40,7 @@ class ProductRegistry
     end
     products.compact.uniq
   end
-  
+
   def get_subscription(node)
     @registry[node].each do |installed_product|
       return Result.ok(installed_product) if ProductAttributes.subscription?(installed_product)
