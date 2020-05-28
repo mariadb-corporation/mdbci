@@ -179,9 +179,9 @@ class ConfigurationGenerator
   end
 
   def generate_product_registry(product_registry, name, products, recipe_names)
-    product_registry.add_products(name, recipe_names)
+    product_registry.add_products(name, *recipe_names)
     products.each do |product|
-      product_registry.add_product(name, product['name'])
+      product_registry.add_products(name, product['name'])
     end
   end
 

@@ -91,7 +91,7 @@ class InstallProduct < BaseCommand
   def rewrite_product_registry(name)
     path = Configuration.product_registry_path(@mdbci_config.path)
     product_registry = ProductRegistry.new.from_file(path)
-    product_registry.add_product(name, @product)
+    product_registry.add_products(name, @product)
     product_registry.save_registry(path)
   end
 
