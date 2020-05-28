@@ -142,8 +142,8 @@ Labels should be separated with commas, do not contain any whitespaces.
   def destroy_by_configuration
     configuration = Configuration.new(@args.first, @env.labels)
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
-    product_registry_result = ProductRegistry.new.from_file(Configuration.product_registry_path(configuration.path))
-    unsubscribe_from_subscriptions(configuration, network_settings_result, product_registry_result)
+    product_registry = ProductRegistry.new.from_file(Configuration.product_registry_path(configuration.path))
+    unsubscribe_from_subscriptions(configuration, network_settings_result, product_registry)
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
@@ -158,7 +158,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       if network_settings_result.error?
         @ui.error('Network settings file not found.')
       else
-        uninstall_products(configuration, network_settings_result.value, product_registry_result)
+        uninstall_products(configuration, network_settings_result.value, product_registry)
       end
       Result.ok('')
     else
