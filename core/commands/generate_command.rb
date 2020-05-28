@@ -59,7 +59,7 @@ class GenerateCommand < BaseCommand
   # Read the template file and notify if file does not exist or incorrect
   def read_template
     @template_file = File.expand_path(@env.template_file)
-    ConfigurationTemplate.from_path(@template_file) do |template|
+    ConfigurationTemplate.from_path(@template_file).and_then do |template|
       @template = template
       ConfigurationTemplate.determine_template_type(@template, @env.box_definitions)
     end.and_then do |template_type|
