@@ -14,7 +14,7 @@ class ConfigurationTemplate
   # @returns [Result::Base<Symbol>] type of the template: vagrant, docker or terraform
   def self.determine_template_type(template, box_definitions)
     template.each_node.map do |node|
-      node['box']
+      node[1]['box']
     end.then do |box_names|
       box_definitions.unique_values_for_boxes(box_names, 'provider')
     end.and_then do |providers|

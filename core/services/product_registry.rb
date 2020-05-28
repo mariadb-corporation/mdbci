@@ -4,8 +4,8 @@ require_relative 'product_attributes'
 
 # The module provides work with the product_registry.yaml file
 class ProductRegistry
-  def initialize
-    @registry = {}
+  def initialize(registry = {})
+    @registry = registry
   end
 
   # Add multiple products to the register
@@ -27,9 +27,10 @@ class ProductRegistry
   end
 
   # Read a register from file
-  def from_file(path)
-    File.open(path, 'r') { |f| @registry = YAML.safe_load(f) }
-    self
+  def self.from_file(path)
+    File.open(path, 'r') { |f| return Result.ok(ProductRegistry.new(YAML.safe_load(f))) }
+  rescue StandardError
+    Result.error('Failed to read registry')
   end
 
   # Create an array of reverse products

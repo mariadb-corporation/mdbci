@@ -90,9 +90,14 @@ class InstallProduct < BaseCommand
 
   def rewrite_product_registry(name)
     path = Configuration.product_registry_path(@mdbci_config.path)
-    product_registry = ProductRegistry.new.from_file(path)
-    product_registry.add_products(name, @product)
-    product_registry.save_registry(path)
+    product_registry_result = ProductRegistry.from_file(path)
+    if product_registry_result.success?
+      product_registry = product_registry_result.value
+      product_registry.add_products(name, @product)
+      product_registry.save_registry(path)
+    else
+      @ui.error(product_registry_result.error)
+    end
   end
 
   # Make array of cnf files and it target path on the nodes
