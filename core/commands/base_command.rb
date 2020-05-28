@@ -35,7 +35,7 @@ class BaseCommand
   # This method is called whenever the command is executed. Any
   # subclasses must implement this method in order to be called.
   #
-  # @return [Number] exit code for the command execution.
+  # @return [Result::Base] exit code for the command execution.
   def execute
     raise "#{self.class} must implement execute method."
   end
