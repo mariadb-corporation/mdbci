@@ -7,19 +7,22 @@ module ProductAttributes
       recipe: 'mariadb::install_community',
       name: 'mariadb',
       repository: 'mariadb',
-      files_location: 'cookbooks/mariadb/files'
+      files_location: 'cookbooks/mariadb/files',
+      reverse_product: 'mariadb_remove'
     },
     'mdbe' => {
       recipe: 'mariadb::install_enterprise',
       name: 'mariadb',
       repository: 'mdbe',
-      files_location: 'cookbooks/mariadb/files'
+      files_location: 'cookbooks/mariadb/files',
+      reverse_product: 'mariadb_remove'
     },
     'mdbe_ci' => {
       recipe: 'mariadb::install_enterprise',
       name: 'mariadb',
       repository: 'mdbe_ci',
-      files_location: 'cookbooks/mariadb/files'
+      files_location: 'cookbooks/mariadb/files',
+      reverse_product: 'mariadb_remove'
     },
     'mariadb_remove' => {
       recipe: 'mariadb::uninstall',
@@ -29,7 +32,8 @@ module ProductAttributes
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       name: 'maxscale',
-      repository: 'maxscale'
+      repository: 'maxscale',
+      reverse_product: 'maxscale_remove'
     },
     'maxscale_remove' => {
       recipe: 'mariadb-maxscale::purge_maxscale',
@@ -40,7 +44,8 @@ module ProductAttributes
       recipe: 'mariadb-maxscale::install_maxscale',
       name: 'maxscale',
       repository: 'maxscale_ci',
-      repo_file_name: 'maxscale_ci'
+      repo_file_name: 'maxscale_ci',
+      reverse_product: 'maxscale_remove'
     },
     'mysql' => {
       recipe: 'mysql::install_community',
@@ -139,14 +144,6 @@ module ProductAttributes
     'mdbe_plugin_xpand' => 'mdbe_ci'
   }.freeze
 
-  REVERSE = {
-    'mariadb' => 'mariadb',
-    'mdbe' => 'mariadb',
-    'mdbe_ci' => 'mariadb',
-    'maxscale' => 'maxscale',
-    'maxscale_ci' => 'maxscale'
-  }.freeze
-
   SUBSCRIPTION = %w[
     subscription-manager
     suse-connect
@@ -159,7 +156,7 @@ module ProductAttributes
 
   # Get the reverse product name for the product
   def self.reverse_product(product)
-    REVERSE[product]
+    PRODUCT_ATTRIBUTES[product][:reverse_product]
   end
 
   # Check whether product needs a dependence to function
