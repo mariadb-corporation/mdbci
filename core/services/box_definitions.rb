@@ -3,6 +3,7 @@
 require 'find'
 require 'forwardable'
 require 'xdg'
+require_relative '../models/result'
 
 # The list of BoxDefinitions that are configured in the application
 class BoxDefinitions
@@ -67,6 +68,19 @@ class BoxDefinitions
   # @return [Boolean] true if box exists
   def box_exists?(box_name)
     @boxes.key?(box_name)
+  end
+
+  # Get the list of unique values for specified field out of the specified boxes
+  # @param boxes [Array<String>] name of boxes to check
+  # @param field [String] name of the field to extract from box definitions
+  # @return [Result::Base<Array<String>>] values of boxes
+  def unique_values_for_boxes(boxes, field)
+    values = boxes.map do |box|
+      get_box(box)[field]
+    end
+    Result.ok(values)
+  rescue RuntimeError => e
+    Result.error(e)
   end
 
   private

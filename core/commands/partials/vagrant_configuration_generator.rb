@@ -271,7 +271,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param path [String] path of the configuration file
   # @param config [Hash] value of the configuration file
   # @param provider [String] provider name of the nodes
-  # @return [Integer] SUCCESS_RESULT if the execution of the method passed without errors,
+  # @return [Result::Base] SUCCESS_RESULT if the execution of the method passed without errors,
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate(path, config, provider)
     # TODO: MariaDb Version Validator
@@ -357,39 +357,31 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # defines the path for generating the configuration, parse the config JSON-file.
   #
   # @param name [String] name of the configuration file
-  # @return [Array<String, Hash>] path and config hash
-  # @raise RuntimeError if configuration file is invalid.
+  # @return [Result::Base<ConfigurationTemplate>] path and config hash
   def setup_command(name)
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
-    config = ConfigurationTemplate.new(
-        File.expand_path(@env.template_file), @env.box_definitions
-    )
     @product_registry = ProductRegistry.new
-    [@configuration_path, config]
+    ConfigurationTemplate.from_path(File.expand_path(@env.template_file))
   end
 
   # Generate a configuration.
   #
   # @param name [String] name of the configuration file
-  # @return [Number] exit code for the command execution
+  # @return [Result::Base] exit code for the command execution
   def execute(name)
-    begin
-      path, config = setup_command(name)
-    rescue RuntimeError => error
-      @ui.error(error.message)
-      return ERROR_RESULT
+    setup_command(name).and_then do |config|
+      nodes_checking_result = load_nodes_provider_and_check_it(config)
+      return ARGUMENT_ERROR_RESULT unless nodes_checking_result
+
+      generate_result = generate(@configuration_path, config, @provider)
+      return generate_result unless generate_result == SUCCESS_RESULT
+
+      @ui.info "Generating config in #{@configuration_path}"
+      generate_provider_and_template_files(@configuration_path, @provider)
+      SUCCESS_RESULT
     end
-    nodes_checking_result = load_nodes_provider_and_check_it(config)
-    return ARGUMENT_ERROR_RESULT unless nodes_checking_result
-
-    generate_result = generate(path, config, @provider)
-    return generate_result unless generate_result == SUCCESS_RESULT
-
-    @ui.info "Generating config in #{path}"
-    generate_provider_and_template_files(path, @provider)
-    SUCCESS_RESULT
   end
 end
 # rubocop:enable Metrics/ClassLength
