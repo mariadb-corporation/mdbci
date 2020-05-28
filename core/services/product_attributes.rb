@@ -16,15 +16,15 @@ module ProductAttributes
       files_location: 'cookbooks/mariadb/files'
     },
     'mdbe_ci' => {
-        recipe: 'mariadb::install_enterprise',
-        name: 'mariadb',
-        repository: 'mdbe_ci',
-        files_location: 'cookbooks/mariadb/files'
+      recipe: 'mariadb::install_enterprise',
+      name: 'mariadb',
+      repository: 'mdbe_ci',
+      files_location: 'cookbooks/mariadb/files'
     },
     'mariadb_remove' => {
-        recipe: 'mariadb::uninstall',
-        name: 'mariadb',
-        repository: 'mariadb'
+      recipe: 'mariadb::uninstall',
+      name: 'mariadb',
+      repository: 'mariadb'
     },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
@@ -60,10 +60,10 @@ module ProductAttributes
       files_location: 'cookbooks/galera/files'
     },
     'galera_enterprise_ci' => {
-        recipe: 'galera',
-        name: 'galera',
-        repository: 'galera_enterprise_ci',
-        files_location: 'cookbooks/galera/files'
+      recipe: 'galera',
+      name: 'galera',
+      repository: 'galera_enterprise_ci',
+      files_location: 'cookbooks/galera/files'
     },
     'docker' => {
       recipe: 'docker',
@@ -76,81 +76,81 @@ module ProductAttributes
       license_file_name: 'clustrix_license'
     },
     'mdbe_build' => {
-        recipe: 'mdbe_build',
-        name: 'mdbe_build'
+      recipe: 'mdbe_build',
+      name: 'mdbe_build'
     },
     'mdbe_plugin_columnstore' => {
-        recipe: 'mdbe_plugins::columnstore',
-        name: 'columnstore'
+      recipe: 'mdbe_plugins::columnstore',
+      name: 'columnstore'
     },
     'mdbe_plugin_connect' => {
-        recipe: 'mdbe_plugins::connect',
-        name: 'connect'
+      recipe: 'mdbe_plugins::connect',
+      name: 'connect'
     },
     'mdbe_plugin_cracklib_password_check' => {
-        recipe: 'mdbe_plugins::cracklib_password_check',
-        name: 'cracklib_password_check'
+      recipe: 'mdbe_plugins::cracklib_password_check',
+      name: 'cracklib_password_check'
     },
     'mdbe_plugin_gssapi_client' => {
-        recipe: 'mdbe_plugins::gssapi_client',
-        name: 'gssapi_client'
+      recipe: 'mdbe_plugins::gssapi_client',
+      name: 'gssapi_client'
     },
     'mdbe_plugin_gssapi_server' => {
-        recipe: 'mdbe_plugins::gssapi_server',
-        name: 'gssapi_server'
+      recipe: 'mdbe_plugins::gssapi_server',
+      name: 'gssapi_server'
     },
     'mdbe_plugin_mariadb_test' => {
-        recipe: 'mdbe_plugins::mariadb_test',
-        name: 'mariadb_test'
+      recipe: 'mdbe_plugins::mariadb_test',
+      name: 'mariadb_test'
     },
     'mdbe_plugin_mroonga' => {
-        recipe: 'mdbe_plugins::mroonga',
-        name: 'mroonga'
+      recipe: 'mdbe_plugins::mroonga',
+      name: 'mroonga'
     },
     'mdbe_plugin_oqgraph' => {
-        recipe: 'mdbe_plugins::oqgraph',
-        name: 'oqgraph'
+      recipe: 'mdbe_plugins::oqgraph',
+      name: 'oqgraph'
     },
     'mdbe_plugin_rocksdb' => {
-        recipe: 'mdbe_plugins::rocksdb',
-        name: 'rocksdb'
+      recipe: 'mdbe_plugins::rocksdb',
+      name: 'rocksdb'
     },
     'mdbe_plugin_spider' => {
-        recipe: 'mdbe_plugins::spider',
-        name: 'spider'
+      recipe: 'mdbe_plugins::spider',
+      name: 'spider'
     },
     'mdbe_plugin_xpand' => {
-        recipe: 'mdbe_plugins::xpand',
-        name: 'xpand'
+      recipe: 'mdbe_plugins::xpand',
+      name: 'xpand'
     }
   }.freeze
 
   DEPENDENCE = {
-      'mdbe_plugin_columnstore' => 'mdbe_ci',
-      'mdbe_plugin_connect' => 'mdbe_ci',
-      'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
-      'mdbe_plugin_gssapi_client' => 'mdbe_ci',
-      'mdbe_plugin_gssapi_server' => 'mdbe_ci',
-      'mdbe_plugin_mariadb_test' => 'mdbe_ci',
-      'mdbe_plugin_mroonga' => 'mdbe_ci',
-      'mdbe_plugin_oqgraph' => 'mdbe_ci',
-      'mdbe_plugin_rocksdb' => 'mdbe_ci',
-      'mdbe_plugin_spider' => 'mdbe_ci',
-      'mdbe_plugin_xpand' => 'mdbe_ci'
+    'mdbe_plugin_columnstore' => 'mdbe_ci',
+    'mdbe_plugin_connect' => 'mdbe_ci',
+    'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
+    'mdbe_plugin_gssapi_client' => 'mdbe_ci',
+    'mdbe_plugin_gssapi_server' => 'mdbe_ci',
+    'mdbe_plugin_mariadb_test' => 'mdbe_ci',
+    'mdbe_plugin_mroonga' => 'mdbe_ci',
+    'mdbe_plugin_oqgraph' => 'mdbe_ci',
+    'mdbe_plugin_rocksdb' => 'mdbe_ci',
+    'mdbe_plugin_spider' => 'mdbe_ci',
+    'mdbe_plugin_xpand' => 'mdbe_ci'
   }.freeze
 
   REVERSE = {
-      'mariadb' => 'mariadb',
-      'mdbe' => 'mariadb',
-      'mdbe_ci' => 'mariadb',
-      'maxscale' => 'maxscale',
-      'maxscale_ci' => 'maxscale'
+    'mariadb' => 'mariadb',
+    'mdbe' => 'mariadb',
+    'mdbe_ci' => 'mariadb',
+    'maxscale' => 'maxscale',
+    'maxscale_ci' => 'maxscale'
   }.freeze
 
   SUBSCRIPTION = %w[
     subscription-manager
     suse-connect
-  ]
+  ].freeze
 
   # Check whether the product is a subscription
   def self.subscription?(product)
@@ -168,7 +168,7 @@ module ProductAttributes
   end
 
   # Check whether product is main or dependence
-  def self.is_dependence?(product)
+  def self.dependence?(product)
     DEPENDENCE.value?(product)
   end
 

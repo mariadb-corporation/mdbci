@@ -190,7 +190,7 @@ class ConfigurationGenerator
     dependences = create_dependences(products)
     main_products = create_main_products(products)
     products.delete_if do |product|
-      ProductAttributes.need_dependence?(product['name']) || ProductAttributes.is_dependence?(product['name'])
+      ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
     end
     products.concat(dependences).concat(main_products)
   end
@@ -203,7 +203,7 @@ class ConfigurationGenerator
       if ProductAttributes.need_dependence?(product['name'])
         dependences << { 'name' => ProductAttributes.dependence_for_product(product['name']), 'version' => product['version'] }
       end
-      if ProductAttributes.is_dependence?(product['name'])
+      if ProductAttributes.dependence?(product['name'])
         dependences << { 'name' => product['name'], 'version' => product['version'] }
       end
     end
