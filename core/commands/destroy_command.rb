@@ -188,9 +188,9 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   def uninstall_products(configuration, network_settings, product_registry)
     configuration.node_names.each do |name|
-      products = product_registry.generate_reverse_products(name)
-      unless products.empty?
-        role_file_path = generate_role_file_remove(configuration, name, products)
+      removal_products = product_registry.generate_reverse_products(name)
+      unless removal_products.empty?
+        role_file_path = generate_role_file_remove(configuration, name, removal_products)
         configure(role_file_path, name, configuration, network_settings)
       end
     end
@@ -218,10 +218,10 @@ Labels should be separated with commas, do not contain any whitespaces.
     role_file_path
   end
 
-  def generate_role_file_remove(configuration, name, products)
+  def generate_role_file_remove(configuration, name, removal_products)
   recipe_names = []
-    products.each do |product|
-      recipe_names.push(ProductAttributes.recipe_name("#{product}_remove"))
+    removal_products.each do |product|
+      recipe_names.push(ProductAttributes.recipe_name(product))
     end
   generate_role_file(configuration, name, recipe_names)
   end

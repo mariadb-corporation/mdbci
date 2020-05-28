@@ -68,6 +68,12 @@ class RemoveProductCommand < BaseCommand
       return ARGUMENT_ERROR_RESULT
     end
 
+    @remove_product = ProductAttributes.reverse_product(@product)
+    if @remove_product.nil?
+      @ui.error("Currently MDBCI can not remove product '#{@product}'")
+      return ERROR_RESULT
+    end
+
     @machine_configurator = MachineConfigurator.new(@ui)
 
     SUCCESS_RESULT
@@ -97,7 +103,7 @@ class RemoveProductCommand < BaseCommand
   # @param name [String] node name
   def generate_role_file(name)
     recipe_name = []
-    recipe_name.push(ProductAttributes.recipe_name("#{@product}_remove"))
+    recipe_name.push(ProductAttributes.recipe_name(@remove_product))
     role_file_path = "#{@mdbci_config.path}/#{name}.json"
     role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_name)
     IO.write(role_file_path, role_json_file)
