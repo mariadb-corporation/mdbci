@@ -84,7 +84,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     FileUtils.rm_f(configuration.network_settings_file)
     @ui.info("Removing label information file #{configuration.labels_information_file}")
     FileUtils.rm_f(configuration.labels_information_file)
-    return if keep_template
+    return if keep_template || configuration.template_path.nil?
 
     @ui.info("Removing template file #{configuration.template_path}")
     FileUtils.rm_f(configuration.template_path)
@@ -140,7 +140,12 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle case when command calling with configuration.
   def destroy_by_configuration
-    configuration = Configuration.new(@args.first, @env.labels)
+    begin
+      configuration = Configuration.new(@args.first, @env.labels)
+    rescue ArgumentError
+      emergency_deletion_files(@args.first, @env.labels)
+      return
+    end
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
     registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
     if registry_result.success?
@@ -178,6 +183,12 @@ Labels should be separated with commas, do not contain any whitespaces.
     end.and_then do
       remove_files(configuration, @env.keep_template) unless @env.keep_configuration
     end
+  end
+
+  def emergency_deletion_files(path, labels)
+    @ui.error("Configuration files are corrupted or don't exist. Delete in emergency mode.")
+    configuration = Configuration.new(path, labels, false)
+    remove_files(configuration, @env.keep_template) unless @env.keep_configuration
   end
 
   def unsubscribe_from_subscriptions(configuration, network_settings, registry)
