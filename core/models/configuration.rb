@@ -121,7 +121,15 @@ class Configuration
     Result.error(e.message)
   end
 
-  def initialize(spec, labels = nil)
+  def initialize(spec, labels = nil, check_correctness = true)
+    if check_correctness
+      initialize_with_check_correctness(spec, labels)
+    else
+      initialize_without_check_correctness(spec)
+    end
+  end
+
+  def initialize_with_check_correctness(spec, labels)
     @path, node = parse_spec(spec)
     raise ArgumentError, "Invalid path to the MDBCI configuration: #{spec}" unless self.class.config_directory?(@path)
 
@@ -135,6 +143,16 @@ class Configuration
     @labels = labels.nil? ? [] : labels.split(',')
     @node_names = select_node_names(node)
   end
+
+  def initialize_without_check_correctness(spec)
+    @path = parse_spec(spec)[0]
+    begin
+    @template_path = read_template_path(@path)
+    rescue ArgumentError
+      @template_path = nil
+    end
+  end
+
 
   # Provide a path to the network settings configuration file.
   def network_settings_file
