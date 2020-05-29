@@ -92,8 +92,9 @@ when "suse"
     command "zypper -n install --from mariadb MariaDB-server MariaDB-client"
   end
 when "debian"
-  package 'mariadb-server'
-  package 'mariadb-client'
+  package %w[mariadb-server mariadb-client] do
+    action :upgrade
+  end
 when "windows"
   windows_package "MariaDB" do
     source "#{Chef::Config[:file_cache_path]}/mariadb.msi"
@@ -101,8 +102,9 @@ when "windows"
     action :install
   end
 else
-  package 'MariaDB-server'
-  package 'MariaDB-client'
+  package %w[MariaDB-server MariaDB-client] do
+    action :upgrade
+  end
 end
 
 # Copy server.cnf configuration file to configuration
