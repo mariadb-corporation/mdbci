@@ -15,7 +15,7 @@ require_relative 'terraform_gcp_generator'
 require_relative '../../services/configuration_generator'
 require_relative '../../models/configuration'
 require_relative '../../services/product_attributes'
-require_relative '../../services/product_registry'
+require_relative '../../services/product_and_subscription_registry'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend
@@ -78,7 +78,7 @@ class TerraformConfigurationGenerator < BaseCommand
   def generate_configuration_file
     nodes_info = @configuration_template.map do |node|
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
-      node_info = @configuration_generator.generate_node_info(node, node_params, @product_registry)
+      node_info = @configuration_generator.generate_node_info(node, node_params, @registry)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -163,7 +163,7 @@ class TerraformConfigurationGenerator < BaseCommand
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
     configuration_id_file = File.join(@configuration_path, 'configuration_id')
-    product_registry_path = Configuration.product_registry_path(@configuration_path)
+    registry_path = Configuration.registry_path(@configuration_path)
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
     raise 'Configuration \'id\' file already exists' if File.exist?(configuration_id_file)
@@ -171,7 +171,7 @@ class TerraformConfigurationGenerator < BaseCommand
     File.open(provider_file, 'w') { |f| f.write(@provider) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
     File.open(configuration_id_file, 'w') { |f| f.write(@configuration_id) }
-    @product_registry.save_registry(product_registry_path)
+    @registry.save_registry(registry_path)
   end
 
   # Check that all boxes specified in the the template are exist in the boxes.json.
@@ -206,10 +206,11 @@ class TerraformConfigurationGenerator < BaseCommand
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
     @digitalocean_config = @env.tool_config['digitalocean']
-    @product_registry = ProductRegistry.new
+    @registry = ProductAndSubcriptionRegistry.new
     generate_configuration_id
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
       @configuration_template = template
+      return Result.error('Unable to identify the provider') unless check_nodes_boxes_and_setup_provider
       Result.ok('Configuration complete')
     end
   end

@@ -5,7 +5,7 @@ require_relative '../services/machine_configurator'
 require_relative '../models/configuration'
 require_relative '../models/result'
 require_relative '../services/product_attributes'
-require_relative '../services/product_registry'
+require_relative '../services/product_and_subscription_registry'
 
 # This class remove the product on selected node
 class RemoveProductCommand < BaseCommand
@@ -88,16 +88,16 @@ class RemoveProductCommand < BaseCommand
     target_path_config = "configs/#{name}-config.json"
     extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
     node_settings = @network_settings.node_settings(name)
-    rewrite_product_registry(name).and_then do
+    rewrite_registry(name).and_then do
       @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
     end
   end
 
-  def rewrite_product_registry(name)
-    path = Configuration.product_registry_path(@mdbci_config.path)
-    ProductRegistry.from_file(path).and_then do |product_registry|
-      product_registry.remove_product(name, @product)
-      product_registry.save_registry(path)
+  def rewrite_registry(name)
+    path = Configuration.registry_path(@mdbci_config.path)
+    ProductAndSubcriptionRegistry.from_file(path).and_then do |registry|
+      registry.remove_product(name, @product)
+      registry.save_registry(path)
       Result.ok('')
     end
   end

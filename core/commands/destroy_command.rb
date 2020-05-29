@@ -8,7 +8,7 @@ require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
 require_relative 'partials/terraform_cleaner'
 require_relative '../services/network_config'
-require_relative '../services/product_registry'
+require_relative '../services/product_and_subscription_registry'
 
 require 'fileutils'
 
@@ -142,11 +142,11 @@ Labels should be separated with commas, do not contain any whitespaces.
   def destroy_by_configuration
     configuration = Configuration.new(@args.first, @env.labels)
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
-    product_registry_result = ProductRegistry.from_file(Configuration.product_registry_path(configuration.path))
-    if product_registry_result.success?
-      unsubscribe_from_subscriptions(configuration, network_settings_result, product_registry_result.value)
+    registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
+    if registry_result.success?
+      unsubscribe_from_subscriptions(configuration, network_settings_result, registry_result.value)
     else
-      @ui.error(product_registry_result.error)
+      @ui.error(registry_result.error)
     end
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
@@ -161,8 +161,10 @@ Labels should be separated with commas, do not contain any whitespaces.
     elsif configuration.dedicated_configuration?
       if network_settings_result.error?
         @ui.error('Network settings file not found.')
+      elsif registry_result.error?
+        @ui.error(registry_result.error)
       else
-        uninstall_products(configuration, network_settings_result.value, product_registry)
+        uninstall_products(configuration, network_settings_result.value, registry_result.value)
       end
       Result.ok('')
     else
@@ -178,10 +180,10 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
   end
 
-  def unsubscribe_from_subscriptions(configuration, network_settings, product_registry)
+  def unsubscribe_from_subscriptions(configuration, network_settings, registry)
     if network_settings.success?
       configuration.node_names.each do |name|
-        subscription = product_registry.get_subscription(name)
+        subscription = registry.get_subscription(name)
         if subscription.success?
           role_file_path = generate_role_file_unsub(configuration, name, subscription.value)
          configure(role_file_path, name, configuration, network_settings.value)
@@ -190,9 +192,9 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
   end
 
-  def uninstall_products(configuration, network_settings, product_registry)
+  def uninstall_products(configuration, network_settings, registry)
     configuration.node_names.each do |name|
-      removal_products = product_registry.generate_reverse_products(name)
+      removal_products = registry.generate_reverse_products(name)
       unless removal_products.empty?
         role_file_path = generate_role_file_remove(configuration, name, removal_products)
         configure(role_file_path, name, configuration, network_settings)

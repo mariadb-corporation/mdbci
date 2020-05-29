@@ -23,11 +23,11 @@ class ConfigurationGenerator
     @suse_config = env.suse_config
   end
 
-  def generate_node_info(node, node_params, product_registry)
+  def generate_node_info(node, node_params, registry)
     box = node[1]['box'].to_s
     products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    get_role_description(node_params[:name], products, box, product_registry).and_then do |role|
+    get_role_description(node_params[:name], products, box, registry).and_then do |role|
       Result.ok({ node_params: node_params, role_file_content: role, box: box })
     end
   end
@@ -124,7 +124,7 @@ class ConfigurationGenerator
   #
   # @param box [String] name of the box
   # @return [Result::Base] Hash in format { recipe_names: [], product_configs: {} }
-  def init_product_configs_and_recipes(box)
+  def init_product_configs_and_recipes(box,name, registry)
     product_configs = {}
     recipe_names = []
     provider = provider_by_box(box)
@@ -135,6 +135,7 @@ class ConfigurationGenerator
       end
 
       recipe_names << 'subscription-manager'
+      registry.add_subscription(name, 'subscription-manager')
       product_configs.merge!('subscription-manager': @rhel_config)
     end
 
@@ -142,6 +143,7 @@ class ConfigurationGenerator
       return Result.error('Credentials for SUSEConnect are not configured') if @suse_config.nil?
 
       recipe_names << 'suse-connect'
+      registry.add_subscription(name, 'suse-connect')
       product_configs.merge!('suse-connect': @suse_config.merge({ provider: provider }))
     end
 
@@ -157,14 +159,14 @@ class ConfigurationGenerator
   # @param products [Array<Hash>] list of parameters of products to configure from configuration file
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
-  def get_role_description(name, products, box, product_registry)
+  def get_role_description(name, products, box, registry)
     extend_template(products)
-    recipes_result = init_product_configs_and_recipes(box)
+    generate_registry(registry, name, products)
+    recipes_result = init_product_configs_and_recipes(box, name, registry)
     return recipes_result if recipes_result.error?
 
     product_configs = recipes_result.value[:product_configs]
     recipe_names = recipes_result.value[:recipe_names]
-    generate_product_registry(product_registry, name, products, recipe_names)
     products.each do |product|
       recipe_and_config_result = make_product_config_and_recipe_name(product, box)
       return recipe_and_config_result if recipe_and_config_result.error?
@@ -178,10 +180,10 @@ class ConfigurationGenerator
     Result.ok(role_description)
   end
 
-  def generate_product_registry(product_registry, name, products, recipe_names)
-    product_registry.add_products(name, *recipe_names)
+  def generate_registry(registry, name, products)
+    registry.create_registry_node(name)
     products.each do |product|
-      product_registry.add_products(name, product['name'])
+      registry.add_products(name, product['name'])
     end
   end
 

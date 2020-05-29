@@ -144,16 +144,6 @@ module ProductAttributes
     'mdbe_plugin_xpand' => 'mdbe_ci'
   }.freeze
 
-  SUBSCRIPTION = %w[
-    subscription-manager
-    suse-connect
-  ].freeze
-
-  # Check whether the product is a subscription
-  def self.subscription?(product)
-    SUBSCRIPTION.include?(product)
-  end
-
   # Get the reverse product name for the product
   def self.reverse_product(product)
     return PRODUCT_ATTRIBUTES[product] if PRODUCT_ATTRIBUTES[product].nil?
