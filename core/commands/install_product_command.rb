@@ -83,20 +83,18 @@ class InstallProduct < BaseCommand
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
       extra_files.concat(cnf_extra_files(name))
       node_settings = @network_settings.node_settings(name)
-      rewrite_product_registry(name)
-      @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
+      rewrite_product_registry(name).and_then do
+        @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
+      end
     end
   end
 
   def rewrite_product_registry(name)
     path = Configuration.product_registry_path(@mdbci_config.path)
-    product_registry_result = ProductRegistry.from_file(path)
-    if product_registry_result.success?
-      product_registry = product_registry_result.value
+    ProductRegistry.from_file(path).and_then do |product_registry|
       product_registry.add_products(name, @product)
       product_registry.save_registry(path)
-    else
-      @ui.error(product_registry_result.error)
+      Result.ok('')
     end
   end
 
