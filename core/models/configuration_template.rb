@@ -18,7 +18,7 @@ class ConfigurationTemplate
     end.then do |box_names|
       box_definitions.unique_values_for_boxes(box_names, 'provider')
     end.and_then do |providers|
-      if providers.size > 1
+      if providers.uniq.size > 1
         return Result.error("There are several providers in the template: #{providers.join(', ')}")
       end
 

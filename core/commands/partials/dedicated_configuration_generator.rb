@@ -4,7 +4,7 @@ require 'fileutils'
 
 require_relative '../../services/configuration_generator'
 require_relative '../../models/configuration'
-require_relative '../../services/product_registry'
+require_relative '../../services/product_and_subscription_registry'
 
 # The class generates the MDBCI configuration for computers that have been setup beforehand
 class DedicatedConfigurationGenerator < BaseCommand
@@ -25,7 +25,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = File.absolute_path(name.to_s)
-    @product_registry = ProductRegistry.new
+    @registry = ProductAndSubcriptionRegistry.new
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
       @configuration_template = template
       Result.ok('')
@@ -46,7 +46,7 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate_configuration_file
     nodes_info = @configuration_template.map do |node|
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
-      node_info = @configuration_generator.generate_node_info(node, node_params, @product_registry)
+      node_info = @configuration_generator.generate_node_info(node, node_params, @registry)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -87,9 +87,9 @@ class DedicatedConfigurationGenerator < BaseCommand
   def generate_configuration_info_files
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
-    product_registry_path = Configuration.product_registry_path(@configuration_path)
+    registry_path = Configuration.registry_path(@configuration_path)
     File.open(provider_file, 'w') { |f| f.write('dedicated') }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
-    @product_registry.save_registry(product_registry_path)
+    @registry.save_registry(registry_path)
   end
 end
