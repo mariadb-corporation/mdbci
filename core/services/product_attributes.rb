@@ -146,8 +146,7 @@ module ProductAttributes
 
   # Get the reverse product name for the product
   def self.reverse_product(product)
-    return PRODUCT_ATTRIBUTES[product] if PRODUCT_ATTRIBUTES[product].nil?
-    PRODUCT_ATTRIBUTES[product][:reverse_product]
+    PRODUCT_ATTRIBUTES.dig(product, :reverse_product)
   end
 
   # Check whether product needs a dependence to function
