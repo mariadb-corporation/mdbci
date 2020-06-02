@@ -54,6 +54,8 @@ module DockerCookbook
 
     # These are helpers for the properties so they are not in an action class
     def default_docker_version
+      return '19.03.10' if focal?
+
       '18.06.0'
     end
 
