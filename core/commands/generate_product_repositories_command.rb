@@ -552,7 +552,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   def parse_mdbe_ci_rpm_repository(config, auth)
-    parse_repository(
+    remove_mdbe_ci_corrupted_releases_rpm(parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       save_as_field(:version),
       append_url(%w[yum]),
@@ -562,11 +562,33 @@ In order to specify the number of retries for repository configuration use --att
         release[:repo] = add_auth_to_url(release[:url], auth)
         release
       end
-    )
+    ), auth)
+  end
+
+  # Generate HTML content as a string
+  def generate_content(url, auth)
+    options = {}
+    options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
+    doc = Nokogiri::HTML(URI.open(url, options).read)
+    doc.css('a').to_s
+  rescue OpenURI::HTTPError
+    ''
+  end
+
+  def remove_mdbe_ci_corrupted_releases_rpm(releases, auth)
+    packages = ['MariaDB-client', 'MariaDB-server']
+    Workers.map(releases) do |release|
+      content = generate_content(release[:url], auth)
+      if packages.all? { |package| /#{package}/ =~ content }
+        release
+      else
+        nil
+      end
+    end.compact
   end
 
   def parse_mdbe_ci_deb_repository(config, auth)
-    parse_repository(
+    remove_mdbe_ci_corrupted_releases_deb(parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       save_as_field(:version),
       append_url(%w[apt], nil, true),
@@ -577,7 +599,31 @@ In order to specify the number of retries for repository configuration use --att
         release[:repo] = "#{repo_path} #{release[:platform_version]} main"
         release
       end
-    )
+    ), auth)
+  end
+
+  def remove_mdbe_ci_corrupted_releases_deb(releases, auth)
+    packages = ['mariadb-client', 'mariadb-server']
+    Workers.map(releases) do |release|
+      url = generate_mdbe_ci_deb_full_url(release[:url])
+      content = generate_content(url, auth)
+      if packages.all? { |package| /#{package}.*#{release[:repo].split(' ')[1]}/ =~ content}
+        release
+      else
+        nil
+      end
+    end.compact
+  end
+
+  def generate_mdbe_ci_deb_full_url(incorrect_url)
+    split_url = incorrect_url.split('/')
+    split_url.pop(2)
+    url = split_url.join('/')
+    mariadb_version = '10.2'
+    mariadb_version = '10.3' if url.include?('10.3')
+    mariadb_version = '10.4' if url.include?('10.4')
+    mariadb_version = '10.5' if url.include?('10.5')
+    "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 
   def parse_mdbe_ci_es_repo_rpm_repository(config, auth)
