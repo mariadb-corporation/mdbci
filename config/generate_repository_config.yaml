@@ -17,7 +17,7 @@ columnstore:
 maxscale_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/Maxscale/
-    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+    key: https://mdbe-ci-repo.mariadb.net/MariaDBManager-GPG-KEY.public
 maxscale:
   repo:
     rpm:
