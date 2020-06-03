@@ -218,7 +218,6 @@ In order to specify the number of retries for repository configuration use --att
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'maxscale_ci',
       save_as_field(:version),
-      append_url(%w[mariadb-maxscale]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       append_url(%w[x86_64]),
@@ -233,7 +232,6 @@ In order to specify the number of retries for repository configuration use --att
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), 'maxscale_ci',
       save_as_field(:version),
-      append_url(%w[mariadb-maxscale]),
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
@@ -790,7 +788,7 @@ In order to specify the number of retries for repository configuration use --att
 
   # Filter all links via regular expressions and then place captured first element as version
   # @param field [Symbol] name of the field to write result to
-  # @param rexexp [RegExp] expression that should have first group designated to field extraction
+  # @param regexp [RegExp] expression that should have first group designated to field extraction
   # @param save_path [Boolean] whether to save current path to the release or not
   def extract_field(field, regexp, save_path = false)
     lambda do |release, links|
