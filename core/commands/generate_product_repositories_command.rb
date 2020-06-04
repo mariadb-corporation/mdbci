@@ -236,7 +236,7 @@ In order to specify the number of retries for repository configuration use --att
       append_url(%w[dists]),
       save_as_field(:platform_version),
       lambda do |release, _|
-        url = add_auth_to_url(release[:url], auth)
+        url = add_auth_to_url(release[:repo_url], auth)
         release[:repo] = "#{url} #{release[:platform_version]} main"
         release
       end
