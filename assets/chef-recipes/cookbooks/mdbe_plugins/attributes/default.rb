@@ -1,1 +1,1 @@
-default['mdbe_plugins']['xpand_config'] = %w[plugin-maturity=experimental]
+default['mdbe_plugins']['xpand_config'] = 'plugin-maturity=experimental'
