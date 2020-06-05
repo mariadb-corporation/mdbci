@@ -12,8 +12,8 @@ class RepoManager
 
   attr_accessor :repos
 
-
-  # The list of the directories to search data in. The last directory takes presence over the first one
+  # The list of the directories to search data in.
+  # The last directory takes presence over the first one.
   BOX_DIRECTORIES = [
     File.expand_path('../../config/repo.d/', __dir__),
     File.join(XDG::Config.new.home, 'mdbci', 'repo.d')
@@ -36,10 +36,10 @@ class RepoManager
     @ui.info("Loaded repos: #{@repos.size}")
   end
 
-
   def find_repository(product_name, product, box)
     @ui.info('Looking for repo')
-    if ProductAttributes.uses_repository?(product_name) || ProductAttributes.alternative_repository?(product_name, product['version'])
+    if !ProductAttributes.uses_repository?(product_name) ||
+       ProductAttributes.alternative_repository?(product_name, product['version'])
       @ui.warning('MDBCI cannot determine the existence/correctness of the specified version of the product!')
       return { 'version' => product['version'] }
     end
@@ -57,7 +57,7 @@ class RepoManager
   end
 
   def show
-    @repos.keys.each do |key|
+    @repos.each_key do |key|
       @ui.out key + ' => [' + @repos[key]['repo'] + ']'
     end
     0
