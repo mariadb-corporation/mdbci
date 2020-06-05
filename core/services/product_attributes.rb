@@ -78,7 +78,7 @@ module ProductAttributes
       recipe: 'clustrix',
       name: 'clustrix',
       repository: 'clustrix',
-      alternative_repository: 'http',
+      valid_repository_version: -> (version) { version.start_with?('http') },
       license_file_name: 'clustrix_license'
     },
     'mdbe_build' => {
@@ -195,15 +195,10 @@ module ProductAttributes
     PRODUCT_ATTRIBUTES[product][:license_file_name]
   end
 
-  # Get the existence of the repository for the product
-  def self.uses_repository?(product)
-    PRODUCT_ATTRIBUTES[product].key?(:repository)
-  end
-
-  # Check whether product
-  def self.alternative_repository?(product, repo_name)
-    PRODUCT_ATTRIBUTES[product].key?(:alternative_repository) &&
-      repo_name.include?(PRODUCT_ATTRIBUTES[product][:alternative_repository])
+  # Check that product allows to pass version as valid repository
+  def self.uses_version_as_repository?(product, version)
+    attributes = PRODUCT_ATTRIBUTES[product]
+    attributes.key?(:repository) || attributes[:valid_repository_version]&.call(version)
   end
 
   # Get the repository for the product
