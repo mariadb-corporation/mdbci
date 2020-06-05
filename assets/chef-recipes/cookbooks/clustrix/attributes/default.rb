@@ -3,7 +3,9 @@
 # attributes/default.rb
 
 # Path for ClustrixDB installer
-default['clustrix']['repo'] = 'http://files.clustrix.com/releases/software/clustrix-9.1.4.el7.tar.bz2'
+if node['clustrix']['repo'].nil?
+  default['clustrix']['repo'] = node['clustrix']['version']
+end
 
 # Path for ClustrixDB installer
 default['clustrix']['license'] = "set global license='{}';"
