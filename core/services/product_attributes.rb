@@ -198,7 +198,7 @@ module ProductAttributes
   # Check that product allows to pass version as valid repository
   def self.uses_version_as_repository?(product, version)
     attributes = PRODUCT_ATTRIBUTES[product]
-    attributes.key?(:repository) || attributes[:valid_repository_version]&.call(version)
+    !attributes.key?(:repository) || attributes[:valid_repository_version]&.call(version)
   end
 
   # Get the repository for the product
