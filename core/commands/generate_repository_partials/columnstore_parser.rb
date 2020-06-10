@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require_relative 'repository_parser_core'
+
 # This module handles the Columnstore repository
 module ColumnstoreParser
+  extend RepositoryParserCore
+
   def self.parse(config, log, logger)
     releases = []
     releases.concat(parse_columnstore_rpm_repository(config['repo']['rpm'], log, logger))
@@ -10,16 +14,16 @@ module ColumnstoreParser
   end
 
   def self.parse_columnstore_rpm_repository(config, log, logger)
-    ParseHelper.parse_repository(
+    parse_repository(
       config['path'], nil, config['key'], 'columnstore', %w[mariadb-columnstore],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      ParseHelper.save_as_field(:version),
-      ParseHelper.append_url(%w[yum]),
-      ParseHelper.split_rpm_platforms,
-      ParseHelper.save_as_field(:platform_version),
-      ParseHelper.append_url(%w[x86_64]),
+      save_as_field(:version),
+      append_url(%w[yum]),
+      split_rpm_platforms,
+      save_as_field(:platform_version),
+      append_url(%w[x86_64]),
       lambda do |release, _|
         release[:repo] = release[:url]
         release
@@ -28,16 +32,16 @@ module ColumnstoreParser
   end
 
   def self.parse_columnstore_deb_repository(config, log, logger)
-    ParseHelper.parse_repository(
+    parse_repository(
       config['path'], nil, config['key'], 'columnstore', %w[mariadb-columnstore],
       ->(url) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, _) { /#{package}/ },
       log, logger,
-      ParseHelper.save_as_field(:version),
-      ParseHelper.append_url(%w[repo]),
-      ParseHelper.extract_field(:platform, %r{^(\p{Alpha}+)\p{Digit}+\/?$}, true),
-      ParseHelper.append_url(%w[dists]),
-      ParseHelper.save_as_field(:platform_version),
+      save_as_field(:version),
+      append_url(%w[repo]),
+      extract_field(:platform, %r{^(\p{Alpha}+)\p{Digit}+\/?$}, true),
+      append_url(%w[dists]),
+      save_as_field(:platform_version),
       lambda do |release, _|
         release[:repo] = release[:repo_url]
         release
