@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # This module provides logic for processing repositories
-module ParseHelper
-  def self.add_auth_to_url(url, auth)
+module RepositoryParserCore
+  def add_auth_to_url(url, auth)
     url.dup.insert(url.index('://') + 3, "#{auth['username']}:#{auth['password']}@")
   end
 
   # Save all values that present in current level as field contents
   # @param field [Symbol] field to save data to
   # @param save_path [Boolean] whether to save path to :repo_url field or not
-  def self.save_as_field(field, save_path = false)
+  def save_as_field(field, save_path = false)
     lambda do |release, links|
       links.map do |link|
         result = {
@@ -27,7 +27,7 @@ module ParseHelper
   # @param paths [Array<String>] array of paths that should be checked for presence
   # @param key [Symbol] field to save data to
   # @param save_path [Boolean] whether to save path to :repo_url field or not
-  def self.append_url(paths, key = nil, save_path = false)
+  def append_url(paths, key = nil, save_path = false)
     lambda do |release, links|
       link_names = links.map { |link| link.content.delete('/') }
       repositories = []
@@ -52,7 +52,7 @@ module ParseHelper
     'rhel' => %w[rhel],
     'opensuse' => %w[opensuse]
   }.freeze
-  def self.split_rpm_platforms
+  def split_rpm_platforms
     lambda do |release, links|
       link_names = links.map { |link| link.content.delete('/') }
       releases = []
@@ -74,7 +74,7 @@ module ParseHelper
   # @param field [Symbol] name of the field to write result to
   # @param rexexp [RegExp] expression that should have first group designated to field extraction
   # @param save_path [Boolean] whether to save current path to the release or not
-  def self.extract_field(field, regexp, save_path = false)
+  def extract_field(field, regexp, save_path = false)
     lambda do |release, links|
       possible_releases = links.select do |link|
         link.content =~ regexp
@@ -98,7 +98,7 @@ module ParseHelper
     'stretch' => 'debian',
     'xenial' => 'ubuntu'
   }.freeze
-  def self.extract_deb_platforms
+  def extract_deb_platforms
     lambda do |release, links|
       links.map do |link|
         link.content.delete('/')
@@ -113,7 +113,7 @@ module ParseHelper
   end
 
   # Parse the repository and provide required configurations
-  def self.parse_repository(
+  def parse_repository(
     base_url, auth, key, product, packages, full_url, comparison_template, log, logger, *steps
   )
     # Recursively go through the site and apply steps on each level
@@ -135,7 +135,7 @@ module ParseHelper
   end
 
   # Send error message to both direct output and logger facility
-  def self.error_and_log(message, log, logger)
+  def error_and_log(message, log, logger)
     log.error(message)
     logger.error(message)
   end
@@ -144,7 +144,7 @@ module ParseHelper
   # @param url [String] path to the site to be checked
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
-  def self.get_directory_links(url, logger, auth = nil)
+  def get_directory_links(url, logger, auth = nil)
     get_links(url, logger, auth).select { |link| dir_link?(link) && !parent_dir_link?(link) }
   end
 
@@ -152,7 +152,7 @@ module ParseHelper
   # @param url [String] path to the site to be checked
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
-  def self.get_links(url, logger, auth = nil)
+  def get_links(url, logger, auth = nil)
     uri = url.gsub(%r{([^:])\/+}, '\1/')
     logger.info("Loading URLs '#{uri}'")
     options = {}
@@ -164,7 +164,7 @@ module ParseHelper
   # Check that passed link is possibly a directory or not
   # @param link link to check
   # @return [Boolean] whether link is directory or not
-  def self.dir_link?(link)
+  def dir_link?(link)
     link.content.match?(%r{\/$}) ||
       link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$})
   end
@@ -172,7 +172,7 @@ module ParseHelper
   # Check that passed link is possibly a parent directory link or not
   # @param link link to check
   # @return [Boolean] whether link is parent directory link or not
-  def self.parent_dir_link?(link)
+  def parent_dir_link?(link)
     link[:href] == '../'
   end
 
@@ -180,7 +180,7 @@ module ParseHelper
   # @param step [Lambda] the executable lambda that should be applied here
   # @param links [Array] the list of elements got from the page
   # @param release [Hash] information about the release collected so far
-  def self.apply_step_to_links(step, links, release)
+  def apply_step_to_links(step, links, release)
     # Delegate creation of next releases to the lambda
     next_releases = step.call(release, links)
     next_releases = [next_releases] unless next_releases.is_a?(Array)
@@ -197,7 +197,7 @@ module ParseHelper
   end
 
   # Method filters releases, removing empty ones and by version, if it required
-  def self.filter_releases(releases)
+  def filter_releases(releases)
     next_releases = releases.reject(&:nil?)
     next_releases.select do |release|
       if @product_version.nil? || release[:version].nil?
@@ -208,7 +208,7 @@ module ParseHelper
     end
   end
 
-  def self.remove_corrupted_releases(releases, packages, full_url, auth, comparison_template)
+  def remove_corrupted_releases(releases, packages, full_url, auth, comparison_template)
     Workers.map(releases) do |release|
       content = generate_content(full_url.call(release[:url]), auth)
       next unless packages.all? do |package|
@@ -223,7 +223,7 @@ module ParseHelper
   # @param releases [Array<Hash>] list of releases
   # @param key [String] text to put into key field
   # @param product [String] name of the product
-  def self.add_key_and_product_to_releases(releases, key, product)
+  def add_key_and_product_to_releases(releases, key, product)
     releases.each do |release|
       release[:repo_key] = key
       release[:product] = product
@@ -231,7 +231,7 @@ module ParseHelper
   end
 
   # Generate HTML content as a string
-  def self.generate_content(url, auth)
+  def generate_content(url, auth)
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
     doc = Nokogiri::HTML(URI.open(url, options).read)
@@ -242,7 +242,7 @@ module ParseHelper
 
   # Parse the repository and provide required configurations
   # @param [Array] steps - array of Hash in format { lambda, complete_condition }
-  def self.parse_repository_recursive(
+  def parse_repository_recursive(
     base_url, auth, key, product, packages, full_url, comparison_template, log, logger, *steps
   )
     # Recursively go through the site and apply steps on each level
@@ -281,7 +281,7 @@ module ParseHelper
 
   # Append all values that present in current level to fields
   # @param field [Symbol] field to save data to
-  def self.append_to_field(field)
+  def append_to_field(field)
     lambda do |release, links|
       links.map do |link|
         release.clone.merge({ link: link,
@@ -290,7 +290,7 @@ module ParseHelper
     end
   end
 
-  def self.dirs?(dirs)
+  def dirs?(dirs)
     lambda do |links|
       repo_dirs = links.map { |link| link.content.delete('/').strip.chomp }
       (repo_dirs & dirs).any?

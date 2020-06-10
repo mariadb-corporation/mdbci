@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'parse_helper'
+require_relative 'repository_parser_core'
 
 # This module handles the MySQL repository
 module MysqlParser
+  extend RepositoryParserCore
+
   def self.parse(config, log, logger)
     releases = []
     releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], log, logger))
@@ -12,15 +14,15 @@ module MysqlParser
   end
 
   def self.parse_mysql_deb_repository(config, log, logger)
-    ParseHelper.parse_repository(
+    parse_repository(
       config['path'], nil, config['key'], 'mysql', %w[mysql],
       ->(url) { generate_mysql_url(url) },
       ->(package, _) { /#{package}/ },
       log, logger,
-      ParseHelper.append_url(%w[debian ubuntu], :platform, true),
-      ParseHelper.append_url(%w[dists]),
-      ParseHelper.save_as_field(:platform_version),
-      ParseHelper.extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}),
+      append_url(%w[debian ubuntu], :platform, true),
+      append_url(%w[dists]),
+      save_as_field(:platform_version),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}),
       lambda do |release, _|
         release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]}"\
                        " mysql-#{release[:version]}"
@@ -32,15 +34,15 @@ module MysqlParser
   # Method parses MySQL repositories that correspond to the following scheme:
   # http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
   def self.parse_mysql_rpm_repository(config, log, logger)
-    ParseHelper.parse_repository(
+    parse_repository(
       config['path'], nil, config['key'], 'mysql', %w[mysql],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      ParseHelper.extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
-      ParseHelper.split_rpm_platforms,
-      ParseHelper.save_as_field(:platform_version),
-      ParseHelper.append_url(%w[x86_64], :repo),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
+      split_rpm_platforms,
+      save_as_field(:platform_version),
+      append_url(%w[x86_64], :repo),
       lambda do |release, _|
         release[:repo] = release[:url]
         release

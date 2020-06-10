@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'parse_helper'
+require_relative 'repository_parser_core'
 
 # This module handles the MariaDB repository
 module MariadbParser
+  extend RepositoryParserCore
+
   def self.parse(config, log, logger)
     releases = []
     version_regexp = %r{^(\p{Digit}+\.\p{Digit}+(\.\p{Digit}+)?)\/?$}
@@ -17,15 +19,15 @@ module MariadbParser
   end
 
   def self.parse_mariadb_rpm_repository(config, product, version_regexp, log, logger)
-    ParseHelper.parse_repository(
+    parse_repository(
       config['path'], nil, config['key'], product, %w[MariaDB-client MariaDB-server],
       ->(url) { "#{url}rpms/" },
       ->(package, _) { /#{package}/ },
       log, logger,
-      ParseHelper.extract_field(:version, version_regexp),
-      ParseHelper.append_url(%w[centos rhel sles opensuse], :platform),
-      ParseHelper.extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      ParseHelper.append_url(%w[x86_64]),
+      extract_field(:version, version_regexp),
+      append_url(%w[centos rhel sles opensuse], :platform),
+      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      append_url(%w[x86_64]),
       lambda do |release, _|
         release[:repo] = release[:url]
         release
@@ -34,15 +36,15 @@ module MariadbParser
   end
 
   def self.parse_mariadb_deb_repository(config, product, version_regexp, log, logger)
-    ParseHelper.parse_repository(
+    parse_repository(
       config['path'], nil, config['key'], product, %w[mariadb-client mariadb-server],
       ->(url) { generate_mariadb_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ },
       log, logger,
-      ParseHelper.extract_field(:version, version_regexp),
-      ParseHelper.save_as_field(:platform, true),
-      ParseHelper.append_url(%w[dists]),
-      ParseHelper.save_as_field(:platform_version),
+      extract_field(:version, version_regexp),
+      save_as_field(:platform, true),
+      append_url(%w[dists]),
+      save_as_field(:platform_version),
       lambda do |release, _|
         release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
         release

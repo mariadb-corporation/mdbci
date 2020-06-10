@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'parse_helper'
+require_relative 'repository_parser_core'
 
 # This module handles the MDBE CI repository
 module MdbeCiParser
+  extend RepositoryParserCore
+
   def self.parse(config, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
 
@@ -26,35 +28,35 @@ module MdbeCiParser
   end
 
   def self.parse_mdbe_ci_rpm_repository(config, auth, log, logger)
-    ParseHelper.parse_repository(
-      config['path'], auth, ParseHelper.add_auth_to_url(config['key'], auth), 'mdbe_ci',
+    parse_repository(
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[MariaDB-client MariaDB-server],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      ParseHelper.save_as_field(:version),
-      ParseHelper.append_url(%w[yum]),
-      ParseHelper.split_rpm_platforms,
-      ParseHelper.extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      save_as_field(:version),
+      append_url(%w[yum]),
+      split_rpm_platforms,
+      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       lambda do |release, _|
-        release[:repo] = ParseHelper.add_auth_to_url(release[:url], auth)
+        release[:repo] = add_auth_to_url(release[:url], auth)
         release
       end
     )
   end
 
   def self.parse_mdbe_ci_deb_repository(config, auth, log, logger)
-    ParseHelper.parse_repository(
-      config['path'], auth, ParseHelper.add_auth_to_url(config['key'], auth), 'mdbe_ci',
+    parse_repository(
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[mariadb-client mariadb-server],
       ->(url) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
-      ParseHelper.save_as_field(:version),
-      ParseHelper.append_url(%w[apt], nil, true),
-      ParseHelper.append_url(%w[dists]),
-      ParseHelper.extract_deb_platforms,
+      save_as_field(:version),
+      append_url(%w[apt], nil, true),
+      append_url(%w[dists]),
+      extract_deb_platforms,
       lambda do |release, _|
-        repo_path = ParseHelper.add_auth_to_url(release[:repo_url], auth)
+        repo_path = add_auth_to_url(release[:repo_url], auth)
         release[:repo] = "#{repo_path} #{release[:platform_version]} main"
         release
       end
@@ -73,34 +75,34 @@ module MdbeCiParser
   end
 
   def self.parse_mdbe_ci_es_repo_rpm_repository(config, auth, log, logger)
-    ParseHelper.parse_repository_recursive(
-      config['path'], auth, ParseHelper.add_auth_to_url(config['key'], auth), 'mdbe_ci',
+    parse_repository_recursive(
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[MariaDB-client MariaDB-server], ->(url) { url },
       ->(package, _) { /#{package}/ }, log, logger,
-      { lambda: ParseHelper.append_to_field(:version),
-        complete_condition: ParseHelper.dirs?(%w[apt yum bintar sourcetar]) },
-      { lambda: ParseHelper.append_url(%w[yum]) },
-      { lambda: ParseHelper.split_rpm_platforms },
-      { lambda: ParseHelper.extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}) },
+      { lambda: append_to_field(:version),
+        complete_condition: dirs?(%w[apt yum bintar sourcetar]) },
+      { lambda: append_url(%w[yum]) },
+      { lambda: split_rpm_platforms },
+      { lambda: extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}) },
       { lambda: lambda do |release, _|
         release[:version] = release[:version].join('/')
-        release[:repo] = ParseHelper.add_auth_to_url(release[:url], auth)
+        release[:repo] = add_auth_to_url(release[:url], auth)
         release
       end }
     )
   end
 
   def self.parse_mdbe_ci_es_repo_deb_repository(config, auth, log, logger)
-    ParseHelper.parse_repository_recursive(
-      config['path'], auth, ParseHelper.add_auth_to_url(config['key'], auth), 'mdbe_ci',
+    parse_repository_recursive(
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[mariadb-client mariadb-server], ->(url) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
-      { lambda: ParseHelper.append_to_field(:version),
-        complete_condition: ParseHelper.dirs?(%w[apt yum bintar sourcetar]) },
-      { lambda: ParseHelper.append_url(%w[apt], nil, true) },
-      { lambda: ParseHelper.append_url(%w[dists]) }, { lambda: ParseHelper.extract_deb_platforms },
+      { lambda: append_to_field(:version),
+        complete_condition: dirs?(%w[apt yum bintar sourcetar]) },
+      { lambda: append_url(%w[apt], nil, true) },
+      { lambda: append_url(%w[dists]) }, { lambda: extract_deb_platforms },
       { lambda: lambda do |release, _|
-        repo_path = ParseHelper.add_auth_to_url(release[:repo_url], auth)
+        repo_path = add_auth_to_url(release[:repo_url], auth)
         release[:version] = release[:version].join('/')
         release[:repo] = "#{repo_path} #{release[:platform_version]} main"
         release

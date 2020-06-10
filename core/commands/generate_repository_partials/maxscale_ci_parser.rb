@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'parse_helper'
+require_relative 'repository_parser_core'
 
 # This module handles the Maxscale CI repository
 module MaxscaleCiParser
+  extend RepositoryParserCore
+
   def self.parse(config, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
 
@@ -15,35 +17,35 @@ module MaxscaleCiParser
   end
 
   def self.parse_maxscale_ci_rpm_repository(config, auth, log, logger)
-    ParseHelper.parse_repository(
-      config['path'], auth, ParseHelper.add_auth_to_url(config['key'], auth), 'maxscale_ci',
+    parse_repository(
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'maxscale_ci',
       %w[maxscale],
       ->(url) { url },
       ->(package, _) { /#{package}/ }, log, logger,
-      ParseHelper.save_as_field(:version),
-      ParseHelper.append_url(%w[mariadb-maxscale]),
-      ParseHelper.split_rpm_platforms,
-      ParseHelper.extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      ParseHelper.append_url(%w[x86_64]),
+      save_as_field(:version),
+      append_url(%w[mariadb-maxscale]),
+      split_rpm_platforms,
+      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      append_url(%w[x86_64]),
       lambda do |release, _|
-        release[:repo] = ParseHelper.add_auth_to_url(release[:url], auth)
+        release[:repo] = add_auth_to_url(release[:url], auth)
         release
       end
     )
   end
 
   def self.parse_maxscale_ci_deb_repository(config, auth, log, logger)
-    ParseHelper.parse_repository(
-      config['path'], auth, ParseHelper.add_auth_to_url(config['key'], auth), 'maxscale_ci',
+    parse_repository(
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'maxscale_ci',
       %w[maxscale], ->(url) { "#{url}main/binary-amd64/" },
       ->(package, _) { /#{package}/ }, log, logger,
-      ParseHelper.save_as_field(:version),
-      ParseHelper.append_url(%w[mariadb-maxscale]),
-      ParseHelper.append_url(%w[debian ubuntu], :platform, true),
-      ParseHelper.append_url(%w[dists]),
-      ParseHelper.save_as_field(:platform_version),
+      save_as_field(:version),
+      append_url(%w[mariadb-maxscale]),
+      append_url(%w[debian ubuntu], :platform, true),
+      append_url(%w[dists]),
+      save_as_field(:platform_version),
       lambda do |release, _|
-        url = ParseHelper.add_auth_to_url(release[:url], auth)
+        url = add_auth_to_url(release[:url], auth)
         release[:repo] = "#{url} #{release[:platform_version]} main"
         release
       end
