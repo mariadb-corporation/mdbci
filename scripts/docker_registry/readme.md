@@ -19,42 +19,36 @@ The official documentation contains a [recipe](https://docs.docker.com/registry/
 The following dependencies are needed to be installed:
 
 - Docker. Follow official installation [instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
-
-Switch Docker into the Swarm mode.
-
-```
-docker swarm init
-```
+- Docker Compose. Follow official [installation instructions](https://docs.docker.com/compose/install/).
 
 ## Authentication
 
 Create a password file that will contain all the required passwords:
 
 ```
-sudo mkdir /home/docker-registry/auth
-sudo touch /home/docker-registry/auth/docker-registry.htpasswd
-sudo htpasswd -B /home/docker-registry/auth/docker-registry.htpasswd USER
+sudo mkdir -p /srv/repository/docker-registry/auth
+sudo touch /srv/repository/docker-registry/auth/docker-registry.htpasswd
+sudo htpasswd -B /srv/repository/docker-registry/auth/docker-registry.htpasswd USER
 ```
-
 The password will be asked on the command prompt.
 
 ### Adding new user to the list of authenticated ones
 
-Use the following line to create new user. The parameter `-B` is mandatory. Substitute the USER with required user name.
+Use the following line to create new user. The parameter `-B` is mandatory. Substitute the `USER` with required user name.
 
 ```bash
-sudo htpasswd -B /home/docker-registry/auth/docker-registry.htpasswd USER
+sudo htpasswd -B /srv/repository/docker-registry/auth/docker-registry.htpasswd USER
 ```
 
 ## Docker registry
 
-In current MaxScale CI setup the Docker is running in the Swarm mode. This mode will be used to deploy the registry. See the docker-registry.yaml file for stack configuration.
+The registry is deployed using Docker Compose. See the `docker-compose.yaml` for more information.
 
-In order to deploy the service the following commands are needed:
+In order to deploy the service please configure authentication and use the following commands to deploy the registry:
 
 ```
-sudo mkdir -p /home/docker-registry/registry
-docker stack deploy -c docker-registry.yaml maxscale-docker-registry
+sudo mkdir -p /srv/repository/docker-registry/registry
+docker-compose up -d
 ```
 
 ## Nginx configuration
