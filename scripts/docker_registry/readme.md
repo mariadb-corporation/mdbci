@@ -55,4 +55,6 @@ docker-compose up -d
 
 Nginx server will redirect to the 5000 port that is used to provide registry services. This part is not required, but used for the convenience only.
 
-Copy the `docker-registry.nginx` file to the `/etc/nginx/sites-available`, create the symbolic link to this file into the directory `/etc/nginx/sites-enabled` and reconfigure the Nginx.
+Copy the `maxscale-docker-registry.conf` file to the `/etc/nginx/sites-available`, create the symbolic link to this file into the directory `/etc/nginx/sites-enabled` and reconfigure the Nginx.
+
+You may need to update path to the SSL sertificates.
