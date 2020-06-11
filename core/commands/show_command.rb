@@ -56,6 +56,10 @@ class ShowCommand < BaseCommand
       description: 'List all configured repositories',
       action: ->(*) { @env.repos.show }
     },
+    repository: {
+      description: 'Provide the repository configuration for the specified product',
+      action: ->(*) { show_repository }
+    },
     versions: {
       description: 'List boxes versions for specified platform',
       action: ->(*) { show_platform_versions }
@@ -242,5 +246,22 @@ class ShowCommand < BaseCommand
         Result.ok([config, network_settings])
       end
     end
+  end
+
+  def show_repository
+    errors = []
+    errors.append('Please specify the platform.') unless @env.boxPlatform
+    errors.append('Please specify the platform version.') unless @env.boxPlatformVersion
+    errors.append('Please specify the product.') unless @env.nodeProduct
+    errors.append('Please specify the product version.') unless @env.productVersion
+    return Result.error(errors.join(' ')) unless errors.empty?
+
+    repository_manager = @env.repos
+    repository_key = repository_manager.makeKey(@env.nodeProduct, @env.productVersion, @env.boxPlatform,
+      @env.boxPlatformVersion)
+    @ui.out(repository_manager.getRepo(repository_key)["repo"])
+    Result.ok('')
+  rescue RuntimeError => e
+    Result.error(e.message)
   end
 end
