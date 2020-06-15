@@ -79,8 +79,8 @@ mdbe_ci:
 galera_enterprise_ci:
   repo:
     rpm:
-      path: https://mdbe-ci-repo.mariadb.net/galera/
+      path: https://mdbe-ci-repo.mariadb.net/Galera-ES/
       key: https://mdbe-ci-repo.mariadb.net/MDBE.public
     deb:
-      path: https://mdbe-ci-repo.mariadb.net/galera/
+      path: https://mdbe-ci-repo.mariadb.net/Galera-ES/
       key: https://mdbe-ci-repo.mariadb.net/MDBE.public
