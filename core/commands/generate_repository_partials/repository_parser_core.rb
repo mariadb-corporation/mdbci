@@ -70,6 +70,34 @@ module RepositoryParserCore
     end
   end
 
+  DEB_VERSIONS = {
+    '8' => 'jessie',
+    '9' => 'stretch',
+    '10' => 'buster',
+    '1604' => 'xenial',
+    '1804' => 'bionic',
+    '2004' => 'focal'
+  }.freeze
+  def add_platform_and_version(platform)
+    lambda do |release, links|
+      link_names = links.map { |link| link.content.delete('/') }
+      releases = []
+      link_names.each do |platform_and_version|
+        platform_version = if platform == :deb
+                             DEB_VERSIONS[platform_and_version.split('-').last]
+                           else
+                             platform_and_version.split('-').last
+                           end
+        releases << {
+          url: "#{release[:url]}#{platform_and_version}/",
+          platform: platform_and_version.split('-').first,
+          platform_version: platform_version
+        }
+      end
+      releases
+    end
+  end
+
   # Filter all links via regular expressions and then place captured first element as version
   # @param field [Symbol] name of the field to write result to
   # @param rexexp [RegExp] expression that should have first group designated to field extraction
