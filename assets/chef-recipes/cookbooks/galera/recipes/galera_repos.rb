@@ -12,10 +12,8 @@ end
 case node[:platform_family]
 when 'debian', 'ubuntu'
   if node['galera']['repo_key'] =~ URI::DEFAULT_PARSER.make_regexp
-    remote_file File.join('tmp', 'apt.key') do
-      source node['galera']['repo_key']
-      sensitive true
-      action :create
+    execute 'download repo key' do
+      command "curl -o /tmp/apt.key #{node['galera']['repo_key']}"
     end
     execute 'Import apt key' do
       command 'apt-key add /tmp/apt.key && rm -f /tmp/apt.key'
@@ -35,10 +33,8 @@ when 'debian', 'ubuntu'
   end
   apt_update
 when 'rhel', 'fedora', 'centos'
-  remote_file File.join('tmp', 'rpm.key') do
-    source node['galera']['repo_key']
-    action :create
-    sensitive true
+  execute 'download repo key' do
+    command "curl -o /tmp/rpm.key #{node['galera']['repo_key']}"
   end
   execute 'Import rpm key' do
     command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
@@ -50,10 +46,8 @@ when 'rhel', 'fedora', 'centos'
     gpgcheck
   end
 when 'suse', 'opensuse', 'sles', nil
-  remote_file File.join('tmp', 'rpm.key') do
-    source node['galera']['repo_key']
-    action :create
-    sensitive true
+  execute 'download repo key' do
+    command "curl -o /tmp/rpm.key #{node['galera']['repo_key']}"
   end
   execute 'Import rpm key' do
     command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'

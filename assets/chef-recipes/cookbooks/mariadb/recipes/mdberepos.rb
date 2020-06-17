@@ -13,12 +13,14 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
   repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
+  execute 'add repo key' do
+    command "curl -L #{node['mariadb']['repo_key']} | apt-key add"
+  end
   apt_repository repo_file_name do
     uri repo_uri
     distribution repo_distribution
     components node['mariadb']['deb_components']
     keyserver 'keyserver.ubuntu.com'
-    key node['mariadb']['repo_key']
     sensitive true
   end
   apt_update
@@ -33,9 +35,8 @@ when 'suse', 'opensuse', 'sles', nil
   zypper_repository 'mariadb' do
     action :remove
   end
-  remote_file File.join('tmp', 'rpm.key') do
-    source node['mariadb']['repo_key']
-    action :create
+  execute 'download repo key' do
+    command "curl -o /tmp/rpm.key #{node['mariadb']['repo_key']}"
   end
   execute 'Import rpm key' do
     command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
