@@ -10,4 +10,4 @@ default["mysql"]["repo"] = "http://repo.mysql.com/yum/"
 default["mysql"]["repo_key"] = "http://repo.mysql.com/yum/"
 
 # path for server.cnf file
-default["mysql"]["cnf_template"] = "server1.cnf"
+default["mysql"]["cnf_template"] = nil
