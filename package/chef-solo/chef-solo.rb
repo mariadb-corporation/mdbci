@@ -23,4 +23,4 @@ env = external_env.merge(required_env_values)
 ENV.replace(env)
 
 # Starting the Chef Solo application
-Chef::Application::Solo.new.run
+Chef::Application::Solo.new.run(enforce_license: false)
