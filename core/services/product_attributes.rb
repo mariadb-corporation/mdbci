@@ -128,6 +128,26 @@ module ProductAttributes
     'mdbe_plugin_xpand' => {
       recipe: 'mdbe_plugins::xpand',
       name: 'xpand'
+    },
+    'galera_3_enterprise' => {
+        recipe: 'galera_ci::galera_3_enterprise',
+        name: 'galera_3_enterprise',
+        repository: 'galera_3_enterprise'
+    },
+    'galera_4_enterprise' => {
+        recipe: 'galera_ci::galera_4_enterprise',
+        name: 'galera_4_enterprise',
+        repository: 'galera_4_enterprise'
+    },
+    'galera_3_community' => {
+        recipe: 'galera_ci::galera_3_community',
+        name: 'galera_3_community',
+        repository: 'galera_3_community'
+    },
+    'galera_4_community' => {
+        recipe: 'galera_ci::galera_4_community',
+        name: 'galera_4_community',
+        repository: 'galera_4_community'
     }
   }.freeze
 

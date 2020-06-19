@@ -84,3 +84,19 @@ galera_enterprise_ci:
     deb:
       path: https://mdbe-ci-repo.mariadb.net/Galera-ES/
       key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+galera_3_community:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera3/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+galera_4_community:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera4/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+galera_3_enterprise:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera3Enterprise/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+galera_4_enterprise:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera4Enterprise/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
