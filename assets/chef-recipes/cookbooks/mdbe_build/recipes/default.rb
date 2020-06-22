@@ -127,6 +127,7 @@ ubuntu_trusty_packages = %w[
 ubuntu_xenial_packages = %w[
   autoconf
   automake
+  dh-exec
   gnutls-dev
   libcurl4-openssl-dev
   libgcrypt20-dev
