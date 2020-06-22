@@ -20,7 +20,6 @@ require_relative 'generate_repository_partials/mariadb_parser'
 require_relative 'generate_repository_partials/columnstore_parser'
 require_relative 'generate_repository_partials/mysql_parser'
 require_relative 'generate_repository_partials/clustrix_parser'
-require_relative 'generate_repository_partials/galera_enterprise_ci_parser'
 require_relative 'generate_repository_partials/galera_ci_parser'
 
 # The command generates the repository configuration
@@ -37,7 +36,6 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'maxscale_ci_docker' => 'maxscale_ci_docker',
     'clustrix' => 'clustrix',
     'mdbe_ci' => 'mdbe_ci',
-    'galera_enterprise_ci' => 'galera_enterprise_ci',
     'galera_3_enterprise' => 'galera_3_enterprise',
     'galera_4_enterprise' => 'galera_4_enterprise',
     'galera_3_community' => 'galera_3_community',
@@ -271,8 +269,6 @@ In order to specify the number of retries for repository configuration use --att
       MysqlParser.parse(product_config, @ui, @logger)
     when 'clustrix'
       ClustrixParser.parse(product_config)
-    when 'galera_enterprise_ci'
-      GaleraEnterpriseCiParser.parse(product_config, @env.mdbe_ci_config, @ui, @logger)
     when 'galera_3_enterprise'
       GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
     when 'galera_4_enterprise'

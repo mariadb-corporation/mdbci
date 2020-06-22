@@ -76,14 +76,6 @@ mdbe_ci:
     es_repo:
       path: https://es-repo.mariadb.net/jenkins/
       key: https://es-repo.mariadb.net/jenkins/MDBE.public
-galera_enterprise_ci:
-  repo:
-    rpm:
-      path: https://mdbe-ci-repo.mariadb.net/Galera-ES/
-      key: https://mdbe-ci-repo.mariadb.net/MDBE.public
-    deb:
-      path: https://mdbe-ci-repo.mariadb.net/Galera-ES/
-      key: https://mdbe-ci-repo.mariadb.net/MDBE.public
 galera_3_community:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera3/
