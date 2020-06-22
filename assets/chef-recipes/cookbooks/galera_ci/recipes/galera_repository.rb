@@ -1,16 +1,7 @@
-if !node['galera_3_community'].nil?
-  repo = node['galera_3_community']['repo']
-  repo_key = node['galera_3_community']['repo_key']
-elsif !node['galera_4_community'].nil?
-  repo = node['galera_4_community']['repo']
-  repo_key = node['galera_4_community']['repo_key']
-elsif !node['galera_3_enterprise'].nil?
-  repo = node['galera_3_enterprise']['repo']
-  repo_key = node['galera_3_enterprise']['repo_key']
-elsif !node['galera_4_enterprise'].nil?
-  repo = node['galera_4_enterprise']['repo']
-  repo_key = node['galera_4_enterprise']['repo_key']
-end
+all_versions = %w[galera_3_community galera_4_community galera_3_enterprise galera_4_enterprise]
+current_version = all_versions.find { |version| node.attribute?(version) }
+repo = node[current_version]['repo']
+repo_key = node[current_version]['repo_key']
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
