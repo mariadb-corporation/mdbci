@@ -6,7 +6,7 @@ repo_key = node[current_version]['repo_key']
 case node[:platform_family]
 when 'debian', 'ubuntu'
   repo_uri, repo_distribution = repo.split(/\s+/)
-  apt_repository 'mariadb' do
+  apt_repository 'galera' do
     uri repo_uri
     distribution repo_distribution
     keyserver 'keyserver.ubuntu.com'
@@ -16,13 +16,13 @@ when 'debian', 'ubuntu'
   end
   apt_update
 when 'rhel'
-  yum_repository 'mariadb' do
+  yum_repository 'galera' do
     baseurl repo
     gpgkey repo_key
     sensitive true
   end
 when 'sles', 'suse', 'opensuse', nil
-  zypper_repository 'mariadb' do
+  zypper_repository 'galera' do
     action :remove
   end
   remote_file File.join('tmp', 'rpm.key') do
@@ -32,12 +32,12 @@ when 'sles', 'suse', 'opensuse', nil
   execute 'Import rpm key' do
     command 'rpm --import /tmp/rpm.key && rm -f /tmp/rpm.key'
   end
-  zypper_repository 'mariadb' do
+  zypper_repository 'galera' do
     action :add
     baseurl repo
     sensitive true
   end
-  zypper_repository 'MariaDB' do
+  zypper_repository 'galera' do
     action :refresh
   end
 end

@@ -159,6 +159,21 @@ module ProductAttributes
     'mdbe_plugin_xpand' => 'mdbe_ci'
   }.freeze
 
+  ORDER = {
+    'galera_3_enterprise' => 'mdbe_ci',
+    'galera_4_enterprise' => 'mdbe_ci'
+  }.freeze
+
+  # Check whether the product is first in the queue
+  def self.first_in_order?(product)
+    ORDER.key?(product)
+  end
+
+  # Get the next product from the queue
+  def self.second_in_order(product)
+    ORDER[product]
+  end
+
   # Get the reverse product name for the product
   def self.reverse_product(product)
     PRODUCT_ATTRIBUTES.dig(product, :reverse_product)
