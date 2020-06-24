@@ -1,6 +1,11 @@
 require 'shellwords'
 
-include_recipe "mariadb::mdbcrepos"
+if node['mariadb']['repo_key'].include?('MDBE.public')
+  include_recipe 'mariadb::mdberepos'
+  include_recipe 'galera_ci::galera_repository'
+else
+  include_recipe 'mariadb::mdbcrepos'
+end
 include_recipe "chrony::default"
 
 system 'echo Platform family: '+node[:platform_family]
