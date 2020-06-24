@@ -142,6 +142,57 @@ module ProductAttributes
         recipe: 'galera_ci::galera_4_community',
         name: 'galera_4_community',
         repository: 'galera_4_community'
+    },
+    'mariadb_ci' => {
+        recipe: 'mariadb::install_community',
+        name: 'mariadb',
+        repository: 'mariadb_ci',
+        files_location: 'cookbooks/mariadb/files',
+        reverse_product: 'mariadb_remove'
+    },
+    'mariadb_plugin_columnstore' => {
+        recipe: 'mdbe_plugins::columnstore',
+        name: 'columnstore'
+    },
+    'mariadb_plugin_connect' => {
+        recipe: 'mdbe_plugins::connect',
+        name: 'connect'
+    },
+    'mariadb_plugin_cracklib_password_check' => {
+        recipe: 'mdbe_plugins::cracklib_password_check',
+        name: 'cracklib_password_check'
+    },
+    'mariadb_plugin_gssapi_client' => {
+        recipe: 'mdbe_plugins::gssapi_client',
+        name: 'gssapi_client'
+    },
+    'mariadb_plugin_gssapi_server' => {
+        recipe: 'mdbe_plugins::gssapi_server',
+        name: 'gssapi_server'
+    },
+    'mariadb_plugin_mariadb_test' => {
+        recipe: 'mdbe_plugins::mariadb_test',
+        name: 'mariadb_test'
+    },
+    'mariadb_plugin_mroonga' => {
+        recipe: 'mdbe_plugins::mroonga',
+        name: 'mroonga'
+    },
+    'mariadb_plugin_oqgraph' => {
+        recipe: 'mdbe_plugins::oqgraph',
+        name: 'oqgraph'
+    },
+    'mariadb_plugin_rocksdb' => {
+        recipe: 'mdbe_plugins::rocksdb',
+        name: 'rocksdb'
+    },
+    'mariadb_plugin_spider' => {
+        recipe: 'mdbe_plugins::spider',
+        name: 'spider'
+    },
+    'mariadb_plugin_xpand' => {
+        recipe: 'mdbe_plugins::xpand',
+        name: 'xpand'
     }
   }.freeze
 
@@ -156,7 +207,18 @@ module ProductAttributes
     'mdbe_plugin_oqgraph' => 'mdbe_ci',
     'mdbe_plugin_rocksdb' => 'mdbe_ci',
     'mdbe_plugin_spider' => 'mdbe_ci',
-    'mdbe_plugin_xpand' => 'mdbe_ci'
+    'mdbe_plugin_xpand' => 'mdbe_ci',
+    'mariadb_plugin_columnstore' => 'mariadb_ci',
+    'mariadb_plugin_connect' => 'mariadb_ci',
+    'mariadb_plugin_cracklib_password_check' => 'mariadb_ci',
+    'mariadb_plugin_gssapi_client' => 'mariadb_ci',
+    'mariadb_plugin_gssapi_server' => 'mariadb_ci',
+    'mariadb_plugin_mariadb_test' => 'mariadb_ci',
+    'mariadb_plugin_mroonga' => 'mariadb_ci',
+    'mariadb_plugin_oqgraph' => 'mariadb_ci',
+    'mariadb_plugin_rocksdb' => 'mariadb_ci',
+    'mariadb_plugin_spider' => 'mariadb_ci',
+    'mariadb_plugin_xpand' => 'mariadb_ci'
   }.freeze
 
   # Get the reverse product name for the product
