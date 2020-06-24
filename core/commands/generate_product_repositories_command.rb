@@ -21,7 +21,6 @@ require_relative 'generate_repository_partials/columnstore_parser'
 require_relative 'generate_repository_partials/mysql_parser'
 require_relative 'generate_repository_partials/clustrix_parser'
 require_relative 'generate_repository_partials/galera_ci_parser'
-require_relative 'generate_repository_partials/mariadb_ci_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -40,8 +39,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'galera_3_enterprise' => 'galera_3_enterprise',
     'galera_4_enterprise' => 'galera_4_enterprise',
     'galera_3_community' => 'galera_3_community',
-    'galera_4_community' => 'galera_4_community',
-    'mariadb_ci' => 'mariadb_ci'
+    'galera_4_community' => 'galera_4_community'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -279,8 +277,6 @@ In order to specify the number of retries for repository configuration use --att
       GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_3_community', @ui, @logger)
     when 'galera_4_community'
       GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_4_community', @ui, @logger)
-    when 'mariadb_ci'
-      MariadbCiParser.parse(product_config, @env.mdbe_ci_config, @ui, @logger)
     end
   end
 

@@ -92,7 +92,3 @@ galera_4_enterprise:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera4Enterprise/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
-mariadb_ci:
-  repo:
-    path: https://mdbe-ci-repo.mariadb.net/MariaDBServerCommunity/
-    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
