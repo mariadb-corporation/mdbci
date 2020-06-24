@@ -1,12 +1,8 @@
-case node[:platform_family]
-when 'debian', 'ubuntu'
-  galera_installed = File.exist?('/etc/apt/sources.list.d/galera.list')
-when 'rhel', 'centos'
-  galera_installed = File.exist?('/etc/yum.repos.d/galera.repo')
+if node['galera_3_enterprise'].nil? && node['galera_4_enterprise'].nil?
+  include_recipe "mariadb::galerarepos"
 else
-  galera_installed = File.exist?('/etc/zypp/repos.d/galera.repo')
+  include_recipe "galera_ci::galera_repository"
 end
-include_recipe "mariadb::galerarepos" unless galera_installed
 include_recipe "mariadb::mdberepos"
 include_recipe "chrony::default"
 

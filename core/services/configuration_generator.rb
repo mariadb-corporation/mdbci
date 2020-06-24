@@ -160,7 +160,7 @@ class ConfigurationGenerator
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box, registry)
-    products = extend_template(products)
+    extend_template(products)
     generate_registry(registry, name, products)
     recipes_result = init_product_configs_and_recipes(box, name, registry)
     return recipes_result if recipes_result.error?
@@ -189,36 +189,12 @@ class ConfigurationGenerator
 
   # Add all required product dependencies
   def extend_template(products)
-    products = make_right_order(products)
     dependences = create_dependences(products)
     main_products = create_main_products(products)
     products.delete_if do |product|
       ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
     end
     products.concat(dependences).concat(main_products)
-  end
-
-  # Make the correct product queue
-  def make_right_order(products)
-    products_in_order = []
-    products.each do |product|
-      products_in_order << product
-      next unless ProductAttributes.first_in_order?(product['name'])
-
-      product = get_product(products, ProductAttributes.second_in_order(product['name']))
-      products_in_order.delete_if do |removing_product|
-        removing_product == product
-      end
-      products_in_order << product
-    end
-    products_in_order.uniq.compact
-  end
-
-  def get_product(products, name)
-    products.each do |product|
-      return product if product['name'] == name
-    end
-    nil
   end
 
   # Create a dependency list
