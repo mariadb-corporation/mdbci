@@ -41,7 +41,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'galera_4_enterprise' => 'galera_4_enterprise',
     'galera_3_community' => 'galera_3_community',
     'galera_4_community' => 'galera_4_community',
-    'mariadb_ci' => 'mariadb_ci'
+    'mariadb_ci' => 'mariadb_ci',
+    'mdbe_staging' => 'mdbe_staging'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -262,7 +263,7 @@ In order to specify the number of retries for repository configuration use --att
     when 'maxscale'
       MaxscaleParser.parse(product_config, @ui, @logger)
     when 'mdbe'
-      MdbeParser.parse(product_config, @env.mdbe_private_key)
+      MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
       MariadbParser.parse(product_config, @ui, @logger)
     when 'columnstore'
@@ -281,6 +282,8 @@ In order to specify the number of retries for repository configuration use --att
       GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_4_community', @ui, @logger)
     when 'mariadb_ci'
       MariadbCiParser.parse(product_config, @env.mdbe_ci_config, @ui, @logger)
+    when 'mdbe_staging'
+      MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
     end
   end
 
