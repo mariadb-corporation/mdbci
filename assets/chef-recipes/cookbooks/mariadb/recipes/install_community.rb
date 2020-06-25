@@ -1,6 +1,6 @@
 require 'shellwords'
 
-if node['mariadb']['repo_key'].include?('MDBE.public')
+if node['mariadb']['repo'].include?('mdbe-ci-repo.mariadb.net')
   include_recipe 'mariadb::mdberepos'
   include_recipe 'galera_ci::galera_repository'
 else
