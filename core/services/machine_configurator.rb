@@ -165,7 +165,7 @@ class MachineConfigurator
 
   # Determine the method to download Chef installation script: wget or curl
   def prepare_appimage_download_command(connection, chef_version, logger)
-    appimage_url = "http://max-tst-01.mariadb.com/ci-repository/chef-solo-#{chef_version}.glibc-x86_64.AppImage"
+    appimage_url = "https://mdbe-ci-repo.mariadb.net/MDBCI/chef-solo-#{chef_version}.glibc-x86_64.AppImage"
     result = ssh_exec(connection, 'which wget', logger)
     if result.success?
       "wget -q #{appimage_url} --output-document /tmp/chef-solo"
