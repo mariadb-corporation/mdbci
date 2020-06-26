@@ -5,7 +5,7 @@ require_relative 'base_command'
 require_relative '../services/shell_commands'
 
 VAGRANT_VERSION = '2.2.7'
-VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.0.45'
+VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.1.2'
 VAGRANT_AWS_PLUGIN_VERSION = '0.7.2'
 
 TERRAFORM_VERSION = '0.12.27'
