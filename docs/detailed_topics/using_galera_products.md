@@ -15,11 +15,11 @@ You need to select the Galera type and Galera version to install Galera.
         "node" : {
                 "hostname" : "hostname",
                 "box" : "box_name",
-		        "products":[
-			        {
-				         "name": "galera_4_community",
-				         "version": "mariadb-4.x"
-			        }
+		            "products":[
+			              {
+				                "name": "galera_4_community",
+				                "version": "mariadb-4.x"
+			              }
                 ]
         }
 }
