@@ -8,7 +8,7 @@ VAGRANT_VERSION = '2.2.7'
 VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.0.45'
 VAGRANT_AWS_PLUGIN_VERSION = '0.7.2'
 
-TERRAFORM_VERSION = '0.12.11'
+TERRAFORM_VERSION = '0.12.27'
 TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
 
 # Command installs reqired dependencies for running mdbci
