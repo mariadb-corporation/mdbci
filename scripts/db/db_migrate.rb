@@ -1,21 +1,22 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-if ARGV.length != 2
+if ARGV.length != 3
   puts <<-EOF
 Usage:
-  db_migrate USER PASSWORD
-  
+  db_migrate HOST USER PASSWORD
+
+  HOST: The location of the database.
   USER: The database username.
   PASSWORD: The database password.
   EOF
   exit 0
 end
 
+HOST = ARGV.shift
 USER = ARGV.shift
 PASSWORD = ARGV.shift
 
-HOST = 'localhost'
 PORT = '3306'
 DB_NAME = 'test_results_db'
 
