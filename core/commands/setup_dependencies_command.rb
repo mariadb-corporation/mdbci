@@ -6,7 +6,6 @@ require_relative '../services/shell_commands'
 
 VAGRANT_VERSION = '2.2.9'
 VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.1.2'
-VAGRANT_AWS_PLUGIN_VERSION = '0.7.2'
 
 TERRAFORM_VERSION = '0.12.27'
 TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
@@ -25,7 +24,7 @@ class SetupDependenciesCommand < BaseCommand
 
 First it installs Vagrant and suited libvirt development library using native distribution package manager.
 
-Then it installs 'vagrant-libvirt' and 'vagrant-aws' plugins for Vagrant.
+Then it installs 'vagrant-libvirt' plugin for Vagrant.
 
 After that 'default' VM pool created for libvirt and the current user added to the libvirt user group.
 
