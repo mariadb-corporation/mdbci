@@ -56,6 +56,7 @@ class NetworkSettings
   def store_network_configuration(configuration)
     store_network_settings(configuration)
     store_labels_information(configuration)
+    generate_ssh_configuration(configuration)
   end
 
   private
@@ -76,6 +77,15 @@ class NetworkSettings
       nodes.all? { |node| @settings.key?(node) }
     end.keys
     File.write(configuration.labels_information_file, active_labels.sort.join(','))
+  end
+
+  def generate_ssh_configuration(configuration)
+    @settings.each do |key, value|
+      template = File.expand_path("#{key}_ssh_file", configuration.path)
+      File.write(template,
+                 "ssh -i #{value['keyfile']} #{value['whoami']}@#{value['network']} -o \"UserKnownHostsFile=/dev/null\"")
+      FileUtils.chmod('u+x' , template)
+    end
   end
 
   # Parse INI document into a set of machine descriptions
