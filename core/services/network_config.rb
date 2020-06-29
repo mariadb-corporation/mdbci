@@ -75,6 +75,7 @@ class NetworkConfig
     File.write(@config.network_settings_file, ini_format)
     @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
     File.write(@config.labels_information_file, active_labels.sort.join(','))
+    generate_ssh_configuration
   end
 
   # Restores network configuration of nodes that were already brought up
@@ -84,6 +85,14 @@ class NetworkConfig
   end
 
   private
+
+  def generate_ssh_configuration
+    @config.node_configurations.each_key do |key|
+      template = File.expand_path("#{key}_ssh_file", @config.path)
+      File.write(template, "vagrant ssh #{key}")
+      FileUtils.chmod('u+x' , template)
+    end
+  end
 
   # Split list of nodes between running and halt ones
   #
