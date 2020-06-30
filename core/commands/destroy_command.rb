@@ -84,6 +84,8 @@ Labels should be separated with commas, do not contain any whitespaces.
     FileUtils.rm_f(configuration.network_settings_file)
     @ui.info("Removing label information file #{configuration.labels_information_file}")
     FileUtils.rm_f(configuration.labels_information_file)
+    @ui.info("Removing SSH file #{configuration.ssh_file}")
+    FileUtils.rm_f(configuration.ssh_file)
     return if keep_template || configuration.template_path.nil?
 
     @ui.info("Removing template file #{configuration.template_path}")

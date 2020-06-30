@@ -59,6 +59,13 @@ class NetworkSettings
     generate_ssh_configuration(configuration)
   end
 
+  def self.generate_ssh_content(name, network, whoami, keyfile)
+    "Host #{name}
+    HostName #{network}
+    User #{whoami}
+    IdentityFile #{keyfile}"
+  end
+
   private
 
   def store_network_settings(configuration)
@@ -80,12 +87,11 @@ class NetworkSettings
   end
 
   def generate_ssh_configuration(configuration)
+    contents = []
     @settings.each do |key, value|
-      template = File.expand_path("#{key}_ssh_file", configuration.path)
-      File.write(template,
-                 "ssh -i #{value['keyfile']} #{value['whoami']}@#{value['network']} -o \"UserKnownHostsFile=/dev/null\"")
-      FileUtils.chmod('u+x' , template)
+      contents << self.class.generate_ssh_content(key, value['network'], value['whoami'], value['keyfile'])
     end
+    File.write(configuration.ssh_file, contents.join("\n"))
   end
 
   # Parse INI document into a set of machine descriptions
