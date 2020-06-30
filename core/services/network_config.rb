@@ -2,6 +2,8 @@
 
 require_relative '../node'
 require_relative 'vagrant_service'
+require_relative '../models/configuration'
+require_relative '../models/network_settings'
 require 'stringio'
 
 # Network configurator for vagrant nodes
@@ -75,6 +77,7 @@ class NetworkConfig
     File.write(@config.network_settings_file, ini_format)
     @ui.info("Generating labels information file, '#{@config.labels_information_file}'")
     File.write(@config.labels_information_file, active_labels.sort.join(','))
+    @ui.info("Generating SSH file, '#{@config.ssh_file}'")
     generate_ssh_configuration
   end
 
@@ -87,11 +90,11 @@ class NetworkConfig
   private
 
   def generate_ssh_configuration
-    @config.node_configurations.each_key do |key|
-      template = File.expand_path("#{key}_ssh_file", @config.path)
-      File.write(template, "vagrant ssh #{key}")
-      FileUtils.chmod('u+x' , template)
+    contents = []
+    @nodes.each_key do |key|
+      contents << NetworkSettings.generate_ssh_content(key, get_network(key), get_whoami(key), get_keyfile(key))
     end
+    File.write(@config.ssh_file, contents.join("\n"))
   end
 
   # Split list of nodes between running and halt ones

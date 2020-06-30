@@ -14,6 +14,7 @@ class Configuration
 
   NETWORK_FILE_SUFFIX = '_network_config'
   LABELS_INFO_FILE_SUFFIX = '_configured_labels'
+  SSH_FILE_SUFFIX = '_ssh_config'
 
   # Checks whether provided path is a directory containing configurations.
   #
@@ -157,6 +158,10 @@ class Configuration
   # Provide a path to the network settings configuration file.
   def network_settings_file
     "#{@path}#{NETWORK_FILE_SUFFIX}"
+  end
+
+  def ssh_file
+    "#{@path}#{SSH_FILE_SUFFIX}"
   end
 
   # Provide a path to the configured label information file.
