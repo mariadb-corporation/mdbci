@@ -6,21 +6,21 @@ require_relative 'repository_parser_core'
 module MaxscaleParser
   extend RepositoryParserCore
 
-  def self.parse(config, log, logger)
+  def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm'], log, logger))
-    releases.concat(parse_maxscale_deb_repository(config['repo']['deb'], log, logger))
+    releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm'], product_version, log, logger))
+    releases.concat(parse_maxscale_deb_repository(config['repo']['deb'], product_version, log, logger))
     releases
   end
 
-  def self.parse_maxscale_rpm_repository(config, log, logger)
+  def self.parse_maxscale_rpm_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'maxscale',
       %w[maxscale],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version),
+      save_as_field(:version, right_data: product_version),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       append_url(%w[x86_64]),
@@ -31,14 +31,14 @@ module MaxscaleParser
     )
   end
 
-  def self.parse_maxscale_deb_repository(config, log, logger)
+  def self.parse_maxscale_deb_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'maxscale',
       %w[maxscale],
       ->(url) { "#{url}main/binary-amd64/" },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version),
+      save_as_field(:version, right_data: product_version),
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),

@@ -6,35 +6,35 @@ require_relative 'repository_parser_core'
 module MdbeCiParser
   extend RepositoryParserCore
 
-  def self.parse(config, mdbe_ci_config, log, logger)
+  def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
 
     auth_mdbe_ci_repo = mdbe_ci_config['mdbe_ci_repo']
     auth_es_repo = mdbe_ci_config['es_repo']
     releases = []
     releases.concat(
-      parse_mdbe_ci_rpm_repository(config['repo']['mdbe_ci_repo'], auth_mdbe_ci_repo, log, logger)
+      parse_mdbe_ci_rpm_repository(config['repo']['mdbe_ci_repo'], product_version, auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
-      parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], auth_mdbe_ci_repo, log, logger)
+      parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], product_version, auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
-      parse_mdbe_ci_es_repo_rpm_repository(config['repo']['es_repo'], auth_es_repo, log, logger)
+      parse_mdbe_ci_es_repo_rpm_repository(config['repo']['es_repo'], product_version, auth_es_repo, log, logger)
     )
     releases.concat(
-      parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], auth_es_repo, log, logger)
+      parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], product_version, auth_es_repo, log, logger)
     )
     releases
   end
 
-  def self.parse_mdbe_ci_rpm_repository(config, auth, log, logger)
+  def self.parse_mdbe_ci_rpm_repository(config, product_version, auth, log, logger)
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[MariaDB-client MariaDB-server],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version),
+      save_as_field(:version, right_data: product_version),
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -45,13 +45,13 @@ module MdbeCiParser
     )
   end
 
-  def self.parse_mdbe_ci_deb_repository(config, auth, log, logger)
+  def self.parse_mdbe_ci_deb_repository(config, product_version, auth, log, logger)
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[mariadb-client mariadb-server],
       ->(url) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
-      save_as_field(:version),
+      save_as_field(:version, right_data: product_version),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
       extract_deb_platforms,
@@ -74,12 +74,12 @@ module MdbeCiParser
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 
-  def self.parse_mdbe_ci_es_repo_rpm_repository(config, auth, log, logger)
+  def self.parse_mdbe_ci_es_repo_rpm_repository(config, product_version, auth, log, logger)
     parse_repository_recursive(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[MariaDB-client MariaDB-server], ->(url) { url },
       ->(package, _) { /#{package}/ }, log, logger,
-      { lambda: append_to_field(:version),
+      { lambda: append_to_field(:version, right_data: product_version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
       { lambda: append_url(%w[RPMS]) },
       { lambda: add_platform_and_version(:rpm) },
@@ -91,13 +91,13 @@ module MdbeCiParser
     )
   end
 
-  def self.parse_mdbe_ci_es_repo_deb_repository(config, auth, log, logger)
+  def self.parse_mdbe_ci_es_repo_deb_repository(config, product_version, auth, log, logger)
     parse_repository_recursive(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
       %w[mariadb-client mariadb-server],
       ->(url) { url },
       ->(package, _) { /#{package}/ }, log, logger,
-      { lambda: append_to_field(:version),
+      { lambda: append_to_field(:version, right_data: product_version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
       { lambda: append_url(%w[DEB]) },
       { lambda: add_platform_and_version(:deb) },

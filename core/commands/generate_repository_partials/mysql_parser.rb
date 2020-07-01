@@ -6,14 +6,14 @@ require_relative 'repository_parser_core'
 module MysqlParser
   extend RepositoryParserCore
 
-  def self.parse(config, log, logger)
+  def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], log, logger))
-    releases.concat(parse_mysql_deb_repository(config['repo']['deb'], log, logger))
+    releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], product_version, log, logger))
+    releases.concat(parse_mysql_deb_repository(config['repo']['deb'], product_version, log, logger))
     releases
   end
 
-  def self.parse_mysql_deb_repository(config, log, logger)
+  def self.parse_mysql_deb_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mysql', %w[mysql],
       ->(url) { generate_mysql_url(url) },
@@ -22,7 +22,7 @@ module MysqlParser
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
-      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}, right_data: product_version),
       lambda do |release, _|
         release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]}"\
                        " mysql-#{release[:version]}"
@@ -33,13 +33,13 @@ module MysqlParser
 
   # Method parses MySQL repositories that correspond to the following scheme:
   # http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
-  def self.parse_mysql_rpm_repository(config, log, logger)
+  def self.parse_mysql_rpm_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mysql', %w[mysql],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}, right_data: product_version),
       split_rpm_platforms,
       save_as_field(:platform_version),
       append_url(%w[x86_64], :repo),

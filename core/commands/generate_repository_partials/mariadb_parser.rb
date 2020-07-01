@@ -6,25 +6,25 @@ require_relative 'repository_parser_core'
 module MariadbParser
   extend RepositoryParserCore
 
-  def self.parse(config, log, logger)
+  def self.parse(config, product_version, log, logger)
     releases = []
     version_regexp = %r{^(\p{Digit}+\.\p{Digit}+(\.\p{Digit}+)?)\/?$}
     releases.concat(
-      parse_mariadb_rpm_repository(config['repo']['rpm'], 'mariadb', version_regexp, log, logger)
+      parse_mariadb_rpm_repository(config['repo']['rpm'], product_version, 'mariadb', version_regexp, log, logger)
     )
     releases.concat(
-      parse_mariadb_deb_repository(config['repo']['deb'], 'mariadb', version_regexp, log, logger)
+      parse_mariadb_deb_repository(config['repo']['deb'], product_version, 'mariadb', version_regexp, log, logger)
     )
     releases
   end
 
-  def self.parse_mariadb_rpm_repository(config, product, version_regexp, log, logger)
+  def self.parse_mariadb_rpm_repository(config, product_version, product, version_regexp, log, logger)
     parse_repository(
       config['path'], nil, config['key'], product, %w[MariaDB-client MariaDB-server],
       ->(url) { "#{url}rpms/" },
       ->(package, _) { /#{package}/ },
       log, logger,
-      extract_field(:version, version_regexp),
+      extract_field(:version, version_regexp, right_data: product_version),
       append_url(%w[centos rhel sles opensuse], :platform),
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       append_url(%w[x86_64]),
@@ -35,13 +35,13 @@ module MariadbParser
     )
   end
 
-  def self.parse_mariadb_deb_repository(config, product, version_regexp, log, logger)
+  def self.parse_mariadb_deb_repository(config, product_version, product, version_regexp, log, logger)
     parse_repository(
       config['path'], nil, config['key'], product, %w[mariadb-client mariadb-server],
       ->(url) { generate_mariadb_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ },
       log, logger,
-      extract_field(:version, version_regexp),
+      extract_field(:version, version_regexp, right_data: product_version),
       save_as_field(:platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
