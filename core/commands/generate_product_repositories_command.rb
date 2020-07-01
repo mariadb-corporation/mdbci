@@ -255,33 +255,33 @@ In order to specify the number of retries for repository configuration use --att
   def parse_repository(product, product_config)
     case product
     when 'mdbe_ci'
-      MdbeCiParser.parse(product_config, @env.mdbe_ci_config, @ui, @logger)
+      MdbeCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'maxscale_ci'
-      MaxscaleCiParser.parse(product_config, @env.mdbe_ci_config, @ui, @logger)
+      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'maxscale_ci_docker'
       MaxscaleCiDockerParser.parse(@ui, @env.tool_config)
     when 'maxscale'
-      MaxscaleParser.parse(product_config, @ui, @logger)
+      MaxscaleParser.parse(product_config, @product_version, @ui, @logger)
     when 'mdbe'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
-      MariadbParser.parse(product_config, @ui, @logger)
+      MariadbParser.parse(product_config, @product_version, @ui, @logger)
     when 'columnstore'
-      ColumnstoreParser.parse(product_config, @ui, @logger)
+      ColumnstoreParser.parse(product_config, @product_version, @ui, @logger)
     when 'mysql'
-      MysqlParser.parse(product_config, @ui, @logger)
+      MysqlParser.parse(product_config, @product_version, @ui, @logger)
     when 'clustrix'
       ClustrixParser.parse(product_config)
     when 'galera_3_enterprise'
-      GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
     when 'galera_4_enterprise'
-      GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_4_enterprise', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_4_enterprise', @ui, @logger)
     when 'galera_3_community'
-      GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_3_community', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_community', @ui, @logger)
     when 'galera_4_community'
-      GaleraCiParser.parse(product_config, @env.mdbe_ci_config, 'galera_4_community', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_4_community', @ui, @logger)
     when 'mariadb_ci'
-      MariadbCiParser.parse(product_config, @env.mdbe_ci_config, @ui, @logger)
+      MariadbCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'mdbe_staging'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
     end

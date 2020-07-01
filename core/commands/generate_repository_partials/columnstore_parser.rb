@@ -6,20 +6,20 @@ require_relative 'repository_parser_core'
 module ColumnstoreParser
   extend RepositoryParserCore
 
-  def self.parse(config, log, logger)
+  def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_columnstore_rpm_repository(config['repo']['rpm'], log, logger))
-    releases.concat(parse_columnstore_deb_repository(config['repo']['deb'], log, logger))
+    releases.concat(parse_columnstore_rpm_repository(config['repo']['rpm'], product_version, log, logger))
+    releases.concat(parse_columnstore_deb_repository(config['repo']['deb'], product_version, log, logger))
     releases
   end
 
-  def self.parse_columnstore_rpm_repository(config, log, logger)
+  def self.parse_columnstore_rpm_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'columnstore', %w[mariadb-columnstore],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version),
+      save_as_field(:version, right_data: product_version),
       append_url(%w[yum]),
       split_rpm_platforms,
       save_as_field(:platform_version),
@@ -31,13 +31,13 @@ module ColumnstoreParser
     )
   end
 
-  def self.parse_columnstore_deb_repository(config, log, logger)
+  def self.parse_columnstore_deb_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'columnstore', %w[mariadb-columnstore],
       ->(url) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version),
+      save_as_field(:version, right_data: product_version),
       append_url(%w[repo]),
       extract_field(:platform, %r{^(\p{Alpha}+)\p{Digit}+\/?$}, true),
       append_url(%w[dists]),

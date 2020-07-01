@@ -9,9 +9,11 @@ module RepositoryParserCore
   # Save all values that present in current level as field contents
   # @param field [Symbol] field to save data to
   # @param save_path [Boolean] whether to save path to :repo_url field or not
-  def save_as_field(field, save_path = false)
+  def save_as_field(field, save_path = false, right_data: nil)
     lambda do |release, links|
       links.map do |link|
+        next if !right_data.nil? && link.content.delete('/') != right_data
+
         result = {
           link: link,
           field => link.content.delete('/')
@@ -102,12 +104,14 @@ module RepositoryParserCore
   # @param field [Symbol] name of the field to write result to
   # @param rexexp [RegExp] expression that should have first group designated to field extraction
   # @param save_path [Boolean] whether to save current path to the release or not
-  def extract_field(field, regexp, save_path = false)
+  def extract_field(field, regexp, save_path = false, right_data: nil)
     lambda do |release, links|
       possible_releases = links.select do |link|
         link.content =~ regexp
       end
       possible_releases.map do |link|
+        next if !right_data.nil? && link.content.match(regexp).captures.first != right_data
+
         result = {
           link: link,
           field => link.content.match(regexp).captures.first
@@ -213,7 +217,7 @@ module RepositoryParserCore
     next_releases = step.call(release, links)
     next_releases = [next_releases] unless next_releases.is_a?(Array)
     # Merge processing results into a new array
-    next_releases.map do |next_release|
+    next_releases.compact.map do |next_release|
       result = release.merge(next_release)
       if result.key?(:link)
         result[:url] = "#{release[:url]}#{next_release[:link][:href]}"
@@ -309,9 +313,11 @@ module RepositoryParserCore
 
   # Append all values that present in current level to fields
   # @param field [Symbol] field to save data to
-  def append_to_field(field)
+  def append_to_field(field, right_data: nil)
     lambda do |release, links|
       links.map do |link|
+        next if !right_data.nil? && !right_data.include?(link.content.delete('/'))
+
         release.clone.merge({ link: link,
                               field => release.fetch(field, []) + [link.content.delete('/')] })
       end

@@ -6,24 +6,24 @@ require_relative 'repository_parser_core'
 module GaleraCiParser
   extend RepositoryParserCore
 
-  def self.parse(config, mdbe_ci_config, galera_version, log, logger)
+  def self.parse(config, product_version, mdbe_ci_config, galera_version, log, logger)
     return [] if mdbe_ci_config.nil?
 
     auth_mdbe_ci_repo = mdbe_ci_config['mdbe_ci_repo']
     releases = []
-    releases.concat(parse_galera_ci_rpm_repository(config['repo'], auth_mdbe_ci_repo, galera_version, log, logger))
-    releases.concat(parse_galera_ci_deb_repository(config['repo'], auth_mdbe_ci_repo, galera_version, log, logger))
+    releases.concat(parse_galera_ci_rpm_repository(config['repo'], product_version, auth_mdbe_ci_repo, galera_version, log, logger))
+    releases.concat(parse_galera_ci_deb_repository(config['repo'], product_version, auth_mdbe_ci_repo, galera_version, log, logger))
     releases
   end
 
-  def self.parse_galera_ci_rpm_repository(config, auth, galera_version, log, logger)
+  def self.parse_galera_ci_rpm_repository(config, product_version, auth, galera_version, log, logger)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), galera_version,
         %w[galera],
         ->(url) { url },
         ->(package, _) { /#{package}/ },
         log, logger,
-        save_as_field(:version),
+        save_as_field(:version, right_data: product_version),
         append_url(%w[yum]),
         split_rpm_platforms,
         extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -34,14 +34,14 @@ module GaleraCiParser
     )
   end
 
-  def self.parse_galera_ci_deb_repository(config, auth, galera_version, log, logger)
+  def self.parse_galera_ci_deb_repository(config, product_version, auth, galera_version, log, logger)
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), galera_version,
         %w[galera],
         ->(url) { generate_galera_ci_deb_full_url(url) },
         ->(package, platform) { /#{package}.*#{platform}/ },
         log, logger,
-        save_as_field(:version),
+        save_as_field(:version, right_data: product_version),
         append_url(%w[apt], nil, true),
         append_url(%w[dists]),
         extract_deb_platforms,
