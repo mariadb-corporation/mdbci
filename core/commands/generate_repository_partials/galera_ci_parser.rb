@@ -18,12 +18,12 @@ module GaleraCiParser
 
   def self.parse_galera_ci_rpm_repository(config, product_version, auth, galera_version, log, logger)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['key'], auth), galera_version,
+        config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
         %w[galera],
         ->(url) { url },
         ->(package, _) { /#{package}/ },
         log, logger,
-        save_as_field(:version, right_data: product_version),
+        save_as_field(:version),
         append_url(%w[yum]),
         split_rpm_platforms,
         extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -36,12 +36,12 @@ module GaleraCiParser
 
   def self.parse_galera_ci_deb_repository(config, product_version, auth, galera_version, log, logger)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['key'], auth), galera_version,
+        config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
         %w[galera],
         ->(url) { generate_galera_ci_deb_full_url(url) },
         ->(package, platform) { /#{package}.*#{platform}/ },
         log, logger,
-        save_as_field(:version, right_data: product_version),
+        save_as_field(:version),
         append_url(%w[apt], nil, true),
         append_url(%w[dists]),
         extract_deb_platforms,

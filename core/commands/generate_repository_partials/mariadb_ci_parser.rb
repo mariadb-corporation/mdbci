@@ -22,12 +22,12 @@ module MariadbCiParser
 
   def self.parse_mariadb_ci_rpm_repository(config, product_version, auth, log, logger)
     parse_repository(
-      config['path'], auth, add_auth_to_url(config['key'], auth), 'mariadb_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mariadb_ci', product_version,
       %w[MariaDB-client MariaDB-server],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version, right_data: product_version),
+      save_as_field(:version),
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -40,11 +40,11 @@ module MariadbCiParser
 
   def self.parse_mariadb_ci_deb_repository(config, product_version, auth, log, logger)
     parse_repository(
-      config['path'], auth, add_auth_to_url(config['key'], auth), 'mariadb_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mariadb_ci', product_version,
       %w[mariadb-client mariadb-server],
       ->(url) { generate_mariadb_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
-      save_as_field(:version, right_data: product_version),
+      save_as_field(:version),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
       extract_deb_platforms,

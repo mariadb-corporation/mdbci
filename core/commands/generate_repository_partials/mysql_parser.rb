@@ -15,14 +15,14 @@ module MysqlParser
 
   def self.parse_mysql_deb_repository(config, product_version, log, logger)
     parse_repository(
-      config['path'], nil, config['key'], 'mysql', %w[mysql],
+      config['path'], nil, config['key'], 'mysql', product_version, %w[mysql],
       ->(url) { generate_mysql_url(url) },
       ->(package, _) { /#{package}/ },
       log, logger,
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
-      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}, right_data: product_version),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}),
       lambda do |release, _|
         release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]}"\
                        " mysql-#{release[:version]}"
@@ -35,11 +35,11 @@ module MysqlParser
   # http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
   def self.parse_mysql_rpm_repository(config, product_version, log, logger)
     parse_repository(
-      config['path'], nil, config['key'], 'mysql', %w[mysql],
+      config['path'], nil, config['key'], 'mysql', product_version, %w[mysql],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}, right_data: product_version),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
       split_rpm_platforms,
       save_as_field(:platform_version),
       append_url(%w[x86_64], :repo),

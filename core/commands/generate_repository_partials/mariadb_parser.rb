@@ -20,11 +20,11 @@ module MariadbParser
 
   def self.parse_mariadb_rpm_repository(config, product_version, product, version_regexp, log, logger)
     parse_repository(
-      config['path'], nil, config['key'], product, %w[MariaDB-client MariaDB-server],
+      config['path'], nil, config['key'], product, product_version, %w[MariaDB-client MariaDB-server],
       ->(url) { "#{url}rpms/" },
       ->(package, _) { /#{package}/ },
       log, logger,
-      extract_field(:version, version_regexp, right_data: product_version),
+      extract_field(:version, version_regexp),
       append_url(%w[centos rhel sles opensuse], :platform),
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       append_url(%w[x86_64]),
@@ -37,11 +37,11 @@ module MariadbParser
 
   def self.parse_mariadb_deb_repository(config, product_version, product, version_regexp, log, logger)
     parse_repository(
-      config['path'], nil, config['key'], product, %w[mariadb-client mariadb-server],
+      config['path'], nil, config['key'], product, product_version, %w[mariadb-client mariadb-server],
       ->(url) { generate_mariadb_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ },
       log, logger,
-      extract_field(:version, version_regexp, right_data: product_version),
+      extract_field(:version, version_regexp),
       save_as_field(:platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),

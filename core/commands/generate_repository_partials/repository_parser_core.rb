@@ -9,11 +9,9 @@ module RepositoryParserCore
   # Save all values that present in current level as field contents
   # @param field [Symbol] field to save data to
   # @param save_path [Boolean] whether to save path to :repo_url field or not
-  def save_as_field(field, save_path = false, right_data: nil)
+  def save_as_field(field, save_path = false)
     lambda do |release, links|
       links.map do |link|
-        next if !right_data.nil? && link.content.delete('/') != right_data
-
         result = {
           link: link,
           field => link.content.delete('/')
@@ -104,14 +102,12 @@ module RepositoryParserCore
   # @param field [Symbol] name of the field to write result to
   # @param rexexp [RegExp] expression that should have first group designated to field extraction
   # @param save_path [Boolean] whether to save current path to the release or not
-  def extract_field(field, regexp, save_path = false, right_data: nil)
+  def extract_field(field, regexp, save_path = false)
     lambda do |release, links|
       possible_releases = links.select do |link|
         link.content =~ regexp
       end
       possible_releases.map do |link|
-        next if !right_data.nil? && link.content.match(regexp).captures.first != right_data
-
         result = {
           link: link,
           field => link.content.match(regexp).captures.first
@@ -146,7 +142,7 @@ module RepositoryParserCore
 
   # Parse the repository and provide required configurations
   def parse_repository(
-    base_url, auth, key, product, packages, full_url, comparison_template, log, logger, *steps
+    base_url, auth, key, product, product_version, packages, full_url, comparison_template, log, logger, *steps
   )
     # Recursively go through the site and apply steps on each level
     result = steps.reduce([{ url: base_url }]) do |releases, step|
@@ -160,7 +156,7 @@ module RepositoryParserCore
         end
         apply_step_to_links(step, links, release)
       end
-      filter_releases(next_releases.flatten)
+      filter_releases(next_releases.flatten, product_version)
     end
     result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
     add_key_and_product_to_releases(result, key, product)
@@ -217,7 +213,7 @@ module RepositoryParserCore
     next_releases = step.call(release, links)
     next_releases = [next_releases] unless next_releases.is_a?(Array)
     # Merge processing results into a new array
-    next_releases.compact.map do |next_release|
+    next_releases.map do |next_release|
       result = release.merge(next_release)
       if result.key?(:link)
         result[:url] = "#{release[:url]}#{next_release[:link][:href]}"
@@ -229,13 +225,13 @@ module RepositoryParserCore
   end
 
   # Method filters releases, removing empty ones and by version, if it required
-  def filter_releases(releases)
+  def filter_releases(releases, product_version)
     next_releases = releases.reject(&:nil?)
     next_releases.select do |release|
-      if @product_version.nil? || release[:version].nil?
+      if product_version.nil? || release[:version].nil?
         true
       else
-        release[:version] == @product_version
+        release[:version] == product_version
       end
     end
   end
@@ -275,7 +271,7 @@ module RepositoryParserCore
   # Parse the repository and provide required configurations
   # @param [Array] steps - array of Hash in format { lambda, complete_condition }
   def parse_repository_recursive(
-    base_url, auth, key, product, packages, full_url, comparison_template, log, logger, *steps
+    base_url, auth, key, product, product_version, packages, full_url, comparison_template, log, logger, *steps
   )
     # Recursively go through the site and apply steps on each level
     result = steps.reduce([{ url: base_url }]) do |input_releases, step|
@@ -300,7 +296,7 @@ module RepositoryParserCore
             [release]
           end
         end
-        next_releases = filter_releases(next_releases.flatten)
+        next_releases = filter_releases(next_releases.flatten, product_version)
         completed_releases += next_releases.select { |release| release[:continue_step] == false }
         processed_releases = next_releases - completed_releases
         break if processed_releases.empty?
@@ -313,11 +309,9 @@ module RepositoryParserCore
 
   # Append all values that present in current level to fields
   # @param field [Symbol] field to save data to
-  def append_to_field(field, right_data: nil)
+  def append_to_field(field)
     lambda do |release, links|
       links.map do |link|
-        next if !right_data.nil? && !right_data.include?(link.content.delete('/'))
-
         release.clone.merge({ link: link,
                               field => release.fetch(field, []) + [link.content.delete('/')] })
       end
