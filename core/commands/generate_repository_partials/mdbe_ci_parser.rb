@@ -29,12 +29,12 @@ module MdbeCiParser
 
   def self.parse_mdbe_ci_rpm_repository(config, product_version, auth, log, logger)
     parse_repository(
-      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[MariaDB-client MariaDB-server],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version, right_data: product_version),
+      save_as_field(:version),
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -47,11 +47,11 @@ module MdbeCiParser
 
   def self.parse_mdbe_ci_deb_repository(config, product_version, auth, log, logger)
     parse_repository(
-      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
       ->(url) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
-      save_as_field(:version, right_data: product_version),
+      save_as_field(:version),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
       extract_deb_platforms,
@@ -76,10 +76,10 @@ module MdbeCiParser
 
   def self.parse_mdbe_ci_es_repo_rpm_repository(config, product_version, auth, log, logger)
     parse_repository_recursive(
-      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[MariaDB-client MariaDB-server], ->(url) { url },
       ->(package, _) { /#{package}/ }, log, logger,
-      { lambda: append_to_field(:version, right_data: product_version),
+      { lambda: append_to_field(:version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
       { lambda: append_url(%w[RPMS]) },
       { lambda: add_platform_and_version(:rpm) },
@@ -93,11 +93,11 @@ module MdbeCiParser
 
   def self.parse_mdbe_ci_es_repo_deb_repository(config, product_version, auth, log, logger)
     parse_repository_recursive(
-      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci',
+      config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
       ->(url) { url },
       ->(package, _) { /#{package}/ }, log, logger,
-      { lambda: append_to_field(:version, right_data: product_version),
+      { lambda: append_to_field(:version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
       { lambda: append_url(%w[DEB]) },
       { lambda: add_platform_and_version(:deb) },

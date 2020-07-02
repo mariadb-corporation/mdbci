@@ -15,12 +15,12 @@ module MaxscaleParser
 
   def self.parse_maxscale_rpm_repository(config, product_version, log, logger)
     parse_repository(
-      config['path'], nil, config['key'], 'maxscale',
+      config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
       ->(url) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version, right_data: product_version),
+      save_as_field(:version),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
       append_url(%w[x86_64]),
@@ -33,12 +33,12 @@ module MaxscaleParser
 
   def self.parse_maxscale_deb_repository(config, product_version, log, logger)
     parse_repository(
-      config['path'], nil, config['key'], 'maxscale',
+      config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
       ->(url) { "#{url}main/binary-amd64/" },
       ->(package, _) { /#{package}/ },
       log, logger,
-      save_as_field(:version, right_data: product_version),
+      save_as_field(:version),
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
