@@ -33,6 +33,7 @@ require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
 require_relative 'commands/remove_product_command'
 require_relative 'commands/check_relevance_command'
+require_relative 'commands/list_cloud_instances_command'
 
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
@@ -206,6 +207,9 @@ EOF
       exit_code = command.execute
     when 'install_product'
       command = InstallProduct.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'list_cloud_instances'
+      command = ListCloudInstancesCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'remove_product'
       command = RemoveProductCommand.new(ARGV, self, $out)

@@ -14,6 +14,7 @@ require_relative 'install_product_command'
 require_relative 'remove_product_command'
 require_relative 'provide_files'
 require_relative 'check_relevance_command'
+require_relative 'list_cloud_instances_command'
 
 # Command provides a documentation to the user on how to use the mdbci tool.
 class HelpCommand < BaseCommand
@@ -32,6 +33,7 @@ class HelpCommand < BaseCommand
     'generate-product-repositories' => GenerateProductRepositoriesCommand.synopsis,
     'help' => HelpCommand.synopsis,
     'install_product' => InstallProduct.synopsis,
+    'list_cloud_instances' => ListCloudInstancesCommand.synopsis,
     'remove_product' => RemoveProductCommand.synopsis,
     'provide-files' => ProvideFiles.synopsis,
     'public_keys' => 'Copy ssh keys to configured nodes.',
