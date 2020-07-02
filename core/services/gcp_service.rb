@@ -39,6 +39,23 @@ class GcpService
     end.map(&:name)
   end
 
+  # Fetch instances list and return instance names with time.
+  # @return [Array<{:name => String, :time => String}>] instance names and time.
+  def instances_list_with_time
+    return [] unless configured?
+
+    @service.fetch_all do |token|
+      @service.list_instances(
+        @gcp_config['project'], @gcp_config['zone'], page_token: token, order_by: 'creationTimestamp desc'
+      )
+    end.map do |instance|
+      {
+        name: instance.name,
+        time: instance.creation_timestamp
+      }
+    end
+  end
+
   # Checks for instance existence.
   # @param instance_name [String] instance name
   # @return [Boolean] true if instance exists.

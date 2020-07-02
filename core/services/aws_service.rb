@@ -52,7 +52,7 @@ class AwsService
   end
 
   # Get the instances list
-  # @return [Array] instances list in format [{ instance_id, node_name, configuration_id }]
+  # @return [Array] instances list in format [{ instance_id, node_name, configuration_id, launch_time }]
   def instances_list
     return [] unless configured?
 
@@ -62,7 +62,7 @@ class AwsService
 
         node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }&.fetch(:value, nil)
         configuration_id = instance[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
-        { instance_id: instance[:instance_id], node_name: node_name, configuration_id: configuration_id }
+        { instance_id: instance[:instance_id], node_name: node_name, configuration_id: configuration_id, launch_time: instance[:launch_time] }
       end
     end.flatten.compact
   end
