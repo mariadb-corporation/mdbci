@@ -63,7 +63,9 @@ class NetworkSettings
     "Host #{name}
     HostName #{network}
     User #{whoami}
-    IdentityFile #{keyfile}"
+    IdentityFile #{keyfile}
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null"
   end
 
   private
