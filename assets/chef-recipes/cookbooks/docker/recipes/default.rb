@@ -43,6 +43,9 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
   end
 elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on OpenSuse 15
   Chef::Log.warn(WARN_ABOUT_CURRENT_VERSION)
+  package 'libseccomp2' do
+    action :upgrade
+  end
   execute 'Install Docker CE' do
     # The current version is always installed
     command 'sudo zypper install -y docker'
