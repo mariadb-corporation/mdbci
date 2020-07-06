@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
+require 'xdg'
+require 'json'
+require 'yaml'
+require 'tty-table'
+
 require_relative 'base_command'
 require_relative '../services/aws_service'
 require_relative '../services/gcp_service'
 
 # Command shows list all active instances on Cloud Providers
 class ListCloudInstancesCommand < BaseCommand
-  HIDDEN_GCP_INSTANCES = %w[
-    max-gcloud-02
-    max-gcloud-01
-    mdbe-ci-repo
-    mariadbenterprise-buildbot
-  ].freeze
+  HIDDEN_GCP_INSTANCES_BY_USER = 'mdbci/hidden-gcp-instances.yaml'
+  HIDDEN_GCP_INSTANCES_BY_DEFAULT = '../../config/hidden-gcp-instances.yaml'
 
   def self.synopsis
     'Show list all active instances on Cloud Providers'
@@ -47,22 +48,41 @@ List cloud instances command shows a list of active machines on GCP and AWS prov
   end
 
   def show_aws_list
-    @ui.info('List all active instances on AWS:')
-    @ui.info("Launch time\t\t\t Node name\t Instance ID\t\t Configuration ID")
-    @env.aws_service.instances_list.sort do |first, second|
+    all_instance = @env.aws_service.instances_list.sort do |first, second|
       first[:launch_time] <=> second[:launch_time]
-    end.each do |instance|
-      @ui.info("#{instance[:launch_time]}\t #{instance[:node_name]}\t\t #{instance[:instance_id]}\t #{instance[:configuration_id]}")
     end
+    @ui.info('List all active instances on AWS:')
+    @ui.out(JSON.generate({ aws: all_instance }))
+    table = TTY::Table.new(header: ['Launch time', 'Node name', 'Instance ID', 'Configuration ID'])
+    all_instance.each do |instance|
+      table << [instance[:launch_time], instance[:node_name],
+                instance[:instance_id], instance[:configuration_id]]
+    end
+    @ui.info("\n" + table.render(:unicode)) unless table.render(:unicode).nil?
   end
 
   def show_gcp_list
-    @ui.info('List all active instances on GCP:')
-    @ui.info("Launch time\t\t\t Node name")
-    @env.gcp_service.instances_list_with_time.each do |instance|
-      next if HIDDEN_GCP_INSTANCES.include?(instance[:name])
-
-      @ui.info("#{instance[:time]}\t #{instance[:name]}")
+    all_instance = @env.gcp_service.instances_list_with_time.reject do |instance|
+      read_hidden_gcp_instances.include?(instance[:node_name])
     end
+    @ui.info('List all active instances on GCP:')
+    @ui.out(JSON.generate({ gcp: all_instance }))
+    table = TTY::Table.new(header: ['Launch time', 'Node name'])
+    all_instance.each do |instance|
+      table << [instance[:launch_time], instance[:node_name]]
+    end
+    @ui.info("\n" + table.render(:unicode)) unless table.render(:unicode).nil?
+  end
+
+  def read_hidden_gcp_instances
+    config = XDG::Config.new
+    config.all.each do |config_dir|
+      path = File.expand_path(HIDDEN_GCP_INSTANCES_BY_USER, config_dir)
+      next unless File.exist?(path)
+
+      return YAML.safe_load(File.read(path))
+    end
+    path = File.expand_path(HIDDEN_GCP_INSTANCES_BY_DEFAULT, __dir__)
+    YAML.safe_load(File.read(path))
   end
 end

@@ -50,8 +50,8 @@ class GcpService
       )
     end.map do |instance|
       {
-        name: instance.name,
-        time: instance.creation_timestamp
+        node_name: instance.name,
+        launch_time: instance.creation_timestamp
       }
     end
   end

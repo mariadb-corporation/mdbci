@@ -13,6 +13,7 @@ gem 'ipaddress'
 gem 'net-ssh', '~> 5.2.0'
 gem 'net-scp'
 gem 'nokogiri'
+gem 'tty-table'
 gem 'workers'
 gem 'xdg'
 
