@@ -49,7 +49,7 @@ when 'rhel', 'fedora', 'centos'
     sensitive true
     gpgcheck
   end
-when 'suse', 'opensuse', 'sles', nil
+when 'suse', 'opensuse', 'sles'
   remote_file File.join('tmp', 'rpm.key') do
     source node['galera']['repo_key']
     action :create

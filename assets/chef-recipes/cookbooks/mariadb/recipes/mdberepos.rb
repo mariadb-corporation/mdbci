@@ -29,7 +29,7 @@ when 'rhel', 'fedora', 'centos'
     sensitive true
     options({ 'module_hotfixes' => '1' })
   end
-when 'suse', 'opensuse', 'sles', nil
+when 'suse', 'opensuse', 'sles'
   zypper_repository 'mariadb' do
     action :remove
   end
