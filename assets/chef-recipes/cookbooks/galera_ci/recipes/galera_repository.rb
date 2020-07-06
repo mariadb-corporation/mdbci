@@ -21,7 +21,7 @@ when 'rhel'
     gpgkey repo_key
     sensitive true
   end
-when 'sles', 'suse', 'opensuse', nil
+when 'sles', 'suse', 'opensuse'
   zypper_repository 'galera' do
     action :remove
   end

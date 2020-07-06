@@ -26,7 +26,7 @@ when "rhel", "fedora", "centos"
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']
   end
-when "suse", "opensuse", "sles", nil # nil stands for SLES 15
+when "suse", "opensuse", "sles"
   # Add the repo
   template "/etc/zypp/repos.d/#{node['maxscale']['repo_file_name']}.repo" do
     source "mdbci.maxscale.suse.erb"

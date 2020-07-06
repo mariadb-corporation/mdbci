@@ -41,7 +41,7 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
   service 'docker' do
     action :start
   end
-elsif ['suse', 'linux', 'sles', nil].include?(node[:platform_family]) # nil on OpenSuse 15
+elsif ['suse', 'linux', 'sles'].include?(node[:platform_family])
   Chef::Log.warn(WARN_ABOUT_CURRENT_VERSION)
   package 'libseccomp2' do
     action :upgrade

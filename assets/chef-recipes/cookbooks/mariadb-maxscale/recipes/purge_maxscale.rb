@@ -10,7 +10,7 @@ when "debian", "ubuntu", "centos", "rhel"
     action :purge
   end
 
-when "suse", "opensuse", nil
+when "suse", "opensuse"
   execute 'zypper remove maxscale' do
     command "zypper --non-interactive remove -u maxscale"
   end

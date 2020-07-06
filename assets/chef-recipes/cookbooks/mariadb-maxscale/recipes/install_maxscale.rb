@@ -45,7 +45,7 @@ when "rhel", "fedora", "centos"
       EOF
     end
   end
-when "suse", nil # nil stands for SLES 15
+when "suse"
   execute "Install iptables and SuSEfirewall2" do
     command "zypper install -y iptables"
     command "zypper install -y SuSEfirewall2"

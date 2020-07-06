@@ -25,7 +25,7 @@ when 'rhel', 'fedora', 'centos'
     sensitive true
     gpgcheck
   end
-when 'suse', 'opensuse', 'sles', nil
+when 'suse', 'opensuse', 'sles'
   platform_release = node[:platform_version].split('.').first
   zypper_repository 'Galera-Enterprise' do
     action :remove
