@@ -25,6 +25,7 @@ opts = GetoptLong.new(
   ['--force-distro', GetoptLong::REQUIRED_ARGUMENT],
   ['--help', GetoptLong::NO_ARGUMENT],
   ['--ipv6', GetoptLong::NO_ARGUMENT],
+  ['--json', GetoptLong::NO_ARGUMENT],
   ['--key', '-k', GetoptLong::REQUIRED_ARGUMENT],
   ['--keep-template', GetoptLong::NO_ARGUMENT],
   ['--labels', '-l', GetoptLong::REQUIRED_ARGUMENT],
@@ -135,6 +136,9 @@ begin
 
     when '--ipv6'
       session.ipv6 = true
+
+    when '--json'
+      session.json = true
 
     when '--configuration-file'
       session.configuration_file = File.absolute_path(arg)
