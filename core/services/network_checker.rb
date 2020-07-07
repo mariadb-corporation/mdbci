@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'xdg'
 require 'yaml'
 
 require_relative 'log_storage'
@@ -37,15 +36,9 @@ module NetworkChecker
   # Load default network resources if the file is not available
   # @return [Array<String>] resources read from the file
   def self.load_resources
-    config = XDG::Config.new
-    config.all.each do |config_dir|
-      path = File.expand_path(NETWORK_RESOURCES_BY_USER, config_dir)
-      next unless File.exist?(path)
-
-      return YAML.safe_load(File.read(path))
-    end
-    path = File.expand_path(NETWORK_RESOURCES_BY_DEFAULT, __dir__)
-    YAML.safe_load(File.read(path))
+    YAML.safe_load(File.read(ConfigurationReader.path_to_file(
+        NETWORK_RESOURCES_BY_USER, NETWORK_RESOURCES_BY_DEFAULT
+    )))
   end
 
   def self.check_resource?(tool, machine_configurator, machine, resource, logger)
