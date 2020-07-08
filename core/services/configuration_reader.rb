@@ -18,10 +18,10 @@ module ConfigurationReader
 
   # @return <String> the path to file
   # Path to the file on the user directory or on the default directory
-  def self.path_to_file(name_by_user, name_by_default)
-    path = path_to_user_file(name_by_user)
+  def self.path_to_file(file_name)
+    path = path_to_user_file(File.join('mdbci', file_name))
     return path unless path.nil?
 
-    File.expand_path(name_by_default, __dir__)
+    File.expand_path(File.join('../../config', file_name), __dir__)
   end
 end

@@ -1,0 +1,7 @@
+--- # Instances that should be hidden from the user when displaying the list_cloud_instances command
+gcp:
+  - max-gcloud-02
+  - max-gcloud-01
+  - mdbe-ci-repo
+  - mariadbenterprise-buildbot
+aws:
