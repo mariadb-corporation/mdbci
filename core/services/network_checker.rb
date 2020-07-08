@@ -8,8 +8,7 @@ require_relative '../models/result'
 
 # This class checks the health of network resources
 module NetworkChecker
-  NETWORK_RESOURCES_BY_USER = 'mdbci/required-network-resources.yaml'
-  NETWORK_RESOURCES_BY_DEFAULT = '../../config/required-network-resources.yaml'
+  NETWORK_RESOURCES_FILE_NAME = 'required-network-resources.yaml'
 
   # Check all resources for availability
   # @return [Result::Base] success if all resources available
@@ -36,9 +35,7 @@ module NetworkChecker
   # Load default network resources if the file is not available
   # @return [Array<String>] resources read from the file
   def self.load_resources
-    YAML.safe_load(File.read(ConfigurationReader.path_to_file(
-        NETWORK_RESOURCES_BY_USER, NETWORK_RESOURCES_BY_DEFAULT
-    )))
+    YAML.safe_load(File.read(ConfigurationReader.path_to_file(NETWORK_RESOURCES_FILE_NAME)))
   end
 
   def self.check_resource?(tool, machine_configurator, machine, resource, logger)

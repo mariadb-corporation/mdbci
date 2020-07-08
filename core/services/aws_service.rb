@@ -67,6 +67,19 @@ class AwsService
     end.flatten.compact
   end
 
+  def instances_list_with_time_and_name
+    return [] unless configured?
+
+    describe_instances[:reservations].map do |reservation|
+      reservation[:instances].map do |instance|
+        next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
+
+        node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }&.fetch(:value, nil)
+        { node_name: node_name, launch_time: instance[:launch_time] }
+      end
+    end.flatten.compact
+  end
+
   # Get the vpc list
   # @return [Array] vpc list in format [{ vpc_id, configuration_id }]
   def vpc_list(tags)
