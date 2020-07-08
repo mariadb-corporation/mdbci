@@ -37,20 +37,12 @@ Add the --json flag for the list_cloud_instances command to show the machine rea
 
   def show_list
     @hidden_instances = read_hidden_instances
-    if @env.aws_service.configured?
-      aws_list = generate_aws_list
-    else
-      @ui.info('AWS-service is not configured. AWS-list is not available.')
-    end
-    if @env.gcp_service.configured?
-      gcp_list = generate_gcp_list
-    else
-      @ui.info('GCP-service is not configured. GCP-list is not available.')
-    end
-    print_lists(aws_list, gcp_list)
+    print_lists(generate_aws_list, generate_gcp_list)
   end
 
   def generate_aws_list
+    return Result.error('AWS-service is not configured') unless @env.aws_service.configured?
+
     all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
       first[:launch_time] <=> second[:launch_time]
     end
@@ -59,40 +51,54 @@ Add the --json flag for the list_cloud_instances command to show the machine rea
         @hidden_instances['aws'].include?(instance[:node_name])
       end
     end
-    all_instances
+    return Result.error('No instances were found in AWS-services') if all_instances.empty?
+
+    Result.ok(all_instances)
   end
 
   def generate_gcp_list
+    return Result.error('GCP-service is not configured') unless @env.gcp_service.configured?
+
     all_instances = @env.gcp_service.instances_list_with_time
     unless @hidden_instances['gcp'].nil?
       all_instances.reject! do |instance|
         @hidden_instances['gcp'].include?(instance[:node_name])
       end
     end
-    all_instances
+    return Result.error('No instances were found in GCP-services') if all_instances.empty?
+
+    Result.ok(all_instances)
   end
 
   def print_lists(aws_list, gcp_list)
     if @env.json
       @ui.out(in_json_format(aws_list, gcp_list))
     else
-      @ui.info('List all active instances on AWS:')
-      @ui.info(in_table_format(aws_list)) unless aws_list.nil?
-      @ui.info('List all active instances on GCP:')
-      @ui.info("\n" + in_table_format(gcp_list)) unless gcp_list.nil?
+      if aws_list.success?
+        @ui.info('List all active instances on AWS:')
+        @ui.info("\n" + in_table_format(aws_list.value))
+      else
+        @ui.info(aws_list.error)
+      end
+      if gcp_list.success?
+        @ui.info('List all active instances on GCP:')
+        @ui.info("\n" + in_table_format(gcp_list.value))
+      else
+        @ui.info(gcp_list.error)
+      end
     end
   end
 
   def in_json_format(aws_list, gcp_list)
-    aws_list_json = if aws_list.nil?
-                      { aws: 'not available' }
+    aws_list_json = if aws_list.error?
+                      { aws: aws_list.error }
                     else
-                      { aws: aws_list }
+                      { aws: aws_list.value }
                     end
-    gcp_list_json = if gcp_list.nil?
-                      { gcp: 'not available' }
+    gcp_list_json = if gcp_list.error?
+                      { gcp: gcp_list.error }
                     else
-                      { gcp: gcp_list }
+                      { gcp: gcp_list.value }
                     end
     JSON.generate(aws_list_json.merge(gcp_list_json))
   end
