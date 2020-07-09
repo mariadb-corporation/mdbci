@@ -1,6 +1,8 @@
 require_relative 'base_command'
 require_relative '../models/configuration'
-require_relative '../services/network_config'
+require_relative '../models/network_settings'
+require_relative '../node'
+require_relative '../services/vagrant_service'
 
 # Command recreates the network configuration file
 class ShowNetworkConfigCommand < BaseCommand
@@ -50,9 +52,14 @@ The last command currently will place only the configuration for the specified n
   end
 
   def write_network_configuration
-    network_config = NetworkConfig.new(@configuration, @ui)
-    network_config.add_nodes(@configuration.node_names)
-    File.write(@configuration.network_settings_file, network_config.ini_format)
+    network_settings = NetworkSettings.new
+    @configuration.node_configurations.keys.each do |node|
+      if VagrantService.node_running?(node, @ui, @configuration.path)
+        settings = Node.new(@configuration, node).generate_ssh_settings
+        network_settings.add_network_configuration(node, settings)
+      end
+    end
+    network_settings.store_network_configuration(@configuration)
     @ui.info("Wrote network configuration file to #{@configuration.network_settings_file}")
     SUCCESS_RESULT
   rescue RuntimeError => error

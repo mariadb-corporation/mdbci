@@ -4,7 +4,8 @@ require_relative '../../models/return_codes'
 require_relative '../../services/shell_commands'
 require_relative '../../services/vagrant_service'
 require_relative '../../services/machine_configurator'
-require_relative '../../services/network_config'
+require_relative '../../models/network_settings'
+require_relative '../../node'
 require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
@@ -85,10 +86,11 @@ class VagrantConfigurator
       end
       next unless VagrantService.node_running?(node, logger)
 
-      @network_config.add_nodes([node])
-      next if NetworkChecker.resources_available?(@machine_configurator, @network_config[node], logger).error?
+      settings = Node.new(@config, node).generate_ssh_settings
+      @network_settings.add_network_configuration(node, settings)
+      next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
-      return SUCCESS_RESULT if ChefConfigurationGenerator.configure_with_chef(node, logger, @network_config[node], @config, @ui, @machine_configurator).success?
+      return SUCCESS_RESULT if ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator).success?
     end
     Result.error("Node '#{node}' was not configured.")
   end
@@ -119,16 +121,22 @@ class VagrantConfigurator
   def up
     nodes = @config.node_names
     run_in_directory(@config.path) do
-      @network_config = NetworkConfig.new(@config, @ui)
-      @network_config.store_network_config
+      @network_settings = generate_network_settings
       up_results = Workers.map(nodes) { |node| up_node(node) }
       up_results.each { |up_result| up_result[1].print_to_stdout } if use_log_storage?
       up_results.each do |up_result|
         return up_result[0] if up_result[0].error?
       end
     end
-    @network_config.generate_config_information
+    @network_settings.store_network_configuration(@config)
     SUCCESS_RESULT
+  end
+
+  def generate_network_settings
+    NetworkSettings.from_file(@config.network_settings_file).match(
+        { ok: ->(result) { @network_settings = result },
+          error: ->(_result) { @network_settings = NetworkSettings.new } }
+    )
   end
 
   # Checks whether to use log storage

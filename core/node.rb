@@ -74,6 +74,15 @@ class Node
     @ssh_config['User']
   end
 
+  def generate_ssh_settings
+    {
+      'keyfile' => @ssh_config['IdentityFile'],
+      'network' => @ssh_config['HostName'],
+      'whoami' => @ssh_config['User'],
+      'hostname' => @config.node_configurations[@name]['hostname']
+    }
+  end
+
   private
 
   # Parses output of 'vagrant ssh-config' command
