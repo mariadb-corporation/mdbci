@@ -122,6 +122,10 @@ module ProductAttributes
       recipe: 'mdbe_plugins::rocksdb',
       name: 'rocksdb'
     },
+    'mdbe_plugin_s3' => {
+      recipe: 'mdbe_plugins::s3',
+      name: 's3'
+    },
     'mdbe_plugin_spider' => {
       recipe: 'mdbe_plugins::spider',
       name: 'spider'
@@ -214,6 +218,7 @@ module ProductAttributes
     'mdbe_plugin_oqgraph' => 'mdbe_ci',
     'mdbe_plugin_rocksdb' => 'mdbe_ci',
     'mdbe_plugin_spider' => 'mdbe_ci',
+    'mdbe_plugin_s3' => 'mdbe_ci',
     'mdbe_plugin_xpand' => 'mdbe_ci',
     'mariadb_plugin_columnstore' => 'mariadb_ci',
     'mariadb_plugin_connect' => 'mariadb_ci',
