@@ -6,6 +6,7 @@ require_relative '../services/configuration_generator'
 require_relative '../models/result'
 require_relative '../services/product_attributes'
 require_relative '../services/product_and_subscription_registry'
+require_relative '../services/chef_configuration_generator'
 
 # This class installs the product on selected node
 class InstallProduct < BaseCommand
@@ -81,7 +82,7 @@ class InstallProduct < BaseCommand
       role_file_path_config = "#{@mdbci_config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
       extra_files = [[role_file_path, target_path], [role_file_path_config, target_path_config]]
-      extra_files.concat(cnf_extra_files(name))
+      extra_files.concat(ChefConfigurationGenerator.cnf_extra_files(name, @mdbci_config))
       node_settings = @network_settings.node_settings(name)
       rewrite_registry(name).and_then do
         @machine_configurator.configure(node_settings, "#{name}-config.json", @ui, extra_files)
@@ -96,26 +97,6 @@ class InstallProduct < BaseCommand
       registry.save_registry(path)
       Result.ok('')
     end
-  end
-
-  # Make array of cnf files and it target path on the nodes
-  #
-  # @return [Array] array of [source_file_path, target_file_path]
-  def cnf_extra_files(node)
-    cnf_template_path = @mdbci_config.cnf_template_path(node)
-    return [] if cnf_template_path.nil?
-
-    @mdbci_config.products_info(node).map do |product_info|
-      cnf_template = product_info['cnf_template']
-      next if cnf_template.nil?
-
-      product = product_info['name']
-      files_location = ProductAttributes.chef_recipe_files_location(product)
-      next if files_location.nil?
-
-      [File.join(cnf_template_path, cnf_template),
-       File.join(files_location, cnf_template)]
-    end.compact
   end
 
   # Create a role file to install the product from the chef
