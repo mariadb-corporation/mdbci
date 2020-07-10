@@ -5,7 +5,6 @@ require_relative '../../services/shell_commands'
 require_relative '../../services/vagrant_service'
 require_relative '../../services/machine_configurator'
 require_relative '../../models/network_settings'
-require_relative '../../node'
 require_relative 'vagrant_configuration_generator'
 require_relative '../destroy_command'
 require_relative '../../services/log_storage'
@@ -86,7 +85,7 @@ class VagrantConfigurator
       end
       next unless VagrantService.node_running?(node, logger)
 
-      settings = Node.new(@config, node).generate_ssh_settings
+      settings = VagrantService.generate_ssh_settings(node, @ui, @config)
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
