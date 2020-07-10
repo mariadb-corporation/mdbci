@@ -6,6 +6,7 @@ you want to install. In the latter case you must provide version for the MDBE pr
 
 The list of plugins and their corresponding MDCI product names:
 
+* backup, `mdbe_plugin_backup`;
 * columnstore, `mdbe_plugin_columnstore`;
 * connect, `mdbe_plugin_connect`;
 * cracklib password check, `mdbe_plugin_cracklib_password_check`;
@@ -15,6 +16,7 @@ The list of plugins and their corresponding MDCI product names:
 * mroonga, `mdbe_plugin_mroonga`;
 * oqgraph, `mdbe_plugin_oqgraph`;
 * rocksdb, `mdbe_plugin_rocksdb`;
+* s3, `mdbe_plugin_rocksdb`;
 * spider, `mdbe_plugin_spider`;
 * xpand, `mdbe_plugin_xpand`.
 
