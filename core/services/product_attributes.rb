@@ -86,6 +86,10 @@ module ProductAttributes
       recipe: 'mdbe_build',
       name: 'mdbe_build'
     },
+    'mdbe_plugin_backup' => {
+        recipe: 'mdbe_plugins::backup',
+        name: 'backup'
+    },
     'mdbe_plugin_columnstore' => {
       recipe: 'mdbe_plugins::columnstore',
       name: 'columnstore'
@@ -208,6 +212,7 @@ module ProductAttributes
   }.freeze
 
   DEPENDENCE = {
+    'mdbe_plugin_backup' => 'mdbe_ci',
     'mdbe_plugin_columnstore' => 'mdbe_ci',
     'mdbe_plugin_connect' => 'mdbe_ci',
     'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
