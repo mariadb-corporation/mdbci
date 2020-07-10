@@ -9,7 +9,6 @@ require_relative 'partials/vagrant_cleaner'
 require_relative 'partials/terraform_cleaner'
 require_relative '../models/network_settings'
 require_relative '../services/vagrant_service'
-require_relative '../node'
 require_relative '../services/product_and_subscription_registry'
 
 require 'fileutils'
@@ -252,7 +251,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     network_settings = NetworkSettings.new
     configuration.node_configurations.keys.each do |node|
       if VagrantService.node_running?(node, @ui, configuration.path)
-        settings = Node.new(configuration, node).generate_ssh_settings
+        settings = VagrantService.generate_ssh_settings(node, @ui, configuration)
         network_settings.add_network_configuration(node, settings)
       end
     end

@@ -34,4 +34,30 @@ module VagrantService
     ShellCommands.check_command_in_dir(logger, "vagrant destroy -f #{node_names.join(' ')}", path,
                                        'Vagrant was unable to destroy existing nodes')
   end
+
+  def self.generate_ssh_settings(name, log, config)
+    ssh_config = load_vagrant_node_config(name, log, config)
+    {
+      'keyfile' => ssh_config['IdentityFile'],
+      'network' => ssh_config['HostName'],
+      'whoami' => ssh_config['User'],
+      'hostname' => config.node_configurations[name]['hostname']
+    }
+  end
+
+  # Runs 'vagrant ssh-config' command for node and collects configuration
+  def self.load_vagrant_node_config(name, log, config)
+    result = ShellCommands.run_command_in_dir(log, "vagrant ssh-config #{name}", config.path, false)
+    parse_ssh_config(result[:output])
+  end
+
+  # Parses output of 'vagrant ssh-config' command
+  def self.parse_ssh_config(ssh_config)
+    pattern = /^(\S+)\s+(\S+)$/
+    ssh_config.split("\n").each_with_object({}) do |line, node_config|
+      if (match_result = line.strip.match(pattern))
+        node_config[match_result[1]] = match_result[2]
+      end
+    end
+  end
 end
