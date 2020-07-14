@@ -177,6 +177,10 @@ class TerraformGcpGenerator
           }
         <% end %>
       }
+      scheduling {
+        preemptible = true
+        automatic_restart = false
+      }
       metadata = {
         <%= ssh_metadata %>
       }
