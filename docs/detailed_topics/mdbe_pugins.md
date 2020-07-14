@@ -12,6 +12,7 @@ The list of plugins and their corresponding MDCI product names:
 * cracklib password check, `mdbe_plugin_cracklib_password_check`;
 * gssapi client, `mdbe_plugin_gssapi_client`;
 * gssapi server, `mdbe_plugin_gssapi_server`;
+* hashicorp key management, `mdbe_plugin_hashicorp_key_management`;
 * mariadb test, `mdbe_plugin_mariadb_test`;
 * mroonga, `mdbe_plugin_mroonga`;
 * oqgraph, `mdbe_plugin_oqgraph`;

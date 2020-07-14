@@ -110,6 +110,10 @@ module ProductAttributes
       recipe: 'mdbe_plugins::gssapi_server',
       name: 'gssapi_server'
     },
+    'mdbe_plugin_hashicorp_key_management' => {
+      recipe: 'mdbe_plugins::hashicorp_key_management',
+      name: 'hashicorp_key_management'
+    },
     'mdbe_plugin_mariadb_test' => {
       recipe: 'mdbe_plugins::mariadb_test',
       name: 'mariadb_test'
@@ -218,6 +222,7 @@ module ProductAttributes
     'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
     'mdbe_plugin_gssapi_client' => 'mdbe_ci',
     'mdbe_plugin_gssapi_server' => 'mdbe_ci',
+    'mdbe_plugin_hashicorp_key_management' => 'mdbe_ci',
     'mdbe_plugin_mariadb_test' => 'mdbe_ci',
     'mdbe_plugin_mroonga' => 'mdbe_ci',
     'mdbe_plugin_oqgraph' => 'mdbe_ci',
