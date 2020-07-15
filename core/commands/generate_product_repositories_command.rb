@@ -22,6 +22,7 @@ require_relative 'generate_repository_partials/mysql_parser'
 require_relative 'generate_repository_partials/clustrix_parser'
 require_relative 'generate_repository_partials/galera_ci_parser'
 require_relative 'generate_repository_partials/mariadb_ci_parser'
+require_relative 'generate_repository_partials/mariadb_staging_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -42,7 +43,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'galera_3_community' => 'galera_3_community',
     'galera_4_community' => 'galera_4_community',
     'mariadb_ci' => 'mariadb_ci',
-    'mdbe_staging' => 'mdbe_staging'
+    'mdbe_staging' => 'mdbe_staging',
+    'mariadb_staging' => 'mariadb_staging'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -284,6 +286,8 @@ In order to specify the number of retries for repository configuration use --att
       MariadbCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'mdbe_staging'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
+    when 'mariadb_staging'
+      MariadbStagingParser.parse(product_config, @product_version, @ui, @logger)
     end
   end
 
