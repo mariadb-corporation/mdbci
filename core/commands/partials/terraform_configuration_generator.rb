@@ -103,6 +103,13 @@ class TerraformConfigurationGenerator < BaseCommand
   # @param box_params [Hash] information of the box parameters
   # @return [Hash] list of the node parameters.
   def make_node_params(node, box_params)
+    preemptible = if !node[1]['preemptible'].nil?
+                    node[1]['preemptible'] == 'true'
+                  elsif !@gcp_config['preemptible'].nil?
+                    @gcp_config['preemptible']
+                  else
+                    true
+                  end
     symbolic_box_params = box_params.transform_keys(&:to_sym)
     symbolic_box_params.merge(
       {
@@ -110,7 +117,8 @@ class TerraformConfigurationGenerator < BaseCommand
           host: node[1]['hostname'].to_s,
           machine_type: node[1]['machine_type']&.to_s,
           memory_size: node[1]['memory_size']&.to_i,
-          cpu_count: node[1]['cpu_count']&.to_i
+          cpu_count: node[1]['cpu_count']&.to_i,
+          preemptible: preemptible
       }
     )
   end
