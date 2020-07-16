@@ -153,7 +153,6 @@ Use the following short product names to configure them:
                               @configuration.dig('gcp', 'project')),
       'region' => read_topic('Please input Google Cloud Platform region', @configuration.dig('gcp', 'region')),
       'zone' => read_topic('Please input Google Cloud Platform zone', @configuration.dig('gcp', 'zone')),
-      'preemptible' => read_topic('Use preemptible Google Compute instances?', 'y').casecmp('y').zero?,
       'use_existing_network' => false
     }
     return settings unless read_topic('Use existing network for Google Compute instances?', 'y').casecmp('y').zero?
