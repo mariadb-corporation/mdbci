@@ -48,7 +48,7 @@ module MdbeParser
       major_release_path = URI.parse(major_release_link.attribute('href').to_s).path
       get_mdbe_release_links("#{path_uri.scheme}://#{path_uri.host}/#{major_release_path}", link_name)
     end.flatten
-    (major_release_links + minor_release_links).map do |link|
+    minor_release_links.map do |link|
       link.content.match(/^#{link_name} (.*)$/).captures[0].lstrip
     end
   end
