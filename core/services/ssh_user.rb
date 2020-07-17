@@ -19,7 +19,7 @@ module SshUser
     execute_commands_to_create(
       machine_coonfigurator, network_settings, node_name, user_name, logger
     ).and_then do
-      network_settings['whoami'] = user_name
+      network_settings = network_settings.merge({ 'whoami' => user_name })
     end
     network_settings
   end
