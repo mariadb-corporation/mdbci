@@ -113,6 +113,10 @@ class Configuration
     File.join(File.expand_path(configuration_path), 'connect.sh')
   end
 
+  def self.ssh_user_path(configuration_path)
+    File.join(File.expand_path(configuration_path), 'ssh_user.json')
+  end
+
   # Create the configuration based on the path specification and labels list.
   #
   # Method returns Result that may contain the Configuration

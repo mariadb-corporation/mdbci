@@ -11,6 +11,7 @@ require_relative '../../services/network_checker'
 require_relative '../../services/product_attributes'
 require_relative '../../services/configuration_generator'
 require_relative '../../services/chef_configuration_generator'
+require_relative '../../services/ssh_user'
 require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
@@ -111,6 +112,7 @@ class TerraformConfigurator
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
       node_network = retrieve_node_network(node)
+      SshUser.create_user(@machine_configurator, node, node_network, @config, logger)
       @network_settings.add_network_configuration(node, node_network)
       result = NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
         ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator)
