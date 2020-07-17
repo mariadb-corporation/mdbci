@@ -3,6 +3,13 @@ return if node[:platform_family] == 'suse' && node[:platform_version].to_i < 15
 package 'ntp' do
   action :remove
 end
+
+if node[:platform] == 'debian' || node[:platform] == 'ubuntu'
+  apt_update 'update apt cache' do
+    action :update
+  end
+end
+
 package 'chrony'
 
 
