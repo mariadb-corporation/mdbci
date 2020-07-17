@@ -5,6 +5,7 @@ require 'fileutils'
 require_relative '../../services/configuration_generator'
 require_relative '../../models/configuration'
 require_relative '../../services/product_and_subscription_registry'
+require_relative '../../services/ssh_user'
 
 # The class generates the MDBCI configuration for computers that have been setup beforehand
 class DedicatedConfigurationGenerator < BaseCommand
@@ -26,6 +27,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = File.absolute_path(name.to_s)
     @registry = ProductAndSubcriptionRegistry.new
+    @ssh_users = {}
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
       @configuration_template = template
       Result.ok('')
@@ -45,6 +47,7 @@ class DedicatedConfigurationGenerator < BaseCommand
   # Generate role file
   def generate_configuration_file
     nodes_info = @configuration_template.map do |node|
+      @ssh_users[node[0]] = node[1]['user']
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
       node_info = @configuration_generator.generate_node_info(node, node_params, @registry)
       return Result.error(node_info.error) if node_info.error?
@@ -91,5 +94,6 @@ class DedicatedConfigurationGenerator < BaseCommand
     File.open(provider_file, 'w') { |f| f.write('dedicated') }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
     @registry.save_registry(registry_path)
+    SshUser.save_to_file(@ssh_users, @configuration_path)
   end
 end

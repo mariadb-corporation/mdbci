@@ -34,6 +34,7 @@ require_relative 'services/box_definitions'
 require_relative 'commands/remove_product_command'
 require_relative 'commands/check_relevance_command'
 require_relative 'commands/list_cloud_instances_command'
+require_relative 'commands/create_user_command'
 
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
@@ -68,6 +69,7 @@ class Session
   attr_accessor :snapshot_name
   attr_accessor :ipv6
   attr_accessor :json
+  attr_accessor :user
   attr_reader :aws_service
   attr_reader :digitalocean_service
   attr_reader :gcp_service
@@ -190,6 +192,9 @@ EOF
       exit_code = command.execute
     when 'configure'
       command = ConfigureCommand.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'create_user'
+      command = CreateUserCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'deploy-examples'
       command = DeployCommand.new([ARGV.shift], self, $out)

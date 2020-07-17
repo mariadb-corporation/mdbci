@@ -15,6 +15,7 @@ require_relative '../../services/product_attributes'
 require_relative '../../services/shell_commands'
 require_relative '../../out'
 require_relative '../../services/product_and_subscription_registry'
+require_relative '../../services/ssh_user'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
 # rubocop:disable Metrics/ClassLength
@@ -252,6 +253,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       node_definition = node_definition(node, path, cookbook_path)
       raise node_definition.error if node_definition.error?
 
+      @ssh_users[node[0]] = node[1]['user']
       vagrant.puts node_definition.value
     end
     vagrant.puts vagrant_config_footer
@@ -307,6 +309,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
 
     File.open(provider_file, 'w') { |f| f.write(provider) }
     File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
+    SshUser.save_to_file(@ssh_users, path)
     @registry.save_registry(registry_path)
   end
 
@@ -363,6 +366,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
     @registry = ProductAndSubcriptionRegistry.new
+    @ssh_users = {}
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file))
   end
 

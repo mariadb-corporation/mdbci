@@ -15,6 +15,7 @@ require_relative 'remove_product_command'
 require_relative 'provide_files'
 require_relative 'check_relevance_command'
 require_relative 'list_cloud_instances_command'
+require_relative 'create_user_command'
 
 # Command provides a documentation to the user on how to use the mdbci tool.
 class HelpCommand < BaseCommand
@@ -27,6 +28,7 @@ class HelpCommand < BaseCommand
   COMMANDS = {
     'check_relevance' => CheckRelevanceCommand.synopsis,
     'configure' => ConfigureCommand.synopsis,
+    'create_user' => CreateUserCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
     'destroy' => DestroyCommand.synopsis,
     'generate' => GenerateCommand.synopsis,
