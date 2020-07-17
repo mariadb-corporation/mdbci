@@ -345,6 +345,9 @@ when 'ubuntu'
       path '/etc/apt/sources.list.d/mariadb-build.list'
       action :create
     end
+    apt_update 'update apt cache' do
+      action :update
+    end
     execute 'fix for broken debhelper' do
       command 'apt-get -y -t bionic-backports install debhelper'
     end
