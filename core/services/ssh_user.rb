@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'json'
-
 require_relative '../models/configuration'
 
 # The module creates a new user on the VM.
@@ -11,14 +10,18 @@ module SshUser
   end
 
   def self.create_user(machine_coonfigurator, node_name, network_settings, config, logger)
-    user_name = JSON.parse(read_from_file(config))[node_name]
-    return if user_name.nil?
+    users_info = read_from_file(config)
+    return network_settings if users_info.nil?
 
-    commands_to_create(
+    user_name = JSON.parse(users_info)[node_name]
+    return network_settings if user_name.nil?
+
+    execute_commands_to_create(
       machine_coonfigurator, network_settings, node_name, user_name, logger
     ).and_then do
       network_settings['whoami'] = user_name
     end
+    network_settings
   end
 
   def self.read_from_file(configuration)
@@ -28,7 +31,7 @@ module SshUser
   end
 
   # rubocop:disable Layout/LineLength:
-  def self.commands_to_create(machine_configurator, network_settings, node_name, user_name, logger)
+  def self.execute_commands_to_create(machine_configurator, network_settings, node_name, user_name, logger)
     logger.info("Creating a new user #{user_name} on #{node_name}")
     result = machine_configurator.run_command(network_settings, "sudo useradd -m #{user_name}", logger)
     if result.success?

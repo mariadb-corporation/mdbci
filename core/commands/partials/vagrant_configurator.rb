@@ -87,7 +87,7 @@ class VagrantConfigurator
       next unless VagrantService.node_running?(node, logger)
 
       settings = VagrantService.generate_ssh_settings(node, @ui, @config)
-      SshUser.create_user(@machine_configurator, node, settings, @config, logger)
+      settings = SshUser.create_user(@machine_configurator, node, settings, @config, logger)
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
