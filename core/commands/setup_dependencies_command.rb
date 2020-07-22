@@ -111,6 +111,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
         return line.match(distribution_regex)[1].downcase if line =~ distribution_regex
       end
     end
+    ''
   end
 
   def install_terraform
@@ -307,6 +308,18 @@ class DependencyManager
   def should_install?(product)
     product == @env.nodeProduct || @env.nodeProduct.nil?
   end
+
+  # Extracts linux version codename from lsb_release command
+  # @return [String] Linux version codename
+  def get_linux_distro_version_codename
+    version_codename_regex = /^VERSION_CODENAME=\W*(\w+)\W*/
+    File.open('/etc/os-release') do |release_file|
+      release_file.each do |line|
+        return line.match(version_codename_regex)[1].downcase if line =~ version_codename_regex
+      end
+    end
+    ''
+  end
 end
 
 # Class that manages CentOS specific packages
@@ -450,9 +463,15 @@ end
 # Class that manages Ubuntu specific packages
 class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
-    ['build-essential', 'cmake', 'dnsmasq', 'ebtables', 'git', 'libvirt-bin',
-     'libvirt-dev', 'libxml2-dev', 'libxslt-dev', 'qemu', 'qemu-kvm', 'rsync', 'wget',
-     'apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common', 'zip']
+    packages = %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
+                  qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
+                  software-properties-common zip]
+    if get_linux_distro_version_codename == 'focal'
+      packages.concat(%w[libvirt-daemon-system bridge-utils virt-manager libvirt-clients])
+    else
+      packages << 'libvirt-bin'
+    end
+    packages
   end
 
   def install_docker
