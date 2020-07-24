@@ -7,46 +7,77 @@ These instructions install the bare minimum that is required to run the MaxScale
 ### CentOS
 
 ```
-sudo yum -y install ceph-common libvirt libvirt-client libvirt-devel qemu-kvm git
-sudo yum -y install https://releases.hashicorp.com/vagrant/2.2.0/vagrant_2.2.0_x86_64.rpm
+sudo yum -y install ceph-common gcc git libvirt libvirt-client libvirt-devel qemu qemu-img qemu-kvm rsync wget \
+    yum-utils device-mapper-persistent-data lvm2 zip
+sudo systemctl start libvirtd
+sudo yum -y install https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.rpm
 ```
 
-### Debian/Ubuntu
+### Debian
 
 ```
 sudo apt-get update
-sudo apt-get -y install build-essential libxslt-dev libxml2-dev libvirt-dev wget git cmake
-wget https://releases.hashicorp.com/vagrant/2.2.0/vagrant_2.2.0_x86_64.deb
-sudo dpkg -i vagrant_2.2.0_x86_64.deb
-rm vagrant_2.2.0_x86_64.deb
+sudo apt-get -y install build-essential libxslt-dev libxml2-dev libvirt-dev wget git cmake libvirt-daemon-system \
+    qemu qemu-kvm rsync apt-transport-https ca-certificates curl gnupg2 software-properties-common zip
+wget https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.deb
+sudo dpkg -i vagrant_2.2.9_x86_64.deb
+rm vagrant_2.2.9_x86_64.deb
+sudo systemctl restart libvirtd.service
+```
+
+### Ubuntu
+
+```
+sudo apt-get update
+sudo apt-get -y install build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev qemu qemu-kvm \
+    rsync wget apt-transport-https ca-certificates curl gnupg-agent software-properties-common zip
+
+# For Ubuntu Focal
+sudo apt-get -y install libvirt-daemon-system bridge-utils libvirt-clients
+# For older Ubuntu releases
+sudo apt-get -y install libvirt-bin
+
+wget https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.deb
+sudo dpkg -i vagrant_2.2.9_x86_64.deb
+rm vagrant_2.2.9_x86_64.deb
+sudo systemctl restart libvirtd.service
 ```
 
 ## Prepare the Environment
 
 ```
-vagrant plugin install vagrant-libvirt --plugin-version 0.0.43
-vagrant plugin install vagrant-aws --plugin-version 0.7.2
+vagrant plugin install vagrant-libvirt --plugin-version 0.1.2
 sudo mkdir /var/lib/libvirt/libvirt-images
 sudo virsh pool-create-as default dir --target=/var/lib/libvirt/libvirt-images
 sudo usermod -a -G libvirt $(whoami)
-vagrant box add --force dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box
+
+wget -O terraform.zip https://releases.hashicorp.com/terraform/0.12.27/terraform_0.12.27_linux_amd64.zip
+sudo unzip terraform.zip -d /usr/local/bin/
+rm terraform.zip
 
 mkdir mdbci
 cd mdbci
-wget http://max-tst-01.mariadb.com/ci-repository/mdbci
-chmod a+x mdbci
-
-./mdbci generate-product-repositories
-./mdbci deploy-examples
+wget http://max-tst-01.mariadb.com/ci-repository/mdbci -O ./mdbci && chmod +x ./mdbci
 ```
 
-For configuring AWS access:
+After setting all the necessary dependencies and setting up the environment, it is necessary to
+fill in the MDBCI configuration settings (for example, credentials of cloud platforms, private repositories, and etc.).
+
 ```
 ./mdbci configure
 ```
-and put AWS credentials
+
+You can follow the [MDBCI configuration](./MDBCI_CONFIGURATION.md) to read more about MDBCI configuration.
+
 
 After this, you need to log out and back in again. This needs to be done in order for the new groups to become active.
+
+To use the ability to install products on virtual machines created with MDBCI, you must run
+the command (to install some products, MDBCI may need data about private repositories in MDBCI configuration):
+
+```
+./mdbci generate-product-repositories
+```
 
 ## Generate Configuration and Start VMs
 

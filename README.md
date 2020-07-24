@@ -65,7 +65,7 @@ In-depth architecture description is provided in the [separate document](docs/ar
 
 ## MDBCI installation
 
-MDBCI requires you to install the Libvirt in your Linux installation, install Vagrant and install required plugins.
+MDBCI requires you to install the Libvirt in your Linux installation, install Terraform, install Vagrant and install required plugins.
 
 Dependencies installation can be performed automatically using command
 
@@ -73,7 +73,7 @@ Dependencies installation can be performed automatically using command
 ./mdbci setup-dependencies
 ```
 
-This will install Libvirt development libraries, libvirt virtualization packages, vagrant and its plugins for Libvirt and AWS support, as well as all the tools required in the installation process.
+This will install Libvirt development libraries, libvirt virtualization packages, vagrant and its plugins for Libvirt, Terraform, as well as all the tools required in the installation process.
 
 Current user will be added to existing libvirt groups and a new VM pool will bew created.
 
@@ -81,7 +81,7 @@ During the installation you will be prompted to enter your password.
 
 **WARNING**: upon installation previously created libvirt VM pool named 'default' will be deleted.
 
-You can force the use of installation method for a specific Дinux distribution by passing its name to the `--force-distro` option
+You can force the use of installation method for a specific Linux distribution by passing its name to the `--force-distro` option
 
 ```
 ./mdbci setup-dependencies --force-distro CentOS
@@ -96,9 +96,18 @@ To perform a clean installation call
 ./mdbci setup-dependencies --reinstall
 ````
 
-This will uninstall libvirt development package, vagrant and its plugins and destroy existing 'default' libvirt pool.
+This will uninstall libvirt development package, Terraform, vagrant and its plugins and destroy existing 'default' libvirt pool.
 
 If you have trouble using `./mdbci setup-dependencies` you can follow the [quickstart](docs/QUICKSTART.md) to install them manually.
+
+After setting all the necessary dependencies and setting up the environment, it is necessary to
+fill in the MDBCI configuration settings (for example, credentials of cloud platforms, private repositories, and etc.).
+
+```
+./mdbci configure
+```
+
+You can follow the [MDBCI configuration](./docs/MDBCI_CONFIGURATION.md) to read more about MDBCI configuration.
 
 ## MDBCI usage
 
@@ -168,7 +177,7 @@ Each host description contains the `hostname` and `box` fields. The first one is
 
 You can get the list of boxes using the `./mdbci show platforms` command.
 
-Then each host is setup with the product. The products will be installed on the machines. The mandatory fields for each product is it's name and version that is required to be installed. You can install several products on one host, use the `products` field for it and describe the products list as array of json-objects (see `several_products_host` for reference). 
+Then each host is setup with the product. The products will be installed on the machines. The mandatory fields for each product is it's name and version that is required to be installed. You can install several products on one host, use the `products` field for it and describe the products list as array of json-objects (see `several_products_host` for reference).
 
 When installing a database you must also specify the name of the configuration file and the path to the folder where the file is stored. It is advised to use absolute path in `cnf_template_path` as the relative path is calculated from within the configuration directory.
 
