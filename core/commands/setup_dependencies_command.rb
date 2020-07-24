@@ -467,7 +467,7 @@ class UbuntuDependencyManager < DebianDependencyManager
                   qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
                   software-properties-common zip]
     if get_linux_distro_version_codename == 'focal'
-      packages.concat(%w[libvirt-daemon-system bridge-utils virt-manager libvirt-clients])
+      packages.concat(%w[libvirt-daemon-system bridge-utils libvirt-clients])
     else
       packages << 'libvirt-bin'
     end
