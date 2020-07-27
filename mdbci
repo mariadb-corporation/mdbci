@@ -14,6 +14,7 @@ require 'getoptlong'
 
 # Reading options
 opts = GetoptLong.new(
+  ['--all', GetoptLong::NO_ARGUMENT],
   ['--attempts', '-a', GetoptLong::REQUIRED_ARGUMENT],
   ['--box-name', '-n', GetoptLong::REQUIRED_ARGUMENT],
   ['--boxes', '-b', GetoptLong::REQUIRED_ARGUMENT],
@@ -72,6 +73,9 @@ ENV['LIBVIRT_DEFAULT_URI'] = 'qemu:///system'
 begin
   opts.each do |opt, arg|
     case opt
+    when '--all'
+      session.all = true
+
     when '--silent'
       session.isSilent = true
 
