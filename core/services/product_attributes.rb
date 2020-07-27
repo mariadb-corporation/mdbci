@@ -219,6 +219,10 @@ module ProductAttributes
     'mariadb_plugin_xpand' => {
         recipe: 'mdbe_plugins::xpand',
         name: 'xpand'
+    },
+    'connectors_build' => {
+        recipe: 'connectors_build',
+        name: 'connectors_build'
     }
   }.freeze
 
