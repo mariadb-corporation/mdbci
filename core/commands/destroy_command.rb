@@ -46,10 +46,13 @@ You can either destroy a single node:
 Or you can destroy all nodes:
   mdbci destroy configuration
 
+Or you can destroy all configurations in directory:
+  mdbci destroy --all vms-directory-path
+
 In the latter case the command will remove the configuration folder,
 the network configuration file and the template. You can prevent
 destroy command from deleting the template file:
-  mdbci destroy configuration --keep_template
+  mdbci destroy configuration --keep-template
 
 After running the vagrant destroy this command also deletes the
 libvirt and VirtualBox boxes using low-level commands.
@@ -142,11 +145,11 @@ Labels should be separated with commas, do not contain any whitespaces.
   end
 
   # Handle case when command calling with configuration.
-  def destroy_by_configuration
+  def destroy_by_configuration(configuration_path)
     begin
-      configuration = Configuration.new(@args.first, @env.labels)
+      configuration = Configuration.new(configuration_path, @env.labels)
     rescue ArgumentError
-      emergency_deletion_files(@args.first, @env.labels)
+      emergency_deletion_files(configuration_path, @env.labels)
       return
     end
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
@@ -163,7 +166,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     elsif configuration.terraform_configuration?
       terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service)
       result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
-      return unless @env.labels.nil? && Configuration.config_directory?(@args.first)
+      return unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
 
       result
     elsif configuration.dedicated_configuration?
@@ -178,13 +181,26 @@ Labels should be separated with commas, do not contain any whitespaces.
     else
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
-      unless @env.labels.nil? && Configuration.config_directory?(@args.first)
+      unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
         update_configuration_files(configuration)
         return
       end
       Result.ok('')
     end.and_then do
       remove_files(configuration, @env.keep_template) unless @env.keep_configuration
+    end
+  end
+
+  # Handle cases when command calling with --all option.
+  def destroy_all_in_path(path)
+    Dir.entries(path).select do |entry|
+      File.directory?(File.join(path, entry)) && !%w[. ..].include?(entry)
+    end.map do |entry|
+      File.join(path, entry)
+    end.select do |directory|
+      Configuration.config_directory?(directory)
+    end.each do |directory|
+      destroy_by_configuration(directory)
     end
   end
 
@@ -264,12 +280,14 @@ Labels should be separated with commas, do not contain any whitespaces.
     @aws_service = @env.aws_service
     @gcp_service = @env.gcp_service
     @digitalocean_service = @env.digitalocean_service
-    if @env.node_name
+    if @env.all
+      destroy_all_in_path(@args.first)
+    elsif @env.node_name
       destroy_by_node_name
     elsif @env.list
       display_all_nodes
     else
-      destroy_by_configuration
+      destroy_by_configuration(@args.first)
     end
     SUCCESS_RESULT
   end
