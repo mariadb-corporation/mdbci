@@ -194,12 +194,10 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle cases when command calling with --all option.
   def destroy_all_in_path(path)
-    Dir.children(path).select do |entry|
-      File.directory?(File.join(path, entry))
-    end.map do |entry|
+    Dir.children(path).map do |entry|
       File.join(path, entry)
     end.select do |directory|
-      Configuration.config_directory?(directory)
+      File.directory?(directory) && Configuration.config_directory?(directory)
     end.each do |directory|
       destroy_by_configuration(directory)
     end
