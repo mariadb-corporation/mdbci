@@ -25,7 +25,8 @@ class DestroyCommand < BaseCommand
   #
   # @return [Boolean] whether parameters are good or not.
   def check_parameters
-    if !@env.list && !@env.node_name && (@args.empty? || @args.first.nil?)
+    if !@env.list && !@env.node_name && (@args.empty? || @args.first.nil?) &&
+        (@env.all && @args.first.nil? && ENV['MDBCI_VM_PATH'].nil?)
       @ui.error 'Please specify the node name or path to the mdbci configuration or configuration/node as a parameter.'
       show_help
       false
@@ -46,8 +47,8 @@ You can either destroy a single node:
 Or you can destroy all nodes:
   mdbci destroy configuration
 
-Or you can destroy all configurations in directory:
-  mdbci destroy --all vms-directory-path
+Or you can destroy all configurations in directory (in $MDBCI_VM_PATH directory by default):
+  mdbci destroy --all [vms-directory-path]
 
 In the latter case the command will remove the configuration folder,
 the network configuration file and the template. You can prevent
@@ -150,7 +151,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       configuration = Configuration.new(configuration_path, @env.labels)
     rescue ArgumentError
       emergency_deletion_files(configuration_path, @env.labels)
-      return
+      return Result.error('')
     end
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
     registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
@@ -166,7 +167,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     elsif configuration.terraform_configuration?
       terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service)
       result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
-      return unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
+      return result unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
 
       result
     elsif configuration.dedicated_configuration?
@@ -183,7 +184,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
       unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
         update_configuration_files(configuration)
-        return
+        return Result.ok('')
       end
       Result.ok('')
     end.and_then do
@@ -193,8 +194,8 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle cases when command calling with --all option.
   def destroy_all_in_path(path)
-    Dir.entries(path).select do |entry|
-      File.directory?(File.join(path, entry)) && !%w[. ..].include?(entry)
+    Dir.children(path).select do |entry|
+      File.directory?(File.join(path, entry))
     end.map do |entry|
       File.join(path, entry)
     end.select do |directory|
@@ -281,7 +282,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     @gcp_service = @env.gcp_service
     @digitalocean_service = @env.digitalocean_service
     if @env.all
-      destroy_all_in_path(@args.first)
+      destroy_all_in_path(@args.first || ENV['MDBCI_VM_PATH'])
     elsif @env.node_name
       destroy_by_node_name
     elsif @env.list
