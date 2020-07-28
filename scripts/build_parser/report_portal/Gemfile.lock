@@ -3,7 +3,7 @@ GEM
   specs:
     faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
-    json (2.1.0)
+    json (2.3.0)
     multipart-post (2.0.0)
     mysql2 (0.4.10)
 
