@@ -3,8 +3,8 @@
 case node[:platform]
 when 'debian', 'ubuntu'
   package 'maven'
-  if (node[:platform] == 'debian' && node[:platform_version].to_i == 9) ||
-     (node[:platform] == 'ubuntu' && node[:platform_version].to_f == 16.04)
+  if (platform?('debian') && node[:platform_version].to_i == 9) ||
+     (platform?('ubuntu') && node[:platform_version].to_f == 16.04)
     package 'openjdk-8-jdk'
   end
 when 'centos', 'redhat'
