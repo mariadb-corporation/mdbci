@@ -112,7 +112,7 @@ class TerraformConfigurator
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
       node_network = retrieve_node_network(node)
-      node_network = SshUser.create_user(@machine_configurator, node, node_network, @config, logger)
+      node_network = SshUser.create_user(@machine_configurator, node, node_network, @config.path, logger)
       @network_settings.add_network_configuration(node, node_network)
       result = NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
         ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator)

@@ -46,7 +46,7 @@ class DedicatedConfigurator
     @attempts.times do |attempt|
       @ui.info("Configure node #{node}. Attempt #{attempt + 1}.")
       node_network = @network_settings.node_settings(node)
-      node_network = SshUser.create_user(@machine_configurator, node, node_network, @config, logger)
+      node_network = SshUser.create_user(@machine_configurator, node, node_network, @config.path, logger)
       result = connect(node_network, node).and_then do
         NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
           ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator)

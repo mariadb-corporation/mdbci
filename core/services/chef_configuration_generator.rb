@@ -20,6 +20,17 @@ module ChefConfigurationGenerator
     end
   end
 
+  def self.reduces_configure_with_chef(
+    node, logger, network_settings, machine_configurator, role_file, node_config_file
+  )
+    solo_config = "#{node}-config.json"
+    extra_files = [
+      [role_file, "roles/#{node}.json"],
+      [node_config_file, "configs/#{solo_config}"]
+    ]
+    machine_configurator.configure(network_settings, solo_config, logger, extra_files)
+  end
+
   # Make array of cnf files and it target path on the nodes
   def self.cnf_extra_files(node, config)
     cnf_template_path = config.cnf_template_path(node)
