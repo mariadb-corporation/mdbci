@@ -30,8 +30,9 @@ Use the --user flag for the user name specification. Example: mdbci create_user 
   end
 
   def create_user
-    SshUser.execute_commands_to_create(
-      @machine_coonfigurator, @network_settings, @config.node_names.first, @env.user, @ui
+    SshUser.save_to_file({ @config.node_names.first => @env.user }, @config.path)
+    SshUser.execute_command_to_create(
+      @machine_coonfigurator, @network_settings, @config.node_names.first, @ui, @config.path
     )
   end
 
