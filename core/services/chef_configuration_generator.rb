@@ -20,9 +20,7 @@ module ChefConfigurationGenerator
     end
   end
 
-  def self.reduces_configure_with_chef(
-    node, logger, network_settings, machine_configurator, role_file, node_config_file
-  )
+  def self.reduces_configure_with_chef(node, logger, network_settings, machine_configurator, role_file, node_config_file)
     solo_config = "#{node}-config.json"
     extra_files = [
       [role_file, "roles/#{node}.json"],
