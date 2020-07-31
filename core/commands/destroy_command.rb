@@ -194,6 +194,10 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   # Handle cases when command calling with --all option.
   def destroy_all_in_path(path)
+    unless File.directory?(path)
+      @ui.error("Configuration directory does not exist.")
+      return Result.ok('')
+    end
     Dir.children(path).map do |entry|
       File.join(path, entry)
     end.select do |directory|
