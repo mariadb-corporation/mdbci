@@ -3,6 +3,7 @@
 require 'json'
 require 'yaml'
 require 'tty-table'
+require 'date'
 
 require_relative 'base_command'
 require_relative '../services/aws_service'
@@ -54,7 +55,11 @@ Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this 
     end
     return Result.error('No instances were found in AWS-services') if all_instances.empty?
 
-    select_by_time(all_instances) unless @env.hours.nil?
+    all_instances.each do |instance|
+      instance[:launch_time] = DateTime.parse(instance[:launch_time].to_s)
+    end
+    all_instances = select_by_time(all_instances) unless @env.hours.nil?
+    all_instances = time_to_string(all_instances)
     Result.ok(all_instances)
   end
 
@@ -70,26 +75,28 @@ Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this 
     return Result.error('No instances were found in GCP-services') if all_instances.empty?
 
     all_instances.each do |instance|
-      instance[:launch_time] = translate_to_right_time(instance[:launch_time])
+      instance[:launch_time] = DateTime.parse(instance[:launch_time]).new_offset(0.0 / 24)
     end
-    select_by_time(all_instances) unless @env.hours.nil?
+    all_instances = select_by_time(all_instances) unless @env.hours.nil?
+    all_instances = time_to_string(all_instances)
     Result.ok(all_instances)
   end
 
-  def translate_to_right_time(time)
-    date, times = time.split('T')
-    year, month, day = date.split('-')
-    hour, min, sec = times.split(':')
-    Time.utc(year, month, day, hour, min, sec) + 60 * 60 * 7 # Time delay for GCP-provider is 7 hours
-  end
-
   def select_by_time(instances)
+    new_instances = instances
     if @env.hours.to_i <= 0
       @ui.error('The number of hours entered incorrectly. All instances will be shown.')
-      return instances
+      return new_instances
     end
-    instances.select! do |instance|
-      instance[:launch_time] < Time.now.utc - @env.hours.to_i * 60 * 60
+    new_instances.select do |instance|
+      instance[:launch_time] < DateTime.now.new_offset(0.0 / 24) - (@env.hours.to_i / 24.0)
+    end
+  end
+
+  def time_to_string(instances)
+    instances.map do |instance|
+      instance[:launch_time] = instance[:launch_time].to_s
+      instance
     end
   end
 
@@ -127,6 +134,8 @@ Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this 
   end
 
   def in_table_format(list)
+    return 'List empty' if list.empty?
+
     table = TTY::Table.new(header: ['Launch time', 'Node name'])
     list.each do |instance|
       table << [instance[:launch_time], instance[:node_name]]
