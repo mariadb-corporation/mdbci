@@ -25,6 +25,7 @@ opts = GetoptLong.new(
   ['--field', '-f', GetoptLong::REQUIRED_ARGUMENT],
   ['--force-distro', GetoptLong::REQUIRED_ARGUMENT],
   ['--help', GetoptLong::NO_ARGUMENT],
+  ['--hours', GetoptLong::REQUIRED_ARGUMENT],
   ['--ipv6', GetoptLong::NO_ARGUMENT],
   ['--json', GetoptLong::NO_ARGUMENT],
   ['--key', '-k', GetoptLong::REQUIRED_ARGUMENT],
@@ -150,6 +151,9 @@ begin
 
     when '--help'
       session.show_help = true
+
+    when '--hours'
+      session.hours = arg
 
     when '--reinstall'
       session.reinstall = true

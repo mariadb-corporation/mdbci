@@ -22,6 +22,7 @@ class ListCloudInstancesCommand < BaseCommand
 List cloud instances command shows a list of active machines on GCP and AWS providers and the time they were created.
 
 Add the --json flag for the list_cloud_instances command to show the machine readable text.
+Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this hours.
     HELP
     @ui.info(info)
   end
@@ -53,6 +54,7 @@ Add the --json flag for the list_cloud_instances command to show the machine rea
     end
     return Result.error('No instances were found in AWS-services') if all_instances.empty?
 
+    select_by_time(all_instances) unless @env.hours.nil?
     Result.ok(all_instances)
   end
 
@@ -67,7 +69,28 @@ Add the --json flag for the list_cloud_instances command to show the machine rea
     end
     return Result.error('No instances were found in GCP-services') if all_instances.empty?
 
+    all_instances.each do |instance|
+      instance[:launch_time] = translate_to_right_time(instance[:launch_time])
+    end
+    select_by_time(all_instances) unless @env.hours.nil?
     Result.ok(all_instances)
+  end
+
+  def translate_to_right_time(time)
+    date, times = time.split('T')
+    year, month, day = date.split('-')
+    hour, min, sec = times.split(':')
+    Time.utc(year, month, day, hour, min, sec) + 60 * 60 * 7 # Time delay for GCP-provider is 7 hours
+  end
+
+  def select_by_time(instances)
+    if @env.hours.to_i <= 0
+      @ui.error('The number of hours entered incorrectly. All instances will be shown.')
+      return instances
+    end
+    instances.select! do |instance|
+      instance[:launch_time] < Time.now.utc - @env.hours.to_i * 60 * 60
+    end
   end
 
   def print_lists(aws_list, gcp_list)

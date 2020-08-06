@@ -70,6 +70,7 @@ class Session
   attr_accessor :ipv6
   attr_accessor :json
   attr_accessor :user
+  attr_accessor :hours
   attr_reader :aws_service
   attr_reader :digitalocean_service
   attr_reader :gcp_service
