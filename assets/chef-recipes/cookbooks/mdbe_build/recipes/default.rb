@@ -264,7 +264,6 @@ suse_and_sles_packages = %w[
   bzip2
   check-devel
   checkpolicy
-  cmake
   flex
   gcc-c++
   gzip
@@ -296,6 +295,7 @@ suse_packages = %w[
 ]
 
 sles_12_packages = %w[
+  cmake
   boost-devel
   libopenssl-1_0_0-devel
   libopenssl-devel
@@ -421,9 +421,6 @@ when 'suse'
       command 'zypper -n install libboost_*-devel'
     end
   end
-  execute 'install mariadb dependencies' do
-    command 'zypper -n source-install -d mariadb'
-  end
 end
 
 package packages do
@@ -438,15 +435,19 @@ ruby_block 'get cmake version' do
   node.run_state['cmake_flag'] = false
   block do
     cmd = Mixlib::ShellOut.new('cmake --version')
-    cmd.run_command
-    version = cmd.stdout.lines[0].chomp.split(' ')[-1].split('.')
-    required_version = node['mdbe_build']['cmake_version'].split('.')
-    if version[0].to_i < required_version[0].to_i
+    if cmd.error?
       node.run_state['cmake_flag'] = true
-    elsif version[0].to_i == required_version[0].to_i && version[1].to_i < required_version[1].to_i
-      node.run_state['cmake_flag'] = true
-    elsif version[0].to_i == required_version[0].to_i && version[1].to_i == required_version[1].to_i && version[2].to_i < required_version[2].to_i
-      node.run_state['cmake_flag'] = true
+    else
+      cmd.run_command
+      version = cmd.stdout.lines[0].chomp.split(' ')[-1].split('.')
+      required_version = node['mdbe_build']['cmake_version'].split('.')
+      if version[0].to_i < required_version[0].to_i
+        node.run_state['cmake_flag'] = true
+      elsif version[0].to_i == required_version[0].to_i && version[1].to_i < required_version[1].to_i
+        node.run_state['cmake_flag'] = true
+      elsif version[0].to_i == required_version[0].to_i && version[1].to_i == required_version[1].to_i && version[2].to_i < required_version[2].to_i
+        node.run_state['cmake_flag'] = true
+      end
     end
   end
 end
