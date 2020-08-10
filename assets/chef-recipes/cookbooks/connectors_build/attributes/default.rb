@@ -6,3 +6,5 @@ export M2_HOME=/usr/share/maven
 export M2=$M2_HOME/bin
 export PATH=$M2:$PATH
 MAVEN_SETTINGS
+
+default['connectors_build']['java_version'] = nil
