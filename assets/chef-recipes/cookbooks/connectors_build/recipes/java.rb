@@ -8,6 +8,9 @@ when 'debian', 'ubuntu'
     package 'openjdk-8-jdk'
   end
 when 'centos', 'redhat'
+  if node['connectors_build']['java_version'] == '7'
+    package 'java-1.7.0-openjdk-devel'
+  end
   package 'maven'
 when 'suse', 'opensuseleap'
   remote_file '/tmp/maven.tar.gz' do
