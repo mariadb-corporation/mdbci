@@ -8,6 +8,8 @@ class NetworkSettings
     return Result.error('Incorrect path') if path.nil?
 
     document = IniParse.parse(File.read(path))
+    return Result.error('The network configuration file is empty') if document['__anonymous__'].nil?
+
     settings = parse_document(document)
     Result.ok(NetworkSettings.new(settings))
   rescue IniParse::ParseError => e
