@@ -24,6 +24,7 @@ List cloud instances command shows a list of active machines on GCP and AWS prov
 
 Add the --json flag for the list_cloud_instances command to show the machine readable text.
 Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this hours.
+The command ends with an error if instances are present, no otherwise
     HELP
     @ui.info(info)
   end
@@ -34,11 +35,16 @@ Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this 
       return SUCCESS_RESULT
     end
     show_list
-    SUCCESS_RESULT
+    if @number_instances != 0
+      Result.error('Old instances are present!')
+    else
+      SUCCESS_RESULT
+    end
   end
 
   def show_list
     @hidden_instances = read_hidden_instances
+    @number_instances = 0
     print_lists(generate_aws_list, generate_gcp_list)
   end
 
@@ -60,6 +66,7 @@ Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this 
     end
     all_instances = select_by_time(all_instances) unless @env.hours.nil?
     all_instances = time_to_string(all_instances)
+    @number_instances += all_instances.size
     Result.ok(all_instances)
   end
 
@@ -79,6 +86,7 @@ Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this 
     end
     all_instances = select_by_time(all_instances) unless @env.hours.nil?
     all_instances = time_to_string(all_instances)
+    @number_instances += all_instances.size
     Result.ok(all_instances)
   end
 
