@@ -48,7 +48,7 @@ You can either destroy a single node:
 Or you can destroy all nodes:
   mdbci destroy configuration
 
-Or you can destroy all configurations in directory (in $MDBCI_VM_PATH directory by default):
+Or you can destroy all configurations in directory:
   mdbci destroy --all [vms-directory-path]
 
 You can destroy all the machines by passing information in JSON format from list_cloud_instances:
