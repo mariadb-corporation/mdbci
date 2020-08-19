@@ -12,6 +12,7 @@ require_relative '../services/vagrant_service'
 require_relative '../services/product_and_subscription_registry'
 
 require 'fileutils'
+require 'json'
 
 # Command allows to destroy the whole configuration or a specific node.
 class DestroyCommand < BaseCommand
@@ -26,7 +27,7 @@ class DestroyCommand < BaseCommand
   # @return [Boolean] whether parameters are good or not.
   def check_parameters
     if !@env.list && !@env.node_name && (@args.empty? || @args.first.nil?) &&
-        (@env.all && @args.first.nil? && ENV['MDBCI_VM_PATH'].nil?)
+        ((@env.json || @env.all) && @args.first.nil?)
       @ui.error 'Please specify the node name or path to the mdbci configuration or configuration/node as a parameter.'
       show_help
       false
@@ -49,6 +50,9 @@ Or you can destroy all nodes:
 
 Or you can destroy all configurations in directory (in $MDBCI_VM_PATH directory by default):
   mdbci destroy --all [vms-directory-path]
+
+You can destroy all the machines by passing information in JSON format from list_cloud_instances:
+  mdbci destroy --json path-to-JSON-file
 
 In the latter case the command will remove the configuration folder,
 the network configuration file and the template. You can prevent
@@ -205,6 +209,26 @@ Labels should be separated with commas, do not contain any whitespaces.
     end.each do |directory|
       destroy_by_configuration(directory)
     end
+    FileUtils.rm_r(path) if Dir.children(path).empty?
+  end
+
+  def destroy_by_json(path)
+    return Result.error("The file #{path} does not exist or it is a directory") unless File.file?(path)
+
+    json_info = JSON.parse(File.read(path))
+    if json_info['aws'].class == Array
+      json_info['aws'].each do |instance|
+        @ui.info("Destroy #{instance['node_name']}")
+        @aws_service.terminate_instance_by_name(instance['node_name'])
+      end
+    end
+    if json_info['gcp'].class == Array
+      json_info['gcp'].each do |instance|
+        @ui.info("Destroy #{instance['node_name']}")
+        @gcp_service.delete_instance(instance['node_name'])
+      end
+    end
+    SUCCESS_RESULT
   end
 
   def emergency_deletion_files(path, labels)
@@ -278,13 +302,20 @@ Labels should be separated with commas, do not contain any whitespaces.
   end
 
   def execute
+    if @env.show_help
+      show_help
+      return SUCCESS_RESULT
+    end
     return ARGUMENT_ERROR_RESULT unless check_parameters
 
     @aws_service = @env.aws_service
     @gcp_service = @env.gcp_service
     @digitalocean_service = @env.digitalocean_service
     if @env.all
-      destroy_all_in_path(@args.first || ENV['MDBCI_VM_PATH'])
+      destroy_all_in_path(@args.first)
+    elsif @env.json
+      result = destroy_by_json(@args.first)
+      return result if result.error?
     elsif @env.node_name
       destroy_by_node_name
     elsif @env.list
