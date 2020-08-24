@@ -45,6 +45,19 @@ module RepositoryParserCore
     end
   end
 
+  def save_key(logger, auth, candidate_key)
+    lambda do |release, _|
+      key_link = get_links(release[:url], logger, auth).select { |link| key_link?(link) }
+      key_name = key_link.map { |link| link.content.delete('/') }
+      if key_name.empty?
+        release[:repo_key] = candidate_key
+      else
+        release[:repo_key] = add_auth_to_url("#{release[:url]}#{key_name[0]}", auth)
+      end
+      release
+    end
+  end
+
   RPM_PLATFORMS = {
     'el' => %w[centos rhel],
     'sles' => %w[sles],
@@ -197,6 +210,10 @@ module RepositoryParserCore
       link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$})
   end
 
+  def key_link?(link)
+    link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*public$})
+  end
+
   # Check that passed link is possibly a parent directory link or not
   # @param link link to check
   # @return [Boolean] whether link is parent directory link or not
@@ -253,7 +270,7 @@ module RepositoryParserCore
   # @param product [String] name of the product
   def add_key_and_product_to_releases(releases, key, product)
     releases.each do |release|
-      release[:repo_key] = key
+      release[:repo_key] = key unless key.nil?
       release[:product] = product
     end
   end

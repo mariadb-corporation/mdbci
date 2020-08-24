@@ -20,11 +20,12 @@ module MaxscaleCiParser
 
   def self.parse_maxscale_ci_rpm_repository_new(config, product_version, auth, log, logger)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['new_key'], auth), 'maxscale_ci', product_version,
+        config['path'], auth, nil, 'maxscale_ci', product_version,
         %w[maxscale],
         ->(url) { url },
         ->(package, _) { /#{package}/ }, log, logger,
         save_as_field(:version),
+        save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
         append_url(%w[yum]),
         split_rpm_platforms,
         extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
@@ -37,11 +38,12 @@ module MaxscaleCiParser
 
   def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, log, logger)
     parse_repository(
-        config['path'], auth, add_auth_to_url(config['new_key'], auth), 'maxscale_ci', product_version,
+        config['path'], auth, nil, 'maxscale_ci', product_version,
         %w[maxscale],
         ->(url) { generate_maxscale_ci_deb_full_url(url) },
         ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
         save_as_field(:version),
+        save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
         append_url(%w[apt], nil, true),
         append_url(%w[dists]),
         extract_deb_platforms,
