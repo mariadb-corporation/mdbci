@@ -7,15 +7,15 @@ require_relative '../models/configuration'
 require_relative '../models/result'
 
 # This class installs the repository on selected node
-class InstallRepoCommand < BaseCommand
+class SetupRepoCommand < BaseCommand
   def self.synopsis
     'Installs the repository on selected node'
   end
 
   def show_help
     info = <<-HELP
-'install_repo' command installs the repository on the node.
-mdbci install_repo --product PRODUCT --product-version VERSION NODE
+'setup_repo' command installs the repository on the node.
+mdbci setup_repo --product PRODUCT --product-version VERSION NODE
     HELP
     @ui.info(info)
   end
