@@ -19,7 +19,7 @@ require_relative 'commands/provide_files'
 require_relative 'commands/deploy_command'
 require_relative 'commands/setup_dependencies_command'
 require_relative 'commands/install_product_command.rb'
-require_relative 'commands/install_repo_command'
+require_relative 'commands/setup_repo_command'
 require_relative 'commands/update_configuration_command'
 require_relative 'commands/show_command'
 require_relative 'constants'
@@ -217,9 +217,6 @@ EOF
     when 'install_product'
       command = InstallProduct.new(ARGV, self, $out)
       exit_code = command.execute
-    when 'install_repo'
-      command = InstallRepoCommand.new(ARGV, self, $out)
-      exit_code = command.execute
     when 'list_cloud_instances'
       command = ListCloudInstancesCommand.new(ARGV, self, $out)
       exit_code = command.execute
@@ -236,7 +233,8 @@ EOF
       command = SetupDependenciesCommand.new(ARGV, self, $out)
       exit_code = command.execute()
     when 'setup_repo'
-      exit_code = NodeProduct.setup_product_repo(ARGV.shift)
+      command = SetupRepoCommand.new(ARGV, self, $out)
+      exit_code = command.execute
     when 'show'
       command = ShowCommand.new(ARGV, self, $out)
       exit_code = command.execute
