@@ -5,6 +5,7 @@ module ProductAttributes
   PRODUCT_ATTRIBUTES = {
     'mariadb' => {
       recipe: 'mariadb::install_community',
+      repo_recipe: 'mariadb::mdbcrepos',
       name: 'mariadb',
       repository: 'mariadb',
       files_location: 'cookbooks/mariadb/files',
@@ -12,6 +13,7 @@ module ProductAttributes
     },
     'mariadb_staging' => {
       recipe: 'mariadb::install_community',
+      repo_recipe: 'mariadb::mdbcrepos',
       name: 'mariadb',
       repository: 'mariadb_staging',
       files_location: 'cookbooks/mariadb/files',
@@ -19,6 +21,7 @@ module ProductAttributes
     },
     'mdbe' => {
       recipe: 'mariadb::install_enterprise',
+      repo_recipe: 'mariadb::mdberepos',
       name: 'mariadb',
       repository: 'mdbe',
       files_location: 'cookbooks/mariadb/files',
@@ -26,6 +29,7 @@ module ProductAttributes
     },
     'mdbe_ci' => {
       recipe: 'mariadb::install_enterprise',
+      repo_recipe: 'mariadb::mdberepos',
       name: 'mariadb',
       repository: 'mdbe_ci',
       files_location: 'cookbooks/mariadb/files',
@@ -33,6 +37,7 @@ module ProductAttributes
     },
     'mdbe_staging' => {
       recipe: 'mariadb::install_enterprise',
+      repo_recipe: 'mariadb::mdberepos',
       name: 'mariadb',
       repository: 'mdbe_staging',
       files_location: 'cookbooks/mariadb/files',
@@ -45,6 +50,7 @@ module ProductAttributes
     },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
+      repo_recipe: 'mariadb-maxscale::maxscale_repos',
       name: 'maxscale',
       repository: 'maxscale',
       reverse_product: 'maxscale_remove'
@@ -56,6 +62,7 @@ module ProductAttributes
     },
     'maxscale_ci' => {
       recipe: 'mariadb-maxscale::install_maxscale',
+      repo_recipe: 'mariadb-maxscale::maxscale_repos',
       name: 'maxscale',
       repository: 'maxscale_ci',
       repo_file_name: 'maxscale_ci',
@@ -63,17 +70,20 @@ module ProductAttributes
     },
     'mysql' => {
       recipe: 'mysql::install_community',
+      repo_recipe: 'mysql::mdbcrepos',
       name: 'mysql',
       repository: 'mysql',
       files_location: 'cookbooks/mysql/files'
     },
     'columnstore' => {
       recipe: 'mariadb_columnstore',
+      repo_recipe: 'mariadb_columnstore::configure_repository',
       name: 'columnstore',
       repository: 'columnstore'
     },
     'galera' => {
       recipe: 'galera',
+      repo_recipe: 'galera::galera_repos',
       name: 'galera',
       repository: 'mariadb',
       files_location: 'cookbooks/galera/files'
@@ -151,26 +161,31 @@ module ProductAttributes
     },
     'galera_3_enterprise' => {
         recipe: 'galera_ci::galera_3_enterprise',
+        repo_recipe: 'galera_ci::galera_repository',
         name: 'galera_3_enterprise',
         repository: 'galera_3_enterprise'
     },
     'galera_4_enterprise' => {
         recipe: 'galera_ci::galera_4_enterprise',
+        repo_recipe: 'galera_ci::galera_repository',
         name: 'galera_4_enterprise',
         repository: 'galera_4_enterprise'
     },
     'galera_3_community' => {
         recipe: 'galera_ci::galera_3_community',
+        repo_recipe: 'galera_ci::galera_repository',
         name: 'galera_3_community',
         repository: 'galera_3_community'
     },
     'galera_4_community' => {
         recipe: 'galera_ci::galera_4_community',
+        repo_recipe: 'galera_ci::galera_repository',
         name: 'galera_4_community',
         repository: 'galera_4_community'
     },
     'mariadb_ci' => {
         recipe: 'mariadb::install_community',
+        repo_recipe: 'mariadb::mdberepos',
         name: 'mariadb',
         repository: 'mariadb_ci',
         files_location: 'cookbooks/mariadb/files',
@@ -276,7 +291,12 @@ module ProductAttributes
 
   # Get the Chef recipe name for the product
   def self.recipe_name(product)
-    PRODUCT_ATTRIBUTES[product][:recipe]
+    PRODUCT_ATTRIBUTES.dig(product, :recipe)
+  end
+
+  # Get the Chef recipe name for the repo product
+  def self.repo_recipe_name(product)
+    PRODUCT_ATTRIBUTES.dig(product, :repo_recipe)
   end
 
   # Get the repo file name for the product
