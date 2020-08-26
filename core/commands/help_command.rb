@@ -11,6 +11,7 @@ require_relative 'deploy_command'
 require_relative 'setup_dependencies_command'
 require_relative 'update_configuration_command'
 require_relative 'install_product_command'
+require_relative 'install_repo_command'
 require_relative 'remove_product_command'
 require_relative 'provide_files'
 require_relative 'check_relevance_command'
@@ -35,6 +36,7 @@ class HelpCommand < BaseCommand
     'generate-product-repositories' => GenerateProductRepositoriesCommand.synopsis,
     'help' => HelpCommand.synopsis,
     'install_product' => InstallProduct.synopsis,
+    'install_repo' => InstallRepoCommand.synopsis,
     'list_cloud_instances' => ListCloudInstancesCommand.synopsis,
     'remove_product' => RemoveProductCommand.synopsis,
     'provide-files' => ProvideFiles.synopsis,
