@@ -102,11 +102,17 @@ module MdbeCiParser
       { lambda: append_url(%w[DEB]) },
       { lambda: add_platform_and_version(:deb) },
       { lambda: lambda do |release, _|
-        repo_path = add_auth_to_url(release[:url], auth)
         release[:version] = release[:version].join('/')
-        release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+        release[:repo] = generate_deb_path(release[:url], auth)
         release
       end }
     )
+  end
+
+  def self.generate_deb_path(path, auth)
+    split_path = path.split('/')
+    platform_and_version = split_path.pop
+    full_url = split_path.join('/')
+    "#{add_auth_to_url(full_url, auth)}/ #{platform_and_version}/"
   end
 end
