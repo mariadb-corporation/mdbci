@@ -42,6 +42,8 @@ class DestroyCommand < BaseCommand
     info = <<-HELP
 'destroy' command allows to destroy nodes and configuration data.
 
+Use the --force flag to remove interactivity
+
 You can either destroy a single node:
   mdbci destroy configuration/node
 
@@ -138,8 +140,8 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_digitalocean_vm_list = filter_nodes_by_name(digitalocean_vm_list, @env.node_name)
     summary_filtered_vm_list = filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list +
       filtered_gcp_vm_list + filtered_digitalocean_vm_list
-    @ui.info("Virtual machines to destroy: #{summary_filtered_vm_list}")
-    return unless @ui.prompt('Do you want to continue? [y/n]')[0].casecmp('y').zero?
+    return unless @ui.confirmation("Virtual machines to destroy: #{summary_filtered_vm_list}",
+                                   'Do you want to continue? [y/n]')
 
     filtered_vagrant_vm_list.each do |provider, nodes|
       nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
@@ -157,6 +159,9 @@ Labels should be separated with commas, do not contain any whitespaces.
       emergency_deletion_files(configuration_path, @env.labels)
       return Result.error('')
     end
+    return unless @ui.confirmation("Virtual machines to destroy: #{configuration.node_names}",
+                                   'Do you want to continue? [y/n]')
+
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
     registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
     if registry_result.success?
@@ -217,12 +222,18 @@ Labels should be separated with commas, do not contain any whitespaces.
 
     json_info = JSON.parse(File.read(path))
     if json_info['aws'].class == Array
+      return unless @ui.confirmation("Virtual machines to destroy: #{json_info['aws']}",
+                                     'Do you want to continue? [y/n]')
+
       json_info['aws'].each do |instance|
         @ui.info("Destroy #{instance['node_name']}")
         @aws_service.terminate_instance_by_name(instance['node_name'])
       end
     end
     if json_info['gcp'].class == Array
+      return unless @ui.confirmation("Virtual machines to destroy: #{json_info['gcp']}",
+                                     'Do you want to continue? [y/n]')
+
       json_info['gcp'].each do |instance|
         @ui.info("Destroy #{instance['node_name']}")
         @gcp_service.delete_instance(instance['node_name'])
@@ -233,6 +244,9 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   def emergency_deletion_files(path, labels)
     @ui.error("Configuration files are corrupted or don't exist. Delete in emergency mode.")
+    return unless @ui.confirmation("Deleting directory #{path}",
+                                   'Do you want to continue? [y/n]')
+
     configuration = Configuration.new(path, labels, false)
     remove_files(configuration, @env.keep_template) unless @env.keep_configuration
   end

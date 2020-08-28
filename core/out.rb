@@ -3,8 +3,9 @@
 # Class provides means to produce output to the application
 class Out
   # @param silent [Boolean] whether the output should be suppressed or not
-  def initialize(silent = false)
+  def initialize(silent = false, force = false)
     @silent = silent
+    @force = force
     @stream = $stdout
     @stream.sync = true
   end
@@ -35,7 +36,18 @@ class Out
     return if @silent
 
     @stream.print("PROMPT: #{string} ")
-    gets.strip
+    STDIN.gets.strip
+  rescue Interrupt => _e
+    'n'
+  end
+
+  def confirmation(info_string, confirm_string)
+    return true if @force
+
+    info(info_string)
+    result = prompt(confirm_string)[0].casecmp('y').zero?
+    info('Aborted!') unless result
+    result
   end
 
   private
