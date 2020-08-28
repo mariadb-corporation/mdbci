@@ -159,9 +159,6 @@ Labels should be separated with commas, do not contain any whitespaces.
       emergency_deletion_files(configuration_path, @env.labels)
       return Result.error('')
     end
-    return unless @ui.confirmation("Virtual machines to destroy: #{configuration.node_names}",
-                                   'Do you want to continue? [y/n]')
-
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
     registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
     if registry_result.success?
@@ -222,18 +219,12 @@ Labels should be separated with commas, do not contain any whitespaces.
 
     json_info = JSON.parse(File.read(path))
     if json_info['aws'].class == Array
-      return unless @ui.confirmation("Virtual machines to destroy: #{json_info['aws']}",
-                                     'Do you want to continue? [y/n]')
-
       json_info['aws'].each do |instance|
         @ui.info("Destroy #{instance['node_name']}")
         @aws_service.terminate_instance_by_name(instance['node_name'])
       end
     end
     if json_info['gcp'].class == Array
-      return unless @ui.confirmation("Virtual machines to destroy: #{json_info['gcp']}",
-                                     'Do you want to continue? [y/n]')
-
       json_info['gcp'].each do |instance|
         @ui.info("Destroy #{instance['node_name']}")
         @gcp_service.delete_instance(instance['node_name'])

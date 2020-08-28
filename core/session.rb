@@ -121,11 +121,19 @@ EOF
     ]
   end
 
+  def initialize_force
+    @tool_config = ToolConfiguration.load
+    @isForce = @tool_config['force'] || @isForce
+  rescue StandardError => _e
+    @isForce = false
+  end
+
   # Method initializes services that depend on the parsed configuration
   def initialize_services
+    if @tool_config.nil?
+      raise 'Unable to read config file'
+    end
     fill_paths
-    $out.info('Loading MDBCI configuration file')
-    @tool_config = ToolConfiguration.load
     $out.info('Loading repository configuration files')
     @aws_service = AwsService.new(@tool_config['aws'], $out)
     @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
