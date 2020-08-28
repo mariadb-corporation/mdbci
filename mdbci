@@ -184,6 +184,8 @@ rescue GetoptLong::MissingArgument => e
   exit 1
 end
 
+session.initialize_force
+
 out = Out.new(session.isSilent, session.isForce)
 $out = out
 

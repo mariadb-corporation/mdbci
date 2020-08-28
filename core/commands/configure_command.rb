@@ -14,7 +14,8 @@ class ConfigureCommand < BaseCommand
       'suse' => 'SUSE subscription',
       'mdbe' => 'MariaDB Enterprise',
       'mdbe_ci' => 'MariaDB Enterprise CI repository',
-      'docker' => 'MaxScale CI Docker Registry subscription'
+      'docker' => 'MaxScale CI Docker Registry subscription',
+      'force' => 'force flag'
   }
 
   def self.synopsis
@@ -125,6 +126,14 @@ Use the following short product names to configure them:
     SUCCESS_RESULT
   end
 
+  def configure_force
+    force_flag = input_force_setting
+    return ERROR_RESULT if force_flag.nil?
+
+    @configuration['force'] = force_flag
+    SUCCESS_RESULT
+  end
+
   def input_docker_credentials
     {
       'username' => read_topic('Please input username for Docker Registry',
@@ -179,6 +188,10 @@ Use the following short product names to configure them:
         'email' => read_topic('Please input email for SUSEConnect', @configuration.dig('suse', 'email')),
         'key' => read_topic('Please input key for SUSEConnect', @configuration.dig('suse', 'key'))
     }
+  end
+
+  def input_force_setting
+    read_topic('Use the force flag?', 'y').casecmp('y').zero?
   end
 
   def configure_mdbe
