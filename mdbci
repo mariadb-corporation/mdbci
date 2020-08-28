@@ -22,6 +22,7 @@ opts = GetoptLong.new(
   ['--configuration-file', GetoptLong::REQUIRED_ARGUMENT],
   ['--cpu-count', GetoptLong::REQUIRED_ARGUMENT],
   ['--threads', GetoptLong::REQUIRED_ARGUMENT],
+  ['--force', GetoptLong::NO_ARGUMENT],
   ['--field', '-f', GetoptLong::REQUIRED_ARGUMENT],
   ['--force-distro', GetoptLong::REQUIRED_ARGUMENT],
   ['--help', GetoptLong::NO_ARGUMENT],
@@ -91,6 +92,9 @@ begin
 
     when '--field'
       session.field = arg unless arg.empty?
+
+    when '--force'
+      session.isForce = true
 
     when '--override'
       session.override = true
@@ -180,7 +184,7 @@ rescue GetoptLong::MissingArgument => e
   exit 1
 end
 
-out = Out.new(session.isSilent)
+out = Out.new(session.isSilent, session.isForce)
 $out = out
 
 # Putting the information about the
