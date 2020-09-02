@@ -7,6 +7,7 @@ end
 
 execute 'Reset iptables settings' do
   command 'iptables -D INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW'
+  ignore_failure true
 end
 
 case node[:platform_family]
@@ -28,6 +29,7 @@ when 'debian'
   end
   execute 'Save iptables settings' do
     command 'iptables-save > /etc/iptables/rules.v4'
+    ignore_failure true
   end
 
 when 'rhel', 'centos'
@@ -49,6 +51,7 @@ when 'rhel', 'centos'
     else
       command 'iptables-save > /etc/sysconfig/iptables'
     end
+    ignore_failure true
   end
 
 when 'suse'
@@ -66,5 +69,6 @@ when 'suse'
   end
   execute 'Save iptables settings' do
     command 'iptables-save > /etc/sysconfig/iptables'
+    ignore_failure true
   end
 end
