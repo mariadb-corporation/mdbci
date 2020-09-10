@@ -27,12 +27,16 @@ module RepositoryParserCore
   # @param paths [Array<String>] array of paths that should be checked for presence
   # @param key [Symbol] field to save data to
   # @param save_path [Boolean] whether to save path to :repo_url field or not
-  def append_url(paths, key = nil, save_path = false)
+  # @param if_exist [Boolean] append path to url if it path exist, else - keep original url
+  def append_url(paths, key = nil, save_path = false, if_exist = false)
     lambda do |release, links|
       link_names = links.map { |link| link.content.delete('/') }
       repositories = []
       paths.each do |path|
-        next unless link_names.include?(path)
+        unless link_names.include?(path)
+          repositories << release if if_exist
+          next
+        end
 
         repository = {
           url: "#{release[:url]}#{path}/"
