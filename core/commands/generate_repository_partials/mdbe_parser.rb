@@ -70,12 +70,31 @@ module MdbeParser
   end
 
   def self.parse_mdbe_repository(config, mdbe_private_key, link_name, product_name, deb_repo = false)
-    get_mdbe_release_versions(config, mdbe_private_key, link_name).map do |version|
+    release_versions = get_mdbe_release_versions(config, mdbe_private_key, link_name).map do |version|
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
         generate_mdbe_release_info(config['baseurl'], config['key'], version,
                                    platform, platform_version, mdbe_private_key, product_name, deb_repo)
       end
+    end.flatten
+    release_versions + generate_major_versions(release_versions)
+  end
+
+  def self.generate_major_versions(all_versions)
+    minor_version_regex = /^\d+.*\.(\d+).*/
+    major_versions = all_versions.map do |repo|
+      repo[:version].match(/^(\d+.\d+).*/).captures.first
+    end.uniq
+    major_versions.map do |version|
+      max_minor_version = all_versions.select do |repo|
+        repo[:version].start_with?(version)
+      end.max do |a, b|
+        a[:version].match(minor_version_regex).captures.first <=>
+          b[:version].match(minor_version_regex).captures.first
+      end[:version]
+      all_versions
+        .select { |repo| repo[:version] == max_minor_version }
+        .map { |repo| repo.clone.merge(version: version) }
     end.flatten
   end
 end
