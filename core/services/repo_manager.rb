@@ -121,7 +121,7 @@ class RepoManager
   def find_available_repo(product, repository_key)
     @repos.find_all do |elem|
       elem[1]['product'] == product['name'] &&
-          elem[1]['platform'] + '^' + elem[1]['platform_version'] == repository_key
+        elem[1]['platform'] + '^' + elem[1]['platform_version'] == repository_key
     end
   end
 
