@@ -2,6 +2,7 @@
 
 require 'xdg'
 require 'json'
+require 'sem_version'
 require_relative '../models/return_codes'
 require_relative '../models/tool_configuration'
 require_relative 'product_attributes'
@@ -50,6 +51,13 @@ class RepoManager
       repository_name = ProductAttributes.repository(product_name)
       repo_key = "#{repository_name}@#{version}+#{repository_key}"
       repo = @repos[repo_key]
+    end
+    if product.key?('version') && repo.nil?
+      repo = find_last_repository_by_major_version(product, repository_key)
+      unless repo.nil?
+        @ui.warning('MDBCI uses the minor version for the specified major version of the product!')
+        repo_key = "#{repository_name}@#{repo['version']}+#{repository_key}"
+      end
     end
     @ui.info("Repo key is '#{repo_key}': #{repo.nil? ? 'Not found' : 'Found'}")
     repo
@@ -107,17 +115,39 @@ class RepoManager
 
   private
 
+  # Find all available product repositories by repository_key
+  # @param product [Hash] hash array with information about product
+  # @param repository_key [String] key of repository
+  def find_available_repo(product, repository_key)
+    @repos.find_all do |elem|
+      elem[1]['product'] == product['name'] &&
+          elem[1]['platform'] + '^' + elem[1]['platform_version'] == repository_key
+    end
+  end
+
   # Find the latest available repository version
   # @param product [Hash] hash array with information about product
   # @param repository_key [String] key of repository
   def find_last_repository_version(product, repository_key)
-    all_available_repo = @repos.find_all do |elem|
-      elem[1]['product'] == product['name'] &&
-        elem[1]['platform'] + '^' + elem[1]['platform_version'] == repository_key
-    end
+    all_available_repo = find_available_repo(product, repository_key)
     repo = all_available_repo.last[1]
     all_available_repo.delete_if { |elem| elem[1]['version'].include?('debug') }
     repo = all_available_repo.last[1] unless all_available_repo.nil?
     repo
+  end
+
+  # Find the latest available repository version by major version if it's not exists.
+  # For example, for 10.2 version it returns latest 10.2.33-8 version.
+  # @param product [Hash] hash array with information about product
+  # @param repository_key [String] key of repository
+  def find_last_repository_by_major_version(product, repository_key)
+    return nil if product['version'].match(/^\d+\.\d+$/).nil?
+
+    version = "#{product['version']}.0"
+    find_available_repo(product, repository_key).select do |repo|
+      SemVersion.new(repo[1]['version']).satisfies?("~> #{version}")
+    end.max do |a, b|
+      SemVersion.new(a[1]['version']) <=> SemVersion.new(b[1]['version'])
+    end[1]
   end
 end
