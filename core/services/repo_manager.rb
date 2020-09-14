@@ -141,11 +141,13 @@ class RepoManager
   # @param product [Hash] hash array with information about product
   # @param repository_key [String] key of repository
   def find_last_repository_by_major_version(product, repository_key)
-    return nil if product['version'].match(/^\d+\.\d+$/).nil?
+    version_match = product['version'].match(/^(\d+)(\.(\d+)(\.(\d+))?)?.*/)
+    return nil if version_match.nil?
 
-    version = "#{product['version']}.0"
+    version = version_match.captures.values_at(*(0..5).step(2)).compact.map(&:to_i)
     find_available_repo(product, repository_key).select do |repo|
-      SemVersion.new(repo[1]['version']).satisfies?("~> #{version}")
+      repo_version = SemVersion.new(repo[1]['version']).to_a
+      version.each_with_index.all? { |version_part, index| version_part == repo_version[index]  }
     end.max do |a, b|
       SemVersion.new(a[1]['version']) <=> SemVersion.new(b[1]['version'])
     end[1]
