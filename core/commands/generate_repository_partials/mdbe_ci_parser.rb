@@ -38,7 +38,7 @@ module MdbeCiParser
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      append_url(%w[x86_64], nil, false, true),
+      append_path_if_exists('x86_64'),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)
         release
