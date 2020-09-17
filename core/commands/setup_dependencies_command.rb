@@ -4,7 +4,7 @@ require 'tmpdir'
 require_relative 'base_command'
 require_relative '../services/shell_commands'
 
-VAGRANT_VERSION = '2.2.9'
+VAGRANT_VERSION = '2.2.10'
 VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.1.2'
 
 TERRAFORM_VERSION = '0.12.27'
