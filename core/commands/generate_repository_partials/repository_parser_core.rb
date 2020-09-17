@@ -35,13 +35,25 @@ module RepositoryParserCore
         next unless link_names.include?(path)
 
         repository = {
-          url: "#{release[:url]}#{path}/"
+            url: "#{release[:url]}#{path}/"
         }
         repository[:repo_url] = "#{release[:url]}#{path}" if save_path
         repository[key] = path if key
         repositories << repository
       end
       repositories
+    end
+  end
+
+  # Append URL to the current search path if this URL exists
+  # @param path [String] appending path
+  def append_path_if_exists(path)
+    lambda do |release, links|
+      if links.map { |link| link.content.delete('/') }.include?(path)
+        release.merge(url: "#{release[:url]}#{path}/")
+      else
+        release
+      end
     end
   end
 
