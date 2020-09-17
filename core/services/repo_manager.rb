@@ -138,9 +138,14 @@ class RepoManager
   end
 
   def parse_sem_version(version)
-    return nil unless SemVersion.valid?(version)
+    if SemVersion.valid?(version)
+      SemVersion.new(version).to_a
+    else
+      version_match = version.match(/^(\d+)(\.(\d+)(\.(\d+))?)?.*/)
+      return nil if version_match.nil?
 
-    SemVersion.new(version).to_a
+      version_match.captures.values_at(*(0..5).step(2)).compact.map(&:to_i)
+    end
   end
 
   # Find the latest available repository version by major version if it's not exists.
@@ -148,10 +153,9 @@ class RepoManager
   # @param product [Hash] hash array with information about product
   # @param repository_key [String] key of repository
   def find_last_repository_by_major_version(product, repository_key)
-    version_match = product['version'].match(/^(\d+)(\.(\d+)(\.(\d+))?)?.*/)
-    return nil if version_match.nil?
+    version = parse_sem_version(product['version'])
+    return nil if version.nil?
 
-    version = version_match.captures.values_at(*(0..5).step(2)).compact.map(&:to_i)
     find_available_repo(product, repository_key).select do |repo|
       repo[1]['sem_version'] = parse_sem_version(repo[1]['version'])
       next false if repo[1]['sem_version'].nil?
