@@ -37,6 +37,13 @@
     "platform": "ubuntu",
     "platform_version": "bionic"
   },
+  "ubuntu_focal_libvirt": {
+    "provider": "libvirt",
+    "box": "generic/ubuntu2004",
+    "ssh_pty" : "false",
+    "platform": "ubuntu",
+    "platform_version": "focal"
+  },
   "centos_8_libvirt": {
     "provider": "libvirt",
     "box": "generic/centos8",
