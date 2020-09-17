@@ -55,7 +55,8 @@ class RepoManager
     if product.key?('version') && repo.nil?
       repo = find_last_repository_by_major_version(product, repository_key)
       unless repo.nil?
-        @ui.warning('MDBCI uses the minor version for the specified major version of the product!')
+        @ui.warning("MDBCI could not find the specified version #{product['version']}, "\
+                    "automatically using the closes version #{repo['version']}")
         repo_key = "#{repository_name}@#{repo['version']}+#{repository_key}"
       end
     end
@@ -136,6 +137,12 @@ class RepoManager
     repo
   end
 
+  def parse_sem_version(version)
+    return nil unless SemVersion.valid?(version)
+
+    SemVersion.new(version).to_a
+  end
+
   # Find the latest available repository version by major version if it's not exists.
   # For example, for 10.2 version it returns latest 10.2.33-8 version.
   # @param product [Hash] hash array with information about product
@@ -146,10 +153,11 @@ class RepoManager
 
     version = version_match.captures.values_at(*(0..5).step(2)).compact.map(&:to_i)
     find_available_repo(product, repository_key).select do |repo|
-      repo_version = SemVersion.new(repo[1]['version']).to_a
-      version.each_with_index.all? { |version_part, index| version_part == repo_version[index]  }
+      repo[1]['sem_version'] = parse_sem_version(repo[1]['version'])
+      next false if repo[1]['sem_version'].nil?
+      version.each_with_index.all? { |version_part, index| version_part == repo[1]['sem_version'][index]  }
     end.max do |a, b|
-      SemVersion.new(a[1]['version']) <=> SemVersion.new(b[1]['version'])
+      a[1]['sem_version'] <=> b[1]['sem_version']
     end[1]
   end
 end
