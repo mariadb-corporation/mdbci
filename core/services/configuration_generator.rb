@@ -52,7 +52,7 @@ class ConfigurationGenerator
   def self.generate_product_config(repos, product_name, product, box, repo, provider)
     repo = repos.find_repository(product_name, product, box) if repo.nil?
     if repo.nil?
-      raise "Repo for product #{product['name']} #{product['version']} for #{box} not found"
+      return Result.error("Repo for product #{product['name']} #{product['version']} for #{box} not found")
     end
 
     config = make_product_attributes_hash(repo)
