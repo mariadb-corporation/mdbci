@@ -162,6 +162,6 @@ class RepoManager
       version.each_with_index.all? { |version_part, index| version_part == repo[1]['sem_version'][index]  }
     end.max do |a, b|
       a[1]['sem_version'] <=> b[1]['sem_version']
-    end[1]
+    end&.fetch(1, nil)
   end
 end
