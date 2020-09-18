@@ -160,7 +160,7 @@ class ConfigurationGenerator
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box, registry)
-    extend_template(products)
+    products = extend_template(products)
     generate_registry(registry, name, products)
     recipes_result = init_product_configs_and_recipes(box, name, registry)
     return recipes_result if recipes_result.error?
@@ -190,11 +190,16 @@ class ConfigurationGenerator
   # Add all required product dependencies
   def extend_template(products)
     dependences = create_dependences(products)
-    main_products = create_main_products(products)
-    products.delete_if do |product|
-      ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
+    main_products = create_main_products(products) # main_products is plugins
+    if !main_products.empty?
+      new_products = products
+      new_products.delete_if do |product|
+        ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
+      end
+      new_products.concat(dependences).concat(main_products)
+    else
+      products
     end
-    products.concat(dependences).concat(main_products)
   end
 
   # Create a dependency list
