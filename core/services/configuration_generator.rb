@@ -192,7 +192,7 @@ class ConfigurationGenerator
     dependences = create_dependences(products)
     main_products = create_main_products(products) # main_products is plugins
     if !main_products.empty?
-      new_products = products
+      new_products = products.clone
       new_products.delete_if do |product|
         ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
       end
