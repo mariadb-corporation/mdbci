@@ -286,6 +286,54 @@ module ProductAttributes
     'connectors_build' => {
         recipe: 'connectors_build',
         name: 'connectors_build'
+    },
+    'plugin_backup' => {
+        recipe: 'mdbe_plugins::backup',
+        name: 'backup'
+    },
+    'plugin_columnstore' => {
+        recipe: 'mdbe_plugins::columnstore',
+        name: 'columnstore'
+    },
+    'plugin_connect' => {
+        recipe: 'mdbe_plugins::connect',
+        name: 'connect'
+    },
+    'plugin_cracklib_password_check' => {
+        recipe: 'mdbe_plugins::cracklib_password_check',
+        name: 'cracklib_password_check'
+    },
+    'plugin_gssapi_client' => {
+        recipe: 'mdbe_plugins::gssapi_client',
+        name: 'gssapi_client'
+    },
+    'plugin_gssapi_server' => {
+        recipe: 'mdbe_plugins::gssapi_server',
+        name: 'gssapi_server'
+    },
+    'plugin_mariadb_test' => {
+        recipe: 'mdbe_plugins::mariadb_test',
+        name: 'mariadb_test'
+    },
+    'plugin_mroonga' => {
+        recipe: 'mdbe_plugins::mroonga',
+        name: 'mroonga'
+    },
+    'plugin_oqgraph' => {
+        recipe: 'mdbe_plugins::oqgraph',
+        name: 'oqgraph'
+    },
+    'plugin_rocksdb' => {
+        recipe: 'mdbe_plugins::rocksdb',
+        name: 'rocksdb'
+    },
+    'plugin_s3' => {
+        recipe: 'mdbe_plugins::s3',
+        name: 's3'
+    },
+    'plugin_spider' => {
+        recipe: 'mdbe_plugins::spider',
+        name: 'spider'
     }
   }.freeze
 
