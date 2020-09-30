@@ -91,6 +91,8 @@ class TerraformConfigurationGenerator < BaseCommand
                                             File.join(@configuration_path, CONFIGURATION_FILE_NAME))
     end.and_then do
       nodes_info.each do |node_info|
+        next if node_info[:node_params][:platform] == 'windows'
+
         @configuration_generator.create_role_files(@configuration_path, node_info[:node_params][:name], node_info[:role_file_content])
       end
       Result.ok('')
@@ -128,7 +130,7 @@ class TerraformConfigurationGenerator < BaseCommand
                                           @configuration_path, @ssh_keys))
     when 'gcp'
       Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path,
-                                          @ssh_keys, @env.gcp_service))
+                                          @ssh_keys, @env.gcp_service, @all_windows))
     when 'digitalocean'
       Result.ok(TerraformDigitaloceanGenerator.new(@configuration_id, @digitalocean_config, @ui,
                                                    @configuration_path, @ssh_keys,
@@ -146,7 +148,8 @@ class TerraformConfigurationGenerator < BaseCommand
     checks_result = @configuration_template.check_nodes_names
     return checks_result if checks_result.error?
 
-    generate_ssh_keys
+    @all_windows = @configuration_template.all_windows?(@boxes)
+    generate_ssh_keys unless @all_windows
     generation_result = generate_configuration_file.and_then do
       TerraformService.fmt(@ui, @configuration_path)
       unless File.size?(File.join(@configuration_path, CONFIGURATION_FILE_NAME)).nil?

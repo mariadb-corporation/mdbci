@@ -47,6 +47,12 @@ class ConfigurationTemplate
     @node_configurations['cookbook_path']
   end
 
+  def all_windows?(box_definitions)
+    @node_configurations.all? do |node|
+      box_definitions.get_box(node[1]['box'])['platform'] == 'windows'
+    end
+  end
+
   # Check for MDBCI node names defined in the template to be valid Ruby object names.
   #
   # @return [Result::Base] true if all nodes names are valid, otherwise - false.

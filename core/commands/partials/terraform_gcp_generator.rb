@@ -6,6 +6,7 @@ require 'socket'
 require_relative '../../models/result'
 require_relative '../../services/cloud_services'
 require_relative '../../services/terraform_service'
+require_relative '../../services/configuration_reader'
 
 # The class generates the Terraform infrastructure file for Google Cloud Platform provider
 class TerraformGcpGenerator
@@ -16,16 +17,19 @@ class TerraformGcpGenerator
   # @param configuration_path [String] path to directory of generated configuration
   # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
   # @param gcp_service [GcpService] Google Cloud Compute service
+  # @param all_windows [Boolean] all machines on the Windows platform
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, gcp_config, logger, configuration_path, ssh_keys, gcp_service)
+  def initialize(configuration_id, gcp_config, logger, configuration_path, ssh_keys, gcp_service, all_windows)
     @configuration_id = configuration_id
     @gcp_config = gcp_config
     @ui = logger
     @configuration_path = configuration_path
     @configuration_labels = { configuration_id: @configuration_id }
-    @public_key_value = ssh_keys[:public_key_value]
-    @private_key_file_path = ssh_keys[:private_key_file_path]
-    @user = ssh_keys[:login]
+    unless all_windows
+      @public_key_value = ssh_keys[:public_key_value]
+      @private_key_file_path = ssh_keys[:private_key_file_path]
+      @user = ssh_keys[:login]
+    end
     @gcp_service = gcp_service
   end
 
@@ -152,7 +156,12 @@ class TerraformGcpGenerator
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(instance_params)
-    ssh_metadata = ssh_data
+    if instance_params[:platform] == 'windows'
+      need_metadata = false
+    else
+      need_metadata = true
+      ssh_metadata = ssh_data
+    end
     tags_block = tags_partial(instance_tags)
     labels_block = labels_partial(instance_params[:labels])
     template = ERB.new <<-INSTANCE_RESOURCES
@@ -183,9 +192,11 @@ class TerraformGcpGenerator
           automatic_restart = false
         }
       <% end %>
-      metadata = {
-        <%= ssh_metadata %>
-      }
+      <% if need_metadata %>
+        metadata = {
+          <%= ssh_metadata %>
+        }
+      <% end %>
     }
     output "<%= name %>_network" {
       value = {
@@ -261,16 +272,26 @@ class TerraformGcpGenerator
   # @param node_params [Hash] list of the node parameters
   # @return [Result::Base] instance params
   def generate_instance_params(node_params)
+    if node_params[:platform] == 'windows'
+      user = 'jenkins'
+      private_key_file_path = ConfigurationReader.path_to_user_file('mdbci/windows.pem')
+      if private_key_file_path.nil?
+        return Result.error('Please create the windows.pem file in the configuration directory')
+      end
+    else
+      user = @user
+      private_key_file_path = @private_key_file_path
+    end
     labels = @configuration_labels.merge(hostname: TerraformService.format_string(Socket.gethostname),
-                                         username: TerraformService.format_string(@user),
+                                         username: TerraformService.format_string(user),
                                          machinename: TerraformService.format_string(node_params[:name]))
     node_params = node_params.merge(
         labels: labels,
         instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
         network: network_name,
-        user: @user,
+        user: user,
         is_own_vpc: !use_existing_network?,
-        key_file: @private_key_file_path,
+        key_file: private_key_file_path,
         use_only_private_ip: use_only_private_ip?
     )
     CloudServices.choose_instance_type(@gcp_service.machine_types_list, node_params).and_then do |machine_type|

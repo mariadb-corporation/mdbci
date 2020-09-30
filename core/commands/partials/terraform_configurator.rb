@@ -142,7 +142,13 @@ class TerraformConfigurator
                else
                  @ui
                end
-      result = configure_node(node, logger)
+      if @config.windows_node?(node, @env.box_definitions)
+        logger.info('Configuration for Windows nodes is not available')
+        @network_settings.add_network_configuration(node, retrieve_node_network(node))
+        result = Result.ok('')
+      else
+        result = configure_node(node, logger)
+      end
       { node: node, result: result, logger: logger }
     end
     configure_results.each { |result| result[:logger].print_to_stdout } if use_log_storage
