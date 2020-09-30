@@ -143,7 +143,7 @@ class TerraformConfigurator
                  @ui
                end
       if @config.windows_node?(node, @env.box_definitions)
-        logger.info('Configuration for Windows nodes is not available')
+        logger.info('MDBCI is not able to configure Windows nodes')
         @network_settings.add_network_configuration(node, retrieve_node_network(node))
         result = Result.ok('')
       else
