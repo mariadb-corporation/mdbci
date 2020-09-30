@@ -8,6 +8,10 @@ MDBCI supports Windows machines.
 * up
 * destroy
 
+# Create SSH-key
+
+You must to create the SSH-key (`windows.pem`) in the MDBCI configuration folder (full path: `~/.config/mdbci/windows.pem`)
+
 # Example
 
 1. Create template.
