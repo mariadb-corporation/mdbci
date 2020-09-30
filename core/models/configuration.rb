@@ -193,6 +193,14 @@ class Configuration
     end.uniq
   end
 
+  # Return true if node platform is Windows
+  #
+  # @param node [String] name of the node
+  # @param box_definitions [BoxDefinitions] box definitions
+  def windows_node?(node, box_definitions)
+    box_definitions.get_box(box_names(node)[0])['platform'] == 'windows'
+  end
+
   # Get the lists of nodes that correspond to each label
   #
   # @return [Hash] the hash containing arrays of node names

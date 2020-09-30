@@ -126,5 +126,14 @@
     "default_machine_type": "g1-small",
     "default_cpu_count": "1",
     "default_memory_size": "1024"
+  },
+  "windows_gcp": {
+    "provider": "gcp",
+    "image": "bb-windows",
+    "platform": "windows",
+    "platform_version": "2019",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   }
 }
