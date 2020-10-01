@@ -11,6 +11,7 @@ general_packages = %w[
   socat
   sudo
   wget
+  valgrind
 ]
 
 debian_and_ubuntu_packages = %w[
@@ -54,7 +55,6 @@ debian_and_ubuntu_packages = %w[
   software-properties-common
   unixodbc-dev
   uuid-dev
-  valgrind
 ]
 
 debian_packages = %w[
