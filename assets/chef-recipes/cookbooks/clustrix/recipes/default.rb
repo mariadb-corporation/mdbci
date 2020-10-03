@@ -26,7 +26,7 @@ execute 'Unpack ClustrixDB installer' do
 end
 
 execute 'Install ClustrixDB via unpacked installer' do
-  command './clxnode_install.py --yes --force'
+  command './xpdnode_install.py --yes --force'
   cwd File.join(home_dir, 'clustrix-installer')
 end
 
