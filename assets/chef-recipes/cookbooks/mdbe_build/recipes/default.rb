@@ -256,9 +256,11 @@ suse_and_sles_packages = %w[
   bzip2
   check-devel
   checkpolicy
+  cracklib-devel
   flex
   gcc-c++
   gzip
+  krb5-devel
   libaio-devel
   libcurl-devel
   libevent-devel
