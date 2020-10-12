@@ -164,7 +164,10 @@ ubuntu_focal_packages = %w[
 centos_packages = %w[
   boost-devel
   check-devel
+  ccache
+  cmake
   curl-devel
+  cracklib-devel
   gnutls-devel
   jemalloc
   libaio-devel
@@ -183,6 +186,7 @@ centos_packages = %w[
   rpmdevtools
   snappy-devel
   valgrind-devel
+  wget
   which
 ]
 
@@ -190,10 +194,7 @@ centos_6_packages = %w[
   libevent-devel
   bison
   boost-program-options
-  ccache
   clang
-  cmake
-  cracklib-devel
   devtoolset-3-gcc-c++
   devtoolset-3-libasan-devel
   devtoolset-3-valgrind-devel
@@ -206,16 +207,12 @@ centos_6_packages = %w[
   python-pip
   scons
   subversion
-  wget
 ]
 
 centos_7_packages = %w[
   Judy-devel
-  ccache
   checkpolicy
   clang
-  cmake
-  cracklib-devel
   libasan
   libevent-devel
   libgcrypt-devel
@@ -228,17 +225,13 @@ centos_7_packages = %w[
   scons
   subversion
   systemd-devel
-  wget
   yum-utils
 ]
 
 centos_8_packages = %w[
   bison
-  ccache
   checkpolicy
-  cmake
   cracklib
-  cracklib-devel
   Judy
   kernel-headers
   libasan
@@ -253,7 +246,6 @@ centos_8_packages = %w[
   redhat-lsb-core
   python3-scons
   systemd-devel
-  wget
   yum-utils
 ]
 
