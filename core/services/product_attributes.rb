@@ -334,7 +334,11 @@ module ProductAttributes
     'plugin_spider' => {
         recipe: 'mdbe_plugins::spider',
         name: 'spider'
-    }
+    },
+    'google-authenticator' => {
+        recipe: 'google-authenticator',
+        name: 'google-authenticator'
+    },
   }.freeze
 
   DEPENDENCE = {
