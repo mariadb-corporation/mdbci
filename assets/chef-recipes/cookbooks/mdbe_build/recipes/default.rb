@@ -28,6 +28,7 @@ debian_and_ubuntu_packages = %w[
   flex
   gawk
   gdb
+  gnutls-dev
   iputils-ping
   libaio-dev
   libavahi-client3
@@ -67,7 +68,6 @@ debian_and_ubuntu_packages = %w[
 ]
 
 debian_packages = %w[
-  gnutls-dev
   libcurl4-openssl-dev
   libgcrypt20-dev
   lsof
@@ -108,8 +108,11 @@ debian_buster_packages = %w[
 ]
 
 ubuntu_packages = %w[
-  libpcre2-dev
   dh-systemd
+  libcurl4-openssl-dev
+  libgcrypt20-dev
+  libpcre2-dev
+  libzstd-dev
 ]
 
 ubuntu_trusty_packages = %w[
@@ -118,10 +121,7 @@ ubuntu_trusty_packages = %w[
   dh-apparmor
   libbison-dev
   libgcrypt11-dev
-  libgnutls-dev
   librtmp-dev
-  libcurl4-openssl-dev
-  libgcrypt20-dev
   libgnutls28-dev
   libjemalloc-dev
   libkrb5-dev
@@ -137,25 +137,17 @@ ubuntu_xenial_packages = %w[
   autoconf
   automake
   dh-exec
-  gnutls-dev
-  libcurl4-openssl-dev
-  libgcrypt20-dev
   libjemalloc1
   libkrb5-dev
   libnss3-nssdb
   libsystemd-dev
   libtool
-  libzstd-dev
   python-dev
 ]
 
 ubuntu_bionic_packages = %w[
-  gnutls-dev
   libasan2
-  libcurl4-openssl-dev
-  libgcrypt20-dev
   libjemalloc1
-  libzstd-dev
   python-dev
 ]
 
@@ -164,7 +156,6 @@ ubuntu_focal_packages = %w[
   libasan5
   libcurl4-openssl-dev
   libjemalloc2
-  libzstd-dev
   lsof
   pkg-config
   python-dev-is-python3
