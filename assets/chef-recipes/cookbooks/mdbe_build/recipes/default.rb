@@ -30,18 +30,27 @@ debian_and_ubuntu_packages = %w[
   gdb
   iputils-ping
   libaio-dev
+  libavahi-client3
+  libavahi-common-data
+  libavahi-common3
   libboost-all-dev
   libboost-dev
   libboost-filesystem-dev
   libboost-program-options-dev
   libboost-system-dev
   libcrack2-dev
+  libcups2
   libedit-dev
   libevent-dev
+  libjpeg-dev
   libjudy-dev
+  liblcms2-2
   libmhash-dev
+  libnspr4
+  libnss3
   libnuma-dev
   libpam-dev
+  libpcsclite1
   libsnappy-dev
   libssl-dev
   libxml-simple-perl
@@ -133,6 +142,7 @@ ubuntu_xenial_packages = %w[
   libgcrypt20-dev
   libjemalloc1
   libkrb5-dev
+  libnss3-nssdb
   libsystemd-dev
   libtool
   libzstd-dev
