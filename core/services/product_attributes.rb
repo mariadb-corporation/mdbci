@@ -339,6 +339,14 @@ module ProductAttributes
         recipe: 'google-authenticator',
         name: 'google-authenticator'
     },
+    'kerberos' => {
+        recipe: 'kerberos',
+        name: 'kerberos'
+    },
+    'kerberos_server' => {
+        recipe: 'kerberos::kerberos_server',
+        name: 'kerberos'
+    }
   }.freeze
 
   DEPENDENCE = {

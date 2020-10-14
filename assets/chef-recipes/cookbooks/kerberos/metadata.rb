@@ -1,0 +1,6 @@
+name             'kerberos'
+maintainer       'mariadb-corporation'
+maintainer_email 'evgeny.vlasov@fruct.org'
+license          'All rights reserved'
+description      'Install and configure Kerberos'
+version          '0.1.0'
