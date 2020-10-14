@@ -273,7 +273,7 @@ In order to specify the number of retries for repository configuration use --att
     when 'mysql'
       MysqlParser.parse(product_config, @product_version, @ui, @logger)
     when 'clustrix'
-      ClustrixParser.parse(product_config)
+      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging')
     when 'galera_3_enterprise'
       GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
     when 'galera_4_enterprise'

@@ -17,7 +17,7 @@ You can specify two product versions:
   }
 }
 ```
-* Internet version. Version starts with `http`. For expample `http://clustrix.sourse/clustrix-.el7.tar.bz2`
+* Internet version. Version starts with `http`. For example `http://clustrix.sourse/clustrix-.el7.tar.bz2`
 ```json
 {
   "centos_node" :
