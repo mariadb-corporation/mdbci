@@ -9,19 +9,13 @@ module MdbeParser
     releases
   end
 
-  def self.replace_template_by_mdbe_private_key(path, mdbe_private_key)
-    return path if mdbe_private_key.nil?
-
-    path.sub('$PRIVATE_KEY$', mdbe_private_key)
-  end
-
   MDBE_PLATFORMS = {
     'centos' => 'rhel',
     'rhel' => 'rhel',
     'sles' => 'sles'
   }.freeze
   def self.generate_mdbe_repo_path(path, version, platform, platform_version, mdbe_private_key)
-    replace_template_by_mdbe_private_key(path, mdbe_private_key)
+    setup_private_key(path, mdbe_private_key)
       .sub('$MDBE_VERSION$', version)
       .sub('$PLATFORM$', MDBE_PLATFORMS[platform] || '')
       .sub('$PLATFORM_VERSION$', platform_version)
@@ -41,7 +35,7 @@ module MdbeParser
   end
 
   def self.get_mdbe_release_versions(config, mdbe_private_key, link_name)
-    path = replace_template_by_mdbe_private_key(config['path'], mdbe_private_key)
+    path = setup_private_key(config['path'], mdbe_private_key)
     path_uri = URI.parse(path)
     major_release_links = get_mdbe_release_links(path, link_name)
     minor_release_links = major_release_links.map do |major_release_link|

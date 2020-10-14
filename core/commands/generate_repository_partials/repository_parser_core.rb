@@ -353,4 +353,10 @@ module RepositoryParserCore
       (repo_dirs & dirs).any?
     end
   end
+
+  def setup_private_key(path, private_key)
+    return path if private_key.nil?
+
+    path.sub('$PRIVATE_KEY$', private_key)
+  end
 end
