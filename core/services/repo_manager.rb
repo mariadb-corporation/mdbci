@@ -2,7 +2,7 @@
 
 require 'xdg'
 require 'json'
-require 'sem_version'
+require_relative 'sem_version_parser'
 require_relative '../models/return_codes'
 require_relative '../models/tool_configuration'
 require_relative 'product_attributes'
@@ -137,27 +137,16 @@ class RepoManager
     repo
   end
 
-  def parse_sem_version(version)
-    if SemVersion.valid?(version)
-      SemVersion.new(version).to_a
-    else
-      version_match = version.match(/^(\d+)(\.(\d+)(\.(\d+))?)?.*/)
-      return nil if version_match.nil?
-
-      version_match.captures.values_at(*(0..5).step(2)).compact.map(&:to_i)
-    end
-  end
-
   # Find the latest available repository version by major version if it's not exists.
   # For example, for 10.2 version it returns latest 10.2.33-8 version.
   # @param product [Hash] hash array with information about product
   # @param repository_key [String] key of repository
   def find_last_repository_by_major_version(product, repository_key)
-    version = parse_sem_version(product['version'])
+    version = SemVersionParser.parse_sem_version(product['version'])
     return nil if version.nil?
 
     find_available_repo(product, repository_key).select do |repo|
-      repo[1]['sem_version'] = parse_sem_version(repo[1]['version'])
+      repo[1]['sem_version'] = SemVersionParser.parse_sem_version(repo[1]['version'])
       next false if repo[1]['sem_version'].nil?
       version.each_with_index.all? { |version_part, index| version_part == repo[1]['sem_version'][index]  }
     end.max do |a, b|

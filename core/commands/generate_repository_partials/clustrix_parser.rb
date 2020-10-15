@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'repository_parser_core'
+require_relative '../../services/sem_version_parser'
 
 # This module handles the Clustrix repository
 module ClustrixParser
@@ -49,19 +50,27 @@ module ClustrixParser
     end.flatten
   end
 
+  def self.generate_latest_release(releases)
+    releases
+      .map { |release| release.merge({ sem_version: SemVersionParser.parse_sem_version(release[:version]) }) }
+      .max { |a, b| a[:sem_version] <=> b[:sem_version] }
+      .merge({ version: 'latest' })
+  end
+
   def self.get_clustrix_release_versions(config, private_key, link_name)
     paths = [setup_private_key(config['path'], private_key)]
     path_uri = URI.parse(paths.first)
     2.times do
       paths = get_release_paths(path_uri, paths, link_name)
     end
-    paths.map do |path|
+    releases_info = paths.map do |path|
       get_clustrix_tar_links(path)
     end.flatten.map do |link|
       path = generate_url_by_link(path_uri, link)
       version = link.content.match(/^.*\/xpand-(.+)\.[^.]+\.tar\.bz2$/).captures[0].strip
       { repo: path, version: version }
     end
+    releases_info.push(generate_latest_release(releases_info))
   end
 
   def self.generate_clustrix_release_info(platforms, release_info)
