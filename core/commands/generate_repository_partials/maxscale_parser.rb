@@ -14,19 +14,19 @@ module MaxscaleParser
     releases
   end
 
-  def self.setup_new_key(new_key, new_key_sem_versions)
+  def self.setup_old_key(old_key, versions_upper_bound)
     lambda do |release, _|
       version = SemVersionParser.new_sem_version(release[:version])
-      release[:repo_key] = new_key if new_key_sem_versions.any? do |new_key_version|
-        !version.nil? && !new_key_version.nil? &&
-          version.satisfies?("~> #{new_key_version.to_s}") && version.minor == new_key_version.minor
+      release[:repo_key] = old_key if versions_upper_bound.all? do |old_key_version|
+        version.nil? || old_key_version.nil? ||
+          !(version.satisfies?("~> #{old_key_version.to_s}") && version.minor == old_key_version.minor)
       end
       release
     end
   end
 
   def self.parse_maxscale_rpm_repository(config, product_version, log, logger)
-    new_key_sem_versions = config['new_key_versions'].map { |version| SemVersionParser.new_sem_version(version) }
+    old_versions_upper_bound = config['versions_upper_bound'].map { |version| SemVersionParser.new_sem_version(version) }
     parse_repository(
       config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
@@ -41,12 +41,12 @@ module MaxscaleParser
         release[:repo] = release[:url]
         release
       end,
-      setup_new_key(config['new_key'], new_key_sem_versions)
+      setup_old_key(config['old_key'], old_versions_upper_bound)
     )
   end
 
   def self.parse_maxscale_deb_repository(config, product_version, log, logger)
-    new_key_sem_versions = config['new_key_versions'].map { |version| SemVersionParser.new_sem_version(version) }
+    old_versions_upper_bound = config['versions_upper_bound'].map { |version| SemVersionParser.new_sem_version(version) }
     parse_repository(
       config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
@@ -61,7 +61,7 @@ module MaxscaleParser
         release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
         release
       end,
-      setup_new_key(config['new_key'], new_key_sem_versions)
+      setup_old_key(config['old_key'], old_versions_upper_bound)
     )
   end
 end
