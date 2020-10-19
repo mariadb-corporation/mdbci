@@ -31,6 +31,7 @@ module MariadbCiParser
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      append_path_if_exists('x86_64'),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)
         release
@@ -60,10 +61,10 @@ module MariadbCiParser
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = split_url.join('/')
-    mariadb_version = '10.2'
+    mariadb_version = '10.5'
+    mariadb_version = '10.2' if url.include?('10.2')
     mariadb_version = '10.3' if url.include?('10.3')
     mariadb_version = '10.4' if url.include?('10.4')
-    mariadb_version = '10.5' if url.include?('10.5')
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 end
