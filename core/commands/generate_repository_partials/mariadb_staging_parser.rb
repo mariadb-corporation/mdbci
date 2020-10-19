@@ -57,6 +57,12 @@ module MariadbStagingParser
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = split_url.join('/')
-    "#{url}/pool/main/m/mariadb-10.5/"
+    mariadb_version = '10.5'
+    mariadb_version = '10.0' if url.include?('10.0')
+    mariadb_version = '10.1' if url.include?('10.1')
+    mariadb_version = '10.2' if url.include?('10.2')
+    mariadb_version = '10.3' if url.include?('10.3')
+    mariadb_version = '10.4' if url.include?('10.4')
+    "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 end
