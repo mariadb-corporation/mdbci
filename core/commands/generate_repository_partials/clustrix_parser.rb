@@ -23,7 +23,7 @@ module ClustrixParser
   def self.get_clustrix_links(path)
     uri = path.gsub(%r{([^:])\/+}, '\1/')
     doc = Nokogiri::HTML(URI.open(uri))
-    all_links = doc.css('ul:not(.nav) a')
+    all_links = doc.css('a')
     all_links.select do |link|
       yield(link) if block_given?
     end

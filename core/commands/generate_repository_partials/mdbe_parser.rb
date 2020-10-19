@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require_relative 'repository_parser_core'
+
 # This module handles the MDBE repository
 module MdbeParser
+  extend RepositoryParserCore
+
   def self.parse(config, mdbe_private_key, link_name, product_name)
     releases = []
     releases.concat(parse_mdbe_repository(config['repo']['rpm'], mdbe_private_key, link_name, product_name))
@@ -28,7 +32,7 @@ module MdbeParser
   def self.get_mdbe_release_links(path, link_name)
     uri = path.gsub(%r{([^:])\/+}, '\1/')
     doc = Nokogiri::HTML(URI.open(uri))
-    all_links = doc.css('ul:not(.nav) a')
+    all_links = doc.css('a')
     all_links.select do |link|
       mdbe_release_link?(link, link_name)
     end

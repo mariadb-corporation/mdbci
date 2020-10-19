@@ -68,10 +68,10 @@ module MdbeCiParser
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = split_url.join('/')
-    mariadb_version = '10.2'
+    mariadb_version = '10.5'
+    mariadb_version = '10.2' if url.include?('10.2')
     mariadb_version = '10.3' if url.include?('10.3')
     mariadb_version = '10.4' if url.include?('10.4')
-    mariadb_version = '10.5' if url.include?('10.5')
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 
