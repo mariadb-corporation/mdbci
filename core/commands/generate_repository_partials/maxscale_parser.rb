@@ -14,19 +14,44 @@ module MaxscaleParser
     releases
   end
 
-  def self.setup_old_key(old_key, versions_upper_bound)
+  def self.setup_old_key(old_keys)
     lambda do |release, _|
       version = SemVersionParser.new_sem_version(release[:version])
-      release[:repo_key] = old_key if versions_upper_bound.all? do |old_key_version|
-        version.nil? || old_key_version.nil? ||
-          !(version.satisfies?("~> #{old_key_version.to_s}") && version.minor == old_key_version.minor)
+      old_keys.each do |old_key_data|
+        use_old_key = if old_key_data.key?('versions_upper_bound')
+                        old_key_data['versions_upper_bound'].all? do |old_key_version|
+                          version.nil? || old_key_version.nil? ||
+                            !(version.satisfies?("~> #{old_key_version.to_s}") &&
+                              version.minor == old_key_version.minor)
+                        end
+                      elsif old_key_data.key?('specified_versions')
+                        old_key_data['specified_versions'].any? do |old_version|
+                          release[:version] == old_version
+                        end
+                      else
+                        false
+                      end
+        release[:repo_key] = old_key_data['key'] if use_old_key
       end
       release
     end
   end
 
+  def self.generate_old_keys_data(old_keys)
+    old_keys.map do |old_key_data|
+      if old_key_data.key?('versions_upper_bound')
+        versions_upper_bound = old_key_data['versions_upper_bound'].map do |version|
+          SemVersionParser.new_sem_version(version)
+        end
+        old_key_data.merge({ 'versions_upper_bound' => versions_upper_bound })
+      else
+        old_key_data
+      end
+    end
+  end
+
   def self.parse_maxscale_rpm_repository(config, product_version, log, logger)
-    old_versions_upper_bound = config['versions_upper_bound'].map { |version| SemVersionParser.new_sem_version(version) }
+    old_keys = generate_old_keys_data(config['old_keys'])
     parse_repository(
       config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
@@ -41,12 +66,12 @@ module MaxscaleParser
         release[:repo] = release[:url]
         release
       end,
-      setup_old_key(config['old_key'], old_versions_upper_bound)
+      setup_old_key(old_keys)
     )
   end
 
   def self.parse_maxscale_deb_repository(config, product_version, log, logger)
-    old_versions_upper_bound = config['versions_upper_bound'].map { |version| SemVersionParser.new_sem_version(version) }
+    old_keys = generate_old_keys_data(config['old_keys'])
     parse_repository(
       config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
@@ -61,7 +86,7 @@ module MaxscaleParser
         release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
         release
       end,
-      setup_old_key(config['old_key'], old_versions_upper_bound)
+      setup_old_key(old_keys)
     )
   end
 end
