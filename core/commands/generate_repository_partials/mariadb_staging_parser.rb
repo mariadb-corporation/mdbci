@@ -21,7 +21,7 @@ module MariadbStagingParser
     parse_repository(
       config['path'], nil, config['key'], 'mariadb_staging', product_version,
       %w[MariaDB-client MariaDB-server],
-      ->(url) { "#{url}rpms/" }, ->(package, _) { /#{package}/ }, log, logger,
+      ->(url, _) { "#{url}rpms/" }, ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       append_url(%w[yum]),
       split_rpm_platforms,
@@ -38,7 +38,7 @@ module MariadbStagingParser
   def self.parse_mariadb_staging_deb_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mariadb_staging', product_version,
-      %w[mariadb-client mariadb-server], ->(url) { generate_mariadb_deb_full_url(url) },
+      %w[mariadb-client mariadb-server], ->(url, _) { generate_mariadb_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
       save_as_field(:version),
       append_url(%w[repo]),

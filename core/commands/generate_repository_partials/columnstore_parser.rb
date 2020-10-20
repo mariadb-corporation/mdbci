@@ -16,7 +16,7 @@ module ColumnstoreParser
   def self.parse_columnstore_rpm_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'columnstore', product_version, %w[mariadb-columnstore],
-      ->(url) { url },
+      ->(url, _) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
       save_as_field(:version),
@@ -34,7 +34,7 @@ module ColumnstoreParser
   def self.parse_columnstore_deb_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'columnstore', product_version, %w[mariadb-columnstore],
-      ->(url) { generate_mdbe_ci_deb_full_url(url) },
+      ->(url, _) { generate_mdbe_ci_deb_full_url(url) },
       ->(package, _) { /#{package}/ },
       log, logger,
       save_as_field(:version),

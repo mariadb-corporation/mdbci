@@ -21,7 +21,7 @@ module MariadbParser
   def self.parse_mariadb_rpm_repository(config, product_version, product, version_regexp, log, logger)
     parse_repository(
       config['path'], nil, config['key'], product, product_version, %w[MariaDB-client MariaDB-server],
-      ->(url) { "#{url}rpms/" },
+      ->(url, _) { "#{url}rpms/" },
       ->(package, _) { /#{package}/ },
       log, logger,
       extract_field(:version, version_regexp),
@@ -38,7 +38,7 @@ module MariadbParser
   def self.parse_mariadb_deb_repository(config, product_version, product, version_regexp, log, logger)
     parse_repository(
       config['path'], nil, config['key'], product, product_version, %w[mariadb-client mariadb-server],
-      ->(url) { generate_mariadb_deb_full_url(url) },
+      ->(url, _) { generate_mariadb_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ },
       log, logger,
       extract_field(:version, version_regexp),

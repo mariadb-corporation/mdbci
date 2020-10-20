@@ -267,7 +267,8 @@ module RepositoryParserCore
 
   def remove_corrupted_releases(releases, packages, full_url, auth, comparison_template)
     Workers.map(releases) do |release|
-      content = generate_content(full_url.call(release[:url]), auth)
+      dirs_for_check = [full_url.call(release[:url], release[:repo_url])].flatten
+      content = dirs_for_check.map { |url| generate_content(url, auth) }.join('')
       next unless packages.all? do |package|
         comparison_template.call(package, release[:platform_version]) =~ content
       end

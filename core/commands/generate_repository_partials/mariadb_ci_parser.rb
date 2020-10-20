@@ -24,7 +24,7 @@ module MariadbCiParser
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mariadb_ci', product_version,
       %w[MariaDB-client MariaDB-server],
-      ->(url) { url },
+      ->(url, _) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
       save_as_field(:version),
@@ -43,7 +43,7 @@ module MariadbCiParser
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mariadb_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url) { generate_mariadb_ci_deb_full_url(url) },
+      ->(url, _) { generate_mariadb_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
       save_as_field(:version),
       append_url(%w[apt], nil, true),
