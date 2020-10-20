@@ -49,7 +49,7 @@ module MaxscaleParser
     parse_repository(
       config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
-      ->(url) { url },
+      ->(url, _) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
       save_as_field(:version),
@@ -69,7 +69,7 @@ module MaxscaleParser
     parse_repository(
       config['path'], nil, config['key'], 'maxscale', product_version,
       %w[maxscale],
-      ->(url) { "#{url}main/binary-amd64/" },
+      ->(url, repo_url) { ["#{url}main/binary-amd64/", "#{repo_url}/pool/main/m/maxscale/"] },
       ->(package, _) { /#{package}/ },
       log, logger,
       save_as_field(:version),

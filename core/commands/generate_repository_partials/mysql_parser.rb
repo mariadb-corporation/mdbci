@@ -16,7 +16,7 @@ module MysqlParser
   def self.parse_mysql_deb_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mysql', product_version, %w[mysql],
-      ->(url) { generate_mysql_url(url) },
+      ->(url, _) { generate_mysql_url(url) },
       ->(package, _) { /#{package}/ },
       log, logger,
       append_url(%w[debian ubuntu], :platform, true),
@@ -36,7 +36,7 @@ module MysqlParser
   def self.parse_mysql_rpm_repository(config, product_version, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mysql', product_version, %w[mysql],
-      ->(url) { url },
+      ->(url, _) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
       extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
