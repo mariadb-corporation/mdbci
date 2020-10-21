@@ -24,10 +24,6 @@ module MaxscaleParser
                             !(version.satisfies?("~> #{old_key_version.to_s}") &&
                               version.minor == old_key_version.minor)
                         end
-                      elsif old_key_data.key?('specified_versions')
-                        old_key_data['specified_versions'].any? do |old_version|
-                          release[:version] == old_version
-                        end
                       else
                         false
                       end
@@ -39,14 +35,12 @@ module MaxscaleParser
 
   def self.generate_old_keys_data(old_keys)
     old_keys.map do |old_key_data|
-      if old_key_data.key?('versions_upper_bound')
-        versions_upper_bound = old_key_data['versions_upper_bound'].map do |version|
-          SemVersionParser.new_sem_version(version)
-        end
-        old_key_data.merge({ 'versions_upper_bound' => versions_upper_bound })
-      else
-        old_key_data
+      next old_key_data unless old_key_data.key?('versions_upper_bound')
+
+      versions_upper_bound = old_key_data['versions_upper_bound'].map do |version|
+        SemVersionParser.new_sem_version(version)
       end
+      old_key_data.merge({ 'versions_upper_bound' => versions_upper_bound })
     end
   end
 
