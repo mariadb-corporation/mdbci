@@ -5,6 +5,7 @@ require_relative 'repository_parser_core'
 # This module handles the MDBE CI repository
 module MdbeCiParser
   extend RepositoryParserCore
+  DEFAULT_MDBE_VERSION = '10.5'
 
   def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
@@ -50,7 +51,7 @@ module MdbeCiParser
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url, _) { generate_mdbe_ci_deb_full_url(url) },
+      ->(url, repo) { generate_mdbe_ci_deb_full_url(url, repo[:version]) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
       save_as_field(:version),
       append_url(%w[apt], nil, true),
@@ -64,21 +65,15 @@ module MdbeCiParser
     )
   end
 
-  def self.generate_mdbe_ci_deb_full_url(incorrect_url)
-    split_url = incorrect_url.split('/')
-    split_url.pop(2)
-    url = split_url.join('/')
-    mariadb_version = '10.5'
-    mariadb_version = '10.2' if url.include?('10.2')
-    mariadb_version = '10.3' if url.include?('10.3')
-    mariadb_version = '10.4' if url.include?('10.4')
+  def self.generate_mdbe_ci_deb_full_url(url, version)
+    mariadb_version = version.match(/^\D*(\d+\.\d+).*$/)&.captures&.fetch(0) || DEFAULT_MDBE_VERSION
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 
   def self.parse_mdbe_ci_es_repo_rpm_repository(config, product_version, auth, log, logger)
     parse_repository_recursive(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
-      %w[MariaDB-client MariaDB-server], ->(url) { url },
+      %w[MariaDB-client MariaDB-server], ->(url, _) { url },
       ->(package, _) { /#{package}/ }, log, logger,
       { lambda: append_to_field(:version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
@@ -96,7 +91,7 @@ module MdbeCiParser
     parse_repository_recursive(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url) { url },
+      ->(url, _) { url },
       ->(package, _) { /#{package}/ }, log, logger,
       { lambda: append_to_field(:version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
