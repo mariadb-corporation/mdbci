@@ -11,4 +11,10 @@ module SemVersionParser
       version_match.captures.values_at(*(0..7).step(2)).compact.map(&:to_i)
     end
   end
+
+  def self.new_sem_version(version)
+    SemVersion.new(parse_sem_version(version))
+  rescue ArgumentError
+    nil
+  end
 end
