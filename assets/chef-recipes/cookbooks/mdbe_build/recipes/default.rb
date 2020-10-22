@@ -425,6 +425,12 @@ package packages do
   end
 end
 
+if %w[centos redhat].include?(node[:platform]) && node[:platform_version].to_i == 8
+  link '/usr/bin/scons' do
+    to '/usr/bin/scons-3'
+    link_type :symbolic
+  end
+end
 
 ruby_block 'get cmake version' do
   node.run_state['cmake_flag'] = false
