@@ -66,6 +66,7 @@ module MariadbParser
     mariadb_version = '10.3' if url.include?('10.3')
     mariadb_version = '10.4' if url.include?('10.4')
     mariadb_version = '10.5' if url.include?('10.5')
+    mariadb_version = '10.6' if url.include?('10.6')
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 end
