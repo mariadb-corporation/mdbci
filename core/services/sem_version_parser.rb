@@ -3,7 +3,7 @@ require 'sem_version'
 module SemVersionParser
   def self.parse_sem_version(version)
     if SemVersion.valid?(version)
-      SemVersion.new(version).to_a
+      SemVersion.new(version).to_a.compact
     else
       version_match = version.match(/^(\d+)(\.(\d+)(\.(\d+)([_-](\d+)?))?)?.*/)
       return nil if version_match.nil?
