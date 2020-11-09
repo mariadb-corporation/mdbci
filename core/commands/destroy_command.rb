@@ -160,7 +160,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       return Result.error('')
     end
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
-    registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
+    registry_result = ProductAndSubscriptionRegistry.from_file(Configuration.registry_path(configuration.path))
     @ui.error(network_settings_result.error) if network_settings_result.error?
     @ui.error(registry_result.error) if registry_result.error?
     if network_settings_result.success? && registry_result.success?
