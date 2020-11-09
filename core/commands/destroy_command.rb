@@ -161,10 +161,13 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
     registry_result = ProductAndSubcriptionRegistry.from_file(Configuration.registry_path(configuration.path))
-    if registry_result.success?
-      unsubscribe_from_subscriptions(configuration, network_settings_result, registry_result.value)
-    else
-      @ui.error(registry_result.error)
+    @ui.error(network_settings_result.error) if network_settings_result.error?
+    @ui.error(registry_result.error) if registry_result.error?
+    if network_settings_result.success? && registry_result.success?
+      unsubscribe_from_subscriptions(configuration, network_settings_result.value, registry_result.value)
+      if configuration.dedicated_configuration?
+        uninstall_products(configuration, network_settings_result.value, registry_result.value)
+      end
     end
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
@@ -176,22 +179,15 @@ Labels should be separated with commas, do not contain any whitespaces.
       return result unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
 
       result
-    elsif configuration.dedicated_configuration?
-      if network_settings_result.error?
-        @ui.error('Network settings file not found.')
-      elsif registry_result.error?
-        @ui.error(registry_result.error)
-      else
-        uninstall_products(configuration, network_settings_result.value, registry_result.value)
-      end
-      Result.ok('')
-    else
+    elsif configuration.vagrant_configuration?
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
       unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
         update_configuration_files(configuration)
         return Result.ok('')
       end
+      Result.ok('')
+    else
       Result.ok('')
     end.and_then do
       remove_files(configuration, @env.keep_template) unless @env.keep_configuration
@@ -243,13 +239,10 @@ Labels should be separated with commas, do not contain any whitespaces.
   end
 
   def unsubscribe_from_subscriptions(configuration, network_settings, registry)
-    if network_settings.success?
-      configuration.node_names.each do |name|
-        subscription = registry.get_subscription(name)
-        if subscription.success?
-          role_file_path = generate_role_file_unsub(configuration, name, subscription.value)
-         configure(role_file_path, name, configuration, network_settings.value)
-        end
+    configuration.node_names.each do |name|
+      registry.get_subscription(name).and_then do |subscription|
+        role_file_path = generate_role_file_unsub(configuration, name, subscription)
+        configure(role_file_path, name, configuration, network_settings)
       end
     end
   end
