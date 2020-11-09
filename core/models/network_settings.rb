@@ -11,6 +11,8 @@ class NetworkSettings
     return Result.error('The network configuration file is empty') if document['__anonymous__'].nil?
 
     settings = parse_document(document)
+    return Result.error("The network configuration file #{path} is broken") if settings.empty?
+
     Result.ok(NetworkSettings.new(settings))
   rescue IniParse::ParseError => e
     Result.error(e.message)
