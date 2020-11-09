@@ -26,7 +26,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = File.absolute_path(name.to_s)
-    @registry = ProductAndSubcriptionRegistry.new
+    @registry = ProductAndSubscriptionRegistry.new
     @ssh_users = {}
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
       @configuration_template = template

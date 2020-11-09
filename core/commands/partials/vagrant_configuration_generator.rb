@@ -365,7 +365,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     @boxes = @env.box_definitions
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
-    @registry = ProductAndSubcriptionRegistry.new
+    @registry = ProductAndSubscriptionRegistry.new
     @ssh_users = {}
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file))
   end

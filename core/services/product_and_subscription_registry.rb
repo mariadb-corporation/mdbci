@@ -3,7 +3,7 @@
 require_relative 'product_attributes'
 
 # The module provides work with the product_and_subscription_registry.yaml file
-class ProductAndSubcriptionRegistry
+class ProductAndSubscriptionRegistry
   def initialize(registry = {})
     @registry = registry
   end
@@ -40,7 +40,7 @@ class ProductAndSubcriptionRegistry
 
   # Read a register from file
   def self.from_file(path)
-    File.open(path, 'r') { |f| return Result.ok(ProductAndSubcriptionRegistry.new(YAML.safe_load(f))) }
+    File.open(path, 'r') { |f| return Result.ok(ProductAndSubscriptionRegistry.new(YAML.safe_load(f))) }
   rescue StandardError
     Result.error('Failed to read registry')
   end

@@ -213,7 +213,7 @@ class TerraformConfigurationGenerator < BaseCommand
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
     @digitalocean_config = @env.tool_config['digitalocean']
-    @registry = ProductAndSubcriptionRegistry.new
+    @registry = ProductAndSubscriptionRegistry.new
     @ssh_users = {}
     generate_configuration_id
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|

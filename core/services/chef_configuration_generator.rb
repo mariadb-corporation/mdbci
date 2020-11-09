@@ -82,7 +82,7 @@ module ChefConfigurationGenerator
 
   def self.rewrite_registry(name, config, product)
     path = Configuration.registry_path(config.path)
-    ProductAndSubcriptionRegistry.from_file(path).and_then do |registry|
+    ProductAndSubscriptionRegistry.from_file(path).and_then do |registry|
       registry.add_products(name, product)
       registry.save_registry(path)
       Result.ok('')

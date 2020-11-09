@@ -95,7 +95,7 @@ class RemoveProductCommand < BaseCommand
 
   def rewrite_registry(name)
     path = Configuration.registry_path(@mdbci_config.path)
-    ProductAndSubcriptionRegistry.from_file(path).and_then do |registry|
+    ProductAndSubscriptionRegistry.from_file(path).and_then do |registry|
       registry.remove_product(name, @product)
       registry.save_registry(path)
       Result.ok('')
