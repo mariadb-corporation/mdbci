@@ -453,7 +453,7 @@ class DebianDependencyManager < DependencyManager
   def install_vagrant
     return SUCCESS_RESULT unless should_install_vagrant?
 
-    FileUtils.rm_rf(FileUtils.rm_rf(File.expand_path('.vagrant.d')))
+    FileUtils.rm_rf(File.expand_path('~/.vagrant.d'))
     downloaded_file = generate_downloaded_file_path('deb')
     result = run_sequence([
                             "wget #{VAGRANT_URL}.deb -O #{downloaded_file}",
