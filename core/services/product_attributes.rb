@@ -136,6 +136,11 @@ module ProductAttributes
       repository: 'mariadb',
       files_location: 'cookbooks/galera/files'
     },
+    'galera_config' => {
+      recipe: 'galera_config',
+      name: 'galera_config',
+      files_location: 'cookbooks/galera_config/files'
+    },
     'docker' => {
       recipe: 'docker',
       name: 'docker'

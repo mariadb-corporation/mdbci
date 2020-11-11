@@ -234,7 +234,13 @@ class ConfigurationGenerator
   # @param node [Array] internal name of the machine specified in the template
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node)
-    [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    if node[1].key?('cnf_template_path')
+      products.each do |product|
+        product['cnf_template_path'] = node[1]['cnf_template_path']
+      end
+    end
+    products
   end
 
   # Get box provider by box name.
