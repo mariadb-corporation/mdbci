@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require 'fileutils'
 require 'tmpdir'
+require 'sem_version'
 require_relative 'base_command'
 require_relative '../services/shell_commands'
 
@@ -280,7 +282,7 @@ class DependencyManager
   def should_install_vagrant?
     vagrant_v_output = run_command('vagrant -v')[:output]
     installed_version = vagrant_v_output.match(/^Vagrant ([0-9.]+)\s*$/)[1]
-    VAGRANT_VERSION > installed_version
+    SemVersion.new(VAGRANT_VERSION) > SemVersion.new(installed_version)
   rescue Errno::ENOENT
     true
   end
@@ -380,12 +382,13 @@ class CentosDependencyManager < DependencyManager
   def install_vagrant
     return SUCCESS_RESULT unless should_install_vagrant?
 
+    FileUtils.rm_rf(File.expand_path('~/.vagrant.d'))
     downloaded_file = generate_downloaded_file_path('rpm')
     result = run_sequence([
                             "wget #{VAGRANT_URL}.rpm -O #{downloaded_file}",
                             "sudo yum install -y #{downloaded_file}"
                           ])
-    run_command("rm #{downloaded_file}")
+    FileUtils.rm(downloaded_file)
     result[:value].success?
   end
 
@@ -450,12 +453,13 @@ class DebianDependencyManager < DependencyManager
   def install_vagrant
     return SUCCESS_RESULT unless should_install_vagrant?
 
+    FileUtils.rm_rf(File.expand_path('~/.vagrant.d'))
     downloaded_file = generate_downloaded_file_path('deb')
     result = run_sequence([
                             "wget #{VAGRANT_URL}.deb -O #{downloaded_file}",
                             "sudo dpkg -i #{downloaded_file}"
                           ])
-    run_command("rm #{downloaded_file}")
+    FileUtils.rm(downloaded_file)
     result[:value].success?
   end
 end
