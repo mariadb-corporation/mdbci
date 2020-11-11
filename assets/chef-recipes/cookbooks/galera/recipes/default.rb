@@ -236,7 +236,7 @@ unless node['galera']['cnf_template'].nil?
   else
     bash 'Configure Galera server.cnf - Get node IP address' do
       code <<-CODE
-          node_address=$(/sbin/ifconfig eth0 | grep -o -P '(?<=inet ).*(?=  netmask)')
+          node_address=$(/sbin/ifconfig | grep -o -P '(?<=inet ).*(?=  netmask)' | head -n 1)
           sed -i "s|###NODE-ADDRESS###|$node_address|g" #{configuration_file}
       CODE
       flags '-x'
