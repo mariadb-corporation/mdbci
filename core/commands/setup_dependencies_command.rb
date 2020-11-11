@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'fileutils'
-require 'etc'
 require 'tmpdir'
 require 'sem_version'
 require_relative 'base_command'
@@ -383,7 +382,7 @@ class CentosDependencyManager < DependencyManager
   def install_vagrant
     return SUCCESS_RESULT unless should_install_vagrant?
 
-    FileUtils.rm_rf(File.join(Etc.getpwuid.dir, '.vagrant.d'))
+    FileUtils.rm_rf(File.expand_path('.vagrant.d'))
     downloaded_file = generate_downloaded_file_path('rpm')
     result = run_sequence([
                             "wget #{VAGRANT_URL}.rpm -O #{downloaded_file}",
@@ -454,7 +453,7 @@ class DebianDependencyManager < DependencyManager
   def install_vagrant
     return SUCCESS_RESULT unless should_install_vagrant?
 
-    FileUtils.rm_rf(File.join(Etc.getpwuid.dir, '.vagrant.d'))
+    FileUtils.rm_rf(FileUtils.rm_rf(File.expand_path('.vagrant.d')))
     downloaded_file = generate_downloaded_file_path('deb')
     result = run_sequence([
                             "wget #{VAGRANT_URL}.deb -O #{downloaded_file}",
