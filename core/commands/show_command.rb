@@ -259,7 +259,7 @@ class ShowCommand < BaseCommand
     repository_manager = @env.repos
     repository_key = repository_manager.makeKey(@env.nodeProduct, @env.productVersion, @env.boxPlatform,
       @env.boxPlatformVersion)
-    @ui.out(repository_manager.getRepo(repository_key)["repo"])
+    @ui.out(repository_manager.getRepo(repository_key).to_json)
     Result.ok('')
   rescue RuntimeError => e
     Result.error(e.message)
