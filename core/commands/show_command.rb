@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'json'
 require_relative '../models/network_settings'
 require_relative '../models/configuration'
 require_relative 'show_network_config_command'
@@ -259,7 +260,7 @@ class ShowCommand < BaseCommand
     repository_manager = @env.repos
     repository_key = repository_manager.makeKey(@env.nodeProduct, @env.productVersion, @env.boxPlatform,
       @env.boxPlatformVersion)
-    @ui.out(repository_manager.getRepo(repository_key)["repo"])
+    @ui.out(JSON.pretty_generate(repository_manager.getRepo(repository_key)))
     Result.ok('')
   rescue RuntimeError => e
     Result.error(e.message)
