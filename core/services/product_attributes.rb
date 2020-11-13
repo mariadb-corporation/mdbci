@@ -469,7 +469,7 @@ module ProductAttributes
   end
 
   # Checks whether the product has the main_products key
-  def self.config?(product)
+  def self.has_main_product?(product)
     PRODUCT_ATTRIBUTES[product].key?(:main_products)
   end
 

@@ -160,24 +160,25 @@ class ConfigurationGenerator
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box, registry)
-    products = extend_template(products)
-    generate_registry(registry, name, products)
-    recipes_result = init_product_configs_and_recipes(box, name, registry)
-    return recipes_result if recipes_result.error?
+    extend_template(products).and_then do |products|
+      generate_registry(registry, name, products)
+      recipes_result = init_product_configs_and_recipes(box, name, registry)
+      return recipes_result if recipes_result.error?
 
-    product_configs = recipes_result.value[:product_configs]
-    recipe_names = recipes_result.value[:recipe_names]
-    products.each do |product|
-      recipe_and_config_result = make_product_config_and_recipe_name(product, box)
-      return recipe_and_config_result if recipe_and_config_result.error?
+      product_configs = recipes_result.value[:product_configs]
+      recipe_names = recipes_result.value[:recipe_names]
+      products.each do |product|
+        recipe_and_config_result = make_product_config_and_recipe_name(product, box)
+        return recipe_and_config_result if recipe_and_config_result.error?
 
-      recipe_and_config_result.and_then do |recipe_and_config|
-        product_configs.merge!(recipe_and_config[:config])
-        recipe_names << recipe_and_config[:recipe]
+        recipe_and_config_result.and_then do |recipe_and_config|
+          product_configs.merge!(recipe_and_config[:config])
+          recipe_names << recipe_and_config[:recipe]
+        end
       end
+      role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
+      Result.ok(role_description)
     end
-    role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
-    Result.ok(role_description)
   end
 
   def generate_registry(registry, name, products)
@@ -203,31 +204,38 @@ class ConfigurationGenerator
   end
 
   def generate_queue(products)
-    config_products = []
     products_in_queue = products.clone
-    products_in_queue.delete_if do |product|
-      if ProductAttributes.config?(product['name'])
-        config_products << product
-        true
-      end
-    end
+    config_products = delete_config_products(products_in_queue)
     config_products.each do |config|
+      main_product_include = false
       ProductAttributes.main_products(config['name']).each do |main_product|
         index = products_include_product?(products_in_queue, main_product)
         next if index.nil?
 
+        main_product_include = true
         products_in_queue.insert(index + 1, config)
         break
       end
+      return Result.error("Not exit any main product for #{config['name']}") unless main_product_include
     end
-    products_in_queue
+    Result.ok(products_in_queue)
+  end
+
+  def delete_config_products(products_in_queue)
+    config_products = []
+    products_in_queue.delete_if do |product|
+      if ProductAttributes.has_main_product?(product['name'])
+        config_products << product
+        true
+      end
+    end
+    config_products
   end
 
   def products_include_product?(products, interesting_product)
-    products.each_with_index do |product, index|
-      return index if product['name'] == interesting_product
+    products.index do |product|
+      product['name'] == interesting_product
     end
-    nil
   end
 
   # Create a dependency list
