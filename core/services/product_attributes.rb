@@ -139,7 +139,15 @@ module ProductAttributes
     'galera_config' => {
       recipe: 'galera_config',
       name: 'galera_config',
-      files_location: 'cookbooks/galera_config/files'
+      files_location: 'cookbooks/galera_config/files',
+      main_products: [
+          'mdbe',
+          'mariadb',
+          'mdbe_ci',
+          'mariadb_ci',
+          'mdbe_staging',
+          'mariadb_staging'
+      ].freeze
     },
     'docker' => {
       recipe: 'docker',
@@ -458,5 +466,15 @@ module ProductAttributes
   # Get the repository for the product
   def self.repository(product)
     PRODUCT_ATTRIBUTES[product][:repository]
+  end
+
+  # Checks whether the product has the main_products key
+  def self.config?(product)
+    PRODUCT_ATTRIBUTES[product].key?(:main_products)
+  end
+
+  # Get the main_products for the product
+  def self.main_products(product)
+    PRODUCT_ATTRIBUTES[product][:main_products]
   end
 end

@@ -189,6 +189,7 @@ class ConfigurationGenerator
 
   # Add all required product dependencies
   def extend_template(products)
+    extended_products = products
     dependences = create_dependences(products)
     main_products = create_main_products(products) # main_products is plugins
     if !main_products.empty?
@@ -196,10 +197,37 @@ class ConfigurationGenerator
       new_products.delete_if do |product|
         ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
       end
-      new_products.concat(dependences).concat(main_products)
-    else
-      products
+      extended_products = new_products.concat(dependences).concat(main_products)
     end
+    generate_queue(extended_products)
+  end
+
+  def generate_queue(products)
+    config_products = []
+    products_in_queue = products.clone
+    products_in_queue.delete_if do |product|
+      if ProductAttributes.config?(product['name'])
+        config_products << product
+        true
+      end
+    end
+    config_products.each do |config|
+      ProductAttributes.main_products(config['name']).each do |main_product|
+        index = products_include_product?(products_in_queue, main_product)
+        next if index.nil?
+
+        products_in_queue.insert(index + 1, config)
+        break
+      end
+    end
+    products_in_queue
+  end
+
+  def products_include_product?(products, interesting_product)
+    products.each_with_index do |product, index|
+      return index if product['name'] == interesting_product
+    end
+    nil
   end
 
   # Create a dependency list
@@ -237,6 +265,8 @@ class ConfigurationGenerator
     products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
     if node[1].key?('cnf_template_path')
       products.each do |product|
+        next if product.key?('cnf_template_path')
+
         product['cnf_template_path'] = node[1]['cnf_template_path']
       end
     end
