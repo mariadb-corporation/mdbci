@@ -160,24 +160,25 @@ class ConfigurationGenerator
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
   def get_role_description(name, products, box, registry)
-    products = extend_template(products)
-    generate_registry(registry, name, products)
-    recipes_result = init_product_configs_and_recipes(box, name, registry)
-    return recipes_result if recipes_result.error?
+    extend_template(products).and_then do |products|
+      generate_registry(registry, name, products)
+      recipes_result = init_product_configs_and_recipes(box, name, registry)
+      return recipes_result if recipes_result.error?
 
-    product_configs = recipes_result.value[:product_configs]
-    recipe_names = recipes_result.value[:recipe_names]
-    products.each do |product|
-      recipe_and_config_result = make_product_config_and_recipe_name(product, box)
-      return recipe_and_config_result if recipe_and_config_result.error?
+      product_configs = recipes_result.value[:product_configs]
+      recipe_names = recipes_result.value[:recipe_names]
+      products.each do |product|
+        recipe_and_config_result = make_product_config_and_recipe_name(product, box)
+        return recipe_and_config_result if recipe_and_config_result.error?
 
-      recipe_and_config_result.and_then do |recipe_and_config|
-        product_configs.merge!(recipe_and_config[:config])
-        recipe_names << recipe_and_config[:recipe]
+        recipe_and_config_result.and_then do |recipe_and_config|
+          product_configs.merge!(recipe_and_config[:config])
+          recipe_names << recipe_and_config[:recipe]
+        end
       end
+      role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
+      Result.ok(role_description)
     end
-    role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
-    Result.ok(role_description)
   end
 
   def generate_registry(registry, name, products)
@@ -189,6 +190,7 @@ class ConfigurationGenerator
 
   # Add all required product dependencies
   def extend_template(products)
+    extended_products = products
     dependences = create_dependences(products)
     main_products = create_main_products(products) # main_products is plugins
     if !main_products.empty?
@@ -196,9 +198,43 @@ class ConfigurationGenerator
       new_products.delete_if do |product|
         ProductAttributes.need_dependence?(product['name']) || ProductAttributes.dependence?(product['name'])
       end
-      new_products.concat(dependences).concat(main_products)
-    else
-      products
+      extended_products = new_products.concat(dependences).concat(main_products)
+    end
+    generate_queue(extended_products)
+  end
+
+  def generate_queue(products)
+    products_in_queue = products.clone
+    config_products = delete_config_products(products_in_queue)
+    config_products.each do |config|
+      main_product_include = false
+      ProductAttributes.main_products(config['name']).each do |main_product|
+        index = products_include_product?(products_in_queue, main_product)
+        next if index.nil?
+
+        main_product_include = true
+        products_in_queue.insert(index + 1, config)
+        break
+      end
+      return Result.error("Not exit any main product for #{config['name']}") unless main_product_include
+    end
+    Result.ok(products_in_queue)
+  end
+
+  def delete_config_products(products_in_queue)
+    config_products = []
+    products_in_queue.delete_if do |product|
+      if ProductAttributes.has_main_product?(product['name'])
+        config_products << product
+        true
+      end
+    end
+    config_products
+  end
+
+  def products_include_product?(products, interesting_product)
+    products.index do |product|
+      product['name'] == interesting_product
     end
   end
 
@@ -234,7 +270,15 @@ class ConfigurationGenerator
   # @param node [Array] internal name of the machine specified in the template
   # @return [Array<Hash>] list of parameters of products.
   def parse_products_info(node)
-    [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    if node[1].key?('cnf_template_path')
+      products.each do |product|
+        next if product.key?('cnf_template_path')
+
+        product['cnf_template_path'] = node[1]['cnf_template_path']
+      end
+    end
+    products
   end
 
   # Get box provider by box name.
