@@ -37,12 +37,16 @@ module VagrantService
 
   def self.generate_ssh_settings(name, log, config)
     ssh_config = load_vagrant_node_config(name, log, config)
-    {
-      'keyfile' => ssh_config['IdentityFile'],
-      'network' => ssh_config['HostName'],
-      'whoami' => ssh_config['User'],
-      'hostname' => config.node_configurations[name]['hostname']
-    }
+    values = [ssh_config['IdentityFile'], ssh_config['HostName'], ssh_config['User']]
+    if values.include?(nil) || values.include?('')
+      Result.error("Vagrant ssh config of `#{name}` node is broken")
+    else
+      Result.ok({ 'keyfile' => ssh_config['IdentityFile'],
+                  'network' => ssh_config['HostName'],
+                  'whoami' => ssh_config['User'],
+                  'hostname' => config.node_configurations[name]['hostname'] })
+    end
+
   end
 
   # Runs 'vagrant ssh-config' command for node and collects configuration
