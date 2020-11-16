@@ -86,12 +86,17 @@ class VagrantConfigurator
       end
       next unless VagrantService.node_running?(node, logger)
 
-      settings = VagrantService.generate_ssh_settings(node, @ui, @config)
-      settings = SshUser.create_user(@machine_configurator, node, settings, @config.path, logger)
+      settings_result = VagrantService.generate_ssh_settings(node, @ui, @config)
+      next if settings_result.error?
+
+      settings = SshUser.create_user(@machine_configurator, node, settings_result.value, @config.path, logger)
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
-      return SUCCESS_RESULT if ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator).success?
+      if ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node),
+                                                        @config, @ui, @machine_configurator).success?
+        return SUCCESS_RESULT
+      end
     end
     Result.error("Node '#{node}' was not configured.")
   end

@@ -54,8 +54,9 @@ The last command currently will place only the configuration for the specified n
     network_settings = NetworkSettings.new
     @configuration.node_configurations.keys.each do |node|
       if VagrantService.node_running?(node, @ui, @configuration.path)
-        settings = VagrantService.generate_ssh_settings(node, @ui, @configuration)
-        network_settings.add_network_configuration(node, settings)
+        VagrantService.generate_ssh_settings(node, @ui, @configuration).and_then do |settings|
+          network_settings.add_network_configuration(node, settings)
+        end
       end
     end
     network_settings.store_network_configuration(@configuration)

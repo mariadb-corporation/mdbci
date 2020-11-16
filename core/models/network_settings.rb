@@ -112,7 +112,7 @@ class NetworkSettings
       parameters = options.select { |option| option.key.include?(name) }
       parameters.reduce(configs) do |_result, option|
         key = option.key.sub(name, '').sub('_', '')
-        configs[name][key] = option.value.sub(/^"/, '').sub(/"$/, '')
+        configs[name][key] = option.value&.sub(/^"/, '')&.sub(/"$/, '')
       end
     end
     configs
