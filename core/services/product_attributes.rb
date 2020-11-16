@@ -350,15 +350,18 @@ module ProductAttributes
     },
     'google-authenticator' => {
         recipe: 'google-authenticator',
-        name: 'google-authenticator'
+        name: 'google-authenticator',
+        without_version: true
     },
     'kerberos' => {
         recipe: 'kerberos',
-        name: 'kerberos'
+        name: 'kerberos',
+        without_version: true
     },
     'kerberos_server' => {
         recipe: 'kerberos::kerberos_server',
-        name: 'kerberos'
+        name: 'kerberos',
+        without_version: true
     }
   }.freeze
 
@@ -476,5 +479,10 @@ module ProductAttributes
   # Get the main_products for the product
   def self.main_products(product)
     PRODUCT_ATTRIBUTES[product][:main_products]
+  end
+
+  # Checks if the product needs version specification
+  def self.need_version?(product)
+    !PRODUCT_ATTRIBUTES.dig(product, :without_version)
   end
 end

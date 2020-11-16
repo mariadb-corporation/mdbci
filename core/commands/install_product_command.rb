@@ -68,7 +68,7 @@ class InstallProduct < BaseCommand
     @network_settings = result.value
     @product = @env.nodeProduct
     @product_version = @env.productVersion
-    if @product.nil? || @product_version.nil?
+    if @product.nil? || (ProductAttributes.need_version?(@product) && @product_version.nil?)
       @ui.error('You must specify the name and version of the product')
       return ARGUMENT_ERROR_RESULT
     end
