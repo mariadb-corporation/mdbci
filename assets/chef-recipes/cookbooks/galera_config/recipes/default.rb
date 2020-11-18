@@ -2,6 +2,29 @@
 
 require 'shellwords'
 
+%w[4567 4568 4444 3306 4006 4008 4009 4442 6444].each do |port|
+  execute "Open port #{port}" do
+    command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
+    command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
+  end
+end
+
+case node[:platform_family]
+when 'debian', 'ubuntu'
+  execute 'Save MariaDB iptables rules' do
+    command 'iptables-save > /etc/iptables/rules.v4'
+  end
+when 'rhel', 'centos', 'suse'
+  bash 'Save iptables rules' do
+    code <<-EOF
+      iptables-save > /etc/sysconfig/iptables
+    EOF
+    timeout 30
+    retries 5
+    retry_delay 30
+  end
+end
+
 unless node['galera_config']['cnf_template'].nil?
   # Copy server.cnf configuration file to configuration
   case node[:platform_family]
