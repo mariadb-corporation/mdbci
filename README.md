@@ -39,17 +39,26 @@ MDBCI is a tool written in Ruby programming language. In order to ease the deplo
 
 MDBCI uses the [Vagrant](https://www.vagrantup.com/) and a set of low-level tools to create virtual machines and reliably destroy them when the need for them is over. Currently the following Vagrant back ends are supported:
 
-* [Libvirt](https://libvirt.org/) to manage kvm virtual machines,
-* Amazon EC2 virtual machines,
-* Remote boxes.
+* [Libvirt](https://libvirt.org/) to manage kvm virtual machines.
+
+MDBCI uses the [Terraform](https://www.terraform.io/) to create cloud virtual machines and reliably destroy them when the need for them is over. Currently the following Terraform back ends are supported:
+
+* [Amazon EC2](https://aws.amazon.com) virtual machines,
+* [Google Cloud Platform](https://cloud.google.com) virtual machines,
+* [Digital Ocean](https://www.digitalocean.com/) virtual machines.
+
+MDBCI also supports:
+
+* [Dedicated servers](docs/detailed_topics/using_dedicated_servers.md).
 
 MDBCI currently provides support for the following distributions:
 
-* CentOS 6, 7
-* Debian Jessie, Stretch
-* RHEL 6, 7 via AWS
-* SLES 12, 13, 15
-* Ubuntu 14.04, 16.04 and 18.04
+* CentOS 7, 8
+* Debian Stretch, Buster
+* RHEL 7, 8 via AWS or Google Cloud Platform
+* SLES 12, 15
+* Ubuntu 16.04, 18.04, 20.04
+* Windows Server 2019 via Google Cloud Platform. [Read more](docs/detailed_topics/using_windows_machines.md)
 
 MDBCI uses the [Chef](https://www.chef.io/chef/) to deploy the applications onto the virtual machines. The recipes for deployment are provided along with the tool. Currently the following applications may be installed:
 
@@ -57,11 +66,19 @@ MDBCI uses the [Chef](https://www.chef.io/chef/) to deploy the applications onto
 * MariaDB Columnstore,
 * MariaDB Galera,
 * MariaDB MaxScale,
-* MySQL.
+* MariaDB Xpdnode (Clustrix),
+* MariaDB Plugins,
+* MariaDB build dependencies,
+* MariaDB Connectors buid dependencies,
+* MySQL,
+* Kerberos,
+* Docker.
 
 The list of repositories for application installation can be automatically updated.
 
 In-depth architecture description is provided in the [separate document](docs/architecture.md).
+
+[Read more information about products](docs/detailed_topics/all_products.md)
 
 ## MDBCI installation
 
@@ -123,6 +140,15 @@ The core steps required to create virtual machines using MDBCI are:
 
 In the following section we will explore each step in detail. In the overview we will create two VMs: one with MariaDB database and another one with MaxScale server.
 
+### Generate product repositories
+
+Use the `generate-productrepository` command to generate product information in the `repo.d` directory:
+```
+./mdbci generate-product-repositories
+```
+
+[MDBCI generate-product-repository](docs/commands/generate-product-repositories.md)
+
 ### Template creation
 
 Template is a JSON document that describes a set of virtual machines.
@@ -131,41 +157,41 @@ Template is a JSON document that describes a set of virtual machines.
 {
   "mariadb_host": {
     "hostname": "mariadbhost",
-    "box": "centos_7_libvirt",
+    "box": "centos_8_libvirt",
     "labels": [
       "alpha",
       "bravo"
     ],
     "product": {
       "name": "mariadb",
-      "version": "10.3",
+      "version": "10.6",
       "cnf_template": "server1.cnf",
       "cnf_template_path": "../cnf"
     }
   },
   "maxscal_host": {
     "hostname": "maxscalehost",
-    "box": "centos_7_libvirt",
+    "box": "centos_8_libvirt",
     "labels": [
       "alpha"
     ],
     "product": {
       "name": "maxscale",
-      "version": "2.3"
+      "version": "2.5"
     }
   },
   "several_products_host": {
     "hostname": "severalproductshost",
-    "box": "centos_7_libvirt",
+    "box": "centos_8_libvirt",
     "cnf_template_path": "../cnf",
     "products": [
       {
         "name": "maxscale",
-        "version": "2.3"
+        "version": "2.5"
       },
       {
         "name": "mariadb",
-        "version": "10.3",
+        "version": "10.6",
         "cnf_template": "server1.cnf"
       }
     ]
@@ -173,11 +199,11 @@ Template is a JSON document that describes a set of virtual machines.
 }
 ```
 
-Each host description contains the `hostname` and `box` fields. The first one is set to the created virtual machine. The `box` field describes the image that is being used for VM creation and the provider. In the example we use `centos_7_libvirt` that creates the CentOS 7 using the Libvirt provider.
+Each host description contains the `hostname` and `box` fields. The first one is set to the created virtual machine. The `box` field describes the image that is being used for VM creation and the provider. In the example we use `centos_8_libvirt` that creates the CentOS 8 using the Libvirt provider.
 
 You can get the list of boxes using the `./mdbci show platforms` command.
 
-Then each host is setup with the product. The products will be installed on the machines. The mandatory fields for each product is it's name and version that is required to be installed. You can install several products on one host, use the `products` field for it and describe the products list as array of json-objects (see `several_products_host` for reference).
+Then each host is setup with the product. The products will be installed on the machines. You can install several products on one host, use the `products` field for it and describe the products list as array of json-objects (see `several_products_host` for reference).
 
 When installing a database you must also specify the name of the configuration file and the path to the folder where the file is stored. It is advised to use absolute path in `cnf_template_path` as the relative path is calculated from within the configuration directory.
 
@@ -220,6 +246,7 @@ If no machines matches the required set of labels, then no machine will be broug
 ### Using the virtual machines
 
 After the successful startup the file `config_network_config` will be created. This file contains information about the network information of the created entities. You can either use this information or issue [commands directly](docs/examples.md) using special MDBCI commands.
+You can also connect to the VM via ssh using `config_ssh_config`: `ssh -F config_ssh_config several_products_host`
 
 ### Shutting down the virtual machines
 
@@ -228,6 +255,7 @@ When finished and virtual machines are no longer needed you can issue destroy co
 * stop the virtual machines reliably;
 * remove configuration directory;
 * remove network information file;
+* remove ssh config file;
 * remove template that was used to generate the configuration.
 
 Issue the following command:
@@ -242,9 +270,8 @@ mdbci destroy config
 * Developers:
   * Timofey Turenko
   * Andrey Vasilyev
-  * Maksim Kosterin
   * Evgeny Vlasov
-  * Roman Vlasov
+  * Dmitriy Karpovskiy
 * Former Developers:
   * Alexander Kaluzhniy
   * Kirill Krinkin
@@ -252,3 +279,5 @@ mdbci destroy config
   * Mark Zaslavskiy
   * Tatyana Berlenko
   * Kirill Yudenok
+  * Maksim Kosterin
+  * Roman Vlasov

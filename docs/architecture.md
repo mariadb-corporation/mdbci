@@ -17,14 +17,18 @@ This section describes MDBCI architecture, workflow and other technical details.
   * maxscale -- Maxscale server and client
   * mysql -- Mysql server and client
   * galera -- Galera server and clients
+  * clustrix -- Clustrix server. [Read more](detailed_topics/using_clustrix_product.md)
+  * mariadb_plugins -- Plugins for MariaDb. [Read more](detailed_topics/mdbe_pugins.md)
+  * mdbe_build -- Dependencies for MariaDb build
+  * connetors_build -- Dependencies for MariaDb connectors build
+  * kerberos -- Kerberos packages. [Read more](detailed_topics/using_kerberos_product.md)
+  * Docker -- Docker packages.
+
+  [Full list products](detailed_topics/all_products.md)
 
 * **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json formar and collected in repo.d directory (see. [repo.d files](#repod-files))
 
 * **Template** is a set of node definitions in [template.json format](#templatejson). Templates are being used for setup a teting cluster.
-
-### Components
-
-MDBCI uses vagrant with set of plugins as the VM backend manager. It's written with Ruby in order to seamless integration with vagrant. Next releases will be partially converted to vagrant plugins.
 
 ### Workflow
 
@@ -35,7 +39,7 @@ There are next steps for managing testing configuration:
   * Creating stand template
   * Running up virtual machine cluster
   * Running tests
-  * [Cloning configuration]
+  * Cloning configuration
   * Destroing allocated resources
 
 #### Environmental variables
@@ -60,10 +64,11 @@ In this example MDBCI will generate new vagrant/chef config from mynewstand.json
 
 MDBCI configuration is placed to the next files:
 
-* boxes.json
+* boxes
 * repo.d directory and repo.json files
-* templates
-* aws-config.yml
+* generate_repository_config.yaml
+* hidden-instances.yaml
+* required-network-resources.yaml
 
 #### boxes.json
 
@@ -106,7 +111,7 @@ The file boxes.json contains definitions of available boxes. His format is comme
 
 Repositories for products are described in json files. Each file could contain one or more repodefinitions (fields are commented below). During the start mdbci scans repo.d directory and builds full set of available product versions.
 
-```
+```json
 [
 {
    "product":           "galera",
@@ -135,89 +140,9 @@ Repositories for products are described in json files. Each file could contain o
 * platform  -- name of target platform
 * platform_version -- name of version of platform
 
-#### template.json
+#### generate_repository_config.yaml
 
-Templates describe particular stand configuration and have json format. Usually templait contains next blocks:
-
-  * Global config
-  * Nodes definitions
-
-##### Global config parameters
-
-The are next global optional parameters
-
-* cookbook_path -- replaces path to cookbooks.
-* aws_config -- if AWS is used. It specifies [aws_config.yml](#awsconfigyml) file. **Note** If this parameter is specified, mdbci will all nodes interpret as AWS nodes.
-
-
-##### Node definition
-
-Node definition could contain next parameters:
-
-* hostname -- name (and hostname) for VM instance
-* box -- box mane according [boxes.json](#boxesjson) file
-* product -- product block definition
-
-Product block definition looks like as an example:
-
-```
-    "product" : {
-      "name": "mariadb",
-      "version": "10.0.20"
-    }
-```
-
-For Galera product defined some additional parameters for galera server.cnf configuration, for example:
-
-```
-    "product" : {
-      "name": "galera",
-      "version": "10.0",
-      "cnf_template" : "server1.cnf",
-      "cnf_template_path" : "../cnf",
-      "node_name" : "galera0"
-    }
-```
-
-If you want to use non standard configuration for box/product (for instance, you need to install centos6 package with mariadb to centos7 with some particular version) you can use hard repo name link like
-
-```
-    "product" : {
-      "repo": "mariadb@10.0.20_centos6"
-    }
-```
-
-Extra information about matching boxes, versions and products could be found in [corresponded section](#box-products-versions)
-
-
-#### aws_config.yml
-
-This file contains parameters which are required for access to Amazon machines. We intentionally keep ньд format to have compatibility with other tools. Next keys are available in this file
-
-* access_key_id -- AWS access key id
-* secret_access_key --  secret access key
-* keypair_name	-- private key name
-* security_groups -- List of amazon security groups
-* region -- AWS region
-* pemfile -- pem file
-* user_data -- extra user parameters
-* public_ip_service -- curl to aws metadata for public ip4 address
-* private_ip_service -- curl to aws metadata for private ip4 address
-
-Here is an example
-
-```
-aws:
-   access_key_id : 'your_access_key_id_from_aws'
-   secret_access_key : 'your_secret_access_key_from_aws'
-   keypair_name	: 'your_keypair_name'
-   security_groups : [ 'default', 'vagrant' ]
-   region : 'eu-west-1'
-   pemfile : '../maxscale.pem'    # your private key
-   user_data : "#!/bin/bash\nsed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers"
-   public_ip_service : "curl http://169.254.169.254/latest/meta-data/public-ipv4"
-   private_ip_service : "curl http://169.254.169.254/latest/meta-data/private-ipv4"
-```
+All information about products to be generated in `repo.d`.
 
 ### Box, products, versions
 
@@ -248,43 +173,26 @@ mdbe@?+opensuse^13 => [http://downloads.mariadb.com/enterprise/WY99-BC52/mariadb
 where mdbe@? means default mariadb community version on Opensuse13 target platfrom.
 
 
+### hidden-instances.yaml
+
+Information about hidden instances that will not be shown as a result of the `list_cloud_instances` command.
+
+[Read more about list_cloud_instances](commands/list_cloud_instances_command.md)
+
+### required-network-resources.yaml
+
+A list of network resources which you must check before you configure a virtual machine.
+
 ### Supported VM providers
 
 MDBCI supports next VM providers:
 
 * VirtualBox 4.3 and upper
 * Amason EC2
+* Google Cloud Platform
+* Digital Ocean
 * Remote PPC boxes (mdbci)
 * Libvirt boxes (kvm)
 * Docker boxes
 
-#### AWS nodes
-
-Don't forget add dummy box for vagrant aws provider by following command: vagrant box add dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box
-
-#### Libvirt nodes
-
-Installation steps: https://github.com/pradels/vagrant-libvirt
-
-While testing libvirt nodes, do not forget to add the current system or server user to libvirtd group and logout. If you use Jenkins, restart it to.
-
-Currently supported boxes:
-
-* Ubuntu 14.04 (trusty), 12.04 (precise)
-* Debian 7.5
-* CentOS 6.5
-* CentOS 7.0
-
-P.S. You may use vagrant-mutate plugin for converting yours vagrant boxes  (virtualbox, ...) to libvirt boxes.
-
-#### Docker nodes
-
-The docker provisioner can automatically install Docker, pull Docker containers, and configure certain containers to run on boot.
-
-All Dockerfiles store in /mdbci/templates/dockerfiles directory.
-
-Currently supported following containers:
-
-* Ubuntu 14.04 (trusty)
-* CentOS 6.7
-* CentOS 7.0
+[Read more about providers](../README.md#Architecture overview)

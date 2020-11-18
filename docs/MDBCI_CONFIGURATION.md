@@ -56,6 +56,7 @@ mdbe_ci:
   es_repo:
     username: # username
     password: # password
+force: # true or false
 ```
 
 ## How to use existing VPC for AWS and GCP?
