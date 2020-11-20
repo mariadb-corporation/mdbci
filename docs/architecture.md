@@ -4,7 +4,7 @@ This section describes MDBCI architecture, workflow and other technical details.
 
 ### Terminology
 
-* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in [boxes.json](#boxesjson) file.
+* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. [Read more about providers and boxes](./all_providers_and_boxes.md)
 
 * **[MDBCI](https://github.com/mariadb-corporation/mdbci)** is a standard set of tools for testing MariaDb components on the wide set of configurations.
 
@@ -24,11 +24,11 @@ This section describes MDBCI architecture, workflow and other technical details.
   * kerberos -- Kerberos packages. [Read more](detailed_topics/using_kerberos_product.md)
   * Docker -- Docker packages.
 
-  [Full list products](detailed_topics/all_products.md)
+  [Full list products](./all_products.md)
 
 * **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json formar and collected in repo.d directory (see. [repo.d files](#repod-files))
 
-* **Template** is a set of node definitions in [template.json format](#templatejson). Templates are being used for setup a teting cluster.
+* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. [Read more about templates](detailed_topics/create_templates.md)
 
 ### Workflow
 
@@ -62,87 +62,7 @@ In this example MDBCI will generate new vagrant/chef config from mynewstand.json
 
 ### Configuration files
 
-MDBCI configuration is placed to the next files:
-
-* boxes
-* repo.d directory and repo.json files
-* generate_repository_config.yaml
-* hidden-instances.yaml
-* required-network-resources.yaml
-
-#### boxes.json
-
-The file boxes.json contains definitions of available boxes. His format is commented below (**NOTE** real json does not support comments, we used ## just for this documentation).
-
-```
-{
-
-  ## Example of VirtualBox definition
-  "debian" : { ## Box name
-    "provider": "virtualbox",
-    "box": "https://atlas.hashicorp.com/.../virtualbox.box", ## Box URL
-    "platform": "debian",
-    "platform_version": "wheezy"
-  },
-
-  ## Example of AWS Box Definition
-  "ubuntu_vivid": {
-    "provider": "aws",
-    "ami": "ami-b1443fc6",  ## Amazon Image ID
-    "user": "ubuntu",       ## User which will be used for access to the box
-    "default_instance_type": "m3.medium",  ## Amazon instance type
-    "platform": "ubuntu",
-    "platform_version": "vivid"
-  }
-}
-```
-
-##### Available options
-
-* provider -- virtual machine provider
-* box -- virtualbox image if provider is virtualbox
-* ami -- AWS image if provider is Amazon
-* platform  -- name of target platform
-* platform_version -- name of version of platform
-* user -- user which will be used to access to box
-* default_instance_type -- default instance size/type if provider is amazon
-
-#### repo.d files
-
-Repositories for products are described in json files. Each file could contain one or more repodefinitions (fields are commented below). During the start mdbci scans repo.d directory and builds full set of available product versions.
-
-```json
-[
-{
-   "product":           "galera",
-   "version":           "5.3.10",
-   "repo":              "http://yum.mariadb.org/5.3.10/centos6-amd64",
-   "repo_key":          "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
-   "platform":          "centos",
-   "platform_version":  6
-},
-{
-   "product":           "galera",
-   "version":           "5.3.10",
-   "repo":              "http://yum.mariadb.org/5.3.10/centos7-amd64",
-   "repo_key":          "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
-   "platform":          "centos",
-   "platform_version":  7
-}
-]
-```
-##### Available options
-
-* product -- product name
-* version -- product version
-* repo -- link to the repo
-* repo_key -- link to repo key
-* platform  -- name of target platform
-* platform_version -- name of version of platform
-
-#### generate_repository_config.yaml
-
-All information about products to be generated in `repo.d`.
+[Configuration files](./configuration_files.md)
 
 ### Box, products, versions
 
@@ -172,27 +92,6 @@ mdbe@?+opensuse^13 => [http://downloads.mariadb.com/enterprise/WY99-BC52/mariadb
 ```
 where mdbe@? means default mariadb community version on Opensuse13 target platfrom.
 
+### Supported VM providers and boxes
 
-### hidden-instances.yaml
-
-Information about hidden instances that will not be shown as a result of the `list_cloud_instances` command.
-
-[Read more about list_cloud_instances](commands/list_cloud_instances_command.md)
-
-### required-network-resources.yaml
-
-A list of network resources which you must check before you configure a virtual machine.
-
-### Supported VM providers
-
-MDBCI supports next VM providers:
-
-* VirtualBox 4.3 and upper
-* Amason EC2
-* Google Cloud Platform
-* Digital Ocean
-* Remote PPC boxes (mdbci)
-* Libvirt boxes (kvm)
-* Docker boxes
-
-[Read more about providers](../README.md#Architecture overview)
+[Supported VM providers](./all_providers_and_boxes.md)

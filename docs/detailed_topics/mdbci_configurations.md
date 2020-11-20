@@ -62,7 +62,7 @@ force: # true or false
 ## How to use existing VPC for AWS and GCP?
 
 Read more about how to create a new VPC for AWS or GCP in the corresponding
-README files - [AWS VPC](../scripts/aws/vpc/README.md) and [GCP VPC](../scripts/gcp/vpc/README.md).
+README files - [AWS VPC](../../scripts/aws/vpc/README.md) and [GCP VPC](../../scripts/gcp/vpc/README.md).
 
 Set the `use_existing_vpc` setting to `true` and fill `vpc_id` and `subnet_id` fields in the MDBCI configuration for AWS,
 and Set the `use_existing_network` setting to `true` and fill `network` and `tags` fields for GCP.
