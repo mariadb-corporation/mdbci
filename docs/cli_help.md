@@ -1,4 +1,4 @@
-# MDBCI CLI overview
+## MDBCI CLI overview
 
 This document contains the capture of the `mdbci --help` output.
 
