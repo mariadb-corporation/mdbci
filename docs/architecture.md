@@ -4,7 +4,7 @@ This section describes MDBCI architecture, workflow and other technical details.
 
 ### Terminology
 
-* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. [Read more about providers and boxes](./all_providers_and_boxes.md)
+* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. [Read more about providers and boxes](./all_providers_and_boxes.md).
 
 * **[MDBCI](https://github.com/mariadb-corporation/mdbci)** is a standard set of tools for testing MariaDb components on the wide set of configurations.
 
@@ -13,34 +13,32 @@ This section describes MDBCI architecture, workflow and other technical details.
 * **Node** is a particular instance of virtual machine of its description.
 
 * **Product** is a description of the particular version of software which is being under control of MDBCI. Current version supports next products:
-  * mariadb -- MariaDb server and client
-  * maxscale -- Maxscale server and client
-  * mysql -- Mysql server and client
-  * galera -- Galera server and clients
-  * clustrix -- Clustrix server. [Read more](detailed_topics/using_clustrix_product.md)
-  * mariadb_plugins -- Plugins for MariaDb. [Read more](detailed_topics/mdbe_pugins.md)
-  * mdbe_build -- Dependencies for MariaDb build
-  * connetors_build -- Dependencies for MariaDb connectors build
-  * kerberos -- Kerberos packages. [Read more](detailed_topics/using_kerberos_product.md)
-  * Docker -- Docker packages.
+  * mariadb -- MariaDb server and client,
+  * maxscale -- Maxscale server and client,
+  * mysql -- Mysql server and client,
+  * galera -- Galera server and clients,
+  * clustrix -- Clustrix server. [Read more](detailed_topics/using_clustrix_product.md),
+  * mariadb_plugins -- Plugins for MariaDb. [Read more](detailed_topics/mdbe_pugins.md),
+  * mdbe_build -- Dependencies for MariaDb build,
+  * connetors_build -- Dependencies for MariaDb connectors build,
+  * kerberos -- Kerberos packages. [Read more](detailed_topics/using_kerberos_product.md),
+  * docker -- Docker packages.
 
-  [Full list products](./all_products.md)
+  [Full list products](./all_products.md).
 
-* **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json formar and collected in repo.d directory (see. [repo.d files](#repod-files))
+* **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json formar and collected in repo.d directory (see. [repo.d files](#repod-files)).
 
-* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. [Read more about templates](detailed_topics/create_templates.md)
+* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. [Read more about template creation](detailed_topics/template_creation.md).
 
 ### Workflow
 
-Currently, we use vagrant commands for running/destroing virtual machines. In Future releases it will be shadowed by mdbci.
-
-There are next steps for managing testing configuration:
-  * Boxes and repos preparation
-  * Creating stand template
-  * Running up virtual machine cluster
-  * Running tests
-  * Cloning configuration
-  * Destroing allocated resources
+MDBCI Workflow includes the following steps:
+  * Repos preparation.
+  * Creating stand template.
+  * Configuring template.
+  * Running up virtual machine.
+  * Using virtual machine.
+  * Destroing virtual machine.
 
 #### Environmental variables
 
@@ -60,10 +58,6 @@ In this example MDBCI will generate new vagrant/chef config from mynewstand.json
 
 *NB* Many stands could be configured by MDBCI in subdirectories. Each stand is autonomous.
 
-### Configuration files
-
-[Configuration files](./configuration_files.md)
-
 ### Box, products, versions
 
 MDBCI makes matching between boxes, target platforms, products and vesions by lexicographical base. If we
@@ -81,7 +75,7 @@ galera@5.1+debian^jessie => [http://mirror.netinch.com/pub/mariadb/repo/5.1/debi
 galera@10.0.16+rhel^5 => [http://yum.mariadb.org/10.0.16/rhel5-amd64]
 ```
 
-It means that each exact product/platform version combination is encoded
+It means that each exact product/platform version combination is encoded.
 
 product@version+platform^platform_version
 
@@ -92,6 +86,6 @@ mdbe@?+opensuse^13 => [http://downloads.mariadb.com/enterprise/WY99-BC52/mariadb
 ```
 where mdbe@? means default mariadb community version on Opensuse13 target platfrom.
 
-### Supported VM providers and boxes
-
-[Supported VM providers](./all_providers_and_boxes.md)
+See also:
+* [Configuration files](./configuration_files.md).
+* [Supported VM providers](./all_providers_and_boxes.md).

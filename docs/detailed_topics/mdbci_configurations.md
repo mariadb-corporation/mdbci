@@ -1,5 +1,7 @@
 # MDBCI configuration
 
+Configuration is required for some MDBCI commands.
+
 ## Interactive step-by-step configuration
 
 ```
