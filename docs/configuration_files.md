@@ -3,12 +3,12 @@
 Configuration files are located in `~/.config/mdbci/`.
 
 Full list of configuration files:
-* [clustrix_license](#clustrix_license)
-* [config.yaml](#configyaml)
-* [hidden-instances.yaml](#hidden-instancesyaml)
-* [repo.d](#repod)
-* [required-network-resources.yaml](#required-network-resourcesyaml)
-* [windows.pem]()
+* [clustrix_license](#clustrix_license),
+* [config.yaml](#configyaml),
+* [hidden-instances.yaml](#hidden-instancesyaml),
+* [repo.d](#repod),
+* [required-network-resources.yaml](#required-network-resourcesyaml),
+* [windows.pem](#windowspem).
 
 ### clustrix_license
 
@@ -25,13 +25,14 @@ set global license=
 "signature":"KEY"}'
 ```
 
-[Read more about clustrix](detailed_topics/using_clustrix_product.md)
+[Clustrix product in MDBCI](detailed_topics/using_clustrix_product.md).
 
 ### config.yaml
 
+Main MDBCI configuration file.
 `config.yaml` file describes the configuration information obtained as a result of the command `./mdbci configure`.
 
-[Read more about config.yaml](detailed_topics/mdbci_configurations.md)
+[Read more about config.yaml](detailed_topics/mdbci_configurations.md).
 
 ### hidden-instances.yaml
 
@@ -45,7 +46,7 @@ aws:
   - aws-name
 ```
 
-[Read more about list_cloud_instances](commands/list_cloud_instances_command.md)
+[Read more about list_cloud_instances](commands/list_cloud_instances_command.md).
 
 ### repo.d
 
@@ -55,32 +56,33 @@ During the start mdbci scans repo.d directory and builds full set of available p
 File format:
 ```json
 [
-{
-   "product":           "galera",
-   "version":           "5.3.10",
-   "repo":              "http://yum.mariadb.org/5.3.10/centos6-amd64",
-   "repo_key":          "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
-   "platform":          "centos",
-   "platform_version":  6
-},
-{
-   "product":           "galera",
-   "version":           "5.3.10",
-   "repo":              "http://yum.mariadb.org/5.3.10/centos7-amd64",
-   "repo_key":          "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
-   "platform":          "centos",
-   "platform_version":  7
-}
+  {
+    "repo": "http://yum.mariadb.org/10.5/centos/7/x86_64/",
+    "repo_key": "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
+    "platform": "centos",
+    "platform_version": "7",
+    "product": "mariadb",
+    "version": "10.5"
+  },
+  {
+    "repo": "http://yum.mariadb.org/10.5/centos/8/x86_64/",
+    "repo_key": "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
+    "platform": "centos",
+    "platform_version": "8",
+    "product": "mariadb",
+    "version": "10.5"
+  }
 ]
+
 ```
 ##### Available options
 
-* product -- product name
-* version -- product version
-* repo -- link to the repo
-* repo_key -- link to repo key
-* platform  -- name of target platform
-* platform_version -- name of version of platform
+* product -- product name,
+* version -- product version,
+* repo -- link to the repo,
+* repo_key -- link to repo key,
+* platform  -- name of target platform,
+* platform_version -- name of version of platform.
 
 ### required-network-resources.yaml
 
@@ -95,4 +97,4 @@ File format:
 
 `windows.pem` file describes the RSA key for ssh connection to the Windows machine.
 
-[Read more about creation Windows machine](detailed_topics/using_windows_machines.md)
+[Read more about creation Windows machine](detailed_topics/using_windows_machines.md).

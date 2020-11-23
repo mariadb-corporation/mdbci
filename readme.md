@@ -9,14 +9,12 @@
 
 ## Read More information about MDBCI
 
-* [Requirements](docs/requirements.md)
-* [Install MDBCI](docs/quickstart.md)
-* [Create first VM](docs/simple_examples.md)
-* [All commands and commands descriptions](docs/cli_help.md)
-* [Example with explanations](docs/additional_examples.md)
+* [Install MDBCI](docs/install_mdbci.md)
+* [Tutorial](docs/tutorial.md)
+* [MDBCI help command](docs/help_command.md)
+* [Example with explanations](docs/example_with_explanations.md)
 * [Configurations files](docs/configuration_files.md)
 * [All products](docs/all_products.md)
-* [MDBCI concepts](docs/concepts.md)
 * [All providers and boxes](docs/all_providers_and_boxes.md)
 * [Architecture](docs/architecture.md)
 

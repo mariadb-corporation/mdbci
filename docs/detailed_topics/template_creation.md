@@ -1,4 +1,4 @@
-## Create templates for MDBCI
+## Template creation
 
 The first step in creating the virtual machine is to create a template.
 The template is described in json format.
@@ -32,17 +32,17 @@ Example:
     }
 }
 ```
-__Additional__ parameters are product, products, labels, cnf_template_path:
-* product is a description of a single product. [Full list of available products](../all_products.md)
-* products is a description of many products. [Full list of available products](../all_products.md)
+__Optional__ parameters are product, products, labels, cnf_template_path:
+* product is a description of a single product. [Full list of available products](../all_products.md).
+* products is a description of many products. [Full list of available products](../all_products.md).
 * labels is a set of labels. Names groups of machines that could be brought up independently of other machines in the configuration file. A set of machines with the same labels will be created when calling `mdbci up` with `--labels` option.
 * cnf_template_path is the path to the configuration files to be passed to the machine. When installing a database you must also specify the name of the configuration file and the path to the folder where the file is stored. It is advised to use absolute path in `cnf_template_path` as the relative path is calculated from within the configuration directory.
 
 Also need to specify for the product:
-* name is product name. [Full list of available products](../all_products.md)
-* version is product version. The version is required for some products, see [full list of available products](../all_products.md)
-* (__Additional__) cnf_template_path is the path to the configuration files to be passed to the machine.
-* (__Additional__) cnf_template is the name of the file.
+* name is product name. [Full list of available products](../all_products.md).
+* version is product version. The version is required for some products, see [full list of available products](../all_products.md).
+* (__Optional__) cnf_template_path is the path to the configuration files to be passed to the machine.
+* (__Optional__) cnf_template is the name of the file.
 
 Example:
 ```json
@@ -77,6 +77,6 @@ Example:
 ```
 
 Also see:
-* [Simple example](../simple_examples.md)
-* [Additional example](../additional_examples.md)
+* [Tutorial](../tutorial.md)
+* [Example with explanations](../example_with_explanations.md)
 * [MDBCI generate-product-repositories](../commands/generate-product-repositories.md)

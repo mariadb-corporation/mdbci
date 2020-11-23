@@ -3,7 +3,7 @@
 __product name__ - name of the product to specify in the template or `install_product` command.
 
 __different version support__ - indicates whether different versions are supported.
-[MDBCI generate-product-repository](commands/generate-product-repositories.md)
+[MDBCI generate-product-repository](commands/generate-product-repositories.md).
 
 __cnf file support__ - indicates whether cnf files are supported.
 

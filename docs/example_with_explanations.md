@@ -1,14 +1,5 @@
 ## MDBCI usage
 
-### Generate product repositories
-
-Use the `generate-productrepository` command to generate product information in the `repo.d` directory:
-```
-./mdbci generate-product-repositories
-```
-
-[MDBCI generate-product-repository](commands/generate-product-repositories.md)
-
 ### Template creation
 
 Template is a JSON document that describes a set of virtual machines.
@@ -69,7 +60,7 @@ When installing a database you must also specify the name of the configuration f
 
 `labels` names groups of machines that could be brought up independently of other machines in the configuration file. A set of machines with the same labels will be created when calling `mdbci up` with `--labels` option.
 
-[Read more about create templates](detailed_topics/create_templates.md)
+[Read more about template creation](detailed_topics/template_creation.md).
 
 ### Configuration creation
 
