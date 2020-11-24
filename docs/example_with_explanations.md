@@ -60,7 +60,7 @@ When installing a database you must also specify the name of the configuration f
 
 `labels` names groups of machines that could be brought up independently of other machines in the configuration file. A set of machines with the same labels will be created when calling `mdbci up` with `--labels` option.
 
-[Read more about template creation](detailed_topics/template_creation.md).
+Read more about [template creation](detailed_topics/template_creation.md).
 
 ### Configuration creation
 

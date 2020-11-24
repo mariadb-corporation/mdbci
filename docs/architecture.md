@@ -4,7 +4,7 @@ This section describes MDBCI architecture, workflow and other technical details.
 
 ### Terminology
 
-* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. [Read more about providers and boxes](./all_providers_and_boxes.md).
+* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. Read more about [providers and boxes](./all_providers_and_boxes.md).
 
 * **[MDBCI](https://github.com/mariadb-corporation/mdbci)** is a standard set of tools for testing MariaDb components on the wide set of configurations.
 
@@ -28,7 +28,7 @@ This section describes MDBCI architecture, workflow and other technical details.
 
 * **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json formar and collected in repo.d directory (see. [repo.d files](#repod-files)).
 
-* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. [Read more about template creation](detailed_topics/template_creation.md).
+* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](detailed_topics/template_creation.md).
 
 ### Workflow
 
