@@ -4,20 +4,22 @@ These instructions install the bare minimum that is required to run the MaxScale
 
 ### Install MDBCI dependencies
 
-* glibc >= 2.14
-* fuse
-* fuse-libs - additional fuse libraries for CentOS
-* libfuse2 - additional fuse libraries for Ubuntu and Debian
-
 MDBCI is a tool written in Ruby programming language.
 In order to ease the deployment of the tool the AppImage distribution is provided.
 It allows to use MDBCI as a standalone executable.
 FUSE should be installed on all linux distributions as it's required to execute AppImage file.
 
+* glibc >= 2.14
+* fuse
+* fuse-libs - additional fuse libraries for CentOS
+* libfuse2 - additional fuse libraries for Ubuntu and Debian
+
+Debian/Ubuntu:
 ```
 sudo apt-get install -y libfuse2 fuse
 ```
 
+CentOS/RHEL:
 ```
 sudo yum install -y fuse-libs fuse
 ```
@@ -33,15 +35,15 @@ Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#t
 
 ### Install MDBCI and configure MDBCI
 
-2. Download MDBCI:
+1. Download MDBCI:
    ```
-   sudo wget http://max-tst-01.mariadb.com/ci-repository/mdbci -O /usr/local/bin/mdbci && sudo chmod +x /usr/local/bin/mdbci
+   sudo wget https://mdbe-ci-repo.mariadb.net/MDBCI/mdbci -O /usr/local/bin/mdbci && sudo chmod +x /usr/local/bin/mdbci
    ```
-3. Run installing MDBCI dependencies: `mdbci setup-dependencies`
-4. Fill in the MDBCI configuration settings (for example, credentials of cloud platforms, private repositories, and etc.): `mdbci configure`
+2. Run installing MDBCI dependencies: `mdbci setup-dependencies`
+3. Fill in the MDBCI configuration settings (for example, credentials of cloud platforms, private repositories, and etc.): `mdbci configure`
 
    You can follow the [MDBCI configuration](detailed_topics/mdbci_configurations.md) to read more about MDBCI configuration.
-5. Log out and back in again. This needs to be done in order for the new groups to become active.
+4. Log out and back in again. This needs to be done in order for the new groups to become active.
 
 ### Generate Configuration and Start VMs
 
@@ -49,9 +51,9 @@ To get configuration examples, use command:
 ```
 mdbci deploy-examples
 ```
-The following command will place `confs` and `scripts` directory into the current working directory.
+The following command will place `confs` and `scripts` directories into the current working directory.
 
-In order to generate configuration out of the sample template and create VMs run:
+In order to generate the configuration out of the sample template and create VMs run:
 
 ```
 mdbci generate -t confs/libvirt.json my-setup
