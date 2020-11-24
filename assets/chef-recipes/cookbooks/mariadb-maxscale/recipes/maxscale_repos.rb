@@ -12,8 +12,12 @@ case node[:platform_family]
 when "debian", "ubuntu"
   # Split MaxScale repository information into parts
   repository = node['maxscale']['repo'].split(/\s+/)
+
+  execute 'install key' do
+    command "wget -qO - #{node['maxscale']['repo_key']} | apt-key add -"
+  end
+
   apt_repository 'maxscale' do
-    key node['maxscale']['repo_key']
     uri repository[0]
     components repository.slice(2, repository.size)
   end
