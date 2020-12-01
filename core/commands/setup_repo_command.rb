@@ -16,6 +16,8 @@ class SetupRepoCommand < BaseCommand
     info = <<-HELP
 'setup_repo' command installs the repository on the node.
 mdbci setup_repo --product PRODUCT --product-version VERSION NODE
+
+Specify the --repo-key KEY parameter to hard-set the repository key. The key from repo.d will be ignored.
     HELP
     @ui.info(info)
   end
@@ -31,7 +33,7 @@ mdbci setup_repo --product PRODUCT --product-version VERSION NODE
 
       ChefConfigurationGenerator.install_product(@node_name, @config, @ui, @network_settings,
                                                  @machine_configurator, @product, false, @env.repos,
-                                                 @product_version, repo_recipe_name)
+                                                 @product_version, @repo_key, repo_recipe_name)
     end
   end
 
@@ -48,6 +50,7 @@ mdbci setup_repo --product PRODUCT --product-version VERSION NODE
     @network_settings = result.value
     @product = @env.nodeProduct
     @product_version = @env.productVersion
+    @repo_key = @env.repo_key
     if @product.nil? || @product_version.nil?
       return Result.error('You must specify the name and version of the product')
     end
