@@ -52,6 +52,8 @@ class RepoManager
       repo_key = "#{repository_name}@#{version}+#{repository_key}"
       repo = @repos[repo_key]
     end
+    repo['repo_key'] = product['key'] if product.key?('key')
+
     if product.key?('version') && repo.nil?
       repo = find_last_repository_by_major_version(product, repository_key)
       unless repo.nil?

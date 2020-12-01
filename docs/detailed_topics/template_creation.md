@@ -43,6 +43,7 @@ Also need to specify for the product:
 * version is product version. The version is required for some products, see [full list of available products](../all_products.md).
 * (__Optional__) cnf_template_path is the path to the configuration files to be passed to the machine.
 * (__Optional__) cnf_template is the name of the file.
+* (__Optional__) key is the repository key. The key from repo.d will be ignored.
 
 Example:
 ```json

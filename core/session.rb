@@ -83,6 +83,7 @@ class Session
   attr_accessor :show_help
   attr_accessor :reinstall
   attr_accessor :recreate
+  attr_accessor :repo_key
   attr_accessor :labels
   attr_accessor :force_distro
   attr_accessor :cpu_count

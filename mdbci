@@ -43,6 +43,7 @@ opts = GetoptLong.new(
   ['--recreate', GetoptLong::NO_ARGUMENT],
   ['--reinstall', GetoptLong::NO_ARGUMENT],
   ['--repo-dir', '-r', GetoptLong::REQUIRED_ARGUMENT],
+  ['--repo-key', GetoptLong::REQUIRED_ARGUMENT],
   ['--silent', '-s', GetoptLong::NO_ARGUMENT],
   ['--snapshot-name', GetoptLong::REQUIRED_ARGUMENT],
   ['--template', '-t', GetoptLong::REQUIRED_ARGUMENT],
@@ -164,6 +165,9 @@ begin
 
     when '--recreate'
       session.recreate = true
+
+    when '--repo-key'
+      session.repo_key = arg
 
     when '--labels'
       session.labels = arg
