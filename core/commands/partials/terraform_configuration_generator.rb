@@ -91,7 +91,7 @@ class TerraformConfigurationGenerator < BaseCommand
                                             File.join(@configuration_path, CONFIGURATION_FILE_NAME))
     end.and_then do
       nodes_info.each do |node_info|
-        next if node_info[:node_params][:platform] == 'windows'
+        next if node_info[:node_params][:platform] == 'windows' || node_info[:node_params][:skip_configuration]
 
         @configuration_generator.create_role_files(@configuration_path, node_info[:node_params][:name], node_info[:role_file_content])
       end

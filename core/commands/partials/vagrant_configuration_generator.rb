@@ -204,8 +204,11 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def node_definition(node, path, cookbook_path)
     box = node[1]['box'].to_s
     node_params = make_node_params(node, @boxes.get_box(box))
+
     @configuration_generator.generate_node_info(node, node_params, @registry, @env.force_version).and_then do |info|
-      @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
+      unless info[:node_params][:skip_configuration]
+        @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
+      end
       if box_valid?(info[:box])
         Result.ok(generate_node_defenition(info[:node_params], cookbook_path, path))
       else
