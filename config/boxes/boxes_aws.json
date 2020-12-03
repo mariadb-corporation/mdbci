@@ -237,5 +237,15 @@
     "default_instance_type": "m3.medium",
     "platform": "fedora",
     "platform_version": "22"
+  },
+  "macos_catalina_aws" : {
+    "provider": "aws",
+    "ami": "ami-00692c69a6f9c6ea1",
+    "user": "ec2-user",
+    "default_instance_type": "mac1.metal",
+    "platform": "macos",
+    "platform_version": "catalina",
+    "vpc": "true",
+    "skip_configuration": "true"
   }
 }

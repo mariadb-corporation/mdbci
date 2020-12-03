@@ -55,6 +55,8 @@ class DedicatedConfigurationGenerator < BaseCommand
       node_info.value
     end.compact
     nodes_info.each do |node_info|
+      next if node_info[:node_params][:skip_configuration]
+
       @configuration_generator.create_role_files(
         @configuration_path, node_info[:node_params][:name], node_info[:role_file_content]
       )
