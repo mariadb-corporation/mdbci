@@ -410,7 +410,7 @@ when 'suse'
     zypper_repository 'enable a repository for scons' do
       action :add
       gpgcheck false
-      baseurl 'http://download.opensuse.org/repositories/devel:/tools:/building/SLE_15/'
+      baseurl 'https://download.opensuse.org/distribution/leap/15.2/repo/oss/'
     end
     execute 'install libboost-devel' do
       command 'zypper -n install libboost_*-devel'
