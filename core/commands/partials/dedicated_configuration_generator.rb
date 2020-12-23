@@ -49,7 +49,7 @@ class DedicatedConfigurationGenerator < BaseCommand
     nodes_info = @configuration_template.map do |node|
       @ssh_users[node[0]] = node[1]['user']
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
-      node_info = @configuration_generator.generate_node_info(node, node_params, @registry)
+      node_info = @configuration_generator.generate_node_info(node, node_params, @registry, @env.force_version)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value

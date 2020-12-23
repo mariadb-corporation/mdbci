@@ -23,11 +23,11 @@ class ConfigurationGenerator
     @suse_config = env.suse_config
   end
 
-  def generate_node_info(node, node_params, registry)
+  def generate_node_info(node, node_params, registry, force_version)
     box = node[1]['box'].to_s
     products = parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    get_role_description(node_params[:name], products, box, registry).and_then do |role|
+    get_role_description(node_params[:name], products, box, registry, force_version).and_then do |role|
       Result.ok({ node_params: node_params, role_file_content: role, box: box })
     end
   end
@@ -49,8 +49,9 @@ class ConfigurationGenerator
   # @param box [String] name of the box
   # @param repo [String] repo for product
   # @param provider [String] configuration provider
-  def self.generate_product_config(repos, product_name, product, box, repo, provider)
-    repo = repos.find_repository(product_name, product, box) if repo.nil?
+  # @param force_version [Boolean] search or not search for similar repositories names
+  def self.generate_product_config(repos, product_name, product, box, repo, provider, force_version)
+    repo = repos.find_repository(product_name, product, box, force_version) if repo.nil?
     if repo.nil?
       return Result.error("Repo for product #{product['name']} #{product['version']} for #{box} not found")
     end
@@ -96,7 +97,7 @@ class ConfigurationGenerator
   # @param box [String] name of the box
   # @return [Result::Base] recipe name and product template in format { recipe: String, template: Hash }.
   # rubocop:disable Metrics/MethodLength
-  def make_product_config_and_recipe_name(product, box)
+  def make_product_config_and_recipe_name(product, box, force_version)
     repo = nil
     if !product['repo'].nil?
       repo_name = product['repo']
@@ -112,7 +113,7 @@ class ConfigurationGenerator
       product_name = product['name']
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
-    self.class.generate_product_config(@repository_manager, product_name, product, box, repo, provider_by_box(box))
+    self.class.generate_product_config(@repository_manager, product_name, product, box, repo, provider_by_box(box), force_version)
         .and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
       Result.ok({ recipe: recipe_name, config: product_config })
@@ -159,7 +160,7 @@ class ConfigurationGenerator
   # @param products [Array<Hash>] list of parameters of products to configure from configuration file
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
-  def get_role_description(name, products, box, registry)
+  def get_role_description(name, products, box, registry, force_version)
     extend_template(products).and_then do |products|
       generate_registry(registry, name, products)
       recipes_result = init_product_configs_and_recipes(box, name, registry)
@@ -168,7 +169,7 @@ class ConfigurationGenerator
       product_configs = recipes_result.value[:product_configs]
       recipe_names = recipes_result.value[:recipe_names]
       products.each do |product|
-        recipe_and_config_result = make_product_config_and_recipe_name(product, box)
+        recipe_and_config_result = make_product_config_and_recipe_name(product, box, force_version)
         return recipe_and_config_result if recipe_and_config_result.error?
 
         recipe_and_config_result.and_then do |recipe_and_config|
