@@ -90,6 +90,7 @@ class Session
   attr_accessor :threads_count
   attr_accessor :all
   attr_accessor :isForce
+  attr_accessor :hard_specify
 
   PLATFORM = 'platform'
   VAGRANT_NO_PARALLEL = '--no-parallel'

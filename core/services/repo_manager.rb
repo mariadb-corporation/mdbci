@@ -37,7 +37,7 @@ class RepoManager
     @ui.info("Loaded repos: #{@repos.size}")
   end
 
-  def find_repository(product_name, product, box)
+  def find_repository(product_name, product, box, hard_specify)
     @ui.info('Looking for repo')
     if ProductAttributes.uses_version_as_repository?(product_name, product['version'])
       @ui.warning('MDBCI cannot determine the existence/correctness of the specified version of the product!')
@@ -54,7 +54,7 @@ class RepoManager
     end
     repo['repo_key'] = product['key'] if product.key?('key')
 
-    if product.key?('version') && repo.nil?
+    if product.key?('version') && repo.nil? && !hard_specify
       repo = find_last_repository_by_major_version(product, repository_key)
       unless repo.nil?
         @ui.warning("MDBCI could not find the specified version #{product['version']}, "\

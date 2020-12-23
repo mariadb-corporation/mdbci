@@ -95,7 +95,7 @@ class DockerConfigurationGenerator
   }.freeze
 
   def setup_docker_product_image(node_name, product)
-    image = @env.repos.find_repository(product['name'], product, 'docker')
+    image = @env.repos.find_repository(product['name'], product, 'docker', false)
     if image.nil?
       @ui.error("Unable to find Docker-image for the product specified in '#{node_name}'")
       return ERROR_RESULT

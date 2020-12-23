@@ -62,8 +62,8 @@ module ChefConfigurationGenerator
   # Install product on server
   # param node_name [String] name of the node
   def self.install_product(name, config, logger, network_settings, machine_configurator, product,
-                           need_rewrite, repos, product_version, repo_key, recipe_name)
-    generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name).and_then do |role_file_path|
+                           need_rewrite, repos, product_version, repo_key, hard_specify, recipe_name)
+    generate_role_file(name, config, product, repos, product_version, repo_key,  recipe_name, hard_specify).and_then do |role_file_path|
       target_path = "roles/#{name}.json"
       role_file_path_config = "#{config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
@@ -91,7 +91,7 @@ module ChefConfigurationGenerator
 
   # Create a role file to install the product from the chef
   # @param name [String] node name
-  def self.generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name)
+  def self.generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name, hard_specify)
     node = config.node_configurations[name]
     box = node['box'].to_s
     recipes_names = []
@@ -101,7 +101,7 @@ module ChefConfigurationGenerator
     product_hash['key'] = repo_key unless repo_key.nil?
 
     ConfigurationGenerator
-      .generate_product_config(repos, product, product_hash, box, nil, config.provider)
+      .generate_product_config(repos, product, product_hash, box, nil, config.provider, hard_specify)
       .and_then do |configs|
       role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipes_names,
                                                                              configs)
