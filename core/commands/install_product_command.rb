@@ -31,7 +31,7 @@ class InstallProduct < BaseCommand
     result = ChefConfigurationGenerator.install_product(@mdbci_config.node_names.first,
                                                         @mdbci_config, @ui, @network_settings,
                                                         @machine_configurator, @product, true,
-                                                        @env.repos, @product_version, @repo_key, @hard_specify, recipe_name)
+                                                        @env.repos, @product_version, @repo_key, @force_version, recipe_name)
 
     if result.success?
       SUCCESS_RESULT
@@ -48,7 +48,7 @@ class InstallProduct < BaseCommand
       mdbci install_product --product product --product-version version config/node
 
       Specify the --repo-key KEY parameter to hard-set the repository key. The key from repo.d will be ignored.
-      Specify the --hard-specify to disable smart searching for repo and install specified version
+      Specify the --force-version to disable smart searching for repo and install specified version
     HELP
     @ui.info(info)
   end
@@ -72,7 +72,7 @@ class InstallProduct < BaseCommand
     @product = @env.nodeProduct
     @product_version = @env.productVersion
     @repo_key = @env.repo_key
-    @hard_specify = @env.hard_specify
+    @force_version = @env.force_version
     if @product.nil? || (ProductAttributes.need_version?(@product) && @product_version.nil?)
       @ui.error('You must specify the name and version of the product')
       return ARGUMENT_ERROR_RESULT

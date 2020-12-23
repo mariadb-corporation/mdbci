@@ -25,7 +25,7 @@ opts = GetoptLong.new(
   ['--force', GetoptLong::NO_ARGUMENT],
   ['--field', '-f', GetoptLong::REQUIRED_ARGUMENT],
   ['--force-distro', GetoptLong::REQUIRED_ARGUMENT],
-  ['--hard-specify', GetoptLong::NO_ARGUMENT],
+  ['--force-version', GetoptLong::NO_ARGUMENT],
   ['--help', GetoptLong::NO_ARGUMENT],
   ['--hours', GetoptLong::REQUIRED_ARGUMENT],
   ['--ipv6', GetoptLong::NO_ARGUMENT],
@@ -155,8 +155,8 @@ begin
     when '--configuration-file'
       session.configuration_file = File.absolute_path(arg)
 
-    when '--hard-specify'
-      session.hard_specify = true
+    when '--force-version'
+      session.force_version = true
 
     when '--help'
       session.show_help = true

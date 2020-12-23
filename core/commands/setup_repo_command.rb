@@ -18,7 +18,7 @@ class SetupRepoCommand < BaseCommand
 mdbci setup_repo --product PRODUCT --product-version VERSION NODE
 
 Specify the --repo-key KEY parameter to hard-set the repository key. The key from repo.d will be ignored.
-Specify the --hard-specify to disable smart searching for repo and setup specified version
+Specify the --force-version to disable smart searching for repo and setup specified version
     HELP
     @ui.info(info)
   end
@@ -34,7 +34,7 @@ Specify the --hard-specify to disable smart searching for repo and setup specifi
 
       ChefConfigurationGenerator.install_product(@node_name, @config, @ui, @network_settings,
                                                  @machine_configurator, @product, false, @env.repos,
-                                                 @product_version, @repo_key, @hard_specify, repo_recipe_name)
+                                                 @product_version, @repo_key, @force_version, repo_recipe_name)
     end
   end
 
@@ -52,7 +52,7 @@ Specify the --hard-specify to disable smart searching for repo and setup specifi
     @product = @env.nodeProduct
     @product_version = @env.productVersion
     @repo_key = @env.repo_key
-    @hard_specify = @env.hard_specify
+    @force_version = @env.force_version
     if @product.nil? || @product_version.nil?
       return Result.error('You must specify the name and version of the product')
     end
