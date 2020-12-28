@@ -44,6 +44,7 @@ Also need to specify for the product:
 * (__Optional__) cnf_template_path is the path to the configuration files to be passed to the machine.
 * (__Optional__) cnf_template is the name of the file.
 * (__Optional__) key is the repository key. The key from repo.d will be ignored.
+* (__Optional__) force_version is a usage the specific version. Use `true` to disable smart searching for repo and install specified version.
 
 Example:
 ```json
