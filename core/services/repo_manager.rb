@@ -54,7 +54,7 @@ class RepoManager
     end
     repo['repo_key'] = product['key'] if product.key?('key')
 
-    if product.key?('version') && repo.nil? && !force_version
+    if product.key?('version') && repo.nil? && !(force_version || product.dig('force_version'))
       repo = find_last_repository_by_major_version(product, repository_key)
       unless repo.nil?
         @ui.warning("MDBCI could not find the specified version #{product['version']}, "\
