@@ -14,7 +14,7 @@ module RepositoryParserCore
       links.map do |link|
         result = {
           link: link,
-          field => link.content.delete('/')
+          field => link.attributes['href'].value.delete('/')
         }
         result[:repo_url] = "#{release[:url]}#{link[:href]}" if save_path
         result
