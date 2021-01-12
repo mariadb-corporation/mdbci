@@ -7,6 +7,7 @@ you want to install. In the latter case you must provide version for the MDBE pr
 The list of plugins and their corresponding MDCI product names:
 
 * backup, `mdbe_plugin_backup`;
+* cmapi, `mdbe_plugin_cmapi`;
 * columnstore, `mdbe_plugin_columnstore`;
 * connect, `mdbe_plugin_connect`;
 * cracklib password check, `mdbe_plugin_cracklib_password_check`;
