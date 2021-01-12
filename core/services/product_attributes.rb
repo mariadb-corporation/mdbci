@@ -168,6 +168,10 @@ module ProductAttributes
         recipe: 'mdbe_plugins::backup',
         name: 'backup'
     },
+    'mdbe_plugin_cmapi' => {
+        recipe: 'mdbe_plugins::cmapi',
+        name: 'cmapi'
+    },
     'mdbe_plugin_columnstore' => {
       recipe: 'mdbe_plugins::columnstore',
       name: 'columnstore'
@@ -304,6 +308,10 @@ module ProductAttributes
         recipe: 'mdbe_plugins::backup',
         name: 'backup'
     },
+    'plugin_cmapi' => {
+        recipe: 'mdbe_plugins::cmapi',
+        name: 'cmapi'
+    },
     'plugin_columnstore' => {
         recipe: 'mdbe_plugins::columnstore',
         name: 'columnstore'
@@ -367,6 +375,7 @@ module ProductAttributes
 
   DEPENDENCE = {
     'mdbe_plugin_backup' => 'mdbe_ci',
+    'mdbe_plugin_cmapi' => 'mdbe_ci',
     'mdbe_plugin_columnstore' => 'mdbe_ci',
     'mdbe_plugin_connect' => 'mdbe_ci',
     'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
