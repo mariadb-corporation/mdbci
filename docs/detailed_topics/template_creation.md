@@ -45,6 +45,7 @@ Also need to specify for the product:
 * (__Optional__) cnf_template is the name of the file.
 * (__Optional__) key is the repository key. The key from repo.d will be ignored.
 * (__Optional__) force_version is a usage the specific version. Use `true` to disable smart searching for repo and install specified version.
+* (__Optional__) start is a usage to start the service after installation. Use `false` to disable start service. Default value is `true`. See [start MariaDB service](mariadb_start.md).
 
 Example:
 ```json

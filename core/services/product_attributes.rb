@@ -96,6 +96,11 @@ module ProductAttributes
       name: 'mariadb',
       repository: 'mariadb'
     },
+    'mariadb_start' => {
+        recipe: 'mariadb::start_service',
+        name: 'mariadb_start',
+        without_version: true
+    },
     'maxscale' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       repo_recipe: 'mariadb-maxscale::maxscale_repos',
