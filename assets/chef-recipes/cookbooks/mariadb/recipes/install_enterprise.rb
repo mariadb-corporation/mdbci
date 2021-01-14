@@ -94,10 +94,12 @@ case node[:platform_family]
 when "suse"
   execute "install" do
     command "zypper -n install --from mariadb MariaDB-server MariaDB-client"
+    notifies :start, 'service[mariadb]', :delayed
   end
 when "debian"
   package %w[mariadb-server mariadb-client] do
     action :upgrade
+    notifies :start, 'service[mariadb]', :delayed
   end
 when "windows"
   windows_package "MariaDB" do
@@ -108,6 +110,7 @@ when "windows"
 else
   package %w[MariaDB-server MariaDB-client] do
     action :upgrade
+    notifies :start, 'service[mariadb]', :delayed
   end
 end
 
@@ -153,13 +156,7 @@ else
   end
 end
 
-# Starts service
-if platform?('redhat') && node[:platform_version].to_i == 6
-  service "mysql" do
-    action :start
-  end
-else
-  service "mariadb" do
-    action :start
-  end
+# Start of the service is done through notifications
+service 'mariadb' do
+  action :nothing
 end
