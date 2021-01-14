@@ -65,7 +65,6 @@ class ConfigurationGenerator
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['provider'] = provider
     config['node_name'] = product['node_name'] unless product['node_name'].nil?
-    config['start'] = product['start'] unless product['start'].nil?
     setup_product_license_if_need(config, product_name).and_then do |updated_config|
       attribute_name = ProductAttributes.attribute_name(product_name)
       return Result.ok("#{attribute_name}": updated_config)

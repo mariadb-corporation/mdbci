@@ -20,6 +20,3 @@ default['mariadb']['repo_file_name'] = 'mariadb'
 
 # MariaDB components for Debian repo
 default['mariadb']['deb_components'] = ['main']
-
-# Start or not start MariaDB service after install
-default['mariadb']['start'] = true

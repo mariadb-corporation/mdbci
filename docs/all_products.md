@@ -35,4 +35,3 @@ google-authenticator | - | - | -
 [kerberos](detailed_topics/using_kerberos_product.md) | - | - | -
 [kerberos_server](detailed_topics/using_kerberos_product.md) | - | - | -
 [mariadb_plugins](detailed_topics/mdbe_pugins.md) | - | - | -
-[mariadb_start](detailed_topics/mariadb_start.md) | - | - | -
