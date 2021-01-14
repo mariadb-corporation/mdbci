@@ -219,12 +219,12 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Create repository in the target directory.
-  def write_product(product, releases)
+  def write_product(product, releases, start_time)
     info_and_log("Writing generated configuration for #{product} to the repository.")
     product_name = PRODUCTS_DIR_NAMES[product]
     product_dir = File.join(@destination, product_name)
     if @product_version.nil?
-      FileUtils.rm_rf(product_dir, secure: true)
+      remove_product(product_dir, start_time)
       FileUtils.mkdir_p(product_dir)
     else
       releases = releases.select do |release|
@@ -234,17 +234,30 @@ In order to specify the number of retries for repository configuration use --att
     write_repository(product_dir, releases)
   end
 
+  # Remove files in repository if the file was modified before parsing
+  def remove_product(product_dir, start_time)
+    Dir.children(product_dir).each do |distribution|
+      repository_path = File.join(product_dir, distribution)
+      Dir.children(repository_path).each do |file|
+        file_path = File.join(repository_path, file)
+        FileUtils.rm_f(file_path) if start_time > File.mtime(file_path)
+      end
+      FileUtils.rm_rf(repository_path, secure: true) if Dir.children(repository_path).empty?
+    end
+  end
+
   # Create repository by calling appropriate method using reflection and writing results
   # @param product [String] name of the product to generate
   # @returns [Boolean] whether generation was successful or not
   def create_repository(product)
+    start_time = Time.now
     info_and_log("Generating repository configuration for #{product}")
     begin
       releases = parse_repository(product, @config[product])
       if releases.empty?
         error_and_log("#{product} was not generated. Skiped.")
       else
-        write_product(product, releases)
+        write_product(product, releases, start_time)
       end
       true
     rescue StandardError => e
