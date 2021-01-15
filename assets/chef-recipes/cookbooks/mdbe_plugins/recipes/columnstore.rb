@@ -1,4 +1,4 @@
-PORTS = (8600..8630).to_a.append(8640, 8700, 8800)
+PORTS = (8600..8630).to_a.append(8700, 8800)
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
