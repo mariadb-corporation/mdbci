@@ -18,9 +18,9 @@ module MaxscaleParser
     lambda do |release, _|
       version = SemVersionParser.new_sem_version(release[:version])
       old_keys.each do |old_key_data|
-        use_old_key = if old_key_data.key?('versions_upper_bound')
+        use_old_key = if old_key_data.key?('versions_upper_bound') && !version.nil?
                         old_key_data['versions_upper_bound'].all? do |old_key_version|
-                          version.nil? || old_key_version.nil? ||
+                          old_key_version.nil? ||
                             !(version.satisfies?("~> #{old_key_version.to_s}") &&
                               version.minor == old_key_version.minor)
                         end
