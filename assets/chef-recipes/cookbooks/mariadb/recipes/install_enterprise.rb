@@ -1,7 +1,5 @@
 if node.attribute?('galera_3_enterprise') || node.attribute?('galera_4_enterprise')
   include_recipe "galera_ci::galera_repository"
-else
-  include_recipe "mariadb::galerarepos"
 end
 include_recipe "mariadb::mdberepos"
 include_recipe "chrony::default"
