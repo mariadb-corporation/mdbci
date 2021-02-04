@@ -13,7 +13,7 @@ end
 case node[:platform_family]
 when 'debian'
   package 'mariadb-common' do
-    action :purge
+    action :remove
   end
   execute 'delete unnecessary packages' do
     command 'apt autoremove -y'
