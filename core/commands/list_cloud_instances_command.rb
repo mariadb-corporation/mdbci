@@ -73,7 +73,7 @@ The command ends with an error if instances are present, no otherwise
   def generate_gcp_list
     return Result.error('GCP-service is not configured') unless @env.gcp_service.configured?
 
-    all_instances = @env.gcp_service.instances_list_with_time
+    all_instances = @env.gcp_service.instances_list_with_time_and_type
     unless @hidden_instances['gcp'].nil?
       all_instances.reject! do |instance|
         @hidden_instances['gcp'].include?(instance[:node_name])

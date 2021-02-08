@@ -39,9 +39,9 @@ class GcpService
     end.map(&:name)
   end
 
-  # Fetch instances list and return instance names with time.
-  # @return [Array<{:name => String, :time => String}>] instance names and time.
-  def instances_list_with_time
+  # Fetch instances list and return instance names with time and type.
+  # @return [Array<{:name => String, :time => String, :type => String}>] instance names, time, type.
+  def instances_list_with_time_and_type
     return [] unless configured?
 
     @service.fetch_all do |token|
@@ -50,6 +50,7 @@ class GcpService
       )
     end.map do |instance|
       {
+        type: instance.machine_type.split('/')[-1],
         node_name: instance.name,
         launch_time: instance.creation_timestamp
       }
@@ -144,6 +145,56 @@ class GcpService
       @service.list_machine_types(@gcp_config['project'], @gcp_config['zone'], page_token: token)
     end.map do |machine_type|
       { ram: machine_type.memory_mb, cpu: machine_type.guest_cpus, type: machine_type.name }
+    end
+  end
+
+  def generate_quota(logger)
+    logger.info('Taking the GCP quotas')
+    URI.open("https://serviceusage.googleapis.com/v1beta1/projects/#{@gcp_config['project']}/services/compute.googleapis.com/consumerQuotaMetrics",
+             'Authorization' => "Bearer #{@service.authorization.access_token}",
+             'Content-Type' => 'Content-Type: application/json') do |file|
+      return JSON.parse(file.readlines.join(''))
+    end
+  end
+
+  def get_cpu_quota(logger)
+    generate_quota(logger)['metrics'].each do |metric|
+      next unless metric['displayName'] == 'CPUs'
+
+      metric['consumerQuotaLimits'][-1]['quotaBuckets'].each do |limit|
+        next unless limit.key?('dimensions')
+
+        if limit['dimensions']['region'] == @gcp_config['region']
+          return Result.ok(limit['effectiveLimit'].to_i)
+        end
+      end
+    end
+    Result.error('Unable to process the GCP quota')
+  end
+
+  def count_cpu(machines_types, current_machine)
+    machines_types.each do |machine|
+      return machine[:cpu] if current_machine == machine[:type]
+    end
+  end
+
+  def count_all_cpu(machines_types)
+    cpu_count = 0
+    instances_list_with_time_and_type.each do |instance|
+      cpu_count += count_cpu(machines_types, instance[:type])
+    end
+    cpu_count
+  end
+
+  def check_quota(machines_types, machine_type, logger)
+    get_cpu_quota(logger).and_then do |quota|
+      cpu_count = count_all_cpu(machines_types)
+      logger.info("#{cpu_count} / #{quota} resources are involved")
+      if cpu_count + count_cpu(machines_types, machine_type) <= quota
+        Result.ok('Resources are enough to create a machine')
+      else
+        Result.error('Resources are not enough to create a machine')
+      end
     end
   end
 end
