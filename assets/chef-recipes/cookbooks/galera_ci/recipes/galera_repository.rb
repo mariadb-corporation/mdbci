@@ -21,6 +21,11 @@ when 'rhel'
     gpgkey repo_key
     sensitive true
   end
+  if node[:platform_version].to_i == 8
+    execute 'add hotfixes attribute to yum repo file' do
+      command 'echo module_hotfixes=true >> /etc/yum.repos.d/galera.repo'
+    end
+  end
 when 'sles', 'suse', 'opensuse'
   zypper_repository 'galera' do
     action :remove
