@@ -39,7 +39,7 @@ module GaleraCiParser
     parse_repository(
         config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
         %w[galera],
-        ->(url, _) { generate_galera_ci_deb_full_url(url) },
+        ->(url, _) { generate_galera_ci_deb_full_url(url, logger, auth) },
         ->(package, platform) { /#{package}.*#{platform}/ },
         log, logger,
         save_as_field(:version),
@@ -54,15 +54,17 @@ module GaleraCiParser
     )
   end
 
-  def self.generate_galera_ci_deb_full_url(incorrect_url)
+  def self.generate_galera_ci_deb_full_url(incorrect_url, logger, auth)
     split_url = incorrect_url.split('/')
     split_url.pop(2)
-    url = split_url.join('/')
-    galera_version = '3' if url.include?('3')
-    galera_version = '4' if url.include?('4')
-    if url.include?('Enterprise') && galera_version == '4'
-      return "#{url}/pool/main/g/galera-enterprise-#{galera_version}/"
-    end
-    "#{url}/pool/main/g/galera-#{galera_version}/"
+    url = "#{split_url.join('/')}/pool/main/g/"
+    generate_pool_link(url, logger, auth)
+  end
+
+  def self.generate_pool_link(url, logger, auth)
+    dir = get_directory_links("#{url}", logger, auth)[0].attributes['href'].value
+    "#{url}/#{dir}"
+  rescue OpenURI::HTTPError => e
+    url
   end
 end
