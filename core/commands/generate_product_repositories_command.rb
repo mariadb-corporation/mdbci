@@ -236,6 +236,8 @@ In order to specify the number of retries for repository configuration use --att
 
   # Remove files in repository if the file was modified before parsing
   def remove_product(product_dir, start_time)
+    return unless File.directory?(product_dir)
+
     Dir.children(product_dir).each do |distribution|
       repository_path = File.join(product_dir, distribution)
       Dir.children(repository_path).each do |file|
