@@ -24,7 +24,6 @@ module GaleraCiParser
         ->(package, _) { /#{package}/ },
         log, logger,
         save_as_field(:version),
-        append_url(%w[yum]),
         split_rpm_platforms,
         extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
         append_path_if_exists('x86_64'),
