@@ -18,3 +18,4 @@ services:
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/docker-registry.htpasswd
       REGISTRY_HTTP_TLS_CERTIFICATE: /cert/certs/mariadb.net.origin.crt
       REGISTRY_HTTP_TLS_KEY: /cert/private/mariadb.net.origin.key
+      REGISTRY_HTTP_SECRET: $SECRET

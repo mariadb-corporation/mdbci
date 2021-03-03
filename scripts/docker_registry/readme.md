@@ -44,6 +44,8 @@ sudo htpasswd -B /srv/repository/docker-registry/auth/docker-registry.htpasswd U
 
 The registry is deployed using Docker Compose. See the `docker-compose.yaml` for more information.
 
+You must provide the secret for the Registry to operate. You must put in into the `.env` file. Please copy the `env-template` into `.env` file and fill it with secrets.
+
 In order to deploy the service please configure authentication and use the following commands to deploy the registry:
 
 ```
