@@ -111,6 +111,8 @@ ubuntu_packages = %w[
   dh-systemd
   libcurl4-openssl-dev
   libgcrypt20-dev
+  libjpeg8
+  libjpeg-turbo8
   libpcre2-dev
   libzstd-dev
 ]
