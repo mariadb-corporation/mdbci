@@ -31,6 +31,7 @@ debian_and_ubuntu_packages = %w[
   gnutls-dev
   iputils-ping
   libaio-dev
+  libarchive-dev
   libavahi-client3
   libavahi-common-data
   libavahi-common3
