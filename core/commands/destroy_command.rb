@@ -155,9 +155,9 @@ Labels should be separated with commas, do not contain any whitespaces.
   def destroy_by_configuration(configuration_path)
     begin
       configuration = Configuration.new(configuration_path, @env.labels)
-    rescue ArgumentError
+    rescue ArgumentError => e
       emergency_deletion_files(configuration_path, @env.labels)
-      return Result.error('')
+      return Result.error(e.message)
     end
     network_settings_result = NetworkSettings.from_file(configuration.network_settings_file)
     registry_result = ProductAndSubscriptionRegistry.from_file(Configuration.registry_path(configuration.path))
@@ -319,8 +319,11 @@ Labels should be separated with commas, do not contain any whitespaces.
       destroy_by_node_name
     elsif @env.list
       display_all_nodes
+    elsif !@args.first.nil?
+      return destroy_by_configuration(@args.first)
     else
-      destroy_by_configuration(@args.first)
+      return Result.error('Incorrect use of the destroy command, please, provide the path to the configuration '\
+                          'or use additional command parameters. See details via `mdbci destroy --help`')
     end
     SUCCESS_RESULT
   end

@@ -135,6 +135,8 @@ class Configuration
   end
 
   def initialize(spec, labels = nil, check_correctness = true)
+    raise ArgumentError, 'You must specify path to the mdbci configuration as a parameter.' if spec.nil?
+
     if check_correctness
       initialize_with_check_correctness(spec, labels)
     else
