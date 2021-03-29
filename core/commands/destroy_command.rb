@@ -191,6 +191,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       Result.ok('')
     end.and_then do
       remove_files(configuration, @env.keep_template) unless @env.keep_configuration
+      Result.ok('')
     end
   end
 
@@ -208,6 +209,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       destroy_by_configuration(directory)
     end
     FileUtils.rm_r(path) if Dir.children(path).empty?
+    Result.ok('')
   end
 
   def destroy_by_json(path)
