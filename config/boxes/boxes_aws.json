@@ -58,6 +58,14 @@
     "platform": "ubuntu",
     "platform_version": "yakkety"
   },
+  "ubuntu_focal_aws": {
+    "provider": "aws",
+    "ami": "ami-0d7a77d712db3f78e",
+    "user": "ubuntu",
+    "default_instance_type": "m3.medium",
+    "platform": "ubuntu",
+    "platform_version": "focal"
+  },
   "centos_7_aws" : {
     "provider": "aws",
     "ami": "ami-005b5c720e7b986d6",
