@@ -154,7 +154,7 @@ GEM
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
     workers (0.6.1)
-    xdg (4.5.0)
+    xdg (5.1.0)
     yard (0.9.26)
 
 PLATFORMS
@@ -184,4 +184,4 @@ DEPENDENCIES
   xdg
 
 BUNDLED WITH
-   2.1.4
+   2.2.15
