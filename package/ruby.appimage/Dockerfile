@@ -7,8 +7,8 @@ MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 ARG IMAGE_DATE=2020-12-05
 
 ARG BUILD_JOBS=1
-ARG RUBY_VERSION=2.7.2
-ARG RUBY_INSTALL_VERSION=0.7.1
+ARG RUBY_VERSION=3.0.1
+ARG RUBY_INSTALL_VERSION=0.8.1
 
 # Please update the ENTRYPOINT if changing the WORKSPACE variable
 ENV DOCKER_BUILD=1 \
@@ -33,7 +33,7 @@ RUN yum install -y \
   cd ruby-install-$RUBY_INSTALL_VERSION && \
   make install && \
   install -m 0755 -d $WORKSPACE && \
-  scl enable devtoolset-9 "ruby-install --cleanup --jobs $BULID_JOBS --prefix $RUBY_DIR/usr ruby $RUBY_VERSION -- --disable-install-doc --disable-debug --disable-dependency-tracking --enable-shared --enable-load-relative"
+  scl enable devtoolset-9 "ruby-install --cleanup --jobs $BUILD_JOBS --prefix $RUBY_DIR/usr ruby $RUBY_VERSION -- --disable-install-doc --disable-debug --disable-dependency-tracking --enable-shared --enable-load-relative"
 
 # Install and configure the Rust compilation toolchain
 ENV RUSTUP_HOME=/opt/rustup \
