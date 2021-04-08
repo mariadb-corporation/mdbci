@@ -140,8 +140,8 @@ class VagrantConfigurator
 
   def generate_network_settings
     NetworkSettings.from_file(@config.network_settings_file).match(
-        { ok: ->(result) { @network_settings = result },
-          error: ->(_result) { @network_settings = NetworkSettings.new } }
+      ok: ->(result) { @network_settings = result },
+      error: ->(_result) { @network_settings = NetworkSettings.new }
     )
   end
 
