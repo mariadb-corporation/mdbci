@@ -37,19 +37,24 @@ GEM
       virtus (~> 1.0.3)
     ed25519 (1.2.4)
     equalizer (0.0.11)
-    faraday (1.2.0)
+    faraday (1.3.0)
+      faraday-net_http (~> 1.0)
       multipart-post (>= 1.2, < 3)
       ruby2_keywords
-    google-api-client (0.52.0)
+    faraday-net_http (1.0.1)
+    google-apis-compute_v1 (0.8.0)
+      google-apis-core (~> 0.1)
+    google-apis-core (0.3.0)
       addressable (~> 2.5, >= 2.5.1)
-      googleauth (~> 0.9)
+      googleauth (~> 0.14)
       httpclient (>= 2.8.1, < 3.0)
       mini_mime (~> 1.0)
       representable (~> 3.0)
       retriable (>= 2.0, < 4.0)
       rexml
-      signet (~> 0.12)
-    googleauth (0.14.0)
+      signet (~> 0.14)
+      webrick
+    googleauth (0.16.1)
       faraday (>= 0.17.3, < 2.0)
       jwt (>= 1.4, < 3.0)
       memoist (~> 0.16)
@@ -65,7 +70,7 @@ GEM
     kartograph (0.2.8)
     memoist (0.16.2)
     method_source (1.0.0)
-    mini_mime (1.0.2)
+    mini_mime (1.1.0)
     mini_portile2 (2.4.0)
     multi_json (1.15.0)
     multipart-post (2.1.1)
@@ -93,9 +98,9 @@ GEM
     rainbow (3.0.0)
     rake (13.0.3)
     regexp_parser (2.1.1)
-    representable (3.0.4)
+    representable (3.1.0)
       declarative (< 0.1.0)
-      declarative-option (< 0.2.0)
+      trailblazer-option (~> 0.1.0)
       uber (< 0.2.0)
     resource_kit (0.1.7)
       addressable (>= 2.3.6, < 3.0.0)
@@ -126,9 +131,9 @@ GEM
     rubocop-ast (1.4.1)
       parser (>= 2.7.1.5)
     ruby-progressbar (1.11.0)
-    ruby2_keywords (0.0.2)
+    ruby2_keywords (0.0.4)
     sem_version (2.0.1)
-    signet (0.14.0)
+    signet (0.15.0)
       addressable (~> 2.3)
       faraday (>= 0.17.3, < 2.0)
       jwt (>= 1.5, < 3.0)
@@ -139,6 +144,7 @@ GEM
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
     thread_safe (0.3.6)
+    trailblazer-option (0.1.0)
     tty-color (0.6.0)
     tty-screen (0.8.1)
     tty-table (0.12.0)
@@ -153,6 +159,7 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
+    webrick (1.7.0)
     workers (0.6.1)
     xdg (5.1.0)
     yard (0.9.26)
@@ -166,7 +173,8 @@ DEPENDENCIES
   concurrent-ruby
   droplet_kit
   ed25519
-  google-api-client
+  google-apis-compute_v1
+  googleauth
   iniparse
   ipaddress
   net-scp
