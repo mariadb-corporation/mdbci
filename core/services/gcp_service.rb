@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'googleauth'
-require 'google/apis/compute_v1'
+require 'google-apis-compute_v1'
 
 # This class allows to execute commands in accordance to the Google Cloud Compute
 class GcpService
