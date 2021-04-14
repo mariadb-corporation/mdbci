@@ -28,8 +28,8 @@ class TerraformConfigurator
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
     NetworkSettings.from_file(config.network_settings_file).match(
-        ok: ->(result) { @network_settings = result },
-        error: ->(_result) { @network_settings = NetworkSettings.new }
+      ok: ->(result) { @network_settings = result },
+      error: ->(_result) { @network_settings = NetworkSettings.new }
     )
     @threads_count = @config.node_names.length
     Workers.pool.resize(@threads_count)
