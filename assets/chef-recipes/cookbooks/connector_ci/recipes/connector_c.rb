@@ -1,3 +1,5 @@
+node.run_state['connector_ci'] = 'connector_c'
+
 include_recipe 'connector_ci::connector_repository'
 
 case node[:platform_family]

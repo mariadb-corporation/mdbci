@@ -1,5 +1,4 @@
-all_connectors = %w[connector_c connector_cpp connector_odbc]
-connector = all_connectors.find { |connector_name| node.attribute?(connector_name) }
+connector = node.run_state['connector_ci']
 repo = node[connector]['repo']
 repo_key = node[connector]['repo_key']
 
