@@ -370,6 +370,24 @@ module ProductAttributes
         recipe: 'kerberos::kerberos_server',
         name: 'kerberos',
         without_version: true
+    },
+    'connector_c_ci' => {
+        recipe: 'connector_ci::connector_c',
+        repo_recipe: 'connector_ci::connector_repository',
+        name: 'connector_c',
+        repository: 'connector_c_ci',
+    },
+    'connector_cpp_ci' => {
+        recipe: 'connector_ci::connector_cpp',
+        repo_recipe: 'connector_ci::connector_repository',
+        name: 'connector_cpp',
+        repository: 'connector_cpp_ci',
+    },
+    'connector_odbc_ci' => {
+        recipe: 'connector_ci::connector_odbc',
+        repo_recipe: 'connector_ci::connector_repository',
+        name: 'connector_odbc',
+        repository: 'connector_odbc_ci',
     }
   }.freeze
 

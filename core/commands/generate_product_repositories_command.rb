@@ -23,6 +23,7 @@ require_relative 'generate_repository_partials/clustrix_parser'
 require_relative 'generate_repository_partials/galera_ci_parser'
 require_relative 'generate_repository_partials/mariadb_ci_parser'
 require_relative 'generate_repository_partials/mariadb_staging_parser'
+require_relative 'generate_repository_partials/connector_ci_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -44,7 +45,10 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'galera_4_community' => 'galera_4_community',
     'mariadb_ci' => 'mariadb_ci',
     'mdbe_staging' => 'mdbe_staging',
-    'mariadb_staging' => 'mariadb_staging'
+    'mariadb_staging' => 'mariadb_staging',
+    'connector_c_ci' => 'connector_c_ci',
+    'connector_cpp_ci' => 'connector_cpp_ci',
+    'connector_odbc_ci' => 'connector_odbc_ci'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -303,6 +307,15 @@ In order to specify the number of retries for repository configuration use --att
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
     when 'mariadb_staging'
       MariadbStagingParser.parse(product_config, @product_version, @ui, @logger)
+    when 'connector_c_ci'
+      ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_c_ci',
+                              'mariadb-connector-c', 'mariadb-connector-c', @ui, @logger)
+    when 'connector_cpp_ci'
+      ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_cpp_ci',
+                              'mariadb_connector_cpp', 'mariadbcpp', @ui, @logger)
+    when 'connector_odbc_ci'
+      ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_odbc_ci',
+                              'mariadb_connector_odbc-dev', 'mariadb-connector-odbc-devel', @ui, @logger)
     end
   end
 

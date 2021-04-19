@@ -105,3 +105,15 @@ mariadb_staging:
     deb:
       path: https://downloads.mariadb.com/mariadb-staging/
       key: "0xF1656F24C74CD1D8"
+connector_c_ci:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/ConnectorC/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+connector_cpp_ci:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/ConnectorCpp/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+connector_odbc_ci:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/ConnectorODBC/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
