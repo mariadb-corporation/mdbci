@@ -62,9 +62,9 @@ module NetworkChecker
   end
 
   # Checks the string from curl for correctness
-  # The correct string is 2xx or 3xx
+  # The correct string is 2xx, 3xx, 4xx
   def self.curl_responce_successfull?(curl_info)
-    curl_info =~ /[23][0-9][0-9]/
+    curl_info =~ /[234][0-9][0-9]/
   end
 
   # Checks the tool for availability
