@@ -96,8 +96,15 @@ class TerraformAwsGenerator
     aws_config = @aws_config
     use_existing_vpc = use_existing_vpc?
     template = ERB.new <<-PROVIDER
+    terraform {
+      required_providers {
+        aws = {
+          source = "hashicorp/aws"
+          version = ">= 3.37.0"
+        }
+      }
+    }
     provider "aws" {
-      version = "~> 2.33"
       profile = "default"
       region = "<%= aws_config['region'] %>"
       access_key = "<%= aws_config['access_key_id'] %>"

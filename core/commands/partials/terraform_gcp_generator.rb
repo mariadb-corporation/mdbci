@@ -104,8 +104,16 @@ class TerraformGcpGenerator
   # Generate provider resource.
   def provider_resource
     <<-PROVIDER
+    terraform {
+      required_providers {
+        google = {
+          source = "hashicorp/google"
+          version = ">= 3.65.0"
+        }
+      }
+    }
+
     provider "google" {
-      version = "~> 3.1"
       credentials = file("#{@gcp_config['credentials_file']}")
       project = "#{@gcp_config['project']}"
       region = "#{@gcp_config['region']}"

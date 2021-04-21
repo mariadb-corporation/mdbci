@@ -100,8 +100,15 @@ class TerraformDigitaloceanGenerator
   # Generate provider resource.
   def provider_resource
     <<-PROVIDER
+    terraform {
+      required_providers {
+        digitalocean = {
+          source = "digitalocean/digitalocean"
+          version = ">= 2.8.0"
+        }
+      }
+    }
     provider "digitalocean" {
-      version = "~> 1.12"
       token = "#{@digitalocean_config['token']}"
     }
     #{ssh_resource}
