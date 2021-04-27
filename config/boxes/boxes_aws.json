@@ -4,15 +4,20 @@
     "ami": "ami-03e3a1b55173c30c6",
     "user": "ubuntu",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "ubuntu",
     "platform_version": "bionic",
-    "vpc": "true"
+    "vpc": "true",
+    "supported_instance_types": ["t2.nano","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","t3.nano","t3.micro","t3.small","t3.medium","t3.large","t3.xlarge","t3.2xlarge","t3a.nano","t3a.micro","t3a.small","t3a.medium","t3a.large","t3a.xlarge","t3a.2xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","c5.large","c5.xlarge","c5.2xlarge","c5.4xlarge","c5.9xlarge","c5.12xlarge","c5.18xlarge","c5.24xlarge","c5.metal","c5a.large","c5a.xlarge","c5a.2xlarge","c5a.4xlarge","c5a.8xlarge","c5a.12xlarge","c5a.16xlarge","c5a.24xlarge","c5ad.large","c5ad.xlarge","c5ad.2xlarge","c5ad.4xlarge","c5ad.8xlarge","c5ad.12xlarge","c5ad.16xlarge","c5ad.24xlarge","c5d.large","c5d.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge","c5d.12xlarge","c5d.18xlarge","c5d.24xlarge","c5d.metal","c5n.large","c5n.xlarge","c5n.2xlarge","c5n.4xlarge","c5n.9xlarge","c5n.18xlarge","c5n.metal","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","d3.xlarge","d3.2xlarge","d3.4xlarge","d3.8xlarge","d3en.xlarge","d3en.2xlarge","d3en.4xlarge","d3en.6xlarge","d3en.8xlarge","d3en.12xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","g3s.xlarge","g4ad.4xlarge","g4ad.8xlarge","g4ad.16xlarge","g4dn.xlarge","g4dn.2xlarge","g4dn.4xlarge","g4dn.8xlarge","g4dn.12xlarge","g4dn.16xlarge","g4dn.metal","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","i3.metal","i3en.large","i3en.xlarge","i3en.2xlarge","i3en.3xlarge","i3en.6xlarge","i3en.12xlarge","i3en.24xlarge","i3en.metal","inf1.xlarge","inf1.2xlarge","inf1.6xlarge","inf1.24xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","m5.large","m5.xlarge","m5.2xlarge","m5.4xlarge","m5.8xlarge","m5.12xlarge","m5.16xlarge","m5.24xlarge","m5.metal","m5a.large","m5a.xlarge","m5a.2xlarge","m5a.4xlarge","m5a.8xlarge","m5a.12xlarge","m5a.16xlarge","m5a.24xlarge","m5ad.large","m5ad.xlarge","m5ad.2xlarge","m5ad.4xlarge","m5ad.8xlarge","m5ad.12xlarge","m5ad.16xlarge","m5ad.24xlarge","m5d.large","m5d.xlarge","m5d.2xlarge","m5d.4xlarge","m5d.8xlarge","m5d.12xlarge","m5d.16xlarge","m5d.24xlarge","m5d.metal","m5dn.large","m5dn.xlarge","m5dn.2xlarge","m5dn.4xlarge","m5dn.8xlarge","m5dn.12xlarge","m5dn.16xlarge","m5dn.24xlarge","m5dn.metal","m5n.large","m5n.xlarge","m5n.2xlarge","m5n.4xlarge","m5n.8xlarge","m5n.12xlarge","m5n.16xlarge","m5n.24xlarge","m5zn.large","m5zn.xlarge","m5zn.2xlarge","m5zn.3xlarge","m5zn.6xlarge","m5zn.12xlarge","m5zn.metal","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","p3dn.24xlarge","p4d.24xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","r5.large","r5.xlarge","r5.2xlarge","r5.4xlarge","r5.8xlarge","r5.12xlarge","r5.16xlarge","r5.24xlarge","r5.metal","r5a.large","r5a.xlarge","r5a.2xlarge","r5a.4xlarge","r5a.8xlarge","r5a.12xlarge","r5a.16xlarge","r5a.24xlarge","r5ad.large","r5ad.xlarge","r5ad.2xlarge","r5ad.4xlarge","r5ad.8xlarge","r5ad.12xlarge","r5ad.16xlarge","r5ad.24xlarge","r5d.large","r5d.xlarge","r5d.2xlarge","r5d.4xlarge","r5d.8xlarge","r5d.12xlarge","r5d.16xlarge","r5d.24xlarge","r5d.metal","r5dn.large","r5dn.xlarge","r5dn.2xlarge","r5dn.4xlarge","r5dn.8xlarge","r5dn.12xlarge","r5dn.16xlarge","r5dn.24xlarge","r5dn.metal","r5n.large","r5n.xlarge","r5n.2xlarge","r5n.4xlarge","r5n.8xlarge","r5n.12xlarge","r5n.16xlarge","r5n.24xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge","z1d.large","z1d.xlarge","z1d.2xlarge","z1d.3xlarge","z1d.6xlarge","z1d.12xlarge","z1d.metal"]
   },
   "ubuntu_xenial_aws": {
     "provider": "aws",
     "ami": "ami-02fcf12d5bd33ce51",
     "user": "ubuntu",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "ubuntu",
     "platform_version": "xenial",
     "vpc": "true"
@@ -22,31 +27,42 @@
     "ami": "ami-57228424",
     "user": "ubuntu",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "ubuntu",
-    "platform_version": "wily"
+    "platform_version": "wily",
+    "supported_instance_types": ["c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge"]
   },
   "ubuntu_vivid_aws": {
     "provider": "aws",
     "ami": "ami-b1443fc6",
     "user": "ubuntu",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "ubuntu",
-    "platform_version": "vivid"
+    "platform_version": "vivid",
+    "supported_instance_types": ["t1.micro","t2.nano","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","cc2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g2.2xlarge","g2.8xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge"]
   },
   "ubuntu_trusty_aws": {
     "provider": "aws",
     "ami": "ami-053ba9d62f24950f2",
     "user": "ubuntu",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "ubuntu",
     "platform_version": "trusty",
-    "vpc": "true"
+    "vpc": "true",
+    "supported_instance_types": ["t1.micro","t2.nano","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","t3.nano","t3.micro","t3.small","t3.medium","t3.large","t3.xlarge","t3.2xlarge","t3a.nano","t3a.micro","t3a.small","t3a.medium","t3a.large","t3a.xlarge","t3a.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","c5.large","c5.xlarge","c5.2xlarge","c5.4xlarge","c5.9xlarge","c5.12xlarge","c5.18xlarge","c5.24xlarge","c5.metal","c5a.large","c5a.xlarge","c5a.2xlarge","c5a.4xlarge","c5a.8xlarge","c5a.12xlarge","c5a.16xlarge","c5a.24xlarge","c5ad.large","c5ad.xlarge","c5ad.2xlarge","c5ad.4xlarge","c5ad.8xlarge","c5ad.12xlarge","c5ad.16xlarge","c5ad.24xlarge","c5d.large","c5d.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge","c5d.12xlarge","c5d.18xlarge","c5d.24xlarge","c5d.metal","c5n.large","c5n.xlarge","c5n.2xlarge","c5n.4xlarge","c5n.9xlarge","c5n.18xlarge","c5n.metal","cc2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","d3.xlarge","d3.2xlarge","d3.4xlarge","d3.8xlarge","d3en.xlarge","d3en.2xlarge","d3en.4xlarge","d3en.6xlarge","d3en.8xlarge","d3en.12xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g2.2xlarge","g2.8xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","g3s.xlarge","g4ad.4xlarge","g4ad.8xlarge","g4ad.16xlarge","g4dn.xlarge","g4dn.2xlarge","g4dn.4xlarge","g4dn.8xlarge","g4dn.12xlarge","g4dn.16xlarge","g4dn.metal","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","i3.metal","i3en.large","i3en.xlarge","i3en.2xlarge","i3en.3xlarge","i3en.6xlarge","i3en.12xlarge","i3en.24xlarge","i3en.metal","inf1.xlarge","inf1.2xlarge","inf1.6xlarge","inf1.24xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","m5.large","m5.xlarge","m5.2xlarge","m5.4xlarge","m5.8xlarge","m5.12xlarge","m5.16xlarge","m5.24xlarge","m5.metal","m5a.large","m5a.xlarge","m5a.2xlarge","m5a.4xlarge","m5a.8xlarge","m5a.12xlarge","m5a.16xlarge","m5a.24xlarge","m5ad.large","m5ad.xlarge","m5ad.2xlarge","m5ad.4xlarge","m5ad.8xlarge","m5ad.12xlarge","m5ad.16xlarge","m5ad.24xlarge","m5d.large","m5d.xlarge","m5d.2xlarge","m5d.4xlarge","m5d.8xlarge","m5d.12xlarge","m5d.16xlarge","m5d.24xlarge","m5d.metal","m5dn.large","m5dn.xlarge","m5dn.2xlarge","m5dn.4xlarge","m5dn.8xlarge","m5dn.12xlarge","m5dn.16xlarge","m5dn.24xlarge","m5dn.metal","m5n.large","m5n.xlarge","m5n.2xlarge","m5n.4xlarge","m5n.8xlarge","m5n.12xlarge","m5n.16xlarge","m5n.24xlarge","m5zn.large","m5zn.xlarge","m5zn.2xlarge","m5zn.3xlarge","m5zn.6xlarge","m5zn.12xlarge","m5zn.metal","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","p3dn.24xlarge","p4d.24xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","r5.large","r5.xlarge","r5.2xlarge","r5.4xlarge","r5.8xlarge","r5.12xlarge","r5.16xlarge","r5.24xlarge","r5.metal","r5a.large","r5a.xlarge","r5a.2xlarge","r5a.4xlarge","r5a.8xlarge","r5a.12xlarge","r5a.16xlarge","r5a.24xlarge","r5ad.large","r5ad.xlarge","r5ad.2xlarge","r5ad.4xlarge","r5ad.8xlarge","r5ad.12xlarge","r5ad.16xlarge","r5ad.24xlarge","r5d.large","r5d.xlarge","r5d.2xlarge","r5d.4xlarge","r5d.8xlarge","r5d.12xlarge","r5d.16xlarge","r5d.24xlarge","r5d.metal","r5dn.large","r5dn.xlarge","r5dn.2xlarge","r5dn.4xlarge","r5dn.8xlarge","r5dn.12xlarge","r5dn.16xlarge","r5dn.24xlarge","r5dn.metal","r5n.large","r5n.xlarge","r5n.2xlarge","r5n.4xlarge","r5n.8xlarge","r5n.12xlarge","r5n.16xlarge","r5n.24xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge","z1d.large","z1d.xlarge","z1d.2xlarge","z1d.3xlarge","z1d.6xlarge","z1d.12xlarge","z1d.metal"]
   },
   "ubuntu_precise_aws": {
     "provider": "aws",
     "ami": "ami-008a5373",
     "user": "ubuntu",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "ubuntu",
     "platform_version": "precise"
   },
@@ -55,22 +71,30 @@
     "ami": "ami-0a4d556c",
     "user": "ubuntu",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "ubuntu",
-    "platform_version": "yakkety"
+    "platform_version": "yakkety",
+    "supported_instance_types": ["t1.micro","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge"]
   },
   "ubuntu_focal_aws": {
     "provider": "aws",
     "ami": "ami-0d7a77d712db3f78e",
     "user": "ubuntu",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "ubuntu",
-    "platform_version": "focal"
+    "platform_version": "focal",
+    "supported_instance_types": ["t1.micro","t2.nano","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","t3.nano","t3.micro","t3.small","t3.medium","t3.large","t3.xlarge","t3.2xlarge","t3a.nano","t3a.micro","t3a.small","t3a.medium","t3a.large","t3a.xlarge","t3a.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","c5.large","c5.xlarge","c5.2xlarge","c5.4xlarge","c5.9xlarge","c5.12xlarge","c5.18xlarge","c5.24xlarge","c5.metal","c5a.large","c5a.xlarge","c5a.2xlarge","c5a.4xlarge","c5a.8xlarge","c5a.12xlarge","c5a.16xlarge","c5a.24xlarge","c5ad.large","c5ad.xlarge","c5ad.2xlarge","c5ad.4xlarge","c5ad.8xlarge","c5ad.12xlarge","c5ad.16xlarge","c5ad.24xlarge","c5d.large","c5d.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge","c5d.12xlarge","c5d.18xlarge","c5d.24xlarge","c5d.metal","c5n.large","c5n.xlarge","c5n.2xlarge","c5n.4xlarge","c5n.9xlarge","c5n.18xlarge","c5n.metal","cc2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","d3.xlarge","d3.2xlarge","d3.4xlarge","d3.8xlarge","d3en.xlarge","d3en.2xlarge","d3en.4xlarge","d3en.6xlarge","d3en.8xlarge","d3en.12xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g2.2xlarge","g2.8xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","g3s.xlarge","g4ad.4xlarge","g4ad.8xlarge","g4ad.16xlarge","g4dn.xlarge","g4dn.2xlarge","g4dn.4xlarge","g4dn.8xlarge","g4dn.12xlarge","g4dn.16xlarge","g4dn.metal","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","i3.metal","i3en.large","i3en.xlarge","i3en.2xlarge","i3en.3xlarge","i3en.6xlarge","i3en.12xlarge","i3en.24xlarge","i3en.metal","inf1.xlarge","inf1.2xlarge","inf1.6xlarge","inf1.24xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","m5.large","m5.xlarge","m5.2xlarge","m5.4xlarge","m5.8xlarge","m5.12xlarge","m5.16xlarge","m5.24xlarge","m5.metal","m5a.large","m5a.xlarge","m5a.2xlarge","m5a.4xlarge","m5a.8xlarge","m5a.12xlarge","m5a.16xlarge","m5a.24xlarge","m5ad.large","m5ad.xlarge","m5ad.2xlarge","m5ad.4xlarge","m5ad.8xlarge","m5ad.12xlarge","m5ad.16xlarge","m5ad.24xlarge","m5d.large","m5d.xlarge","m5d.2xlarge","m5d.4xlarge","m5d.8xlarge","m5d.12xlarge","m5d.16xlarge","m5d.24xlarge","m5d.metal","m5dn.large","m5dn.xlarge","m5dn.2xlarge","m5dn.4xlarge","m5dn.8xlarge","m5dn.12xlarge","m5dn.16xlarge","m5dn.24xlarge","m5dn.metal","m5n.large","m5n.xlarge","m5n.2xlarge","m5n.4xlarge","m5n.8xlarge","m5n.12xlarge","m5n.16xlarge","m5n.24xlarge","m5zn.large","m5zn.xlarge","m5zn.2xlarge","m5zn.3xlarge","m5zn.6xlarge","m5zn.12xlarge","m5zn.metal","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","p3dn.24xlarge","p4d.24xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","r5.large","r5.xlarge","r5.2xlarge","r5.4xlarge","r5.8xlarge","r5.12xlarge","r5.16xlarge","r5.24xlarge","r5.metal","r5a.large","r5a.xlarge","r5a.2xlarge","r5a.4xlarge","r5a.8xlarge","r5a.12xlarge","r5a.16xlarge","r5a.24xlarge","r5ad.large","r5ad.xlarge","r5ad.2xlarge","r5ad.4xlarge","r5ad.8xlarge","r5ad.12xlarge","r5ad.16xlarge","r5ad.24xlarge","r5d.large","r5d.xlarge","r5d.2xlarge","r5d.4xlarge","r5d.8xlarge","r5d.12xlarge","r5d.16xlarge","r5d.24xlarge","r5d.metal","r5dn.large","r5dn.xlarge","r5dn.2xlarge","r5dn.4xlarge","r5dn.8xlarge","r5dn.12xlarge","r5dn.16xlarge","r5dn.24xlarge","r5dn.metal","r5n.large","r5n.xlarge","r5n.2xlarge","r5n.4xlarge","r5n.8xlarge","r5n.12xlarge","r5n.16xlarge","r5n.24xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge","z1d.large","z1d.xlarge","z1d.2xlarge","z1d.3xlarge","z1d.6xlarge","z1d.12xlarge","z1d.metal"]
   },
   "centos_7_aws" : {
     "provider": "aws",
     "ami": "ami-005b5c720e7b986d6",
     "user": "centos",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "centos",
     "platform_version": "7",
     "vpc": "true"
@@ -80,6 +104,8 @@
     "ami": "ami-0b22151636799d440",
     "user": "ec2-user",
     "default_instance_type": "m3.large",
+    "default_cpu_count": "2",
+    "default_memory_size": "7680",
     "platform": "centos",
     "platform_version": "7"
   },
@@ -88,15 +114,20 @@
     "ami": "ami-0451e9d3427711cb1",
     "user": "centos",
     "default_instance_type": "t2.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "centos",
     "platform_version": "6",
-    "vpc": "true"
+    "vpc": "true",
+    "supported_instance_types": ["t1.micro","t2.nano","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","t3.nano","t3.micro","t3.small","t3.medium","t3.large","t3.xlarge","t3.2xlarge","t3a.nano","t3a.micro","t3a.small","t3a.medium","t3a.large","t3a.xlarge","t3a.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","c5.large","c5.xlarge","c5.2xlarge","c5.4xlarge","c5.9xlarge","c5.12xlarge","c5.18xlarge","c5.24xlarge","c5.metal","c5a.large","c5a.xlarge","c5a.2xlarge","c5a.4xlarge","c5a.8xlarge","c5a.12xlarge","c5a.16xlarge","c5a.24xlarge","c5ad.large","c5ad.xlarge","c5ad.2xlarge","c5ad.4xlarge","c5ad.8xlarge","c5ad.12xlarge","c5ad.16xlarge","c5ad.24xlarge","c5d.large","c5d.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge","c5d.12xlarge","c5d.18xlarge","c5d.24xlarge","c5d.metal","c5n.large","c5n.xlarge","c5n.2xlarge","c5n.4xlarge","c5n.9xlarge","c5n.18xlarge","c5n.metal","cc2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","d3.xlarge","d3.2xlarge","d3.4xlarge","d3.8xlarge","d3en.xlarge","d3en.2xlarge","d3en.4xlarge","d3en.6xlarge","d3en.8xlarge","d3en.12xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g2.2xlarge","g2.8xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","g3s.xlarge","g4ad.4xlarge","g4ad.8xlarge","g4ad.16xlarge","g4dn.xlarge","g4dn.2xlarge","g4dn.4xlarge","g4dn.8xlarge","g4dn.12xlarge","g4dn.16xlarge","g4dn.metal","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","i3.metal","i3en.large","i3en.xlarge","i3en.2xlarge","i3en.3xlarge","i3en.6xlarge","i3en.12xlarge","i3en.24xlarge","i3en.metal","inf1.xlarge","inf1.2xlarge","inf1.6xlarge","inf1.24xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","m5.large","m5.xlarge","m5.2xlarge","m5.4xlarge","m5.8xlarge","m5.12xlarge","m5.16xlarge","m5.24xlarge","m5.metal","m5a.large","m5a.xlarge","m5a.2xlarge","m5a.4xlarge","m5a.8xlarge","m5a.12xlarge","m5a.16xlarge","m5a.24xlarge","m5ad.large","m5ad.xlarge","m5ad.2xlarge","m5ad.4xlarge","m5ad.8xlarge","m5ad.12xlarge","m5ad.16xlarge","m5ad.24xlarge","m5d.large","m5d.xlarge","m5d.2xlarge","m5d.4xlarge","m5d.8xlarge","m5d.12xlarge","m5d.16xlarge","m5d.24xlarge","m5d.metal","m5dn.large","m5dn.xlarge","m5dn.2xlarge","m5dn.4xlarge","m5dn.8xlarge","m5dn.12xlarge","m5dn.16xlarge","m5dn.24xlarge","m5dn.metal","m5n.large","m5n.xlarge","m5n.2xlarge","m5n.4xlarge","m5n.8xlarge","m5n.12xlarge","m5n.16xlarge","m5n.24xlarge","m5zn.large","m5zn.xlarge","m5zn.2xlarge","m5zn.3xlarge","m5zn.6xlarge","m5zn.12xlarge","m5zn.metal","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","p3dn.24xlarge","p4d.24xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","r5.large","r5.xlarge","r5.2xlarge","r5.4xlarge","r5.8xlarge","r5.12xlarge","r5.16xlarge","r5.24xlarge","r5.metal","r5a.large","r5a.xlarge","r5a.2xlarge","r5a.4xlarge","r5a.8xlarge","r5a.12xlarge","r5a.16xlarge","r5a.24xlarge","r5ad.large","r5ad.xlarge","r5ad.2xlarge","r5ad.4xlarge","r5ad.8xlarge","r5ad.12xlarge","r5ad.16xlarge","r5ad.24xlarge","r5d.large","r5d.xlarge","r5d.2xlarge","r5d.4xlarge","r5d.8xlarge","r5d.12xlarge","r5d.16xlarge","r5d.24xlarge","r5d.metal","r5dn.large","r5dn.xlarge","r5dn.2xlarge","r5dn.4xlarge","r5dn.8xlarge","r5dn.12xlarge","r5dn.16xlarge","r5dn.24xlarge","r5dn.metal","r5n.large","r5n.xlarge","r5n.2xlarge","r5n.4xlarge","r5n.8xlarge","r5n.12xlarge","r5n.16xlarge","r5n.24xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge","z1d.large","z1d.xlarge","z1d.2xlarge","z1d.3xlarge","z1d.6xlarge","z1d.12xlarge","z1d.metal"]
   },
   "debian_jessie_aws" : {
     "provider": "aws",
     "ami": "ami-a72a7ad4",
     "user": "admin",
     "default_instance_type": "t2.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "debian",
     "platform_version": "jessie",
     "vpc": "true"
@@ -106,16 +137,22 @@
     "ami": "ami-879e4ff0",
     "user": "admin",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "debian",
-    "platform_version": "squeeze"
+    "platform_version": "squeeze",
+    "supported_instance_types": ["t1.micro","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge"]
   },
   "debian_wheezy_aws" : {
     "provider": "aws",
     "ami": "ami-e7e66a90",
     "user": "admin",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "debian",
-    "platform_version": "wheezy"
+    "platform_version": "wheezy",
+    "supported_instance_types": ["t1.micro","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge"]
   },
   "debian_buster_aws" : {
     "provider": "aws",
@@ -131,6 +168,8 @@
     "ami": "ami-00a845a11b3d1f308",
     "user": "admin",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "debian",
     "platform_version": "stretch",
     "vpc": "true"
@@ -140,23 +179,30 @@
     "ami": "ami-f06bf389",
     "user": "ec2-user",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "rhel",
     "platform_version": "6",
-    "extra_vagrant_output": "true"
+    "supported_instance_types": ["t1.micro","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","cc2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g2.2xlarge","g2.8xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge"]
   },
   "rhel_7_aws" : {
     "provider": "aws",
     "ami": "ami-25158352",
     "user": "ec2-user",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "rhel",
-    "platform_version": "7"
+    "platform_version": "7",
+    "supported_instance_types": ["t1.micro","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","c1.medium","c1.xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","cc2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g2.2xlarge","g2.8xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i2.xlarge","i2.2xlarge","i2.4xlarge","i2.8xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.medium","m3.large","m3.xlarge","m3.2xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","r3.large","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge"]
   },
   "rhel_8_aws" : {
     "provider": "aws",
     "ami": "ami-0219214bdee2d7451",
     "user": "ec2-user",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "rhel",
     "platform_version": "8",
     "vpc": "true",
@@ -167,6 +213,8 @@
     "ami": "ami-03746875d916becc0",
     "user": "ubuntu",
     "default_instance_type": "m5.large",
+    "default_cpu_count": "2",
+    "default_memory_size": "8192",
     "platform": "ubuntu",
     "platform_version": "trusty",
     "vpc": "true"
@@ -176,6 +224,8 @@
     "ami": "ami-9a6f3ded",
     "user": "ec2-user",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "sles",
     "platform_version": "11"
   },
@@ -184,16 +234,21 @@
     "ami": "ami-0d3747c7692f33308",
     "user": "ec2-user",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "sles",
     "platform_version": "12",
     "vpc": "true",
-    "configure_suse_connect": "true"
+    "configure_suse_connect": "true",
+    "supported_instance_types": ["t2.nano","t2.micro","t2.small","t2.medium","t2.large","t2.xlarge","t2.2xlarge","t3.nano","t3.micro","t3.small","t3.medium","t3.large","t3.xlarge","t3.2xlarge","t3a.nano","t3a.micro","t3a.small","t3a.medium","t3a.large","t3a.xlarge","t3a.2xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge","c5.large","c5.xlarge","c5.2xlarge","c5.4xlarge","c5.9xlarge","c5.12xlarge","c5.18xlarge","c5.24xlarge","c5.metal","c5a.large","c5a.xlarge","c5a.2xlarge","c5a.4xlarge","c5a.8xlarge","c5a.12xlarge","c5a.16xlarge","c5a.24xlarge","c5ad.large","c5ad.xlarge","c5ad.2xlarge","c5ad.4xlarge","c5ad.8xlarge","c5ad.12xlarge","c5ad.16xlarge","c5ad.24xlarge","c5d.large","c5d.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge","c5d.12xlarge","c5d.18xlarge","c5d.24xlarge","c5d.metal","c5n.large","c5n.xlarge","c5n.2xlarge","c5n.4xlarge","c5n.9xlarge","c5n.18xlarge","c5n.metal","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge","d3.xlarge","d3.2xlarge","d3.4xlarge","d3.8xlarge","d3en.xlarge","d3en.2xlarge","d3en.4xlarge","d3en.6xlarge","d3en.8xlarge","d3en.12xlarge","f1.2xlarge","f1.4xlarge","f1.16xlarge","g3.4xlarge","g3.8xlarge","g3.16xlarge","g3s.xlarge","g4ad.4xlarge","g4ad.8xlarge","g4ad.16xlarge","g4dn.xlarge","g4dn.2xlarge","g4dn.4xlarge","g4dn.8xlarge","g4dn.12xlarge","g4dn.16xlarge","g4dn.metal","h1.2xlarge","h1.4xlarge","h1.8xlarge","h1.16xlarge","i3.large","i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge","i3.metal","i3en.large","i3en.xlarge","i3en.2xlarge","i3en.3xlarge","i3en.6xlarge","i3en.12xlarge","i3en.24xlarge","i3en.metal","inf1.xlarge","inf1.2xlarge","inf1.6xlarge","inf1.24xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge","m5.large","m5.xlarge","m5.2xlarge","m5.4xlarge","m5.8xlarge","m5.12xlarge","m5.16xlarge","m5.24xlarge","m5.metal","m5a.large","m5a.xlarge","m5a.2xlarge","m5a.4xlarge","m5a.8xlarge","m5a.12xlarge","m5a.16xlarge","m5a.24xlarge","m5ad.large","m5ad.xlarge","m5ad.2xlarge","m5ad.4xlarge","m5ad.8xlarge","m5ad.12xlarge","m5ad.16xlarge","m5ad.24xlarge","m5d.large","m5d.xlarge","m5d.2xlarge","m5d.4xlarge","m5d.8xlarge","m5d.12xlarge","m5d.16xlarge","m5d.24xlarge","m5d.metal","m5dn.large","m5dn.xlarge","m5dn.2xlarge","m5dn.4xlarge","m5dn.8xlarge","m5dn.12xlarge","m5dn.16xlarge","m5dn.24xlarge","m5dn.metal","m5n.large","m5n.xlarge","m5n.2xlarge","m5n.4xlarge","m5n.8xlarge","m5n.12xlarge","m5n.16xlarge","m5n.24xlarge","m5zn.large","m5zn.xlarge","m5zn.2xlarge","m5zn.3xlarge","m5zn.6xlarge","m5zn.12xlarge","m5zn.metal","p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge","p3dn.24xlarge","p4d.24xlarge","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge","r5.large","r5.xlarge","r5.2xlarge","r5.4xlarge","r5.8xlarge","r5.12xlarge","r5.16xlarge","r5.24xlarge","r5.metal","r5a.large","r5a.xlarge","r5a.2xlarge","r5a.4xlarge","r5a.8xlarge","r5a.12xlarge","r5a.16xlarge","r5a.24xlarge","r5ad.large","r5ad.xlarge","r5ad.2xlarge","r5ad.4xlarge","r5ad.8xlarge","r5ad.12xlarge","r5ad.16xlarge","r5ad.24xlarge","r5d.large","r5d.xlarge","r5d.2xlarge","r5d.4xlarge","r5d.8xlarge","r5d.12xlarge","r5d.16xlarge","r5d.24xlarge","r5d.metal","r5dn.large","r5dn.xlarge","r5dn.2xlarge","r5dn.4xlarge","r5dn.8xlarge","r5dn.12xlarge","r5dn.16xlarge","r5dn.24xlarge","r5dn.metal","r5n.large","r5n.xlarge","r5n.2xlarge","r5n.4xlarge","r5n.8xlarge","r5n.12xlarge","r5n.16xlarge","r5n.24xlarge","x1.16xlarge","x1.32xlarge","x1e.xlarge","x1e.2xlarge","x1e.4xlarge","x1e.8xlarge","x1e.16xlarge","x1e.32xlarge","z1d.large","z1d.xlarge","z1d.2xlarge","z1d.3xlarge","z1d.6xlarge","z1d.12xlarge","z1d.metal"]
   },
   "suse_15_aws" : {
     "provider": "aws",
     "ami": "ami-0f81506cab2b62029",
     "user": "ec2-user",
     "default_instance_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096",
     "platform": "opensuse",
     "platform_version": "15",
     "vpc": "true"
@@ -203,6 +258,8 @@
     "ami": "ami-068cc47f",
     "user": "ec2-user",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "suse",
     "platform_version": "13"
   },
@@ -211,6 +268,8 @@
     "ami": "ami-34b4f043",
     "user": "fedora",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "fedora",
     "platform_version": "19"
   },
@@ -219,6 +278,8 @@
     "ami": "ami-8cb4f0fb",
     "user": "fedora",
     "default_instance_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "fedora",
     "platform_version": "20"
   },
@@ -227,6 +288,8 @@
     "ami": "ami-6c44031b",
     "user": "fedora",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "fedora",
     "platform_version": "21"
   },
@@ -235,6 +298,8 @@
     "ami": "ami-252c5a52",
     "user": "fedora",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "fedora",
     "platform_version": "23"
   },
@@ -243,6 +308,8 @@
     "ami": "ami-1b97e26c",
     "user": "fedora",
     "default_instance_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3840",
     "platform": "fedora",
     "platform_version": "22"
   }
