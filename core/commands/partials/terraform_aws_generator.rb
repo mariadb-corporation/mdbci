@@ -13,8 +13,9 @@ class TerraformAwsGenerator
   # @param logger [Out] logger
   # @param configuration_path [String] path to directory of generated configuration
   # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
+  # @param aws_service [AwsService] AWS service
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, aws_config, logger, configuration_path, ssh_keys)
+  def initialize(configuration_id, aws_config, logger, configuration_path, ssh_keys, aws_service)
     @configuration_id = configuration_id
     @configuration_tags = { configuration_id: @configuration_id }
     @aws_config = aws_config
@@ -22,6 +23,7 @@ class TerraformAwsGenerator
     @configuration_path = configuration_path
     @public_key_value = ssh_keys[:public_key_value]
     @private_key_file_path = ssh_keys[:private_key_file_path]
+    @aws_service = aws_service
   end
 
   # Generate a Terraform configuration file.
@@ -309,6 +311,9 @@ class TerraformAwsGenerator
                                       key_file: @private_key_file_path,
                                       subnet_id: subnet_id,
                                       use_existing_vpc: use_existing_vpc? })
-    Result.ok(node_params)
+    machine_types = @aws_service.machine_types_list(node_params[:supported_instance_types])
+    CloudServices.choose_instance_type(machine_types, node_params).and_then do |machine_type|
+      Result.ok(node_params.merge(machine_type: machine_type))
+    end
   end
 end

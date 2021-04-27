@@ -127,7 +127,7 @@ class TerraformConfigurationGenerator < BaseCommand
     case @provider
     when 'aws'
       Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui,
-                                          @configuration_path, @ssh_keys))
+                                          @configuration_path, @ssh_keys, @env.aws_service))
     when 'gcp'
       Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path,
                                           @ssh_keys, @env.gcp_service, @all_windows))

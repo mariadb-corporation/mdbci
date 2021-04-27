@@ -3,6 +3,13 @@
 require 'aws-sdk-ec2'
 require 'socket'
 
+# To get AMI supported machine types:
+# go to EC2-console -> Instances -> click on button "Launch instances",
+# select needed image and go to "2. Choose Instance Type" tab.
+# Execute next script in the browser developer console:
+# `JSON.stringify(Array.from(document.querySelectorAll("#gwt-debug-instanceTypeList tbody tr[__gwt_row]:not(.lx-IQG) td:nth-child(3) span")).map(td => td.innerText.match(/(\d|\w)+\.(\d|\w)+/) ? td.innerText : null).filter(item => item != null));`
+# and copy array to relevant box in `supported_instance_types` field in `config/boxes_aws.json` file.
+
 # This class allows to execute commands in accordance to the AWS EC2
 class AwsService
   def self.check_credentials(logger, key_id, secret_key, region)
@@ -262,6 +269,21 @@ class AwsService
     return false unless configured?
 
     @aws_config['use_existing_vpc']
+  end
+
+  # Fetch machines types list.
+  # @param [Array<String>] supported_types supported machine types of box for limit the returning list of types.
+  # @return [Array<Hash>] instance types in format { ram, cpu, type }.
+  def machine_types_list(supported_types = nil)
+    return [] unless configured?
+
+    types = @client.describe_instance_types.instance_types.to_a
+    types = types.select { |type| supported_types.include?(type.instance_type) } unless supported_types.nil?
+    types.map do |instance_type|
+      { ram: instance_type.memory_info.size_in_mi_b,
+        cpu: instance_type.v_cpu_info.default_v_cpus,
+        type: instance_type.instance_type }
+    end
   end
 
   private
