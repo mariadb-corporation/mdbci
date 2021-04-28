@@ -72,7 +72,9 @@ rm -rf "$APP_DIR/usr/share/man"
 rm -rf "$APP_DIR/usr/include"
 
 echo "--> creating the AppImage"
-wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
+if [ ! -f "$WORKSPACE/functions.sh" ]; then
+    wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
+fi
 source "$WORKSPACE/functions.sh"
 
 cd $APP_DIR
