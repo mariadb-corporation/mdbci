@@ -79,7 +79,9 @@ class TerraformAwsGenerator
   #
   # @param node_params [Hash] list of the node parameters
   def print_node_info(node_params)
-    @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:ami]}, user:#{node_params[:user]}")
+    @ui.info("AWS definition for host:#{node_params[:host]},"\
+             " ami:#{node_params[:ami]}, user:#{node_params[:user]},"\
+             " instance_type:#{node_params[:machine_type]}")
   end
 
   def file_header
@@ -236,7 +238,7 @@ class TerraformAwsGenerator
     template = ERB.new <<-AWS
     resource "aws_instance" "<%= name %>" {
       ami = "<%= ami %>"
-      instance_type = "<%= default_instance_type %>"
+      instance_type = "<%= machine_type %>"
       key_name = aws_key_pair.ec2key.key_name
       <% if vpc %>
         vpc_security_group_ids = [aws_security_group.security_group_vpc.id]
