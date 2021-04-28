@@ -103,7 +103,7 @@ class BoxDefinitions
 
   REQUIRED_KEYS = %w[provider platform platform_version].freeze
 
-  AWS_KEYS = %w[ami user default_instance_type].freeze
+  AWS_KEYS = %w[ami user default_machine_type].freeze
   DEDICATED_KEYS = %w[host user ssh_key].freeze
   DIGITALOCEAN_KEYS = %w[image user default_machine_type default_cpu_count default_memory_size].freeze
   DOCKER_KEYS = %w[box].freeze
