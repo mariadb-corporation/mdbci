@@ -277,7 +277,13 @@ class AwsService
   def machine_types_list(supported_types = nil)
     return [] unless configured?
 
-    types = @client.describe_instance_types.instance_types.to_a
+    types = []
+    next_token = nil
+    begin
+      response = @client.describe_instance_types(next_token: next_token)
+      types += response.instance_types.to_a
+      next_token = response.next_token
+    end until next_token.nil?
     types = types.select { |type| supported_types.include?(type.instance_type) } unless supported_types.nil?
     types.map do |instance_type|
       { ram: instance_type.memory_info.size_in_mi_b,
