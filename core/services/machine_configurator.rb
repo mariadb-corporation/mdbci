@@ -140,14 +140,17 @@ class MachineConfigurator
     logger.info("Installing Chef #{chef_version} on the server.")
     return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
 
-    result = install_appimage_chef(connection, chef_version, logger)
+    architecture = determine_machine_architecture(connection, logger)
+    return architecture if architecture.error?
+
+    result = install_appimage_chef(connection, chef_version, architecture.value, logger)
     return result if result.success?
 
     install_upstream_chef(connection, '14.13.11', logger)
   end
 
-  def install_appimage_chef(connection, chef_version, logger)
-    download_command = prepare_appimage_download_command(connection, chef_version, logger)
+  def install_appimage_chef(connection, chef_version, architecture, logger)
+    download_command = prepare_appimage_download_command(connection, chef_version, architecture, logger)
     CHEF_INSTALLATION_ATTEMPTS.times do
       sudo_exec(connection, download_command, logger).and_then do
         sudo_exec(connection, 'chmod 0755 /tmp/chef-solo', logger)
@@ -155,6 +158,8 @@ class MachineConfigurator
         sudo_exec(connection, '/tmp/chef-solo --appimage-extract', LogStorage.new)
       end.and_then do
         sudo_exec(connection, './squashfs-root/install.sh', logger)
+      end.and_then do
+        sudo_exec(connection, 'rm -rf squashfs-root')
       end
       return Result.ok(:installed) if chef_installed?(connection, chef_version, logger)
 
@@ -164,13 +169,24 @@ class MachineConfigurator
   end
 
   # Determine the method to download Chef installation script: wget or curl
-  def prepare_appimage_download_command(connection, chef_version, logger)
-    appimage_url = "https://mdbe-ci-repo.mariadb.net/MDBCI/chef-solo-#{chef_version}.glibc-x86_64.AppImage"
+  def prepare_appimage_download_command(connection, chef_version, architecture, logger)
+    appimage_url = "https://mdbe-ci-repo.mariadb.net/MDBCI/chef-solo-#{chef_version}.glibc-#{architecture}.AppImage"
     result = ssh_exec(connection, 'which wget', logger)
     if result.success?
       "wget -q #{appimage_url} --output-document /tmp/chef-solo"
     else
       "curl -sS -L #{appimage_url} --output /tmp/chef-solo"
+    end
+  end
+
+  def determine_machine_architecture(connection, logger)
+    ssh_exec(connection, 'uname -m', logger).and_then do |output|
+      architecture = output.strip
+      if %w[x86_64 aarch64].include?(architecture)
+        Result.ok(architecture)
+      else
+        Result.error("Unsupported server architecture: #{architecture}")
+      end
     end
   end
 
