@@ -122,8 +122,13 @@ module TerraformService
 
   # Format string (only letters, numbers and hyphen).
   # @param string [String] string for format
+  # @param max_length [Integer] maximum length of resulted string, -1 for unlimited
   # @return [String] formatted string.
-  def self.format_string(string)
-    string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
+  def self.format_string(string, max_length: -1)
+    converted_string = string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
+    if max_length > 0
+      converted_string = converted_string.chars.first(max_length).join
+    end
+    converted_string
   end
 end
