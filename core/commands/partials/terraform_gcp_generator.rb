@@ -25,7 +25,7 @@ class TerraformGcpGenerator
     @ui = logger
     @configuration_path = configuration_path
     @configuration_labels = { configuration_id: @configuration_id,
-                              full_config_path: TerraformService.format_string(@configuration_path).chars.first(60) }
+                              full_config_path: TerraformService.format_string(@configuration_path, max_length: 60) }
     unless all_windows
       @public_key_value = ssh_keys[:public_key_value]
       @private_key_file_path = ssh_keys[:private_key_file_path]
