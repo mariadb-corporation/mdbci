@@ -127,7 +127,7 @@ module TerraformService
   def self.format_string(string, max_length: -1)
     converted_string = string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
     if max_length > 0
-      converted_string = base_string.chars.first(max_length).join
+      converted_string = converted_string.chars.first(max_length).join
     end
     converted_string
   end
