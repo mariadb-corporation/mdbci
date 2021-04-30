@@ -1,0 +1,24 @@
+{
+  "aarch64_centos_7_aws": {
+    "provider": "aws",
+    "ami": "ami-0e2a2f48fffbaa4fa",
+    "user": "centos",
+    "platform": "centos",
+    "platform_version": "7",
+    "vpc": "true",
+    "default_machine_type": "c6g.xlarge",
+    "default_cpu_count": "4",
+    "default_memory_size": "8192"
+  },
+  "aarch64_ubuntu_bionic_aws" : {
+    "provider": "aws",
+    "ami": "ami-000c356ce8d6328ef",
+    "user": "ubuntu",
+    "default_machine_type": "c6g.xlarge",
+    "default_cpu_count": "4",
+    "default_memory_size": "8192",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "vpc": "true"
+  }
+}

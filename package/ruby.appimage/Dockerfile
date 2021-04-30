@@ -53,6 +53,7 @@ RUN scl enable devtoolset-9 'cargo build --release' && \
 # Put gen_appimage.sh script into the root
 WORKDIR $WORKSPACE
 COPY gen_appimage.sh $WORKSPACE
+COPY functions.sh $WORKSPACE
 COPY scl_wrapper.sh $WORKSPACE
 
 # Make the file executable
