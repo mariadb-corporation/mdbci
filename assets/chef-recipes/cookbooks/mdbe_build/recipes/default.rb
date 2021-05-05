@@ -316,6 +316,11 @@ when 'debian'
     end
   when 9 # Debian Stretch
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_stretch_packages)
+    if node.attributes['kernel']['machine'] == 'aarch64'
+      execute 'enable apt sources' do
+        command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
+      end
+    end
   when 10 # Debian Buster
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_buster_packages)
     execute 'enable apt sources' do
@@ -339,9 +344,15 @@ when 'ubuntu'
     end
   when 18.04 # Ubuntu Bionic
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_bionic_packages)
-    cookbook_file 'mariadb-build.list' do
-      path '/etc/apt/sources.list.d/mariadb-build.list'
-      action :create
+    if node.attributes['kernel']['machine'] == 'aarch64'
+      execute 'enable apt sources' do
+        command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
+      end
+    else
+      cookbook_file 'mariadb-build.list' do
+        path '/etc/apt/sources.list.d/mariadb-build.list'
+        action :create
+      end
     end
     apt_update 'update apt cache' do
       action :update
@@ -421,10 +432,13 @@ when 'suse'
   end
 end
 
-package packages do
-  case node[:platform]
-  when 'redhat', 'centos'
-    flush_cache({ before: true })
+packages.each do |package_name|
+  package package_name do
+    case node[:platform]
+    when 'redhat', 'centos'
+      flush_cache({ before: true })
+    end
+    ignore_failure node.attributes['kernel']['machine'] == 'aarch64'
   end
 end
 
@@ -444,7 +458,7 @@ ruby_block 'get cmake version' do
     else
       cmd.run_command
       version = cmd.stdout.lines[0].chomp.split(' ')[-1].split('.')
-      required_version = node['mdbe_build']['cmake_version'].split('.')
+      required_version = node['mdbe_build']['cmake_amd64_version'].split('.')
       if version[0].to_i < required_version[0].to_i
         node.run_state['cmake_flag'] = true
       elsif version[0].to_i == required_version[0].to_i && version[1].to_i < required_version[1].to_i
@@ -456,10 +470,17 @@ ruby_block 'get cmake version' do
   end
 end
 
+cmake_version = node['mdbe_build']['cmake_amd64_version']
+cmake_path = "#{node['mdbe_build']['cmake_amd64_version']}-Linux-x86_64"
+if node.attributes['kernel']['machine'] == 'aarch64'
+  cmake_version = node['mdbe_build']['cmake_aarch64_version']
+  cmake_path = "#{node['mdbe_build']['cmake_aarch64_version']}-Linux-aarch64"
+end
+
 execute 'install cmake' do
-  command "wget -q https://github.com/Kitware/CMake/releases/download/v#{node['mdbe_build']['cmake_version']}/cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz --no-check-certificate &&
-tar xzf cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
-rm cmake-#{node['mdbe_build']['cmake_version']}-Linux-x86_64.tar.gz"
+  command "wget -q https://github.com/Kitware/CMake/releases/download/v#{cmake_version}/cmake-#{cmake_path}.tar.gz --no-check-certificate &&
+tar xzf cmake-#{cmake_path}.tar.gz -C /usr/ --strip-components=1 &&
+rm cmake-#{cmake_path}.tar.gz"
   only_if { node.run_state['cmake_flag'] }
 end
 
