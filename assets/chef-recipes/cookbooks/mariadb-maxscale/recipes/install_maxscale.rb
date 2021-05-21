@@ -53,7 +53,7 @@ when "suse"
 end
 
 # iptables rules
-[3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603].each do |port|
+[3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 9092].each do |port|
   execute "Open port #{port}" do
     command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
     command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
