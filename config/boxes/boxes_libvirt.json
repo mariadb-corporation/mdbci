@@ -1,30 +1,35 @@
 {
   "debian_jessie_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/debian8",
     "platform": "debian",
     "platform_version": "jessie"
   },
   "debian_stretch_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/debian9",
     "platform": "debian",
     "platform_version": "stretch"
   },
   "debian_buster_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/debian10",
     "platform": "debian",
     "platform_version": "buster"
   },
   "ubuntu_trusty_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "mrlesmithjr/trusty64",
     "platform": "ubuntu",
     "platform_version": "trusty"
   },
   "ubuntu_xenial_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/ubuntu1604",
     "ssh_pty" : "false",
     "platform": "ubuntu",
@@ -32,6 +37,7 @@
   },
   "ubuntu_bionic_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/ubuntu1804",
     "ssh_pty" : "false",
     "platform": "ubuntu",
@@ -39,6 +45,7 @@
   },
   "ubuntu_focal_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/ubuntu2004",
     "ssh_pty" : "false",
     "platform": "ubuntu",
@@ -46,6 +53,7 @@
   },
   "centos_8_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/centos8",
     "platform": "centos",
     "platform_version": "8",
@@ -53,6 +61,7 @@
   },
   "centos_7_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/centos7",
     "platform": "centos",
     "platform_version": "7",
@@ -60,6 +69,7 @@
   },
   "centos_6_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/centos6",
     "ssh_pty" : "true",
     "platform": "centos",
@@ -68,6 +78,7 @@
   },
   "suse_15_libvirt" : {
     "provider": "libvirt",
+    "architecture": "amd64",
     "platform": "opensuse",
     "box": "generic/opensuse15",
     "platform_version": "15",
@@ -75,6 +86,7 @@
   },
   "sles_12_libvirt" : {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "elastic/sles-12-x86_64",
     "platform": "sles",
     "platform_version": "12",
@@ -82,6 +94,7 @@
   },
   "rhel_8_libvirt": {
     "provider": "libvirt",
+    "architecture": "amd64",
     "box": "generic/rhel8",
     "platform": "rhel",
     "platform_version": "8",

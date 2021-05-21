@@ -52,7 +52,7 @@ class BoxDefinitions
   def platform_key(box_name)
     check_box(box_name)
     box = @boxes[box_name]
-    "#{box['platform']}^#{box['platform_version']}"
+    "#{box['platform']}^#{box['platform_version']}_#{box['architecture']}"
   end
 
   # Get the list of unique values for the specified field

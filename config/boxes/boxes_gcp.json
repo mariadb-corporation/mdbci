@@ -1,6 +1,7 @@
 {
   "debian_stretch_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "debian-cloud/debian-9",
     "platform": "debian",
     "platform_version": "stretch",
@@ -10,6 +11,7 @@
   },
   "debian_buster_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "debian-cloud/debian-10",
     "platform": "debian",
     "platform_version": "buster",
@@ -19,6 +21,7 @@
   },
   "centos_6_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "centos-cloud/centos-6",
     "platform": "centos",
     "platform_version": "6",
@@ -28,6 +31,7 @@
   },
   "centos_7_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "centos-cloud/centos-7",
     "platform": "centos",
     "platform_version": "7",
@@ -37,6 +41,7 @@
   },
   "centos_8_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "centos-cloud/centos-8",
     "platform": "centos",
     "platform_version": "8",
@@ -46,6 +51,7 @@
   },
   "ubuntu_focal_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "ubuntu-os-cloud/ubuntu-2004-lts",
     "platform": "ubuntu",
     "platform_version": "focal",
@@ -55,6 +61,7 @@
   },
   "ubuntu_bionic_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "ubuntu-os-cloud/ubuntu-1804-lts",
     "platform": "ubuntu",
     "platform_version": "bionic",
@@ -64,6 +71,7 @@
   },
   "ubuntu_xenial_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "ubuntu-os-cloud/ubuntu-1604-lts",
     "platform": "ubuntu",
     "platform_version": "xenial",
@@ -73,6 +81,7 @@
   },
   "rhel_6_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "rhel-cloud/rhel-6",
     "platform": "rhel",
     "platform_version": "6",
@@ -82,6 +91,7 @@
   },
   "rhel_7_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "rhel-cloud/rhel-7",
     "platform": "rhel",
     "platform_version": "7",
@@ -91,6 +101,7 @@
   },
   "rhel_8_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "rhel-cloud/rhel-8",
     "platform": "rhel",
     "platform_version": "8",
@@ -100,6 +111,7 @@
   },
   "sles_12_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "suse-cloud/sles-12",
     "platform": "sles",
     "platform_version": "12",
@@ -110,6 +122,7 @@
   },
   "sles_15_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "suse-cloud/sles-15",
     "platform": "sles",
     "platform_version": "15",
@@ -120,6 +133,7 @@
   },
   "suse_15_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "opensuse-leap-15-1-v20190618",
     "platform": "opensuse",
     "platform_version": "15",
@@ -129,6 +143,7 @@
   },
   "windows_gcp": {
     "provider": "gcp",
+    "architecture": "amd64",
     "image": "bb-windows",
     "platform": "windows",
     "platform_version": "2019",

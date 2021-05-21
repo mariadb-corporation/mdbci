@@ -1,6 +1,7 @@
 {
   "aarch64_centos_7_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-0e2a2f48fffbaa4fa",
     "user": "centos",
     "platform": "centos",
@@ -13,6 +14,7 @@
   },
   "aarch64_ubuntu_bionic_aws" : {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-000c356ce8d6328ef",
     "user": "ubuntu",
     "default_machine_type": "c6g.xlarge",
@@ -25,6 +27,7 @@
   },
   "aarch64_ubuntu_xenial_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-06c7c2c6918a085ad",
     "user": "ubuntu",
     "platform": "ubuntu",
@@ -37,6 +40,7 @@
   },
   "aarch64_centos_8_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-03acfc18460ff50ae",
     "user": "centos",
     "platform": "centos",
@@ -49,6 +53,7 @@
   },
   "aarch64_rhel_8_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-0c31406fc02973500",
     "user": "ec2-user",
     "platform": "rhel",
@@ -61,6 +66,7 @@
   },
   "aarch64_rhel_7_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-03a74a6b5d0db0ab4",
     "user": "ec2-user",
     "platform": "rhel",
@@ -73,6 +79,7 @@
   },
   "aarch64_debian_buster_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-0d59bcc339de8a2ab",
     "user": "admin",
     "platform": "debian",
@@ -85,6 +92,7 @@
   },
   "aarch64_debian_stretch_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-0498232745bfd1d40",
     "user": "admin",
     "platform": "debian",
@@ -97,6 +105,7 @@
   },
   "aarch64_ubuntu_focal_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-0a844539be86dab05",
     "user": "ubuntu",
     "platform": "ubuntu",
@@ -109,6 +118,7 @@
   },
   "aarch64_sles_15_aws": {
     "provider": "aws",
+    "architecture": "aarch64",
     "ami": "ami-01b29647f47846dc1",
     "user": "ec2-user",
     "platform": "sles",

@@ -91,6 +91,7 @@ class Session
   attr_accessor :all
   attr_accessor :isForce
   attr_accessor :force_version
+  attr_accessor :architecture
 
   PLATFORM = 'platform'
   VAGRANT_NO_PARALLEL = '--no-parallel'
