@@ -255,11 +255,12 @@ class ShowCommand < BaseCommand
     errors.append('Please specify the platform version.') unless @env.boxPlatformVersion
     errors.append('Please specify the product.') unless @env.nodeProduct
     errors.append('Please specify the product version.') unless @env.productVersion
+    errors.append('Please specify the product architecture.') unless @env.architecture
     return Result.error(errors.join(' ')) unless errors.empty?
 
     repository_manager = @env.repos
     repository_key = repository_manager.makeKey(@env.nodeProduct, @env.productVersion, @env.boxPlatform,
-      @env.boxPlatformVersion)
+      @env.boxPlatformVersion, @env.architecture)
     @ui.out(JSON.pretty_generate(repository_manager.getRepo(repository_key)))
     Result.ok('')
   rescue RuntimeError => e

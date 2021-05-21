@@ -95,10 +95,11 @@ class RepoManager
     repo.to_s.split('@')[0]
   end
 
-  def makeKey(product, version, platform, platform_version)
+  def makeKey(product, version, platform, platform_version, architecture = nil)
     version = '?' if version.nil?
+    architecture = '?' if architecture.nil?
 
-    product.to_s + '@' + version.to_s + '+' + platform.to_s + '^' + platform_version.to_s
+    product.to_s + '@' + version.to_s + '+' + platform.to_s + '^' + platform_version.to_s + '_' + architecture
   end
 
   def addRepo(file)
@@ -107,10 +108,11 @@ class RepoManager
     if repo.is_a?(Array)
       # in repo file arrays are allowed
       repo.each do |r|
-        @repos[makeKey(r['product'], r['version'], r['platform'], r['platform_version'])] = r
+        @repos[makeKey(r['product'], r['version'], r['platform'], r['platform_version'], r['architecture'])] = r
       end
     else
-      @repos[makeKey(repo['product'], repo['version'], repo['platform'], repo['platform_version'])] = repo
+      @repos[makeKey(repo['product'], repo['version'], repo['platform'],
+                     repo['platform_version'], r['architecture'])] = repo
     end
   rescue StandardError
     @ui.warning 'Invalid file format: ' + file.to_s + ' SKIPPED!'
@@ -123,8 +125,8 @@ class RepoManager
   # @param repository_key [String] key of repository
   def find_available_repo(product, repository_key)
     @repos.find_all do |elem|
-      elem[1]['product'] == product['name'] &&
-        elem[1]['platform'] + '^' + elem[1]['platform_version'] == repository_key
+      key = "#{elem[1]['platform']}^#{elem[1]['platform_version']}_#{elem[1]['architecture']}"
+      elem[1]['product'] == product['name'] && key == repository_key
     end
   end
 

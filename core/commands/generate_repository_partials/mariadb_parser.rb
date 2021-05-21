@@ -27,7 +27,7 @@ module MariadbParser
       extract_field(:version, version_regexp),
       append_url(%w[centos rhel sles opensuse], :platform),
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      append_url(%w[x86_64]),
+      append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:repo] = release[:url]
         release
