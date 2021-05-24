@@ -13,6 +13,8 @@ class RepoManager
 
   attr_accessor :repos
 
+  DEFAULT_ARCHITECTURE = 'amd64'
+
   # The list of the directories to search data in.
   # The last directory takes presence over the first one.
   BOX_DIRECTORIES = [
@@ -97,7 +99,7 @@ class RepoManager
 
   def makeKey(product, version, platform, platform_version, architecture = nil)
     version = '?' if version.nil?
-    architecture = '?' if architecture.nil?
+    architecture = DEFAULT_ARCHITECTURE if architecture.nil?
 
     product.to_s + '@' + version.to_s + '+' + platform.to_s + '^' + platform_version.to_s + '_' + architecture
   end
@@ -125,7 +127,7 @@ class RepoManager
   # @param repository_key [String] key of repository
   def find_available_repo(product, repository_key)
     @repos.find_all do |elem|
-      key = "#{elem[1]['platform']}^#{elem[1]['platform_version']}_#{elem[1]['architecture']}"
+      key = "#{elem[1]['platform']}^#{elem[1]['platform_version']}_#{elem[1]['architecture'] || DEFAULT_ARCHITECTURE}"
       elem[1]['product'] == product['name'] && key == repository_key
     end
   end
