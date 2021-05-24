@@ -36,4 +36,8 @@ when 'suse'
   execute 'Change suse on sles repository' do
     command "cat /etc/zypp/repos.d/mariadb.repo | sed s/suse/$(#{release_name})/g > /etc/zypp/repos.d/mariadb.repo"
   end
+
+  zypper_repository 'mariadb' do
+    action :refresh
+  end
 end
