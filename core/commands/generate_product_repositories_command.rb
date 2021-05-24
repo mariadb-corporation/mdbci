@@ -213,7 +213,7 @@ In order to specify the number of retries for repository configuration use --att
       releases.each do |release|
         next if release[:platform] != platform
 
-        setup_release_architecture(release)
+        release[:architecture] = 'amd64' if [nil, 'x86_64'].include?(release[:architecture])
         releases_by_version[release[:version]] << extract_release_fields(release)
       end
       releases_by_version.each_pair do |version, version_releases|
@@ -221,10 +221,6 @@ In order to specify the number of retries for repository configuration use --att
                    JSON.pretty_generate(version_releases))
       end
     end
-  end
-
-  def setup_release_architecture(release)
-    release[:architecture] = 'amd64' if [nil, 'x86_64'].include?(release[:architecture])
   end
 
   # Create repository in the target directory.
