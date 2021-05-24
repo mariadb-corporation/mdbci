@@ -1,5 +1,0 @@
-[<%= node['maxscale']['repo_file_name'] %>]
-name = <%= node['maxscale']['repo_file_name'] %>
-baseurl=<%= node['maxscale']['repo'] %>/<%= node[:platform] == "redhat" ? node[:platform_family] : node[:platform] %>/$releasever/$basearch
-gpgkey=<%= node['maxscale']['repo_key'] %>/Maxscale-GPG-KEY.public
-gpgcheck=1

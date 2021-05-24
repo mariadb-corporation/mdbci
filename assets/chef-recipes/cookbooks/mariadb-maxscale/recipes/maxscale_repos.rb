@@ -27,10 +27,9 @@ when "rhel", "fedora", "centos"
     gpgkey node['maxscale']['repo_key']
   end
 when "suse", "opensuse", "sles"
-  # Add the repo
-  template "/etc/zypp/repos.d/#{node['maxscale']['repo_file_name']}.repo" do
-    source "mdbci.maxscale.suse.erb"
-    action :create
+  zypper_repository node['maxscale']['repo_file_name'] do
+    baseurl node['maxscale']['repo']
+    gpgkey node['maxscale']['repo_key']
   end
 
   execute 'Update zypper cache' do
