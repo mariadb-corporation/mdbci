@@ -36,8 +36,9 @@ module MariadbParser
   end
 
   def self.parse_mariadb_deb_repository(config, product_version, product, version_regexp, log, logger)
+    auth = nil
     parse_repository(
-      config['path'], nil, config['key'], product, product_version, %w[mariadb-client mariadb-server],
+      config['path'], auth, config['key'], product, product_version, %w[mariadb-client mariadb-server],
       ->(url, _) { generate_mariadb_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ },
       log, logger,
@@ -45,6 +46,7 @@ module MariadbParser
       save_as_field(:platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
+      set_deb_architecture(auth),
       lambda do |release, _|
         release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
         release

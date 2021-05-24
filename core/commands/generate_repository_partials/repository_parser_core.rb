@@ -360,4 +360,14 @@ module RepositoryParserCore
 
     path.sub('$PRIVATE_KEY$', private_key)
   end
+
+  def set_deb_architecture(auth)
+    lambda do |release, _links|
+      content = generate_content("#{release[:url]}main", auth)
+      architectures = []
+      architectures << 'amd64' if content =~ /binary-amd64/
+      architectures << 'aarch64' if content =~ /binary-arm64/
+      architectures.map { |architecture| release.merge({ architecture: architecture }) }
+    end
+  end
 end
