@@ -4,9 +4,14 @@ DEVICE_REGEX = /\/dev\/[a-zA-Z0-9]+(\d+)/
 
 ruby_block 'Get filesystem information' do
   block do
-    lsblk_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,SIZE,TYPE | grep disk")
+    lsblk_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,SIZE,TYPE,MODEL | grep disk")
     lsblk_cmd.run_command
-    root_disk_name, root_disk_size = lsblk_cmd.stdout.chomp.split(' ')
+    lsblk_cmd_stdout = lsblk_cmd.stdout.chomp.split("\n")
+    disk_info = lsblk_cmd_stdout[0]
+    lsblk_cmd_stdout.each do |disk|
+      disk_info = disk if disk.include?('Block Store')
+    end
+    root_disk_name, root_disk_size = disk_info.split(' ')
     device_base_name = "/dev/#{root_disk_name}"
 
     df_cmd = Mixlib::ShellOut.new('df -Th / -BG')
