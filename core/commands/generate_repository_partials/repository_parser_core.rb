@@ -363,7 +363,7 @@ module RepositoryParserCore
 
   def set_deb_architecture(auth)
     lambda do |release, _links|
-      content = generate_content("#{release[:url]}main", auth)
+      content = generate_content("#{release[:url]}main/", auth)
       architectures = []
       architectures << 'amd64' if content =~ /binary-amd64/
       architectures << 'aarch64' if content =~ /binary-arm64/
