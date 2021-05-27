@@ -46,13 +46,15 @@ module RepositoryParserCore
   end
 
   # Append URL to the current search path if this URL exists
-  # @param path [String] appending path
-  def append_path_if_exists(path)
+  # @param paths [Array<String>] appending paths
+  def append_path_if_exists(paths)
     lambda do |release, links|
-      if links.map { |link| link.content.delete('/') }.include?(path)
-        release.merge(url: "#{release[:url]}#{path}/")
-      else
-        release
+      paths.map do |path|
+        if links.map { |link| link.content.delete('/') }.include?(path)
+          release.merge(url: "#{release[:url]}#{path}/")
+        else
+          release
+        end
       end
     end
   end
