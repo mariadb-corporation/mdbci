@@ -26,7 +26,7 @@ module MariadbStagingParser
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      append_url(%w[x86_64]),
+      append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:version] = release[:version].delete('mariadb-')
         release[:repo] = release[:url]
@@ -45,6 +45,7 @@ module MariadbStagingParser
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
+      set_deb_architecture(nil),
       lambda do |release, _|
         release[:version] = release[:version].delete('mariadb-')
         release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
