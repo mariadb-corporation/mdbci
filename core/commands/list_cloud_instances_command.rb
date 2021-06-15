@@ -114,13 +114,13 @@ The command ends with an error if instances are present, no otherwise
     else
       if aws_list.success?
         @ui.info('List all active instances on AWS:')
-        @ui.info("\n" + in_table_format(aws_list.value))
+        @ui.info("\n" + in_table_format(aws_list.value, false))
       else
         @ui.info(aws_list.error)
       end
       if gcp_list.success?
         @ui.info('List all active instances on GCP:')
-        @ui.info("\n" + in_table_format(gcp_list.value))
+        @ui.info("\n" + in_table_format(gcp_list.value, true))
       else
         @ui.info(gcp_list.error)
       end
@@ -141,12 +141,16 @@ The command ends with an error if instances are present, no otherwise
     JSON.generate(aws_list_json.merge(gcp_list_json))
   end
 
-  def in_table_format(list)
+  def in_table_format(list, with_user_info)
     return 'List empty' if list.empty?
 
-    table = TTY::Table.new(header: ['Launch time', 'Node name'])
+    header = ['Launch time', 'Node name']
+    header.concat(['Path', 'User']) if with_user_info
+    table = TTY::Table.new(header: header)
     list.each do |instance|
-      table << [instance[:launch_time], instance[:node_name]]
+      info = [instance[:launch_time], instance[:node_name]]
+      info.concat([instance[:path], instance[:username]]) if with_user_info
+      table << info
     end
     table.render(:unicode)
   end

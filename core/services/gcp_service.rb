@@ -39,8 +39,9 @@ class GcpService
     end.map(&:name)
   end
 
-  # Fetch instances list and return instance names with time and type.
-  # @return [Array<{:name => String, :time => String, :type => String}>] instance names, time, type.
+  # Fetch instances list and return instance names with time, type, configuration path, username.
+  # @return [Array<{:name => String, :time => String, :type => String,
+  # :path => String, :username => String}>] instance names, time, type, configuration path, username.
   def instances_list_with_time_and_type
     return [] unless configured?
 
@@ -49,12 +50,26 @@ class GcpService
         @gcp_config['project'], @gcp_config['zone'], page_token: token, order_by: 'creationTimestamp desc'
       )
     end.map do |instance|
-      {
-        type: instance.machine_type.split('/')[-1],
-        node_name: instance.name,
-        launch_time: instance.creation_timestamp
-      }
+      generate_instance_info(instance)
     end
+  end
+
+  def generate_instance_info(instance)
+    labels = instance.labels
+    if labels.nil?
+      path = 'unknown'
+      user = 'unknown'
+    else
+      path = labels['full_config_path'] ? labels['full_config_path'].gsub('-', '/') : 'unknown'
+      user = labels['username'] ? labels['username'] : 'unknown'
+    end
+    {
+      type: instance.machine_type.split('/')[-1],
+      node_name: instance.name,
+      launch_time: instance.creation_timestamp,
+      path: path,
+      username: user
+    }
   end
 
   # Checks for instance existence.
