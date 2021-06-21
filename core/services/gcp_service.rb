@@ -55,21 +55,25 @@ class GcpService
   end
 
   def generate_instance_info(instance)
-    labels = instance.labels
-    if labels.nil?
-      path = 'unknown'
-      user = 'unknown'
-    else
-      path = labels['full_config_path'] ? labels['full_config_path'].gsub('-', '/') : 'unknown'
-      user = labels['username'] ? labels['username'] : 'unknown'
-    end
+    metadata = instance.metadata
+    path = generate_info_from_metadata(metadata, 'full-config-path')
+    user = generate_info_from_metadata(metadata, 'username')
     {
-      type: instance.machine_type.split('/')[-1],
-      node_name: instance.name,
-      launch_time: instance.creation_timestamp,
-      path: path,
-      username: user
+        type: instance.machine_type.split('/')[-1],
+        node_name: instance.name,
+        launch_time: instance.creation_timestamp,
+        path: path,
+        username: user
     }
+  end
+
+  def generate_info_from_metadata(metadata, key)
+    unless metadata.nil? || metadata.items.nil?
+      metadata.items.each do |data|
+        return data.value if data.key == key
+      end
+    end
+    'unknown'
   end
 
   # Checks for instance existence.

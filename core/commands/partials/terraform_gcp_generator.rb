@@ -24,8 +24,7 @@ class TerraformGcpGenerator
     @gcp_config = gcp_config
     @ui = logger
     @configuration_path = configuration_path
-    @configuration_labels = { configuration_id: @configuration_id,
-                              full_config_path: TerraformService.format_string(@configuration_path, max_length: 60) }
+    @configuration_labels = { configuration_id: @configuration_id }
     unless all_windows
       @public_key_value = ssh_keys[:public_key_value]
       @private_key_file_path = ssh_keys[:private_key_file_path]
@@ -131,6 +130,13 @@ class TerraformGcpGenerator
     SSH_DATA
   end
 
+  def directory_data
+    <<-DIRECTORY_DATA
+    username = "#{@user}"
+    full-config-path = "#{@configuration_path}"
+    DIRECTORY_DATA
+  end
+
   # Generate vpc resources.
   # @return [String] generated resources for vpc.
   def vpc_resources
@@ -166,11 +172,12 @@ class TerraformGcpGenerator
   # rubocop:disable Metrics/MethodLength
   def instance_resources(instance_params)
     if instance_params[:platform] == 'windows'
-      need_metadata = false
+      need_ssh_metadata = false
     else
-      need_metadata = true
+      need_ssh_metadata = true
       ssh_metadata = ssh_data
     end
+    directory_metadata = directory_data
     tags_block = tags_partial(instance_tags)
     labels_block = labels_partial(instance_params[:labels])
     template = ERB.new <<-INSTANCE_RESOURCES
@@ -201,11 +208,12 @@ class TerraformGcpGenerator
           automatic_restart = false
         }
       <% end %>
-      <% if need_metadata %>
         metadata = {
-          <%= ssh_metadata %>
+          <% if need_ssh_metadata %>
+            <%= ssh_metadata %>
+          <% end %>
+          <%= directory_metadata %>
         }
-      <% end %>
     }
     output "<%= name %>_network" {
       value = {
