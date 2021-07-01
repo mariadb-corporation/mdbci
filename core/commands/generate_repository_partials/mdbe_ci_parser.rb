@@ -39,7 +39,7 @@ module MdbeCiParser
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-      append_path_if_exists(%w[x86_64 aarch64]),
+      append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)
         release
