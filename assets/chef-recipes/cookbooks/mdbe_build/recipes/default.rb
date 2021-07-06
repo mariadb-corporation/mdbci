@@ -75,23 +75,6 @@ debian_packages = %w[
   python-dev
 ]
 
-debian_jessie_packages = %w[
-  autoconf
-  automake
-  dh-systemd
-  libdbd-mysql-perl
-  libdbi-perl
-  libhtml-template-perl
-  libjemalloc1
-  libkrb5-dev
-  libpcre3-dev
-  libperl4-corelibs-perl
-  libsystemd-dev
-  libterm-readkey-perl
-  libtool
-  pkg-config
-]
-
 debian_stretch_packages = %w[
   autoconf
   automake
@@ -136,36 +119,6 @@ ubuntu_packages = %w[
   libjpeg-turbo8
   libpcre2-dev
   libzstd-dev
-]
-
-ubuntu_trusty_packages = %w[
-  chrpath
-  cmake
-  dh-apparmor
-  libbison-dev
-  libgcrypt11-dev
-  librtmp-dev
-  libgnutls28-dev
-  libjemalloc-dev
-  libkrb5-dev
-  libncurses5-dev
-  libreadline-gplv2-dev
-  make
-  patch
-  perl-modules
-  python-dev
-]
-
-ubuntu_xenial_packages = %w[
-  autoconf
-  automake
-  dh-exec
-  libjemalloc1
-  libkrb5-dev
-  libnss3-nssdb
-  libsystemd-dev
-  libtool
-  python-dev
 ]
 
 ubuntu_bionic_packages = %w[
@@ -246,25 +199,6 @@ centos_packages = %w[
   valgrind-devel
   wget
   which
-]
-
-centos_6_packages = %w[
-  libevent-devel
-  bison
-  boost-program-options
-  clang
-  devtoolset-3-gcc-c++
-  devtoolset-3-libasan-devel
-  devtoolset-3-valgrind-devel
-  Judy-devel
-  libaio
-  perl-CPAN.x86_64
-  perl-DBI
-  perl-Test-HTTP-Server-Simple
-  python-devel
-  python-pip
-  scons
-  subversion
 ]
 
 centos_7_packages = %w[
@@ -416,11 +350,6 @@ sles_15_packages = %w[
 case node[:platform]
 when 'debian'
   case node[:platform_version].to_i
-  when 8 # Debian Jessie
-    packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_jessie_packages)
-    execute 'enable apt sources' do
-      command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
-    end
   when 9 # Debian Stretch
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_stretch_packages)
     if node.attributes['kernel']['machine'] == 'aarch64'
@@ -442,13 +371,6 @@ when 'debian'
   end
 when 'ubuntu'
   case node[:platform_version].to_f
-  when 14.04 # Ubuntu Trusty
-    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_trusty_packages)
-  when 16.04 # Ubuntu Xenial
-    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_xenial_packages)
-    execute 'enable apt sources' do
-      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
-    end
   when 18.04 # Ubuntu Bionic
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_bionic_packages)
     if node.attributes['kernel']['machine'] == 'aarch64'
@@ -481,28 +403,6 @@ when 'ubuntu'
   end
 when 'centos', 'redhat'
   case node[:platform_version].to_i
-  when 6 # CentOS 6
-    packages = general_packages.concat(centos_packages).concat(centos_6_packages)
-    remote_file '/etc/pki/rpm-gpg/RPM-GPG-KEY-cern' do
-      source 'http://linuxsoft.cern.ch/cern/scl/RPM-GPG-KEY-cern'
-      owner 'root'
-      group 'root'
-      mode '644'
-      action :create
-    end
-    remote_file '/etc/yum.repos.d/slc6-scl.repo' do
-      source 'http://linuxsoft.cern.ch/cern/scl/slc6-scl.repo'
-      owner 'root'
-      group 'root'
-      mode '644'
-      action :create
-    end
-    execute 'install development tools' do
-      command "yum -y groupinstall 'Development Tools'"
-    end
-    execute 'enable devtoolset-3' do
-      command "echo 'source /opt/rh/devtoolset-3/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
-    end
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
     execute 'yum groups' do
