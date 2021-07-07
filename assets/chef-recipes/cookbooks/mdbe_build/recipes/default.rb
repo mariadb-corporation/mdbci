@@ -5,7 +5,9 @@ require 'mixlib/shellout'
 general_packages = %w[
   curl
   expect
+  gdb
   git
+  lsof
   net-tools
   rsync
   socat
@@ -17,17 +19,18 @@ general_packages = %w[
 debian_and_ubuntu_packages = %w[
   apt-transport-https
   apt-utils
+  bc
   build-essential
   ccache
   check
   devscripts
+  dh-systemd
   dirmngr
   dpatch
   equivs
   fakeroot
   flex
   gawk
-  gdb
   gnutls-dev
   iputils-ping
   libaio-dev
@@ -42,24 +45,34 @@ debian_and_ubuntu_packages = %w[
   libboost-system-dev
   libcrack2-dev
   libcups2
+  libcurl4-openssl-dev
+  libdbd-mysql-perl
+  libdbi-perl
   libedit-dev
   libevent-dev
+  libgcrypt20-dev
   libjpeg-dev
   libjudy-dev
+  libkrb5-dev
   liblcms2-2
   libmhash-dev
   libnspr4
   libnss3
   libnuma-dev
   libpam-dev
+  libpcre2-dev
   libpcsclite1
   libsnappy-dev
   libssl-dev
+  libsystemd-dev
+  libtool
   libxml-simple-perl
   libxml2-dev
   liblz4-dev
+  libzstd-dev
   netcat
   odbcinst
+  pkg-config
   python3
   python3-pip
   scons
@@ -69,81 +82,40 @@ debian_and_ubuntu_packages = %w[
 ]
 
 debian_packages = %w[
-  libcurl4-openssl-dev
-  libgcrypt20-dev
-  lsof
+  default-jdk
   python-dev
+  unixodbc
 ]
 
 debian_stretch_packages = %w[
   autoconf
   automake
-  bc
-  default-jdk
-  dh-systemd
-  libdbd-mysql-perl
-  libdbi-perl
   libgnutls28-dev
   libgnutls30
   libjemalloc1
-  libkrb5-dev
-  libpcre2-dev
-  libsystemd-dev
-  libsystemd-dev
-  libtool
-  libzstd-dev
-  pkg-config
-  unixodbc
 ]
 
 debian_buster_packages = %w[
-  bc
-  default-jdk
-  dh-systemd
-  libdbd-mysql-perl
-  libdbi-perl
   libjemalloc2
-  libpcre2-dev
   libpmem-dev
-  libsystemd-dev
-  libzstd-dev
-  pkg-config
-  unixodbc
 ]
 
 ubuntu_packages = %w[
-  dh-systemd
-  libcurl4-openssl-dev
-  libgcrypt20-dev
+  autoconf
+  automake
   libjpeg8
   libjpeg-turbo8
-  libpcre2-dev
-  libzstd-dev
+  libpmem-dev
 ]
 
 ubuntu_bionic_packages = %w[
-  autoconf
-  automake
-  bc
   dh-exec
   libasan2
-  libdbd-mysql-perl
-  libdbi-perl
   libjemalloc1
-  libkrb5-dev
-  libpmem-dev
-  libsystemd-dev
-  libsystemd-dev
-  libtool
-  lsof
-  pkg-config
   python-dev
 ]
 
 ubuntu_focal_packages = %w[
-  autoconf
-  automake
-  bc
   bison
   chrpath
   debhelper
@@ -152,19 +124,11 @@ ubuntu_focal_packages = %w[
   gnutls-dev
   libasan5
   libcurl4-openssl-dev
-  libdbd-mysql-perl
-  libdbi-perl
   libjemalloc-dev
   libjemalloc2
-  libkrb5-dev
   libncurses5-dev
   libpcre3-dev
-  libpmem-dev
   libreadline-gplv2-dev
-  libsystemd-dev
-  libtool
-  lsof
-  pkg-config
   psmisc
   python-dev-is-python3
   python2-dev
@@ -173,102 +137,75 @@ ubuntu_focal_packages = %w[
 ]
 
 centos_packages = %w[
+  bison
+  boost-program-options
   boost-devel
   check-devel
+  checkpolicy
   ccache
+  clang
   cmake
   curl-devel
   cracklib-devel
   gnutls-devel
+  java-1.8.0-openjdk
+  java-1.8.0-openjdk-devel
   jemalloc
+  libaio
   libaio-devel
+  libasan
+  libcurl-devel
+  libevent-devel
   libffi-devel
+  libgcrypt-devel
+  libpmem-devel
   libxml2-devel
   mhash-devel
   ncurses-devel
   openssl-devel
   unixODBC-devel
   pam-devel
+  patch
+  perl-CPAN
+  perl-DBD-MySQL
+  perl-DBI
   perl-Time-HiRes
   perl-XML-LibXML
   perl-XML-Simple
   readline-devel
+  redhat-lsb-core
   redhat-rpm-config
   rpmdevtools
   snappy-devel
+  systemd-devel
+  unixODBC
   valgrind-devel
   wget
   which
+  yum-utils
 ]
 
 centos_7_packages = %w[
   Judy-devel
-  bison
-  boost-program-options
-  checkpolicy
-  clang
-  gdb
-  java-1.8.0-openjdk
-  java-1.8.0-openjdk-devel
-  libaio
-  libasan
-  libcurl-devel
-  libevent-devel
-  libgcrypt-devel
-  libpmem-devel
-  lsof
-  patch
-  perl-CPAN
-  perl-DBD-MySQL
-  perl-DBI
-  perl-DBI
   perl-Test-Base
   policycoreutils-python
   python-devel
   python-pip
-  redhat-lsb-core
   scons
   subversion
-  systemd-devel
-  unixODBC
-  valgrind
-  yum-utils
 ]
 
 centos_8_packages = %w[
   Judy
-  bison
-  boost-program-options
-  checkpolicy
-  clang
   cracklib
-  gdb
-  java-1.8.0-openjdk
-  java-1.8.0-openjdk-devel
   kernel-headers
-  libaio
-  libasan
-  libcurl-devel
-  libevent-devel
-  libgcrypt-devel
-  libpmem-devel
-  lsof
   lz4-devel
-  patch
-  perl-CPAN
-  perl-DBD-MySQL
-  perl-DBI
-  perl-DBI
   perl-Getopt-Long
   perl-Memoize.noarch
   policycoreutils
   python3-devel
   python3-pip
   python3-scons
-  redhat-lsb-core
-  systemd-devel
-  unixODBC
-  yum-utils
 ]
 
 suse_and_sles_packages = %w[
@@ -282,6 +219,8 @@ suse_and_sles_packages = %w[
   flex
   gcc-c++
   gzip
+  java-1_8_0-openjdk
+  java-1_8_0-openjdk-devel
   krb5-devel
   libaio-devel
   libcurl-devel
@@ -289,11 +228,17 @@ suse_and_sles_packages = %w[
   libgcrypt-devel
   libgnutls-devel
   libgpg-error-devel
+  libopenssl-devel
+  libpmem-devel
+  libsepol1
   libtool
   libxml2-devel
+  lsb-release
   ncurses-devel
   pam-devel
   perl
+  perl-DBD-mysql
+  perl-DBI
   perl-XML-Simple
   policycoreutils
   rpm-build
@@ -301,6 +246,7 @@ suse_and_sles_packages = %w[
   snappy-devel
   systemd-devel
   tar
+  unixODBC
   unixODBC-devel
   valgrind-devel
   wget
@@ -313,38 +259,14 @@ suse_packages = %w[
 sles_12_packages = %w[
   boost-devel
   cmake
-  gdb
-  java-1_8_0-openjdk
-  java-1_8_0-openjdk-devel
   libopenssl-1_0_0-devel
-  libopenssl-devel
-  libpmem-devel
-  libsepol1
-  lsb-release
-  lsof
-  openssl-devel
-  perl-DBD-mysql
-  perl-DBI
-  unixODBC
 ]
 
 sles_15_packages = %w[
-  gdb
-  java-1_8_0-openjdk
-  java-1_8_0-openjdk-devel
   jemalloc
-  libopenssl-devel
-  libpmem-devel
-  libsepol1
   libxml2-devel
-  lsb-release
-  lsof
   ncurses-devel
-  openssl-devel
-  perl-DBD-mysql
-  perl-DBI
   perl-Data-Dump
-  unixODBC
 ]
 
 case node[:platform]
