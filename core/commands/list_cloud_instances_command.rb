@@ -73,7 +73,10 @@ The command ends with an error if instances are present, no otherwise
   def generate_gcp_list
     return Result.error('GCP-service is not configured') unless @env.gcp_service.configured?
 
-    all_instances = @env.gcp_service.instances_list_with_time_and_type
+    all_instances = []
+    @env.gcp_service.list_zones.each do |zone|
+      all_instances.concat(@env.gcp_service.instances_list_with_time_and_type(zone))
+    end
     unless @hidden_instances['gcp'].nil?
       all_instances.reject! do |instance|
         @hidden_instances['gcp'].include?(instance[:node_name])
@@ -145,11 +148,11 @@ The command ends with an error if instances are present, no otherwise
     return 'List empty' if list.empty?
 
     header = ['Launch time', 'Node name']
-    header.concat(['Path', 'User']) if with_user_info
+    header.concat(['Zone' ,'Path', 'User']) if with_user_info
     table = TTY::Table.new(header: header)
     list.each do |instance|
       info = [instance[:launch_time], instance[:node_name]]
-      info.concat([instance[:path], instance[:username]]) if with_user_info
+      info.concat([instance[:zone] ,instance[:path], instance[:username]]) if with_user_info
       table << info
     end
     table.render(:unicode)

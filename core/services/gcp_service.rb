@@ -41,20 +41,21 @@ class GcpService
 
   # Fetch instances list and return instance names with time, type, configuration path, username.
   # @return [Array<{:name => String, :time => String, :type => String,
-  # :path => String, :username => String}>] instance names, time, type, configuration path, username.
-  def instances_list_with_time_and_type
+  # :path => String, :username => String, :zone => String}>]
+  # instance names, time, type, configuration path, username.
+  def instances_list_with_time_and_type(zone=@gcp_config['zone'])
     return [] unless configured?
 
     @service.fetch_all do |token|
       @service.list_instances(
-        @gcp_config['project'], @gcp_config['zone'], page_token: token, order_by: 'creationTimestamp desc'
+        @gcp_config['project'], zone, page_token: token, order_by: 'creationTimestamp desc'
       )
     end.map do |instance|
-      generate_instance_info(instance)
+      generate_instance_info(instance, zone)
     end
   end
 
-  def generate_instance_info(instance)
+  def generate_instance_info(instance, zone)
     metadata = instance.metadata
     path = generate_info_from_metadata(metadata, 'full-config-path')
     user = generate_info_from_metadata(metadata, 'username')
@@ -62,6 +63,7 @@ class GcpService
         type: instance.machine_type.split('/')[-1],
         node_name: instance.name,
         launch_time: instance.creation_timestamp,
+        zone: zone,
         path: path,
         username: user
     }
@@ -75,6 +77,17 @@ class GcpService
     end
     'unknown'
   end
+
+  def list_zones
+    zones = []
+    return zones unless configured?
+
+    @service.list_zones(@gcp_config['project']).items.each do |zone|
+      zones << zone.name
+    end
+    zones
+  end
+
 
   # Checks for instance existence.
   # @param instance_name [String] instance name
