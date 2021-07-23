@@ -57,7 +57,7 @@ export LD_LIBRARY_PATH="$APP_DIR/usr/lib"
 echo "--> copying application into internal directory"
 EXTERNAL_DIR="$WORKSPACE/external"
 mkdir -p "$EXTERNAL_DIR"
-sudo cp -ra . "$EXTERNAL_DIR"/
+sudo cp -ra "$ROOT_DIR" "$EXTERNAL_DIR"/
 sudo chown -R "$uid:$gid" "$EXTERNAL_DIR"
 cd $EXTERNAL_DIR
 
@@ -92,7 +92,7 @@ if [ ! -x AppRun ]; then
 fi
 
 echo "--> get desktop file and icon"
-cp "$ROOT_DIR/$APP.desktop" "$ROOT_DIR/$APP.png" .
+cp "$EXTERNAL_DIR/$APP.desktop" "$EXTERNAL_DIR/$APP.png" .
 
 echo "--> copy dependencies"
 sudo bash -c "source $WORKSPACE/functions.sh; copy_deps; copy_deps"
