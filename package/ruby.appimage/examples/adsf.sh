@@ -3,6 +3,6 @@
 
 echo "--> install adsf gem"
 
-gem install adsf -v 1.4.2 --no-document
+gem install adsf -v 1.4.6 --no-document
 # Modify the header file to execute the script
 insert_run_header $APP_DIR/usr/bin/adsf
