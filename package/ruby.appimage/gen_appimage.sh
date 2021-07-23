@@ -54,8 +54,14 @@ export PATH="$APP_DIR/usr/bin:$PATH"
 export CPATH="$APP_DIR/usr/include"
 export LD_LIBRARY_PATH="$APP_DIR/usr/lib"
 
-echo "--> running the application build script"
+echo "--> copying application into internal directory"
+EXTERNAL_DIR="$WORKSPACE/external"
+mkdir -p "$EXTERNAL_DIR"
+sudo cp -ra . "$EXTERNAL_DIR"/
+sudo chown -R "$uid:$gid" "$EXTERNAL_DIR"
+cd $EXTERNAL_DIR
 
+echo "--> running the application build script"
 source ./$APP.sh
 
 echo "--> remove unused files"
@@ -117,7 +123,7 @@ echo "--> making results public"
 result_dir="$ROOT_DIR/result"
 if [ ! -d "${result_dir}" ]; then
   sudo mkdir "$result_dir"
-  sudo chown "${TARGET_USER}:${TARGET_GROUP}"
+  sudo chown "${TARGET_USER}:${TARGET_GROUP}" "${result_dir}"
 fi
 
 for image in "$WORKSPACE/out/"*AppImage
