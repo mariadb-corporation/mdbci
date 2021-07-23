@@ -54,4 +54,4 @@ docker container run \
        --name "$container_name" \
        $docker_image "$@"
 
-# docker container rm -v "$container_name"
+docker container rm -v "$container_name"
