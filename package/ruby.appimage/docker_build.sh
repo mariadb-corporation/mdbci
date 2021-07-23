@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script performs the creation of the AppImage inside the Docker.
-# It creates the Docker build image if neccesary, then it runs the build and cleans up the created container.
+# It creates the Docker build image if necessary, then it runs the build and cleans up the created container.
 # You must provide the name of the application you are building and it's version
 set -xe
 
@@ -19,7 +19,7 @@ fi
 app=$1
 container_name=$app-appimage-build
 
-ruby_version=3.0.1
+ruby_version=3.0.2
 docker_image=ruby-appimage:$ruby_version
 
 script_dir="${0%/*}"
@@ -33,6 +33,7 @@ if [ -z "${docker_image_id}" ]; then
 
     process_count=$(getconf _NPROCESSORS_ONLN)
     docker image pull centos:7
+    export DOCKER_BUILDKIT=1
     docker image build \
            --build-arg BUILD_JOBS="$process_count" \
            --build-arg RUBY_VERSION=$ruby_version \
@@ -40,11 +41,17 @@ if [ -z "${docker_image_id}" ]; then
     popd
 fi
 
+# Removing previous container in case script has broken, ignore errors
+set +e
+docker container rm -v "$container_name"
+set -e
+
 docker container run \
-       --user $(id -u):$(id -g) \
+       -e TARGET_USER=$(id -u) \
+       -e TARGET_GROUP=$(id -g) \
        --volume "${app_dir}":/build/application \
        -w /build/application \
        --name "$container_name" \
        $docker_image "$@"
 
-docker container rm -v "$container_name"
+# docker container rm -v "$container_name"

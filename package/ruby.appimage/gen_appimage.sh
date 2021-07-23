@@ -7,7 +7,7 @@ Invalid number of parameters have been passed to the script.
 Usage: "$0" app version
 
 app - name of the application to package.
-verision - version to use during the packaging.
+version - version to use during the packaging.
 EOF
     exit 1
 fi
@@ -40,17 +40,11 @@ APP_DIR=$WORKSPACE/nested/$APP.AppDir
 # Getting the ID of the user that we run the application
 uid=$(id -u)
 gid=$(id -g)
-# Changing the ownership of all in worplace to that user
-sudo chown -R "$uid":"$gid" "$WORKSPACE"
 
 # Creating the AppImage directory
 mkdir -p "$APP_DIR"
 rmdir "$APP_DIR"
 ln -sf "$RUBY_DIR" "$APP_DIR"
-
-# Creating the directory for the AppImage to put
-mkdir -p "$ROOT_DIR/result"
-ln -sf "$ROOT_DIR/result" "$WORKSPACE/out"
 
 # Configuring PATH variables
 export CPPFLAGS="-I${APP_DIR}/usr/include -I${APP_DIR}/usr/include/libxml2"
@@ -62,7 +56,7 @@ export LD_LIBRARY_PATH="$APP_DIR/usr/lib"
 
 echo "--> running the application build script"
 
-. ./$APP.sh
+source ./$APP.sh
 
 echo "--> remove unused files"
 # remove doc, man, ri
@@ -105,6 +99,7 @@ sudo bash -c "source $WORKSPACE/functions.sh; delete_blacklisted"
 
 sudo chown -R "$uid":"$gid" .
 
+# Moving 1 step up in order to generate AppImage
 cd ..
 
 ########################################################################
@@ -115,5 +110,21 @@ echo "--> generate AppImage"
 #   - Expects: $ARCH, $APP, $VERSION env vars
 #   - Expects: ./$APP.AppDir/ directory
 generate_type2_appimage
+
+echo "--> making results public"
+
+# Creating the directory for the AppImage to put
+result_dir="$ROOT_DIR/result"
+if [ ! -d "${result_dir}" ]; then
+  sudo mkdir "$result_dir"
+  sudo chown "${TARGET_USER}:${TARGET_GROUP}"
+fi
+
+for image in "$WORKSPACE/out/"*AppImage
+do
+  file_name=$(basename "$image")
+  sudo mv "$image" "${result_dir}"
+  sudo chown -R "${TARGET_USER}:${TARGET_GROUP}" "${result_dir}/$file_name"
+done
 
 echo '==> finished'

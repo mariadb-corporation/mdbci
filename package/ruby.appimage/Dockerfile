@@ -4,11 +4,11 @@ FROM centos:7 as ruby-appimage-builder
 
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
-ARG IMAGE_DATE=2020-12-05
+ARG IMAGE_DATE=2021-07-23
 
 ARG BUILD_JOBS=1
-ARG RUBY_VERSION=3.0.1
-ARG RUBY_INSTALL_VERSION=0.8.1
+ARG RUBY_VERSION=3.0.2
+ARG RUBY_INSTALL_VERSION=0.8.2
 
 # Please update the ENTRYPOINT if changing the WORKSPACE variable
 ENV DOCKER_BUILD=1 \
@@ -56,22 +56,20 @@ COPY gen_appimage.sh $WORKSPACE
 COPY functions.sh $WORKSPACE
 COPY scl_wrapper.sh $WORKSPACE
 
+# Download the AppImage functions
+RUN wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
+
 # Make the file executable
 RUN chmod 755 $WORKSPACE/gen_appimage.sh $WORKSPACE/scl_wrapper.sh
 
 # Allow to run sudo without password for all users
-# Create seveal users for common UIDs (need to fix it in the future)
+# Create a builder user that will govern the appimage build process
+# Grant all access to WORKSPACE directory to the builder
 RUN echo "ALL ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
   groupadd -g 1000 group0 && \
-  useradd -u 1000 -g 1000 user0 && \
-  groupadd -g 1001 group1 && \
-  useradd -u 1001 -g 1001 user1 && \
-  groupadd -g 1002 group2 && \
-  useradd -u 1002 -g 1002 user2 && \
-  groupadd -g 1003 group3 && \
-  useradd -u 1003 -g 1003 user3 && \
-  groupadd -g 1004 group4 && \
-  useradd -u 1004 -g 1004 user4
+  useradd -u 1000 -g 1000 builder && \
+  chown -R builder: "$WORKSPACE"
 
+USER builder
 
 ENTRYPOINT ["/build/scl_wrapper.sh"]
