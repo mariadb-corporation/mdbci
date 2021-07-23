@@ -4,4 +4,4 @@
 script_dir="${0%/*}"
 
 cd $script_dir
-../docker_build.sh adsf 1.4.2
+../docker_build.sh adsf 1.4.6
