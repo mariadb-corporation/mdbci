@@ -56,8 +56,7 @@ export LD_LIBRARY_PATH="$APP_DIR/usr/lib"
 
 echo "--> copying application into internal directory"
 EXTERNAL_DIR="$WORKSPACE/external"
-mkdir -p "$EXTERNAL_DIR"
-sudo cp -ra "$ROOT_DIR"/* "$EXTERNAL_DIR"/
+sudo cp -ra "$ROOT_DIR" "$EXTERNAL_DIR"
 sudo chown -R "$uid:$gid" "$EXTERNAL_DIR"
 cd $EXTERNAL_DIR
 
