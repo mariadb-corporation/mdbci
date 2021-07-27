@@ -54,6 +54,9 @@ class DedicatedConfigurator
       end
 
       break unless try_again?(node, result)
+    rescue Net::SSH::Exception => e
+      @ui.error("SSH exception: #{e.message}")
+      result = Result.error('SSH error')
     end
     result
   end
