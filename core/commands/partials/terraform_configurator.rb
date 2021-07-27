@@ -124,6 +124,9 @@ class TerraformConfigurator
       else
         @ui.error("Exception during node configuration: #{result.error}")
       end
+    rescue Net::SSH::Exception => e
+      @ui.error("SSH exception: #{e.message}")
+      result = Result.error('SSH error')
     end
     result
   end

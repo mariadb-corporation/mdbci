@@ -97,6 +97,8 @@ class VagrantConfigurator
                                                         @config, @ui, @machine_configurator).success?
         return SUCCESS_RESULT
       end
+    rescue Net::SSH::Exception => e
+      @ui.error("SSH exception: #{e.message}")
     end
     Result.error("Node '#{node}' was not configured.")
   end
