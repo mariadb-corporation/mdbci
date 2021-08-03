@@ -115,9 +115,20 @@ class TerraformConfigurationGenerator < BaseCommand
           machine_type: node[1]['machine_type']&.to_s,
           memory_size: node[1]['memory_size']&.to_i,
           cpu_count: node[1]['cpu_count']&.to_i,
-          preemptible: node[1]['preemptible'].nil? ? false : node[1]['preemptible'] == 'true'
+          preemptible: node[1]['preemptible'].nil? ? false : node[1]['preemptible'] == 'true',
+          attached_disk: need_attached_disk?(node)
       }
     )
+  end
+
+  # Enable an additional disk for nodes with the Clustrix product
+  #
+  # @param node [Array] information of the node from configuration file
+  # @return [Boolean] result
+  def need_attached_disk?(node)
+    ConfigurationGenerator.parse_products_info(node).map do |product|
+      product['name']
+    end.include?('clustrix')
   end
 
   # Get configuration file generator by nodes provider.

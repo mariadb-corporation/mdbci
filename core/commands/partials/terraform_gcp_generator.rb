@@ -181,6 +181,14 @@ class TerraformGcpGenerator
     tags_block = tags_partial(instance_tags)
     labels_block = labels_partial(instance_params[:labels])
     template = ERB.new <<-INSTANCE_RESOURCES
+  <% if attached_disk %>
+    resource "google_compute_disk" "disk" {
+      name    = "<%= instance_name %>-disk"
+      type    = "pd-standard"
+      size    = 30
+    }
+  <% end %>
+
     resource "google_compute_instance" "<%= name %>" {
       name = "<%= instance_name %>"
       machine_type = "<%= machine_type %>"
@@ -192,6 +200,13 @@ class TerraformGcpGenerator
           size = 500
         }
       }
+    <% if attached_disk %>
+      attached_disk {
+        source      = google_compute_disk.disk.self_link
+        device_name = "data-disk-0"
+        mode        = "READ_WRITE"
+      }
+    <% end %>
       <% if is_own_vpc %>
         depends_on = [google_compute_network.vpc_network, google_compute_firewall.firewall_rules]
       <% end %>
