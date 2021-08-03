@@ -25,7 +25,7 @@ class ConfigurationGenerator
 
   def generate_node_info(node, node_params, registry, force_version)
     box = node[1]['box'].to_s
-    products = parse_products_info(node)
+    products = ConfigurationGenerator.parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params[:name], products, box, registry, force_version).and_then do |role|
       Result.ok({ node_params: node_params, role_file_content: role, box: box })
@@ -87,6 +87,22 @@ class ConfigurationGenerator
              chef_type: 'role',
              run_list: run_list }
     JSON.pretty_generate(role)
+  end
+
+  # Parse the products lists from configuration of node.
+  #
+  # @param node [Array] internal name of the machine specified in the template
+  # @return [Array<Hash>] list of parameters of products.
+  def self.parse_products_info(node)
+    products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
+    if node[1].key?('cnf_template_path')
+      products.each do |product|
+        next if product.key?('cnf_template_path')
+
+        product['cnf_template_path'] = node[1]['cnf_template_path']
+      end
+    end
+    products
   end
 
   private
@@ -264,22 +280,6 @@ class ConfigurationGenerator
       main_products << { 'name' => product['name'] } if ProductAttributes.need_dependence?(product['name'])
     end
     main_products
-  end
-
-  # Parse the products lists from configuration of node.
-  #
-  # @param node [Array] internal name of the machine specified in the template
-  # @return [Array<Hash>] list of parameters of products.
-  def parse_products_info(node)
-    products = [].push(node[1]['product']).push(node[1]['products']).flatten.compact.uniq
-    if node[1].key?('cnf_template_path')
-      products.each do |product|
-        next if product.key?('cnf_template_path')
-
-        product['cnf_template_path'] = node[1]['cnf_template_path']
-      end
-    end
-    products
   end
 
   # Get box provider by box name.

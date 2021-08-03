@@ -25,8 +25,26 @@ execute 'Unpack ClustrixDB installer' do
           " -C #{File.join(home_dir, 'clustrix-installer')} --strip-components=1"
 end
 
+if node['clustrix']['provider']   == 'gcp'
+  execute 'Format attached disk' do
+    command 'mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb -F'
+  end
+
+  directory '/data/clustrix' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    action :create
+    recursive true
+  end
+
+  execute 'Mount Clustrix directory' do
+    command 'mount -o discard,defaults /dev/sdb /data/clustrix'
+  end
+end
+
 execute 'Install ClustrixDB via unpacked installer' do
-  command './xpdnode_install.py --yes --force'
+  command "./xpdnode_install.py --yes --force --log-path /var/log/clustrix   --cluster-addr=#{node['ipaddress']} --storage-allocate=20"
   cwd File.join(home_dir, 'clustrix-installer')
 end
 
