@@ -182,7 +182,7 @@ class TerraformGcpGenerator
     labels_block = labels_partial(instance_params[:labels])
     template = ERB.new <<-INSTANCE_RESOURCES
   <% if attached_disk %>
-    resource "google_compute_disk" "disk" {
+    resource "google_compute_disk" "<%= name %>-disk" {
       name    = "<%= instance_name %>-disk"
       type    = "pd-standard"
       size    = 30
@@ -202,7 +202,7 @@ class TerraformGcpGenerator
       }
     <% if attached_disk %>
       attached_disk {
-        source      = google_compute_disk.disk.self_link
+        source      = google_compute_disk.<%= name %>-disk.self_link
         device_name = "data-disk-0"
         mode        = "READ_WRITE"
       }
