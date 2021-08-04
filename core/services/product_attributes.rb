@@ -388,7 +388,17 @@ module ProductAttributes
         repo_recipe: 'connector_ci::connector_repository',
         name: 'connector_odbc',
         repository: 'connector_odbc_ci',
-    }
+    },
+    'rocksdb_tools' => {
+        recipe: 'rocksdb_tools',
+        name: 'rocksdb_tools',
+        without_version: true,
+        reverse_product: 'rocksdb_tools_remove'
+    },
+    'rocksdb_tools_remove' => {
+        recipe: 'rocksdb_tools::remove',
+        name: 'rocksdb_tools'
+    },
   }.freeze
 
   DEPENDENCE = {
