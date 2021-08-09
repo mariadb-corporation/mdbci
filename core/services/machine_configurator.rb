@@ -244,7 +244,7 @@ class MachineConfigurator
   end
 
   def run_chef_solo(config_name, connection, remote_dir, logger)
-    sudo_exec(connection, "chef-solo -c #{remote_dir}/solo.rb -j #{remote_dir}/configs/#{config_name}",
+    sudo_exec(connection, "chef-solo -c #{remote_dir}/solo.rb -j #{remote_dir}/configs/#{config_name} --log_level info",
               logger)
   end
 end
