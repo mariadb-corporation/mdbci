@@ -335,6 +335,12 @@ when 'centos', 'redhat'
     end
   when 8 # CentOS 8
     packages = general_packages.concat(centos_packages).concat(centos_8_packages)
+    if node.attributes['kernel']['machine'] == 'aarch64'
+      yum_repository 'PowerTools' do
+        baseurl 'http://centos.mirror.liquidtelecom.com/8/PowerTools/aarch64/os/'
+        gpgcheck false
+      end
+    end
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
     end
@@ -353,7 +359,11 @@ when 'suse'
     zypper_repository 'enable a repository for scons' do
       action :add
       gpgcheck false
-      baseurl 'https://download.opensuse.org/distribution/leap/15.2/repo/oss/'
+      if node.attributes['kernel']['machine'] == 'aarch64'
+        baseurl 'http://www.rpmfind.net/linux/opensuse/distribution/leap/15.0/repo/oss/'
+      else
+        baseurl 'https://download.opensuse.org/distribution/leap/15.2/repo/oss/'
+      end
     end
     execute 'install libboost-devel' do
       command 'zypper -n install libboost_*-devel'
