@@ -64,6 +64,7 @@ when 'suse', 'opensuse', 'sles'
     action :add
     baseurl node['mariadb']['repo']
     sensitive true
+    priority 10
   end
   zypper_repository 'MariaDB' do
     action :refresh
