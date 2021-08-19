@@ -1,3 +1,5 @@
+package 'SUSEConnect'
+
 execute 'Change SUSEConnect server' do
   command "sed -i 's/https:\\/\\/smt-gce.susecloud.net/https:\\/\\/scc.suse.com/g' /etc/SUSEConnect"
   only_if { node['suse-connect']['provider'] == 'gcp' }
