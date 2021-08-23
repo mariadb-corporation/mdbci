@@ -32,3 +32,5 @@ You can specify two product versions:
   }
 }
 ```
+
+The second time Clustrix is not installed. To reinstall, you need to recreate the machine.
