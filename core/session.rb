@@ -36,6 +36,7 @@ require_relative 'commands/remove_product_command'
 require_relative 'commands/check_relevance_command'
 require_relative 'commands/list_cloud_instances_command'
 require_relative 'commands/create_user_command'
+require_relative 'commands/self_upgrade_command'
 
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
@@ -92,6 +93,7 @@ class Session
   attr_accessor :isForce
   attr_accessor :force_version
   attr_accessor :architecture
+  attr_accessor :mdbci_image_address
 
   PLATFORM = 'platform'
   VAGRANT_NO_PARALLEL = '--no-parallel'
@@ -145,6 +147,7 @@ EOF
     @suse_config = @tool_config['suse']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
     @mdbe_ci_config = @tool_config['mdbe_ci']
+    @mdbci_image_address = @tool_config['mdbci']
   end
 
   def repos
@@ -240,6 +243,9 @@ EOF
       exit_code = command.execute
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'self-upgrade'
+      command = SelfUpgradeCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'setup-dependencies'
       command = SetupDependenciesCommand.new(ARGV, self, $out)

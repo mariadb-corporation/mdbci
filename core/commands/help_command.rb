@@ -17,6 +17,7 @@ require_relative 'provide_files'
 require_relative 'check_relevance_command'
 require_relative 'list_cloud_instances_command'
 require_relative 'create_user_command'
+require_relative 'self_upgrade_command'
 
 # Command provides a documentation to the user on how to use the mdbci tool.
 class HelpCommand < BaseCommand
@@ -40,6 +41,7 @@ class HelpCommand < BaseCommand
     'remove_product' => RemoveProductCommand.synopsis,
     'provide-files' => ProvideFiles.synopsis,
     'public_keys' => 'Copy ssh keys to configured nodes.',
+    'self-upgrade' => SelfUpgradeCommand.synopsis,
     'setup-dependencies' => SetupDependenciesCommand.synopsis,
     'setup_repo' => SetupRepoCommand.synopsis,
     'show' => 'Get information about mdbci and configurations.',

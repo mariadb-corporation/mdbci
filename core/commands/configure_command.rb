@@ -15,7 +15,8 @@ class ConfigureCommand < BaseCommand
       'mdbe' => 'MariaDB Enterprise',
       'mdbe_ci' => 'MariaDB Enterprise CI repository',
       'docker' => 'MaxScale CI Docker Registry subscription',
-      'force' => 'force flag'
+      'force' => 'force flag',
+      'mdbci' => 'MDBCI self-upgrade address'
   }
 
   def self.synopsis
@@ -132,6 +133,20 @@ Use the following short product names to configure them:
 
     @configuration['force'] = force_flag
     SUCCESS_RESULT
+  end
+
+  def configure_mdbci
+    mdbci_image_address = input_mdbci
+    return ERROR_RESULT if mdbci_image_address.nil?
+
+    @configuration['mdbci'] = mdbci_image_address
+    SUCCESS_RESULT
+  end
+
+  def input_mdbci
+    {
+      'image_address' => read_topic('URL for MDBCI self-upgrade', @configuration.dig('mdbci', 'image_address'))
+    }
   end
 
   def input_docker_credentials
