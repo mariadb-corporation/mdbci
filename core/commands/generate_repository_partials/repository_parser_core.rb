@@ -372,4 +372,18 @@ module RepositoryParserCore
       architectures.map { |architecture| release.merge({ architecture: architecture }) }
     end
   end
+
+  def generate_mariadb_deb_full_url(incorrect_url)
+    split_url = incorrect_url.split('/')
+    split_url.pop(2)
+    url = split_url.join('/')
+    mariadb_version = '10.5'
+    mariadb_version = '10.0' if url.include?('10.0')
+    mariadb_version = '10.1' if url.include?('10.1')
+    mariadb_version = '10.2' if url.include?('10.2')
+    mariadb_version = '10.3' if url.include?('10.3')
+    mariadb_version = '10.4' if url.include?('10.4')
+    mariadb_version = '10.6' if url.include?('10.6')
+    "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
+  end
 end

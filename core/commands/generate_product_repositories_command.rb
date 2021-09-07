@@ -24,6 +24,7 @@ require_relative 'generate_repository_partials/galera_ci_parser'
 require_relative 'generate_repository_partials/mariadb_ci_parser'
 require_relative 'generate_repository_partials/mariadb_staging_parser'
 require_relative 'generate_repository_partials/connector_ci_parser'
+require_relative 'generate_repository_partials/mdbe_prestaging_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -305,7 +306,10 @@ In order to specify the number of retries for repository configuration use --att
     when 'mariadb_ci'
       MariadbCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'mdbe_staging'
-      MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
+      save_without_doubles(
+          MdbePrestagingParser.parse(product_config['prestaging'], @product_version, @env.mdbe_ci_config, @ui, @logger),
+          MdbeParser.parse(product_config['staging'], @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
+      )
     when 'mariadb_staging'
       MariadbStagingParser.parse(product_config, @product_version, @ui, @logger)
     when 'connector_c_ci'
@@ -318,6 +322,18 @@ In order to specify the number of retries for repository configuration use --att
       ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_odbc_ci',
                               'mariadb_connector_odbc-dev', 'mariadb-connector-odbc-devel', @ui, @logger)
     end
+  end
+
+  def save_without_doubles(main_builds, additional_builds)
+    result = main_builds.clone
+    additional_builds.each do |additional_build|
+      include = false
+      main_builds.each do |main_build|
+        include = true if main_build[:version] == additional_build[:version]
+      end
+      result << additional_build unless include
+    end
+    result
   end
 
   # Print summary information about the created products
