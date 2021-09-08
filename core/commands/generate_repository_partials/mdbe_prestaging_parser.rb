@@ -10,17 +10,17 @@ module MdbePrestagingParser
     auth = auth_config['es_repo']
     releases = []
     releases.concat(
-        parse_mdbe_prestaging_rpm_repository(config['repo']['rpm'], product_version, auth, log, logger)
+        parse_mdbe_prestaging_rpm_repository(config['repo']['rpm'], product_version, auth, log, logger, config['unsupported'])
     )
     releases.concat(
-        parse_mdbe_prestaging_deb_repository(config['repo']['rpm'], product_version, auth, log, logger)
+        parse_mdbe_prestaging_deb_repository(config['repo']['rpm'], product_version, auth, log, logger, config['unsupported'])
     )
     releases
   end
 
-  def self.parse_mdbe_prestaging_rpm_repository(config, product_version, auth, log, logger)
+  def self.parse_mdbe_prestaging_rpm_repository(config, product_version, auth, log, logger, unsupported_path)
     parse_repository(
-        config['path'], auth, config['key'], 'mdbe_staging', product_version,
+        config['path'], auth, config['key'], 'mdbe_prestaging', product_version,
         %w[MariaDB-client MariaDB-server],
         ->(url, _) { "#{url}rpms/" },
         ->(package, _) { /#{package}/ },
@@ -33,13 +33,14 @@ module MdbePrestagingParser
         lambda do |release, _|
           release[:repo] = add_auth_to_url(release[:url], auth)
           release
-        end
+        end,
+        add_unsupported_repo(config['path'], unsupported_path, auth, log, logger)
     )
   end
 
-  def self.parse_mdbe_prestaging_deb_repository(config, product_version, auth, log, logger)
+  def self.parse_mdbe_prestaging_deb_repository(config, product_version, auth, log, logger, unsupported_path)
     parse_repository(
-        config['path'], auth, config['key'], 'mdbe_staging', product_version, %w[mariadb-client mariadb-server],
+        config['path'], auth, config['key'], 'mdbe_prestaging', product_version, %w[mariadb-client mariadb-server],
         ->(url, _) { generate_mariadb_deb_full_url(url) },
         ->(package, platform) { /#{package}.*#{platform}/ },
         log, logger,
@@ -52,7 +53,8 @@ module MdbePrestagingParser
           repo_path = add_auth_to_url(release[:repo_url], auth)
           release[:repo] = "#{repo_path} #{release[:platform_version]} main"
           release
-        end
+        end,
+        add_unsupported_repo(config['path'], unsupported_path, auth, log, logger)
     )
   end
 end

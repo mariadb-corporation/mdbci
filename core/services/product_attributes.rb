@@ -91,6 +91,14 @@ module ProductAttributes
       files_location: 'cookbooks/mariadb/files',
       reverse_product: 'mariadb_remove'
     },
+    'mdbe_prestaging' => {
+        recipe: 'mariadb::install_enterprise',
+        repo_recipe: 'mariadb::mdberepos',
+        name: 'mariadb',
+        repository: 'mdbe_prestaging',
+        files_location: 'cookbooks/mariadb/files',
+        reverse_product: 'mariadb_remove'
+    },
     'mariadb_remove' => {
       recipe: 'mariadb::uninstall',
       name: 'mariadb',
