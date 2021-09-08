@@ -19,6 +19,14 @@ when 'debian', 'ubuntu'
       owner 'root'
       group 'root'
     end
+    if node['mariadb'].key?('unsupported_repo')
+      file "/etc/apt/sources.list.d/#{repo_file_name}_unsupported.list" do
+        content "deb [trusted=yes] #{node['mariadb']['unsupported_repo']}"
+        mode '0644'
+        owner 'root'
+        group 'root'
+      end
+    end
     remote_file "/tmp/#{repo_file_name}.public" do
       source node['mariadb']['repo_key']
     end
@@ -49,8 +57,19 @@ when 'rhel', 'fedora', 'centos'
     sensitive true
     options({ 'module_hotfixes' => '1' })
   end
+  if node['mariadb'].key?('unsupported_repo')
+    yum_repository "#{repo_file_name}_unsupported" do
+      baseurl node['mariadb']['unsupported_repo']
+      gpgkey node['mariadb']['repo_key']
+      sensitive true
+      options({ 'module_hotfixes' => '1' })
+    end
+  end
 when 'suse', 'opensuse', 'sles'
   zypper_repository 'mariadb' do
+    action :remove
+  end
+  zypper_repository 'mariadb_unsupported' do
     action :remove
   end
   remote_file File.join('tmp', 'rpm.key') do
@@ -68,5 +87,16 @@ when 'suse', 'opensuse', 'sles'
   end
   zypper_repository 'MariaDB' do
     action :refresh
+  end
+  if node['mariadb'].key?('unsupported_repo')
+    zypper_repository 'mariadb_unsupported' do
+      action :add
+      baseurl node['mariadb']['unsupported_repo']
+      sensitive true
+      priority 10
+    end
+    zypper_repository 'mariadb_unsupported' do
+      action :refresh
+    end
   end
 end

@@ -386,4 +386,19 @@ module RepositoryParserCore
     mariadb_version = '10.6' if url.include?('10.6')
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
+
+  def add_unsupported_repo(main_path, unsupported_path, auth, log, logger)
+    lambda do |release, _links|
+      additional_link = release[:url].sub(main_path, unsupported_path)
+      begin
+        get_directory_links(additional_link, logger, auth)
+        release[:unsupported_repo] = release[:repo].sub(
+            add_auth_to_url(main_path, auth), add_auth_to_url(unsupported_path, auth)
+        )
+      rescue StandardError
+        error_and_log("Failed to generate an unsupported repository for #{release[:url]}", log, logger)
+      end
+      release
+    end
+  end
 end

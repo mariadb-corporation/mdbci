@@ -65,7 +65,14 @@ class RepoManager
       end
     end
     @ui.info("Repo key is '#{repo_key}': #{repo.nil? ? 'Not found' : 'Found'}")
+    check_unsupported(repo, product)
     repo
+  end
+
+  def check_unsupported(repo, product)
+    if product.key?('include_unsupported') and !repo.nil?
+      @ui.warning('Unsupported repository was not found') unless repo.key?('unsupported_repo')
+    end
   end
 
   def show

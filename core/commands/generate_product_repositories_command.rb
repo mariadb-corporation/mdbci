@@ -49,7 +49,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mariadb_staging' => 'mariadb_staging',
     'connector_c_ci' => 'connector_c_ci',
     'connector_cpp_ci' => 'connector_cpp_ci',
-    'connector_odbc_ci' => 'connector_odbc_ci'
+    'connector_odbc_ci' => 'connector_odbc_ci',
+    'mdbe_prestaging' => 'mdbe_prestaging'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -192,6 +193,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   STORED_KEYS = %i[repo repo_key platform platform_version product version architecture].freeze
+  UNSUPPORTED_REPO = :unsupported_repo
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
     STORED_KEYS.each_with_object({}) do |key, sliced_hash|
@@ -200,6 +202,7 @@ In order to specify the number of retries for repository configuration use --att
       end
 
       sliced_hash[key] = release[key]
+      sliced_hash[UNSUPPORTED_REPO] = release[UNSUPPORTED_REPO] if release.key?(UNSUPPORTED_REPO)
     end
   end
 
@@ -306,10 +309,7 @@ In order to specify the number of retries for repository configuration use --att
     when 'mariadb_ci'
       MariadbCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'mdbe_staging'
-      save_without_doubles(
-          MdbePrestagingParser.parse(product_config['prestaging'], @product_version, @env.mdbe_ci_config, @ui, @logger),
-          MdbeParser.parse(product_config['staging'], @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
-      )
+      MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
     when 'mariadb_staging'
       MariadbStagingParser.parse(product_config, @product_version, @ui, @logger)
     when 'connector_c_ci'
@@ -321,19 +321,9 @@ In order to specify the number of retries for repository configuration use --att
     when 'connector_odbc_ci'
       ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_odbc_ci',
                               'mariadb_connector_odbc-dev', 'mariadb-connector-odbc-devel', @ui, @logger)
+    when 'mdbe_prestaging'
+      MdbePrestagingParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     end
-  end
-
-  def save_without_doubles(main_builds, additional_builds)
-    result = main_builds.clone
-    additional_builds.each do |additional_build|
-      include = false
-      main_builds.each do |main_build|
-        include = true if main_build[:version] == additional_build[:version]
-      end
-      result << additional_build unless include
-    end
-    result
   end
 
   # Print summary information about the created products
