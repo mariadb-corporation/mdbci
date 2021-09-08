@@ -50,6 +50,7 @@ class InstallProduct < BaseCommand
 
       Specify the --repo-key KEY parameter to hard-set the repository key. The key from repo.d will be ignored.
       Specify the --force-version to disable smart searching for repo and install specified version
+      Specify the --include-unsupported to include an unsupported repository
     HELP
     @ui.info(info)
   end
