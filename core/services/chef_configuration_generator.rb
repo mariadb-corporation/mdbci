@@ -62,8 +62,8 @@ module ChefConfigurationGenerator
   # Install product on server
   # param node_name [String] name of the node
   def self.install_product(name, config, logger, network_settings, machine_configurator, product,
-                           need_rewrite, repos, product_version, repo_key, force_version, recipe_name)
-    generate_role_file(name, config, product, repos, product_version, repo_key,  recipe_name, force_version).and_then do |role_file_path|
+                           need_rewrite, repos, product_version, repo_key, force_version, recipe_name, include_unsupported)
+    generate_role_file(name, config, product, repos, product_version, repo_key,  recipe_name, force_version, include_unsupported).and_then do |role_file_path|
       target_path = "roles/#{name}.json"
       role_file_path_config = "#{config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
@@ -91,13 +91,13 @@ module ChefConfigurationGenerator
 
   # Create a role file to install the product from the chef
   # @param name [String] node name
-  def self.generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name, force_version)
+  def self.generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name, force_version, include_unsupported)
     node = config.node_configurations[name]
     box = node['box'].to_s
     recipes_names = []
     recipes_names.push(recipe_name)
     role_file_path = "#{config.path}/#{name}.json"
-    product_hash = { 'name' => product, 'version' => product_version.to_s }
+    product_hash = { 'name' => product, 'version' => product_version.to_s, 'include_unsupported' => include_unsupported }
     product_hash['key'] = repo_key unless repo_key.nil?
 
     ConfigurationGenerator

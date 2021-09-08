@@ -94,6 +94,7 @@ class Session
   attr_accessor :force_version
   attr_accessor :architecture
   attr_accessor :mdbci_image_address
+  attr_accessor :include_unsupported
 
   PLATFORM = 'platform'
   VAGRANT_NO_PARALLEL = '--no-parallel'
