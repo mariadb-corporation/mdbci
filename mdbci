@@ -49,7 +49,8 @@ opts = GetoptLong.new(
   ['--silent', '-s', GetoptLong::NO_ARGUMENT],
   ['--snapshot-name', GetoptLong::REQUIRED_ARGUMENT],
   ['--template', '-t', GetoptLong::REQUIRED_ARGUMENT],
-  ['--user', GetoptLong::REQUIRED_ARGUMENT]
+  ['--user', GetoptLong::REQUIRED_ARGUMENT],
+  ['--include-unsupported', GetoptLong::NO_ARGUMENT]
 )
 
 $mdbci_exec_dir = File.expand_path(__dir__)
@@ -185,6 +186,9 @@ begin
 
     when '--user'
       session.user = arg
+
+    when '--include-unsupported'
+      session.include_unsupported = true
 
     else
       out.error 'Option is not supported: ' + opt

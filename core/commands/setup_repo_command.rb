@@ -34,7 +34,8 @@ Specify the --force-version to disable smart searching for repo and setup specif
 
       ChefConfigurationGenerator.install_product(@node_name, @config, @ui, @network_settings,
                                                  @machine_configurator, @product, false, @env.repos,
-                                                 @product_version, @repo_key, @force_version, repo_recipe_name)
+                                                 @product_version, @repo_key, @force_version, repo_recipe_name,
+                                                 @include_unsupported)
     end
   end
 
@@ -53,6 +54,7 @@ Specify the --force-version to disable smart searching for repo and setup specif
     @product_version = @env.productVersion
     @repo_key = @env.repo_key
     @force_version = @env.force_version
+    @include_unsupported = @env.include_unsupported
     if @product.nil? || @product_version.nil?
       return Result.error('You must specify the name and version of the product')
     end

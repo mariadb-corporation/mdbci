@@ -31,7 +31,8 @@ class InstallProduct < BaseCommand
     result = ChefConfigurationGenerator.install_product(@mdbci_config.node_names.first,
                                                         @mdbci_config, @ui, @network_settings,
                                                         @machine_configurator, @product, true,
-                                                        @env.repos, @product_version, @repo_key, @force_version, recipe_name)
+                                                        @env.repos, @product_version, @repo_key, @force_version, recipe_name,
+                                                        @include_unsupported)
 
     if result.success?
       SUCCESS_RESULT
@@ -73,6 +74,7 @@ class InstallProduct < BaseCommand
     @product_version = @env.productVersion
     @repo_key = @env.repo_key
     @force_version = @env.force_version
+    @include_unsupported = @env.include_unsupported
     if @product.nil? || (ProductAttributes.need_version?(@product) && @product_version.nil?)
       @ui.error('You must specify the name and version of the product')
       return ARGUMENT_ERROR_RESULT
