@@ -51,7 +51,7 @@ module MdbeParser
     end
   end
 
-  def self.generate_mdbe_release_info(baseurl, key, version, platform,
+  def self.generate_mdbe_release_info(baseurl, key, version, architecture, platform,
                                       platform_version, mdbe_private_key, product_name, deb_repo = false)
     repo_path = generate_mdbe_repo_path(
       baseurl, version, platform, platform_version, mdbe_private_key
@@ -63,7 +63,8 @@ module MdbeParser
       platform: platform,
       platform_version: platform_version,
       product: product_name,
-      version: version
+      version: version,
+      architecture: architecture
     }
   end
 
@@ -71,8 +72,10 @@ module MdbeParser
     get_mdbe_release_versions(config, mdbe_private_key, link_name).map do |version|
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
-        generate_mdbe_release_info(config['baseurl'], config['key'], version,
-                                   platform, platform_version, mdbe_private_key, product_name, deb_repo)
+        config['architectures'].map do |architecture|
+          generate_mdbe_release_info(config['baseurl'], config['key'], version, architecture,
+                                     platform, platform_version, mdbe_private_key, product_name, deb_repo)
+        end
       end
     end.flatten
   end
