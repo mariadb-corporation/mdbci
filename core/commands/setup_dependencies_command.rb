@@ -6,8 +6,8 @@ require 'sem_version'
 require_relative 'base_command'
 require_relative '../services/shell_commands'
 
-VAGRANT_VERSION = '2.2.10'
-VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.1.2'
+VAGRANT_VERSION = '2.2.18'
+VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.4.1'
 
 TERRAFORM_VERSION = '0.15.1'
 TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
@@ -135,6 +135,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
 
   # Install vagrant plugins and prepares mdbci environment
   def install_vagrant_plugins
+    run_command('vagrant plugin uninstall vagrant-libvirt')
     install_libvirt_plugin = "vagrant plugin install vagrant-libvirt --plugin-version #{VAGRANT_LIBVIRT_PLUGIN_VERSION}"
     result = run_command(install_libvirt_plugin)[:value]
     unless result.success?
