@@ -145,7 +145,8 @@ Use the following short product names to configure them:
 
   def input_mdbci
     {
-      'image_address' => read_topic('URL for MDBCI self-upgrade', @configuration.dig('mdbci', 'image_address'))
+      'image_address' => read_topic('URL for MDBCI self-upgrade', @configuration.dig('mdbci', 'image_address')),
+      'mdbci_directory' => read_topic('Full path to the mdbci directory', @configuration.dig('mdbci', 'mdbci_directory'))
     }
   end
 

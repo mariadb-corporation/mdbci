@@ -34,13 +34,15 @@ The address for updating is set in the configuration (mdbci configure --product 
     check_config_result = check_config
     return check_config_result if check_config_result.error?
 
-    self_upgrade_command
+    Dir.chdir(@env.mdbci_image_address['mdbci_directory']) do
+      self_upgrade_command
+    end
   end
 
   def check_config
-    if @env.mdbci_image_address.nil? || @env.mdbci_image_address['image_address'].nil?
+    if @env.mdbci_image_address.nil? || @env.mdbci_image_address['image_address'].nil? || @env.mdbci_image_address['mdbci_directory'].nil?
       Result.error(
-        'The URL for updating the MDBCI is not specified (use `mdbci configure --product mdbci`)'
+        'The URL and path for updating the MDBCI is not specified (use `mdbci configure --product mdbci`)'
       )
     else
       SUCCESS_RESULT
