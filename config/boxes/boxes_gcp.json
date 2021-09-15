@@ -19,6 +19,16 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
+  "debian_bullseye_gcp": {
+    "provider": "gcp",
+    "architecture": "amd64",
+    "image": "debian-cloud/debian-11",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  },
   "centos_6_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
