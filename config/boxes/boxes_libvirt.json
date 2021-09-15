@@ -20,6 +20,13 @@
     "platform": "debian",
     "platform_version": "buster"
   },
+  "debian_bullseye_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/debian11",
+    "platform": "debian",
+    "platform_version": "bullseye"
+  },
   "ubuntu_trusty_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
