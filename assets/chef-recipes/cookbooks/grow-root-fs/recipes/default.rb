@@ -38,8 +38,8 @@ ruby_block 'Get filesystem information' do
   action :run
 end
 
-if node['platform'] == 'debian' && node['platform_version'].to_i == 8
-  # We do not have growpart on Debian Jessie. We use parted 3.2 to resize the root partition
+if node['platform'] == 'debian' && node['platform_version'].to_i == 11
+  # We use parted 3.2 to resize the root partition
   package 'parted' do
     only_if { node.run_state[:need_grow_root_fs] }
   end

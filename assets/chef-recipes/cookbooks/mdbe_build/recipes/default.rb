@@ -24,7 +24,6 @@ debian_and_ubuntu_packages = %w[
   ccache
   check
   devscripts
-  dh-systemd
   dirmngr
   dpatch
   equivs
@@ -90,12 +89,20 @@ debian_packages = %w[
 debian_stretch_packages = %w[
   autoconf
   automake
+  dh-systemd
   libgnutls28-dev
   libgnutls30
   libjemalloc1
 ]
 
 debian_buster_packages = %w[
+  dh-systemd
+  libjemalloc2
+  libpmem-dev
+]
+
+debian_bullseye_packages = %w[
+  debhelper
   libjemalloc2
   libpmem-dev
 ]
@@ -103,6 +110,7 @@ debian_buster_packages = %w[
 ubuntu_packages = %w[
   autoconf
   automake
+  dh-systemd
   libjpeg8
   libjpeg-turbo8
   libpmem-dev
@@ -284,6 +292,8 @@ when 'debian'
     execute 'enable apt sources' do
       command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
+  when 11 # Debian Bullseye
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
   end
   apt_update 'update apt cache' do
     action :update

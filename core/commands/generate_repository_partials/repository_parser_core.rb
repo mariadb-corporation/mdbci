@@ -101,6 +101,7 @@ module RepositoryParserCore
     '8' => 'jessie',
     '9' => 'stretch',
     '10' => 'buster',
+    '11' => 'bullseye',
     '1604' => 'xenial',
     '1804' => 'bionic',
     '2004' => 'focal'
@@ -148,6 +149,7 @@ module RepositoryParserCore
   DEB_PLATFORMS = {
     'bionic' => 'ubuntu',
     'buster' => 'debian',
+    'bullseye' => 'debian',
     'focal' => 'ubuntu',
     'jessie' => 'debian',
     'stretch' => 'debian',
