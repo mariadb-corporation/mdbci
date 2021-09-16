@@ -45,7 +45,7 @@ mdbe:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
       key: ["0x70E4618A8167EE24", "0xCE1A3DD5E3C94f49", "0xCBCB082A1BB943DB", "0xF1656F24C74CD1D8", "0x135659E928C12247"]
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/deb
-      platforms: ["debian_jessie", "debian_stretch", "debian_buster", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal"]
+      platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal"]
       architectures: ["amd64", "aarch64"]
 mysql:
   repo:
@@ -99,7 +99,7 @@ mdbe_staging:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server_staging/
       key: ["0x70E4618A8167EE24", "0xCE1A3DD5E3C94f49", "0xCBCB082A1BB943DB", "0xF1656F24C74CD1D8", "0x135659E928C12247"]
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-staging/$MDBE_VERSION$/deb
-      platforms: ["debian_jessie", "debian_stretch", "debian_buster", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal"]
+      platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal"]
       architectures: ["amd64", "aarch64"]
 mdbe_prestaging:
   repo:
