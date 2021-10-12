@@ -21,6 +21,7 @@ RUN yum install -y \
 RUN yum install -y \
   bzip2 \
   devtoolset-9 \
+  ca-certificates \
   cmake \
   curl \
   file \
