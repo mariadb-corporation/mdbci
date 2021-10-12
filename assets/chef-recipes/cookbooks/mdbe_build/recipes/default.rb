@@ -50,6 +50,7 @@ debian_and_ubuntu_packages = %w[
   libedit-dev
   libevent-dev
   libgcrypt20-dev
+  libjemalloc-dev
   libjpeg-dev
   libjudy-dev
   libkrb5-dev
@@ -105,6 +106,7 @@ debian_bullseye_packages = %w[
   debhelper
   libjemalloc2
   libpmem-dev
+  liburing-dev
 ]
 
 ubuntu_packages = %w[
@@ -132,7 +134,6 @@ ubuntu_focal_packages = %w[
   gnutls-dev
   libasan5
   libcurl4-openssl-dev
-  libjemalloc-dev
   libjemalloc2
   libncurses5-dev
   libpcre3-dev
@@ -159,6 +160,7 @@ centos_packages = %w[
   java-1.8.0-openjdk
   java-1.8.0-openjdk-devel
   jemalloc
+  jemalloc-devel
   libaio
   libaio-devel
   libasan
@@ -262,6 +264,7 @@ suse_and_sles_packages = %w[
 
 suse_packages = %w[
   jemalloc
+  jemalloc-devel
 ]
 
 sles_12_packages = %w[
@@ -272,6 +275,7 @@ sles_12_packages = %w[
 
 sles_15_packages = %w[
   jemalloc
+  jemalloc-devel
   libxml2-devel
   ncurses-devel
   perl-Data-Dump
