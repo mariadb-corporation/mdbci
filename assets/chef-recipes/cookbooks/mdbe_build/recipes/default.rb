@@ -42,6 +42,7 @@ debian_and_ubuntu_packages = %w[
   libboost-filesystem-dev
   libboost-program-options-dev
   libboost-system-dev
+  libbz2-dev
   libcrack2-dev
   libcups2
   libcurl4-openssl-dev
@@ -55,6 +56,7 @@ debian_and_ubuntu_packages = %w[
   libjudy-dev
   libkrb5-dev
   liblcms2-2
+  liblzo2-dev
   libmhash-dev
   libnspr4
   libnss3
@@ -149,6 +151,7 @@ centos_packages = %w[
   bison
   boost-program-options
   boost-devel
+  bzip2-devel
   check-devel
   checkpolicy
   ccache
@@ -170,6 +173,7 @@ centos_packages = %w[
   libgcrypt-devel
   libpmem-devel
   libxml2-devel
+  lzo-devel
   mhash-devel
   ncurses-devel
   openssl-devel
@@ -244,6 +248,7 @@ suse_and_sles_packages = %w[
   libtool
   libxml2-devel
   lsb-release
+  lzo-devel
   ncurses-devel
   pam-devel
   perl
