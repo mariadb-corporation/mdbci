@@ -1,0 +1,22 @@
+{
+  "sles_152_gcp": {
+    "provider": "gcp",
+    "architecture": "amd64",
+    "image": "sles-15-sp2-v20210303",
+    "platform": "sles",
+    "platform_version": "15",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  },
+  "sles_153_gcp": {
+    "provider": "gcp",
+    "architecture": "amd64",
+    "image": "sles-15-sp3-v20211113",
+    "platform": "sles",
+    "platform_version": "15",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  }
+}
