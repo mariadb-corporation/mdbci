@@ -9,8 +9,10 @@ module MaxscaleParser
 
   def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm'], product_version, log, logger))
-    releases.concat(parse_maxscale_deb_repository(config['repo']['deb'], product_version, log, logger))
+    releases.concat(parse_maxscale_rpm_repository(config['repo']['rpm'], product_version, log,
+                                                  logger))
+    releases.concat(parse_maxscale_deb_repository(config['repo']['deb'], product_version, log,
+                                                  logger))
     releases
   end
 
@@ -21,7 +23,7 @@ module MaxscaleParser
         use_old_key = if old_key_data.key?('versions_upper_bound') && !version.nil?
                         old_key_data['versions_upper_bound'].all? do |old_key_version|
                           old_key_version.nil? ||
-                            !(version.satisfies?("~> #{old_key_version.to_s}") &&
+                            !(version.satisfies?("~> #{old_key_version}") &&
                               version.minor == old_key_version.minor)
                         end
                       else
@@ -54,7 +56,7 @@ module MaxscaleParser
       log, logger,
       save_as_field(:version),
       split_rpm_platforms,
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:repo] = release[:url]

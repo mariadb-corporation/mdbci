@@ -8,8 +8,10 @@ module MdbeParser
 
   def self.parse(config, mdbe_private_key, link_name, product_name)
     releases = []
-    releases.concat(parse_mdbe_repository(config['repo']['rpm'], mdbe_private_key, link_name, product_name))
-    releases.concat(parse_mdbe_repository(config['repo']['deb'], mdbe_private_key, link_name, product_name,true))
+    releases.concat(parse_mdbe_repository(config['repo']['rpm'], mdbe_private_key, link_name,
+                                          product_name))
+    releases.concat(parse_mdbe_repository(config['repo']['deb'], mdbe_private_key, link_name,
+                                          product_name, true))
     releases
   end
 
@@ -30,7 +32,7 @@ module MdbeParser
   end
 
   def self.get_mdbe_release_links(path, link_name)
-    uri = path.gsub(%r{([^:])\/+}, '\1/')
+    uri = path.gsub(%r{([^:])/+}, '\1/')
     doc = Nokogiri::HTML(URI.open(uri))
     all_links = doc.css('a')
     all_links.select do |link|
@@ -44,7 +46,8 @@ module MdbeParser
     major_release_links = get_mdbe_release_links(path, link_name)
     minor_release_links = major_release_links.map do |major_release_link|
       major_release_path = URI.parse(major_release_link.attribute('href').to_s).path
-      get_mdbe_release_links("#{path_uri.scheme}://#{path_uri.host}/#{major_release_path}", link_name)
+      get_mdbe_release_links("#{path_uri.scheme}://#{path_uri.host}/#{major_release_path}",
+                             link_name)
     end.flatten
     minor_release_links.map do |link|
       link.content.match(/^#{link_name} (.*)$/).captures[0].lstrip

@@ -22,10 +22,10 @@ module MysqlParser
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
-      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^\/]*)?)(\/?)$}),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^/]*)?)(/?)$}),
       lambda do |release, _|
         release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]}"\
-                       " mysql-#{release[:version]}"
+                         " mysql-#{release[:version]}"
         release
       end
     )
@@ -39,7 +39,7 @@ module MysqlParser
       ->(url, _) { url },
       ->(package, _) { /#{package}/ },
       log, logger,
-      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(\/?)$}),
+      extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(/?)$}),
       split_rpm_platforms,
       save_as_field(:platform_version),
       append_url(%w[x86_64], :repo),

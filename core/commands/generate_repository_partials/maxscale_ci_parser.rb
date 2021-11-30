@@ -11,48 +11,52 @@ module MaxscaleCiParser
 
     auth = mdbe_ci_config['mdbe_ci_repo']
     releases = []
-    releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth, log, logger))
-    releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth, log, logger))
-    releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth, log, logger))
-    releases.concat(parse_maxscale_ci_deb_repository_old(config['repo'], product_version, auth, log, logger))
+    releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
+                                                         log, logger))
+    releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
+                                                         log, logger))
+    releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
+                                                         log, logger))
+    releases.concat(parse_maxscale_ci_deb_repository_old(config['repo'], product_version, auth,
+                                                         log, logger))
     releases
   end
 
   def self.parse_maxscale_ci_rpm_repository_new(config, product_version, auth, log, logger)
     parse_repository(
-        config['path'], auth, nil, 'maxscale_ci', product_version,
-        %w[maxscale],
-        ->(url, _) { url },
-        ->(package, _) { /#{package}/ }, log, logger,
-        save_as_field(:version),
-        save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
-        append_url(%w[yum]),
-        split_rpm_platforms,
-        extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
-        lambda do |release, _|
-          release[:repo] = add_auth_to_url(release[:url], auth)
-          release
-        end
+      config['path'], auth, nil, 'maxscale_ci', product_version,
+      %w[maxscale],
+      ->(url, _) { url },
+      ->(package, _) { /#{package}/ }, log, logger,
+      save_as_field(:version),
+      save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
+      append_url(%w[yum]),
+      split_rpm_platforms,
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
+      lambda do |release, _|
+        release[:repo] = add_auth_to_url(release[:url], auth)
+        release
+      end
     )
   end
 
   def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, log, logger)
     parse_repository(
-        config['path'], auth, nil, 'maxscale_ci', product_version,
-        %w[maxscale],
-        ->(url, _) { generate_maxscale_ci_deb_full_url(url) },
-        ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
-        save_as_field(:version),
-        save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
-        append_url(%w[apt], nil, true),
-        append_url(%w[dists]),
-        extract_deb_platforms,
-        set_deb_architecture(auth),
-        lambda do |release, _|
-          repo_path = add_auth_to_url(release[:repo_url], auth)
-          release[:repo] = "#{repo_path} #{release[:platform_version]} main"
-          release
-        end
+      config['path'], auth, nil, 'maxscale_ci', product_version,
+      %w[maxscale],
+      ->(url, _) { generate_maxscale_ci_deb_full_url(url) },
+      ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
+      save_as_field(:version),
+      save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
+      append_url(%w[apt], nil, true),
+      append_url(%w[dists]),
+      extract_deb_platforms,
+      set_deb_architecture(auth),
+      lambda do |release, _|
+        repo_path = add_auth_to_url(release[:repo_url], auth)
+        release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+        release
+      end
     )
   end
 
@@ -72,7 +76,7 @@ module MaxscaleCiParser
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['old_key'], auth)),
       split_rpm_platforms,
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)

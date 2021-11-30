@@ -1,11 +1,10 @@
 mariadb:
-  repo:
-    rpm:
-      path: http://yum.mariadb.org/
-      key: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-    deb:
-      path: http://mirror.netinch.com/pub/mariadb/repo/
-      key: "0xF1656F24C74CD1D8"
+  rpm:
+    path: https://dlm.mariadb.com/browse/mariadb_server/
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
+  deb:
+    path: https://dlm.mariadb.com/browse/mariadb_server/
+    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
 columnstore:
   repo:
     rpm:
@@ -20,19 +19,12 @@ maxscale_ci:
     old_key: https://mdbe-ci-repo.mariadb.net/MariaDBManager-GPG-KEY.public
     new_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
 maxscale:
-  repo:
-    rpm:
-      path: https://downloads.mariadb.com/MaxScale/
-      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
-      old_keys:
-        - key: https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY
-          versions_upper_bound: ["2.4.12", "2.5.3", "2.3.21"]
-    deb:
-      path: https://downloads.mariadb.com/MaxScale/
-      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
-      old_keys:
-        - key: "135659e928c12247"
-          versions_upper_bound: ["2.4.12", "2.5.3", "2.3.21"]
+  rpm:
+    path: https://dlm.mariadb.com/browse/mariadbmaxscale/
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+  deb:
+    path: https://dlm.mariadb.com/browse/mariadbmaxscale/
+    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
 mdbe:
   repo:
     rpm:

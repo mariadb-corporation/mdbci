@@ -1,5 +1,6 @@
 AllCops:
   TargetRubyVersion: 2.6
+  NewCops: enable
 
 Layout/HeredocIndentation:
   Enabled: false
@@ -8,7 +9,7 @@ Metrics/AbcSize:
   Enabled: false
 
 Metrics/BlockLength:
-  ExcludedMethods:
+  IgnoredMethods:
     - context
     - describe
 
@@ -36,3 +37,5 @@ Style/MultilineBlockChain:
 Style/NegatedIf:
   Enabled: false
 
+Style/AccessorGrouping:
+  EnforcedStyle: separated
