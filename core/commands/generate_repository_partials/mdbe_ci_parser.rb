@@ -14,16 +14,20 @@ module MdbeCiParser
     auth_es_repo = mdbe_ci_config['es_repo']
     releases = []
     releases.concat(
-      parse_mdbe_ci_rpm_repository(config['repo']['mdbe_ci_repo'], product_version, auth_mdbe_ci_repo, log, logger)
+      parse_mdbe_ci_rpm_repository(config['repo']['mdbe_ci_repo'], product_version,
+                                   auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
-      parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], product_version, auth_mdbe_ci_repo, log, logger)
+      parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], product_version,
+                                   auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
-      parse_mdbe_ci_es_repo_rpm_repository(config['repo']['es_repo'], product_version, auth_es_repo, log, logger)
+      parse_mdbe_ci_es_repo_rpm_repository(config['repo']['es_repo'], product_version,
+                                           auth_es_repo, log, logger)
     )
     releases.concat(
-      parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], product_version, auth_es_repo, log, logger)
+      parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], product_version,
+                                           auth_es_repo, log, logger)
     )
     releases
   end
@@ -38,7 +42,7 @@ module MdbeCiParser
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       split_rpm_platforms,
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)

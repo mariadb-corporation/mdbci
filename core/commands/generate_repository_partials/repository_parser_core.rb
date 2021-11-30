@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'uri'
+require 'byebug'
+
 # This module provides logic for processing repositories
 module RepositoryParserCore
   def add_auth_to_url(url, auth)
@@ -14,9 +17,9 @@ module RepositoryParserCore
       links.map do |link|
         result = {
           link: link,
-          field => link.attributes['href'].value.delete('/')
+          field => link[:href].delete('/')
         }
-        result[:repo_url] = "#{release[:url]}#{link[:href]}" if save_path
+        result[:repo_url] = URI.join(release[:url], link[:href]).to_s if save_path
         result
       end
     end
@@ -29,13 +32,13 @@ module RepositoryParserCore
   # @param save_path [Boolean] whether to save path to :repo_url field or not
   def append_url(paths, key = nil, save_path = false)
     lambda do |release, links|
-      link_names = links.map { |link| link.content.delete('/') }
+      link_names = links.map { |link| link[:content].delete('/') }
       repositories = []
       paths.each do |path|
         next unless link_names.include?(path)
 
         repository = {
-            url: "#{release[:url]}#{path}/"
+          url: "#{release[:url]}#{path}/"
         }
         repository[:repo_url] = "#{release[:url]}#{path}" if save_path
         repository[key] = path if key
@@ -50,7 +53,7 @@ module RepositoryParserCore
   def append_path_if_exists(paths)
     lambda do |release, links|
       paths.map do |path|
-        if links.map { |link| link.content.delete('/') }.include?(path)
+        if links.map { |link| link[:content].delete('/') }.include?(path)
           release.merge(url: "#{release[:url]}#{path}/")
         else
           release
@@ -62,12 +65,12 @@ module RepositoryParserCore
   def save_key(logger, auth, candidate_key)
     lambda do |release, _|
       key_link = get_links(release[:url], logger, auth).select { |link| key_link?(link) }
-      key_name = key_link.map { |link| link.content.delete('/') }
-      if key_name.empty?
-        release[:repo_key] = candidate_key
-      else
-        release[:repo_key] = add_auth_to_url("#{release[:url]}#{key_name[0]}", auth)
-      end
+      key_name = key_link.map { |link| link[:content].delete('/') }
+      release[:repo_key] = if key_name.empty?
+                             candidate_key
+                           else
+                             add_auth_to_url("#{release[:url]}#{key_name[0]}", auth)
+                           end
       release
     end
   end
@@ -81,7 +84,7 @@ module RepositoryParserCore
   }.freeze
   def split_rpm_platforms
     lambda do |release, links|
-      link_names = links.map { |link| link.content.delete('/') }
+      link_names = links.map { |link| link[:content].delete('/') }
       releases = []
       RPM_PLATFORMS.each_pair do |keyword, platforms|
         next unless link_names.include?(keyword)
@@ -108,7 +111,7 @@ module RepositoryParserCore
   }.freeze
   def add_platform_and_version(platform)
     lambda do |release, links|
-      link_names = links.map { |link| link.content.delete('/') }
+      link_names = links.map { |link| link[:content].delete('/') }
       releases = []
       link_names.each do |platform_and_version|
         platform_version = if platform == :deb
@@ -133,12 +136,12 @@ module RepositoryParserCore
   def extract_field(field, regexp, save_path = false)
     lambda do |release, links|
       possible_releases = links.select do |link|
-        link.content =~ regexp
+        link[:content] =~ regexp
       end
       possible_releases.map do |link|
         result = {
           link: link,
-          field => link.content.match(regexp).captures.first
+          field => link[:content].match(regexp).captures.first
         }
         result[:repo_url] = "#{release[:url]}#{link[:href]}" if save_path
         result
@@ -158,7 +161,7 @@ module RepositoryParserCore
   def extract_deb_platforms
     lambda do |release, links|
       links.map do |link|
-        link.content.delete('/')
+        link[:content].delete('/')
       end.select do |link|
         DEB_PLATFORMS.keys.any? { |platform| link.start_with?(platform) }
       end.map do |link|
@@ -171,10 +174,27 @@ module RepositoryParserCore
 
   # Parse the repository and provide required configurations
   def parse_repository(
-    base_url, auth, key, product, product_version, packages, full_url, comparison_template, log, logger, *steps
+    base_url,
+    auth,
+    key,
+    product,
+    product_version,
+    packages,
+    full_url,
+    comparison_template,
+    log,
+    logger,
+    *steps
   )
     # Recursively go through the site and apply steps on each level
-    result = steps.reduce([{ url: base_url }]) do |releases, step|
+    result = parse_web_directories(base_url, auth, product_version, log, logger, *steps)
+    result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
+    add_key_and_product_to_releases(result, key, product)
+  end
+
+  # Parse web directories and apply step for each of directory level
+  def parse_web_directories(base_url, auth, product_version, log, logger, *steps)
+    steps.reduce([{ url: base_url }]) do |releases, step|
       next_releases = Workers.map(releases) do |release|
         begin
           links = get_directory_links(release[:url], logger, auth)
@@ -187,8 +207,6 @@ module RepositoryParserCore
       end
       filter_releases(next_releases.flatten, product_version)
     end
-    result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
-    add_key_and_product_to_releases(result, key, product)
   end
 
   # Send error message to both direct output and logger facility
@@ -202,7 +220,9 @@ module RepositoryParserCore
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
   def get_directory_links(url, logger, auth = nil)
-    get_links(url, logger, auth).select { |link| dir_link?(link) && !parent_dir_link?(link) }
+    get_links(url, logger, auth).select do |link|
+      dir_link?(link) && sub_link?(url, link)
+    end
   end
 
   # Get links list on the page
@@ -215,26 +235,40 @@ module RepositoryParserCore
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
     doc = Nokogiri::HTML(URI.open(uri, options).read)
-    doc.css('a')
+    doc.css('a').map do |css_element|
+      {
+        href: css_element[:href],
+        content: css_element.content
+      }
+    end
   end
 
   # Check that passed link is possibly a directory or not
   # @param link link to check
   # @return [Boolean] whether link is directory or not
   def dir_link?(link)
-    link.content.match?(%r{\/$}) ||
-      link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*\/$})
+    link[:content].match?(%r{/$}) ||
+      link[:href].match?(%r{.*/$})
   end
 
   def key_link?(link)
-    link[:href].match?(%r{^(?!((http|https):\/\/|\.{2}|\/|\?)).*public$})
+    link[:href].match?(%r{.*public$})
   end
 
-  # Check that passed link is possibly a parent directory link or not
-  # @param link link to check
-  # @return [Boolean] whether link is parent directory link or not
-  def parent_dir_link?(link)
-    link[:href] == '../'
+  # Check whether a passed link is a sub link for the base url
+  # @param base_url [String] the page url that is being processed
+  # @param link [String] the link that is found on the page
+  # @return [Boolean] whether true or false
+  def sub_link?(base_url, link)
+    test_link = URI.join(base_url, link[:href])
+    base_link = URI.parse(base_url)
+    test_link_parts = test_link.path.split('/')
+    base_link_parts = base_link.path.split('/')
+    return false if test_link_parts.size <= base_link_parts.size
+
+    base_link_parts.zip(test_link_parts).all? do |first, second|
+      first == second
+    end
   end
 
   # Helper method that applies the specified step to the current release
@@ -249,7 +283,7 @@ module RepositoryParserCore
     next_releases.map do |next_release|
       result = release.merge(next_release)
       if result.key?(:link)
-        result[:url] = "#{release[:url]}#{next_release[:link][:href]}"
+        result[:url] = URI.join(release[:url], next_release[:link][:href]).to_s
         result.delete(:link)
       end
       result[:url] += '/' unless result[:url].end_with?('/')
@@ -347,14 +381,14 @@ module RepositoryParserCore
     lambda do |release, links|
       links.map do |link|
         release.clone.merge({ link: link,
-                              field => release.fetch(field, []) + [link.content.delete('/')] })
+                              field => release.fetch(field, []) + [link[:content].delete('/')] })
       end
     end
   end
 
   def dirs?(dirs)
     lambda do |links|
-      repo_dirs = links.map { |link| link.content.delete('/').strip.chomp }
+      repo_dirs = links.map { |link| link[:content].delete('/').strip.chomp }
       (repo_dirs & dirs).any?
     end
   end
@@ -372,6 +406,22 @@ module RepositoryParserCore
       architectures << 'amd64' if content =~ /binary-amd64/
       architectures << 'aarch64' if content =~ /binary-arm64/
       architectures.map { |architecture| release.merge({ architecture: architecture }) }
+    end
+  end
+
+  # Determines the architecture of debian repository based on `binary-ARCH` string
+  def determine_deb_architecture(string)
+    architecture = string.split('-').last
+    architecture = 'aarch64' if architecture == 'arm64'
+    architecture
+  end
+
+  def determine_rpm_architecture(string)
+    case string
+    when 'x86_64'
+      'amd64'
+    else
+      string
     end
   end
 
@@ -395,10 +445,11 @@ module RepositoryParserCore
       begin
         get_directory_links(additional_link, logger, auth)
         release[:unsupported_repo] = release[:repo].sub(
-            add_auth_to_url(main_path, auth), add_auth_to_url(unsupported_path, auth)
+          add_auth_to_url(main_path, auth), add_auth_to_url(unsupported_path, auth)
         )
       rescue StandardError
-        error_and_log("Failed to generate an unsupported repository for #{release[:url]}", log, logger)
+        error_and_log("Failed to generate an unsupported repository for #{release[:url]}", log,
+                      logger)
       end
       release
     end

@@ -25,7 +25,7 @@ module MariadbStagingParser
       save_as_field(:version),
       append_url(%w[yum]),
       split_rpm_platforms,
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:version] = release[:version].delete('mariadb-')

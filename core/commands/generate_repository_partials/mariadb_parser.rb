@@ -8,12 +8,14 @@ module MariadbParser
 
   def self.parse(config, product_version, log, logger)
     releases = []
-    version_regexp = %r{^(\p{Digit}+\.\p{Digit}+(\.\p{Digit}+)?)\/?$}
+    version_regexp = %r{^(\p{Digit}+\.\p{Digit}+(\.\p{Digit}+)?)/?$}
     releases.concat(
-      parse_mariadb_rpm_repository(config['repo']['rpm'], product_version, 'mariadb', version_regexp, log, logger)
+      parse_mariadb_rpm_repository(config['repo']['rpm'], product_version, 'mariadb',
+                                   version_regexp, log, logger)
     )
     releases.concat(
-      parse_mariadb_deb_repository(config['repo']['deb'], product_version, 'mariadb', version_regexp, log, logger)
+      parse_mariadb_deb_repository(config['repo']['deb'], product_version, 'mariadb',
+                                   version_regexp, log, logger)
     )
     releases
   end
@@ -26,7 +28,7 @@ module MariadbParser
       log, logger,
       extract_field(:version, version_regexp),
       append_url(%w[centos rhel sles opensuse], :platform),
-      extract_field(:platform_version, %r{^(\p{Digit}+)\/?$}),
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64], :architecture),
       lambda do |release, _|
         release[:repo] = release[:url]

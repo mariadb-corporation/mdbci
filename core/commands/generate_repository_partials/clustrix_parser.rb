@@ -21,7 +21,7 @@ module ClustrixParser
   end
 
   def self.get_clustrix_links(path)
-    uri = path.gsub(%r{([^:])\/+}, '\1/')
+    uri = path.gsub(%r{([^:])/+}, '\1/')
     doc = Nokogiri::HTML(URI.open(uri))
     all_links = doc.css('a')
     all_links.select do |link|
@@ -67,7 +67,7 @@ module ClustrixParser
       get_clustrix_tar_links(path)
     end.flatten.map do |link|
       path = generate_url_by_link(path_uri, link)
-      version = link.content.match(/^.*\/xpand-(.+)\.[^.]+\.tar\.bz2$/).captures[0].strip
+      version = link.content.match(%r{^.*/xpand-(.+)\.[^.]+\.tar\.bz2$}).captures[0].strip
       { repo: path, version: version }
     end
     releases_info.push(generate_latest_release(releases_info))

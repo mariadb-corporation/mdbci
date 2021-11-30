@@ -8,8 +8,10 @@ module ColumnstoreParser
 
   def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_columnstore_rpm_repository(config['repo']['rpm'], product_version, log, logger))
-    releases.concat(parse_columnstore_deb_repository(config['repo']['deb'], product_version, log, logger))
+    releases.concat(parse_columnstore_rpm_repository(config['repo']['rpm'], product_version, log,
+                                                     logger))
+    releases.concat(parse_columnstore_deb_repository(config['repo']['deb'], product_version, log,
+                                                     logger))
     releases
   end
 
@@ -39,7 +41,7 @@ module ColumnstoreParser
       log, logger,
       save_as_field(:version),
       append_url(%w[repo]),
-      extract_field(:platform, %r{^(\p{Alpha}+)\p{Digit}+\/?$}, true),
+      extract_field(:platform, %r{^(\p{Alpha}+)\p{Digit}+/?$}, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
       lambda do |release, _|

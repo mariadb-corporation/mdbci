@@ -14,6 +14,7 @@ require_relative 'base_command'
 require_relative 'generate_repository_partials/mdbe_ci_parser'
 require_relative 'generate_repository_partials/maxscale_ci_parser'
 require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
+require_relative 'generate_repository_partials/maria_db_community_parser'
 require_relative 'generate_repository_partials/maxscale_parser'
 require_relative 'generate_repository_partials/mdbe_parser'
 require_relative 'generate_repository_partials/mariadb_parser'
@@ -181,14 +182,14 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   # Use data provided via constructor to configure the command.
-  def configure_command
+  def configure_command(threads_count)
     load_configuration_file
     return false unless determine_products_to_parse
     return false unless determine_product_version_to_parse
 
     determine_number_of_attempts
     setup_destination_directory
-    Workers.pool.resize(10)
+    Workers.pool.resize(threads_count)
     true
   end
 
@@ -205,7 +206,6 @@ In order to specify the number of retries for repository configuration use --att
       sliced_hash[UNSUPPORTED_REPO] = release[UNSUPPORTED_REPO] if release.key?(UNSUPPORTED_REPO)
     end
   end
-
 
   # Write all information about releases to the JSON documents
   def write_repository(product_dir, releases)
@@ -287,11 +287,15 @@ In order to specify the number of retries for repository configuration use --att
     when 'maxscale_ci_docker'
       MaxscaleCiDockerParser.parse(@ui, @env.tool_config)
     when 'maxscale'
-      MaxscaleParser.parse(product_config, @product_version, @ui, @logger)
+      MariaDBCommunityParser.parse(product_config, MariaDBCommunityParser::MAXSCALE_SERVER,
+                                   'maxscale', @product_version,
+                                   @ui, @logger)
     when 'mdbe'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
-      MariadbParser.parse(product_config, @product_version, @ui, @logger)
+      MariaDBCommunityParser.parse(product_config, MariaDBCommunityParser::MARIADB_COMMUNITY,
+                                   'mariadb', @product_version,
+                                   @ui, @logger)
     when 'columnstore'
       ColumnstoreParser.parse(product_config, @product_version, @ui, @logger)
     when 'mysql'
@@ -342,7 +346,7 @@ In order to specify the number of retries for repository configuration use --att
       show_help
       return SUCCESS_RESULT
     end
-    return ARGUMENT_ERROR_RESULT unless configure_command
+    return ARGUMENT_ERROR_RESULT unless configure_command(@env.threads_count)
 
     remainning_products = @products.dup
     @attempts.times do
