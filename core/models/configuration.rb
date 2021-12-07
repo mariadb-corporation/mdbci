@@ -162,7 +162,7 @@ class Configuration
   def initialize_without_check_correctness(spec)
     @path = parse_spec(spec)[0]
     begin
-    @template_path = read_template_path(@path)
+      @template_path = read_template_path(@path)
     rescue ArgumentError
       @template_path = nil
     end

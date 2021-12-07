@@ -144,7 +144,7 @@ class ConfigurationGenerator
   #
   # @param box [String] name of the box
   # @return [Result::Base] Hash in format { recipe_names: [], product_configs: {} }
-  def init_product_configs_and_recipes(box,name, registry)
+  def init_product_configs_and_recipes(box, name, registry)
     product_configs = {}
     recipe_names = []
     provider = provider_by_box(box)
