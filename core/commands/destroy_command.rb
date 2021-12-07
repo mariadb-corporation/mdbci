@@ -241,7 +241,8 @@ Labels should be separated with commas, do not contain any whitespaces.
   end
 
   def unsubscribe_from_subscriptions(configuration, network_settings, registry)
-    configuration.node_names.each do |name|
+    network_nodes = network_settings.node_name_list
+    configuration.node_names.filter { |name| network_nodes.include?(name) }.each do |name|
       registry.get_subscription(name).and_then do |subscription|
         role_file_path = generate_role_file_unsub(configuration, name, subscription)
         configure(role_file_path, name, configuration, network_settings)
