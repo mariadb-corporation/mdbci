@@ -48,7 +48,8 @@ module MariadbStagingParser
       set_deb_architecture(nil),
       lambda do |release, _|
         release[:version] = release[:version].delete('mariadb-')
-        release[:repo] = "#{release[:repo_url]} #{release[:platform_version]} main"
+        release[:repo] = release[:repo_url]
+        release[:components] = ["main"]
         release
       end
     )

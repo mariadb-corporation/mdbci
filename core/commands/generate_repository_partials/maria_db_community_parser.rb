@@ -82,7 +82,8 @@ module MariaDBCommunityParser
           platform: platform,
           platform_version: platform_version,
           architecture: architecture,
-          repo: "#{server_location}/#{release[:version]}/repo/#{platform} #{platform_version} main"
+          repo: "#{server_location}/#{release[:version]}/repo/#{platform}",
+          components: ["main"]
         }
       )
     end

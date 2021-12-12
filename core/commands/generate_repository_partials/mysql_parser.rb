@@ -24,9 +24,11 @@ module MysqlParser
       save_as_field(:platform_version),
       extract_field(:version, %r{^mysql-(\d+\.?\d+(-[^/]*)?)(/?)$}),
       lambda do |release, _|
-        release[:repo] = "deb #{release[:repo_url]} #{release[:platform_version]}"\
-                         " mysql-#{release[:version]}"
-        release
+        release.merge({
+                        repo: release[:repo_url],
+                        components: ["mysql-#{release[:version]}"]
+
+                      })
       end
     )
   end

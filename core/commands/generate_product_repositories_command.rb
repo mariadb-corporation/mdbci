@@ -193,18 +193,21 @@ In order to specify the number of retries for repository configuration use --att
     true
   end
 
-  STORED_KEYS = %i[repo repo_key platform platform_version product version architecture].freeze
-  UNSUPPORTED_REPO = :unsupported_repo
+  REQUIRED_KEYS = %i[repo repo_key platform platform_version product version architecture].freeze
+  OPTIONAL_KEYS = %i[components unsupported_repo]
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
-    STORED_KEYS.each_with_object({}) do |key, sliced_hash|
-      unless release.key?(key)
+    updated_release = release.select do |key, _|
+      REQUIRED_KEYS.include?(key) || OPTIONAL_KEYS.include?(key)
+    end.to_h
+
+    REQUIRED_KEYS.each do |key|
+      if !updated_release.key?(key)
         raise "Unable to find key #{key} in repository_configuration #{release}."
       end
-
-      sliced_hash[key] = release[key]
-      sliced_hash[UNSUPPORTED_REPO] = release[UNSUPPORTED_REPO] if release.key?(UNSUPPORTED_REPO)
     end
+
+    updated_release
   end
 
   # Write all information about releases to the JSON documents
