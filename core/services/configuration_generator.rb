@@ -293,10 +293,14 @@ class ConfigurationGenerator
     @box_definitions.get_box(box)['provider']
   end
 
+
+  CHEF_REPO_PARAMETERS = %w[components repo repo_key version]
   # Make list of not-null product attributes
   # @param repo [Hash] repository info
   def self.make_product_attributes_hash(repo)
-    %w[version repo repo_key].map { |key| [key, repo[key]] unless repo[key].nil? }.compact.to_h
+    repo.select do |key, _|
+      CHEF_REPO_PARAMETERS.include?(key)
+    end.to_h
   end
 
   # Add product license to the list of the product parameters if it needed
