@@ -1,0 +1,794 @@
+[
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "jessie",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "jessie",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "jessie",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.3.7",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.3.7/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  }
+]

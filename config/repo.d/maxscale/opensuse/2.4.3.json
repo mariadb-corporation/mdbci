@@ -1,0 +1,11 @@
+[
+  {
+    "version": "2.4.3",
+    "platform": "opensuse",
+    "platform_version": "15",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.3/yum/opensuse/15/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  }
+]

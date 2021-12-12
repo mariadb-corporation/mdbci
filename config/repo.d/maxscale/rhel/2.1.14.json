@@ -1,18 +1,20 @@
 [
   {
-    "repo": "https://downloads.mariadb.com/MaxScale/2.1.14/rhel/6/x86_64/",
-    "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
+    "version": "2.1.14",
     "platform": "rhel",
     "platform_version": "6",
-    "product": "maxscale",
-    "version": "2.1.14"
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.1.14/yum/rhel/6/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
   },
   {
-    "repo": "https://downloads.mariadb.com/MaxScale/2.1.14/rhel/7/x86_64/",
-    "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
+    "version": "2.1.14",
     "platform": "rhel",
     "platform_version": "7",
-    "product": "maxscale",
-    "version": "2.1.14"
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.1.14/yum/rhel/7/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
   }
 ]

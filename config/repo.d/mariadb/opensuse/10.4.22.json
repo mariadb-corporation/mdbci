@@ -1,0 +1,29 @@
+[
+  {
+    "version": "10.4.22",
+    "platform": "opensuse",
+    "platform_version": "15.0",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.22/yum/opensuse/15.0/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.22",
+    "platform": "opensuse",
+    "platform_version": "15",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.22/yum/opensuse/15/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.22",
+    "platform": "opensuse",
+    "platform_version": "42",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.22/yum/opensuse/42/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  }
+]

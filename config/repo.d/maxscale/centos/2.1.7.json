@@ -1,18 +1,20 @@
 [
   {
-    "repo": "https://downloads.mariadb.com/MaxScale/2.1.7/centos/6/x86_64/",
-    "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
+    "version": "2.1.7",
     "platform": "centos",
     "platform_version": "6",
-    "product": "maxscale",
-    "version": "2.1.7"
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.1.7/yum/centos/6/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
   },
   {
-    "repo": "https://downloads.mariadb.com/MaxScale/2.1.7/centos/7/x86_64/",
-    "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
+    "version": "2.1.7",
     "platform": "centos",
     "platform_version": "7",
-    "product": "maxscale",
-    "version": "2.1.7"
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.1.7/yum/centos/7/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
   }
 ]

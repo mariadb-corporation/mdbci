@@ -1,10 +1,11 @@
 [
   {
-    "repo": "https://downloads.mariadb.com/MaxScale/2.1.4/sles/12/x86_64/",
-    "repo_key": "https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY",
+    "version": "2.1.4",
     "platform": "sles",
     "platform_version": "12",
-    "product": "maxscale",
-    "version": "2.1.4"
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.1.4/yum/sles/12/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
   }
 ]

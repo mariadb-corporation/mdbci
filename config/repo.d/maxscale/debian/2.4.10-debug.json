@@ -1,0 +1,242 @@
+[
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "2.4.10-debug",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/2.4.10-debug/apt",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  }
+]

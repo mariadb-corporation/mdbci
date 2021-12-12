@@ -1,0 +1,38 @@
+[
+  {
+    "version": "10.7.1-RC",
+    "platform": "rhel",
+    "platform_version": "7",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/yum/rhel/7/aarch64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "rhel",
+    "platform_version": "7",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/yum/rhel/7/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "rhel",
+    "platform_version": "8",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/yum/rhel/8/aarch64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "rhel",
+    "platform_version": "8",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/yum/rhel/8/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY",
+    "product": "mariadb"
+  }
+]
