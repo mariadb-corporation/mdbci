@@ -52,7 +52,7 @@ Labels should be separated with commas and should not contain any whitespaces.
     @config = Configuration.new(@specification, @env.labels)
   end
 
-  def bing_up_nodes
+  def bring_up_nodes
     if @config.docker_configuration?
       configurator = DockerSwarmConfigurator.new(@config, @env, @ui)
       configurator.configure
@@ -80,6 +80,6 @@ Labels should be separated with commas and should not contain any whitespaces.
       @ui.error(error.backtrace.join("\n"))
       return ARGUMENT_ERROR_RESULT
     end
-    bing_up_nodes
+    bring_up_nodes
   end
 end

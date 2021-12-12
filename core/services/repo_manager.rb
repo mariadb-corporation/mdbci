@@ -60,7 +60,7 @@ class RepoManager
       repo = find_last_repository_by_major_version(product, repository_key)
       unless repo.nil?
         @ui.warning("MDBCI could not find the specified version #{product['version']}, "\
-                    "automatically using the closes version #{repo['version']}")
+                    "automatically using the closest version #{repo['version']}")
         repo_key = "#{repository_name}@#{repo['version']}+#{repository_key}"
       end
     end
