@@ -32,18 +32,18 @@ module ChefConfigurationGenerator
   # Make array of cnf files and it target path on the nodes
   def self.cnf_extra_files(node, config)
     cnf_template_path = config.cnf_template_path(node)
-    return [] if cnf_template_path.nil?
 
     config.products_info(node).map do |product_info|
-      cnf_template = product_info['cnf_template']
-      next if cnf_template.nil?
+      product_config = product_info['cnf_template']
+      product_template_path = product_info.fetch('cnf_template_path', cnf_template_path)
+      next if product_config.nil? || product_template_path.nil?
 
       product = product_info['name']
       files_location = ProductAttributes.chef_recipe_files_location(product)
       next if files_location.nil?
 
-      [File.join(cnf_template_path, cnf_template),
-       File.join(files_location, cnf_template)]
+      [File.join(product_template_path, product_config),
+       File.join(files_location, product_config)]
     end.compact
   end
 
