@@ -3,6 +3,12 @@
 # Configure repository
 case node[:platform_family]
 when 'debian', 'ubuntu', 'mint'
+  apt_preference 'mariadb' do
+    package_name '*'
+    pin 'origin downloads.mariadb.com'
+    pin_priority 1000
+  end
+
   apt_repository 'mariadb' do
     uri node['mariadb']['repo']
     components node['mariadb']['components']

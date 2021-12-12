@@ -16,23 +16,23 @@ module MariaDBCommunityParser
     server: 'https://dlm.mariadb.com/repo/maxscale',
   }.freeze
 
-  def self.parse(config, product_config, product_name, product_version, user_ui, logger)
+  def self.parse(config, product_version, user_ui, logger)
     repos = [].concat(
       parse_releases(
         config['deb'],
-        product_config,
-        product_name,
+        MARIADB_COMMUNITY,
+        'mariadb',
         product_version,
-        :form_deb_repositories,
+        method(:form_deb_repositories),
         user_ui,
         logger
       ),
       parse_releases(
         config['rpm'],
-        product_config,
-        product_name,
+        MARIADB_COMMUNITY,
+        'mariadb',
         product_version,
-        :form_rpm_repositories,
+        method(:form_rpm_repositories),
         user_ui,
         logger
       ),
@@ -60,7 +60,7 @@ module MariaDBCommunityParser
         link.merge({parts: link_parts})
       end
 
-      method(link_parser).call(all_links, release, product_config[:server])
+      link_parser.call(all_links, release, product_config[:server])
     end.flatten
     add_key_and_product_to_releases(releases, repo_config['key'], product_name)
   end
@@ -69,7 +69,7 @@ module MariaDBCommunityParser
   def self.form_deb_repositories(links, release, server_location)
     # Filter out debian releases based on the /repo/PROVIDER/dists/RELESASE/ content strings
     links.select do |link|
-      link[:parts].first == 'repo' &&
+      link[:parts].fetch(0, '') == 'repo'  &&
         link[:parts].fetch(2, '') == 'dists' &&
         link[:parts].fetch(4, '') == 'main' &&
         link[:parts].fetch(5, '').start_with?('binary-')

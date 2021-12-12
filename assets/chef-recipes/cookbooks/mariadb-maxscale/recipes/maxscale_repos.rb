@@ -1,36 +1,32 @@
 #
-# Maxscale package attributes
-#
-system 'echo Maxscale version: ' + node['maxscale']['version']
-system 'echo Maxscale repo: ' + node['maxscale']['repo']
-system 'echo Maxscale repo key: ' + node['maxscale']['repo_key']
-
-#
-# MariaDB Maxscale repos
+# MariaDB MaxScale repos
 #
 case node[:platform_family]
 when "debian", "ubuntu"
-  # Split MaxScale repository information into parts
-  repository = node['maxscale']['repo'].split(/\s+/)
-  apt_repository 'maxscale' do
-    key node['maxscale']['repo_key']
-    uri repository[0]
-    components repository.slice(2, repository.size)
+  apt_preference 'mariadb' do
+    package_name '*'
+    pin 'origin downloads.mariadb.com'
+    pin_priority 1000
   end
 
-  execute "update" do
-    command "apt-get update"
+  apt_repository 'maxscale' do
+    key node['maxscale']['repo_key']
+    uri node['maxscale']['repo']
+    components node['maxscale']['components']
   end
 when "rhel", "fedora", "centos"
   yum_repository node['maxscale']['repo_file_name'] do
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']
+    gpgcheck true
+    options({ 'module_hotfixes' => '1' })
   end
 when "suse", "opensuse", "sles"
   zypper_repository node['maxscale']['repo_file_name'] do
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']
     priority 10
+    gpgcheck true
   end
 
   execute 'Update zypper cache' do

@@ -4,7 +4,7 @@ mariadb:
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
   deb:
     path: https://dlm.mariadb.com/browse/mariadb_server/
-    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
 columnstore:
   repo:
     rpm:
@@ -24,7 +24,7 @@ maxscale:
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
   deb:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
-    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
 mdbe:
   repo:
     rpm:
