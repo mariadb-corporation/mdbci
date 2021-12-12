@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'uri'
-require 'byebug'
 
 # This module provides logic for processing repositories
 module RepositoryParserCore
