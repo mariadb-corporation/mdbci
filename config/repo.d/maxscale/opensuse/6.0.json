@@ -1,0 +1,20 @@
+[
+  {
+    "version": "6.0",
+    "platform": "opensuse",
+    "platform_version": "12",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/6.0/yum/opensuse/12/x86_64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  },
+  {
+    "version": "6.0",
+    "platform": "opensuse",
+    "platform_version": "15",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/maxscale/6.0/yum/opensuse/15/aarch64",
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "maxscale"
+  }
+]

@@ -1,0 +1,578 @@
+[
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "bullseye",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "buster",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "sid",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.7.1-RC",
+    "platform": "debian",
+    "platform_version": "stretch",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.7.1-RC/repo/debian",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  }
+]

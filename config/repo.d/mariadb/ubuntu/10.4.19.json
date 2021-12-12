@@ -1,0 +1,686 @@
+[
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "cosmic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "cosmic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "cosmic",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "disco",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "disco",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "disco",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "eoan",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "eoan",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "eoan",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "groovy",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "trusty",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "amd64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "aarch64",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "i386",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  },
+  {
+    "version": "10.4.19",
+    "platform": "ubuntu",
+    "platform_version": "xenial",
+    "architecture": "ppc64el",
+    "repo": "https://dlm.mariadb.com/repo/mariadb-server/10.4.19/repo/ubuntu",
+    "components": [
+      "main"
+    ],
+    "repo_key": "https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY",
+    "product": "mariadb"
+  }
+]
