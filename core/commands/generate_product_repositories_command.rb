@@ -11,21 +11,21 @@ require 'logger'
 require 'workers'
 
 require_relative 'base_command'
-require_relative 'generate_repository_partials/mdbe_ci_parser'
-require_relative 'generate_repository_partials/maxscale_ci_parser'
-require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
-require_relative 'generate_repository_partials/maria_db_community_parser'
-require_relative 'generate_repository_partials/maxscale_parser'
-require_relative 'generate_repository_partials/mdbe_parser'
-require_relative 'generate_repository_partials/mariadb_parser'
-require_relative 'generate_repository_partials/columnstore_parser'
-require_relative 'generate_repository_partials/mysql_parser'
-require_relative 'generate_repository_partials/clustrix_parser'
+
 require_relative 'generate_repository_partials/galera_ci_parser'
+require_relative 'generate_repository_partials/clustrix_parser'
+require_relative 'generate_repository_partials/columnstore_parser'
+require_relative 'generate_repository_partials/connector_ci_parser'
+require_relative 'generate_repository_partials/maria_db_community_parser'
 require_relative 'generate_repository_partials/mariadb_ci_parser'
 require_relative 'generate_repository_partials/mariadb_staging_parser'
-require_relative 'generate_repository_partials/connector_ci_parser'
+require_relative 'generate_repository_partials/mdbe_ci_parser'
+require_relative 'generate_repository_partials/mdbe_parser'
 require_relative 'generate_repository_partials/mdbe_prestaging_parser'
+require_relative 'generate_repository_partials/max_scale_parser'
+require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
+require_relative 'generate_repository_partials/maxscale_ci_parser'
+require_relative 'generate_repository_partials/mysql_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -290,15 +290,11 @@ In order to specify the number of retries for repository configuration use --att
     when 'maxscale_ci_docker'
       MaxscaleCiDockerParser.parse(@ui, @env.tool_config)
     when 'maxscale'
-      MariaDBCommunityParser.parse(product_config, MariaDBCommunityParser::MAXSCALE_SERVER,
-                                   'maxscale', @product_version,
-                                   @ui, @logger)
+      MaxScaleParser.parse(product_config, @product_version, @ui, @logger)
     when 'mdbe'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
-      MariaDBCommunityParser.parse(product_config, MariaDBCommunityParser::MARIADB_COMMUNITY,
-                                   'mariadb', @product_version,
-                                   @ui, @logger)
+      MariaDBCommunityParser.parse(product_config, @product_version, @ui, @logger)
     when 'columnstore'
       ColumnstoreParser.parse(product_config, @product_version, @ui, @logger)
     when 'mysql'

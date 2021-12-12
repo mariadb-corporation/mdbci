@@ -234,7 +234,7 @@ module RepositoryParserCore
     logger.info("Loading URLs '#{uri}'")
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
-    doc = Nokogiri::HTML(URI.open(uri, options).read)
+    doc = get_html_document(uri, options)
     doc.css('a').map do |css_element|
       {
         href: css_element[:href],
@@ -330,10 +330,15 @@ module RepositoryParserCore
   def generate_content(url, auth)
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
-    doc = Nokogiri::HTML(URI.open(url, options).read)
+    doc = get_html_document(url, options)
     doc.css('a').to_s
-  rescue OpenURI::HTTPError
-    ''
+  end
+
+  # Create a HTML document for a link, or an empty one if request did not happen
+  def get_html_document(uri, options)
+    Nokogiri::HTML(URI.open(uri, options).read)
+  rescue OpenURI::HTTPError, Net::OpenTimeout
+    Nokogiri::HTML('')
   end
 
   # Parse the repository and provide required configurations

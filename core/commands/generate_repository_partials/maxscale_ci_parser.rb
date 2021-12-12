@@ -53,8 +53,8 @@ module MaxscaleCiParser
       extract_deb_platforms,
       set_deb_architecture(auth),
       lambda do |release, _|
-        repo_path = add_auth_to_url(release[:repo_url], auth)
-        release[:repo] = "#{repo_path} #{release[:platform_version]} main"
+        release[:repo] = add_auth_to_url(release[:repo_url], auth)
+        release[:components] = ['main']
         release
       end
     )
@@ -96,8 +96,8 @@ module MaxscaleCiParser
       append_url(%w[dists]),
       save_as_field(:platform_version),
       lambda do |release, _|
-        url = add_auth_to_url(release[:repo_url], auth)
-        release[:repo] = "#{url} #{release[:platform_version]} main"
+        release[:repo] = add_auth_to_url(release[:repo_url], auth)
+        release[:components] = ['main']
         release
       end
     )
