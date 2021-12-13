@@ -45,6 +45,7 @@ Also need to specify for the product:
 * (__Optional__) cnf_template is the name of the file.
 * (__Optional__) key is the repository key. The key from repo.d will be ignored.
 * (__Optional__) force_version is a usage the specific version. Use `true` to disable smart searching for repo and install specified version.
+* (__Optional__) include_unsupported with `true` value allows you to use an unsupported repository for the current product. [List of products with unsupported repositories](../all_products.md)
 
 Example:
 ```json
@@ -74,7 +75,16 @@ Example:
             "version": "10.5",
             "cnf_template": "server1.cnf"
         }]
+    },
+    "node3": {
+        "box": "debian_stretch_libvirt",
+        "hostname": "host3",
+        "product": {
+        "name": "mdbe_prestaging",
+        "version": "10.2.40-13",
+        "include_unsupported": true
     }
+  }
 }
 ```
 
