@@ -80,11 +80,11 @@ Example:
         "box": "debian_stretch_libvirt",
         "hostname": "host3",
         "product": {
-        "name": "mdbe_prestaging",
-        "version": "10.2.40-13",
-        "include_unsupported": true
+            "name": "mdbe_prestaging",
+            "version": "10.2.40-13",
+            "include_unsupported": true
+        }
     }
-  }
 }
 ```
 
