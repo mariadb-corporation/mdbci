@@ -1,27 +1,6 @@
 include_recipe "mariadb-maxscale::maxscale_repos"
 include_recipe "chrony::default"
 
-# Turn off SElinux
-if node[:platform] == "centos" and node["platform_version"].to_f >= 6.0
-  # TODO: centos7 don't have selinux
-  bash 'Turn off SElinux on CentOS >= 6.0' do
-    code <<-EOF
-    selinuxenabled && flag=enabled || flag=disabled
-    if [[ $flag == 'enabled' ]];
-    then
-      /usr/sbin/setenforce 0
-    else
-      echo "SElinux already disabled!"
-    fi
-  EOF
-  end
-
-  cookbook_file 'selinux.config' do
-    path "/etc/selinux/config"
-    action :create
-  end
-end  # Turn off SElinux
-
 # check and install iptables
 case node[:platform_family]
 when "debian", "ubuntu"
