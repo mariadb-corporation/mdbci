@@ -9,7 +9,7 @@ require_relative '../services/shell_commands'
 VAGRANT_VERSION = '2.2.18'
 VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.4.1'
 
-TERRAFORM_VERSION = '0.15.1'
+TERRAFORM_VERSION = '1.1.0'
 TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
 
 # Command installs reqired dependencies for running mdbci
