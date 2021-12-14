@@ -36,27 +36,6 @@ if (node[:platform_family] == 'centos' || node[:platform_family] == 'rhel') &&
 end
 package 'socat'
 
-# Turn off SElinux
-if (node[:platform] == 'centos') && (node['platform_version'].to_f >= 6.0)
-  # TODO: centos7 don't have selinux
-  bash 'Turn off SElinux on CentOS >= 6.0' do
-    code <<-CODE
-    selinuxenabled && flag=enabled || flag=disabled
-    if [[ $flag == 'enabled' ]];
-    then
-      /usr/sbin/setenforce 0
-    else
-      echo "SElinux already disabled!"
-    fi
-    CODE
-  end
-
-  cookbook_file 'selinux.config' do
-    path '/etc/selinux/config'
-    action :create
-  end
-end
-
 # check and install iptables
 case node[:platform_family]
 when 'debian', 'ubuntu'
