@@ -43,7 +43,7 @@ class MachineConfigurator
         sudo_exec(connection, "rm -rf #{remote_dir}", logger)
       end
     end
-  rescue Net::SSH::Exception => e
+  rescue StandardError => e
     Result.error(e.message)
   end
   # rubocop:enable Metrics/ParameterLists
