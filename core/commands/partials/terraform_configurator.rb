@@ -37,7 +37,7 @@ class TerraformConfigurator
 
   # Brings up nodes
   #
-  # @return [Number] execution status
+  # @return [Result::Base] execution status
   def up
     nodes = @config.node_names
     result = up_machines(nodes).and_then do
@@ -71,7 +71,9 @@ class TerraformConfigurator
       @attempts.times do |attempt|
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
         destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
-        TerraformService.apply(target_nodes.values, @ui, @config.path)
+        result = TerraformService.apply(target_nodes.values, @ui, @config.path)
+        next if result.error?
+
         TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
           target_nodes = target_nodes.reject { |_node, resource| running_resources.include?(resource) }
         end
@@ -124,9 +126,9 @@ class TerraformConfigurator
       else
         @ui.error("Exception during node configuration: #{result.error}")
       end
-    rescue Net::SSH::Exception => e
-      @ui.error("SSH exception: #{e.message}")
-      result = Result.error('SSH error')
+    rescue StandardError => e
+      @ui.error("Exception during configuration: #{e.message}")
+      result = Result.error('Unknown error')
     end
     result
   end

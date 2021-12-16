@@ -87,6 +87,10 @@ module TerraformService
     return Result.error('Error of terraform output network command') unless result[:value].success?
 
     Result.ok(JSON.parse(result[:output]))
+  rescue JSON::ParserError => e
+    logger.error("Error of parsing terraform output: #{result[:output]}")
+    logger.error(e.message)
+    Result.error('Unable to parse the terraform output')
   end
 
   def self.make_targets(resources)
