@@ -4,7 +4,7 @@ mariadb:
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
   deb:
     path: https://dlm.mariadb.com/browse/mariadb_server/
-    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
 columnstore:
   repo:
     rpm:
