@@ -2,7 +2,7 @@
   "sles_152_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
-    "image": "sles-15-sp2-v20210303",
+    "image": "sles-15-sp2-v20210604",
     "platform": "sles",
     "platform_version": "15",
     "default_machine_type": "g1-small",
