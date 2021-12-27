@@ -74,15 +74,6 @@
     "platform_version": "7",
     "disk_bus": "sata"
   },
-  "centos_6_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/centos6",
-    "ssh_pty" : "true",
-    "platform": "centos",
-    "platform_version": "6",
-    "disk_bus": "sata"
-  },
   "suse_15_libvirt" : {
     "provider": "libvirt",
     "architecture": "amd64",

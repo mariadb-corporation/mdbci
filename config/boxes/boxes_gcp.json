@@ -29,16 +29,6 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
-  "centos_6_gcp": {
-    "provider": "gcp",
-    "architecture": "amd64",
-    "image": "centos-cloud/centos-6",
-    "platform": "centos",
-    "platform_version": "6",
-    "default_machine_type": "g1-small",
-    "default_cpu_count": "1",
-    "default_memory_size": "1024"
-  },
   "centos_7_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
@@ -85,16 +75,6 @@
     "image": "ubuntu-os-cloud/ubuntu-1604-lts",
     "platform": "ubuntu",
     "platform_version": "xenial",
-    "default_machine_type": "g1-small",
-    "default_cpu_count": "1",
-    "default_memory_size": "1024"
-  },
-  "rhel_6_gcp": {
-    "provider": "gcp",
-    "architecture": "amd64",
-    "image": "rhel-cloud/rhel-6",
-    "platform": "rhel",
-    "platform_version": "6",
     "default_machine_type": "g1-small",
     "default_cpu_count": "1",
     "default_memory_size": "1024"
