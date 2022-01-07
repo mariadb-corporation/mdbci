@@ -1,8 +1,9 @@
-package 'SUSEConnect'
+#package 'SUSEConnect'
 
 execute 'Change SUSEConnect server' do
   command "sed -i 's|https://smt-gce.susecloud.net|https://scc.suse.com|g' /etc/SUSEConnect"
   only_if { node['suse-connect']['provider'] == 'gcp' }
+  ignore_failure true
 end
 
 execute 'Cleanup registration' do
@@ -20,7 +21,7 @@ CLEANUP_COMMANDS = [
 CLEANUP_COMMANDS.each do |command|
   execute "Cleanup SUSEConnect settings: #{command}" do
     command command
-    ignore_failure
+    ignore_failure true
     returns [0, 1]
     only_if { node['suse-connect']['provider'] == 'aws' }
   end
@@ -28,7 +29,7 @@ CLEANUP_COMMANDS.each do |command|
 
 execute 'Register system' do
   sensitive true
-  command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"
+  command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']} --url https://scc.suse.com"
 end
 
 ruby_block 'Get filesystem information' do
@@ -48,15 +49,21 @@ ruby_block 'Get filesystem information' do
   action :run
 end
 
+
 bash 'Activate available products' do
   sensitive true
   retries 3
   retry_delay 15
-  ignore_failure
+  ignore_failure true
   code lazy {
     node.run_state[:products].map do |product|
       "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"\
         " -p #{product['identifier']}/#{product['version']}/#{product['arch']}"
     end.join(' && ')
   }
+end
+
+execute 'Remove broken service' do
+  command 'rm /etc/zypp/services.d/SUSE_Linux_Enterprise_Server_x86_64.service'
+  ignore_failure true
 end
