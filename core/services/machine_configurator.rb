@@ -101,11 +101,15 @@ class MachineConfigurator
   # @param source [String] path to the file on the local machine
   # @param target [String] path to the file on the remote machine
   # @param recursive [Boolean] use recursive copying or not
-  def upload_file(connection, source, target, recursive = true)
-    if connection.scp.upload!(source, target, recursive: recursive)
-      Result.ok(:uploaded)
-    else
-      Result.error("Unable to upload #{source} to #{target}")
+  # @param logger [Ui] the logger instance to use
+  def upload_file(connection, source, target, recursive = true, logger)
+    target_dir = File.dirname(target)
+    ssh_exec(connection, "mkdir -p #{target_dir}", logger).and_then do
+      if connection.scp.upload!(source, target, recursive: recursive)
+        Result.ok(:uploaded)
+      else
+        Result.error("Unable to upload #{source} to #{target}")
+      end
     end
   rescue Net::SCP::Error
     Result.error("The network is overloaded. Unable to upload #{source} to #{target}")
@@ -238,7 +242,7 @@ class MachineConfigurator
     upload_tasks.reduce(status) do |result, (source, target)|
       result.and_then do
         logger.debug("Uploading #{source} to #{target}")
-        upload_file(connection, source, File.join(remote_dir, target))
+        upload_file(connection, source, File.join(remote_dir, target), true, logger)
       end
     end
   end

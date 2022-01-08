@@ -76,6 +76,7 @@ class VagrantConfigurator
   # @param logger [Out] logger to log information to
   # @return [Bool] configuration result
   def bring_up_and_configure(node, logger)
+    configuration_result = Result.error("Node '#{node}' was not configured.")
     @attempts.times do |attempt|
       @ui.info("Bring up and configure node #{node}. Attempt #{attempt + 1}.")
       if @recreate_nodes || attempt.positive?
@@ -93,14 +94,14 @@ class VagrantConfigurator
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
-      if ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node),
-                                                        @config, @ui, @machine_configurator).success?
-        return SUCCESS_RESULT
-      end
+      configuration_result = ChefConfigurationGenerator.configure_with_chef(
+        node, logger, @network_settings.node_settings(node),
+        @config, @ui, @machine_configurator)
+      return configuration_result if configuration_result.success?
     rescue Net::SSH::Exception => e
       @ui.error("SSH exception: #{e.message}")
     end
-    Result.error("Node '#{node}' was not configured.")
+    configuration_result
   end
 
   # Get the logger. Depending on the number of threads returns a unique logger or @ui.
