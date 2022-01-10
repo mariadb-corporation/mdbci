@@ -1,4 +1,7 @@
-#package 'SUSEConnect'
+package 'SUSEConnect' do
+  action :install
+  ignore_failure true
+end
 
 execute 'Change SUSEConnect server' do
   command "sed -i 's|https://smt-gce.susecloud.net|https://scc.suse.com|g' /etc/SUSEConnect"
@@ -48,7 +51,6 @@ ruby_block 'Get filesystem information' do
   end
   action :run
 end
-
 
 bash 'Activate available products' do
   sensitive true
