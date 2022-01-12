@@ -137,3 +137,10 @@ end
 service 'mariadb' do
   action :nothing
 end
+
+check_version 'Check the installed version of the MariaDB Enterprise Server' do
+  version node['mariadb']['version']
+  deb_package_name 'mariadb-server'
+  rhel_package_name 'MariaDB-server'
+  suse_package_name 'MariaDB-server'
+end
