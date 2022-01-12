@@ -7,9 +7,6 @@ else
 end
 include_recipe "chrony::default"
 
-system 'echo Platform family: '+node[:platform_family]
-system 'echo Platform version: '+node[:platform_version]
-
 # Remove mysql-libs
 package 'mysql-libs' do
   action :remove
@@ -152,4 +149,11 @@ else
   execute 'Add my.cnf.d directory to the base mysql configuration file' do
     command "echo '\n!includedir #{db_config_dir}' >> #{db_base_config}"
   end
+end
+
+check_version 'Check the installed version of the MariaDB Server' do
+  version node['mariadb']['version']
+  deb_package_name 'mariadb-server'
+  rhel_package_name 'MariaDB-server'
+  suse_package_name 'MariaDB-server'
 end

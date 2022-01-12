@@ -128,3 +128,10 @@ end
 file "/etc/shadow" do
   mode "640"
 end
+
+check_version 'Check the installed version of the MaxScale server' do
+  version node['maxscale']['version']
+  deb_package_name 'maxscale'
+  rhel_package_name 'maxscale'
+  suse_package_name 'maxscale'
+end
