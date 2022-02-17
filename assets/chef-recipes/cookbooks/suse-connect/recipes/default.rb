@@ -35,7 +35,7 @@ execute 'Register system' do
   command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']} --url https://scc.suse.com"
 end
 
-ruby_block 'Get filesystem information' do
+ruby_block 'Get SUSE product information' do
   block do
     require 'json'
     cmd = Mixlib::ShellOut.new('SUSEConnect --status')
@@ -61,6 +61,32 @@ bash 'Activate available products' do
     node.run_state[:products].map do |product|
       "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"\
         " -p #{product['identifier']}/#{product['version']}/#{product['arch']}"
+    end.join(' && ')
+  }
+end
+
+ruby_block 'Get SUSE Connect Extensions' do
+  block do
+    command = Mixlib::ShellOut.new('SUSEConnect --list-extensions')
+    command.run_command
+    all_extensions = SuseConnectHelpers.extract_extensions(command.stdout)
+    node.run_state[:extensions] =
+      if node['platform_version'].to_i == 12
+        SuseConnectHelpers.filter_extensions(all_extensions, ['Package Hub'])
+      else
+        []
+      end
+  end
+  action :run
+end
+
+bash 'Activate extensions and modules' do
+  retries 3
+  retry_delay 15
+  ignore_failure true
+  code lazy {
+    node.run_state[:extensions].map do |extension|
+      extension[:command]
     end.join(' && ')
   }
 end
