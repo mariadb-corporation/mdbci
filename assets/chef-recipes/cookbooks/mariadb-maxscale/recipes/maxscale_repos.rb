@@ -3,12 +3,6 @@
 #
 case node[:platform_family]
 when "debian", "ubuntu"
-  apt_preference 'mariadb' do
-    package_name '*'
-    pin 'origin downloads.mariadb.com'
-    pin_priority 1000
-  end
-
   apt_repository 'maxscale' do
     key node['maxscale']['repo_key']
     uri node['maxscale']['repo']
