@@ -407,6 +407,11 @@ module ProductAttributes
         recipe: 'rocksdb_tools::remove',
         name: 'rocksdb_tools'
     },
+    'sysbench' => {
+      recipe: 'sysbench::default',
+      name: 'sysbench',
+      without_version: true,
+    }
   }.freeze
 
   DEPENDENCE = {
