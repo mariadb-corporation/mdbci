@@ -19,7 +19,6 @@ when "suse", "opensuse", "sles"
   zypper_repository node['maxscale']['repo_file_name'] do
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']
-    priority 10
     gpgcheck true
   end
 
