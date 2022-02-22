@@ -411,6 +411,11 @@ module ProductAttributes
       recipe: 'sysbench::default',
       name: 'sysbench',
       without_version: true,
+    },
+    'core_dump' => {
+        recipe: 'core_dump',
+        name: 'core_dump',
+        without_version: true
     }
   }.freeze
 
