@@ -70,12 +70,8 @@ ruby_block 'Get SUSE Connect Extensions' do
     command = Mixlib::ShellOut.new('SUSEConnect --list-extensions')
     command.run_command
     all_extensions = SuseConnectHelpers.extract_extensions(command.stdout)
-    node.run_state[:extensions] =
-      if node['platform_version'].to_i == 12
-        SuseConnectHelpers.filter_extensions(all_extensions, ['Package Hub'])
-      else
-        []
-      end
+    node.run_state[:extensions] = SuseConnectHelpers
+                                    .filter_extensions(all_extensions, ['Package Hub'])
   end
   action :run
 end
