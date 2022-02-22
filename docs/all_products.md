@@ -39,3 +39,5 @@ google-authenticator | - | - | - | -
 [kerberos_server](detailed_topics/using_kerberos_product.md) | - | - | - | -
 [mariadb_plugins](detailed_topics/mdbe_pugins.md) | - | - | - | -
 sysbench | - | - | - | - |
+core_dump | - | - | - | - |
+
