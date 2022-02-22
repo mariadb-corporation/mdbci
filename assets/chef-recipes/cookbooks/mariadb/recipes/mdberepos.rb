@@ -83,7 +83,6 @@ when 'suse', 'opensuse', 'sles'
     action :add
     baseurl node['mariadb']['repo']
     sensitive true
-    priority 10
   end
   zypper_repository 'MariaDB' do
     action :refresh
@@ -93,7 +92,6 @@ when 'suse', 'opensuse', 'sles'
       action :add
       baseurl node['mariadb']['unsupported_repo']
       sensitive true
-      priority 10
     end
     zypper_repository 'mariadb_unsupported' do
       action :refresh
