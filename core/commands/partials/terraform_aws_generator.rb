@@ -105,7 +105,6 @@ class TerraformAwsGenerator
       }
     }
     provider "aws" {
-      profile = "default"
       region = "<%= aws_config['region'] %>"
       access_key = "<%= aws_config['access_key_id'] %>"
       secret_key = "<%= aws_config['secret_access_key'] %>"
