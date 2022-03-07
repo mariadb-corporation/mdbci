@@ -15,7 +15,7 @@
   "ubuntu_xenial_aws": {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-02fcf12d5bd33ce51",
+    "ami": "ami-0f29c8402f8cce65c",
     "user": "ubuntu",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
@@ -79,7 +79,7 @@
   "debian_buster_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-015c88ecc51bd3239",
+    "ami": "ami-07a44bb660e25b065",
     "user": "admin",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
@@ -105,7 +105,7 @@
   "debian_stretch_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-00a845a11b3d1f308",
+    "ami": "ami-073fd243671488e14",
     "user": "admin",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
@@ -130,7 +130,7 @@
   "rhel_7_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-25158352",
+    "ami": "ami-002d3240b69a0ef4e",
     "user": "ec2-user",
     "default_machine_type": "m3.medium",
     "default_cpu_count": "1",
@@ -142,7 +142,7 @@
   "rhel_8_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-0219214bdee2d7451",
+    "ami": "ami-059bccc3f1258ac87",
     "user": "ec2-user",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
@@ -156,7 +156,7 @@
   "sles_12_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-0d3747c7692f33308",
+    "ami": "ami-0c007f7970588f55c",
     "user": "ec2-user",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
@@ -170,7 +170,7 @@
   "suse_15_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-0f81506cab2b62029",
+    "ami": "ami-0db6d7002e7d5d7d4",
     "user": "ec2-user",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
