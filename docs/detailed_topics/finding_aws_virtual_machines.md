@@ -32,7 +32,7 @@ Where:
 - `--region` - [aws region](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html)
 - `--output` - output format
 
-Refer to [aws-cli filter usage page](https://docs.aws.amazon.com/cli/latest/userguide/+cli-usage-filter.html),
+Refer to [aws-cli filter usage page](https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-filter.html),
 [describe-images command page](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/describe-images.html)
 for detailed command info
 
