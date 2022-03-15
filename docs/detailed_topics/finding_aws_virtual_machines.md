@@ -9,6 +9,7 @@ Many popular linux distributions have a detailed page with official AMI ids. The
 - [Ubuntu](https://cloud-images.ubuntu.com/locator/ec2/)
 - [Debian](https://wiki.debian.org/Cloud/AmazonEC2Image)
 - [CentOS](https://wiki.centos.org/Cloud/AWS)
+- [Rocky Linux](https://rockylinux.org/cloud-images)
 
 ## 2. Using AWS-CLI tool
 [AWS-CLI](https://aws.amazon.com/cli/) is a powerfull tool for managing AWS services.
@@ -42,5 +43,6 @@ List of known owners id:
 - Ubuntu - `099720109477`
 - SUSE - `013907871322`
 - Debian - `136693071363`
+- Rocky Linux - `792107900819`
 
 Also you can get detail information about AMI by executing `aws ec2 describe-images --image-ids ami-07a44bb660e25b065` command.
