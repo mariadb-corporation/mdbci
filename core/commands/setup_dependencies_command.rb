@@ -6,10 +6,10 @@ require 'sem_version'
 require_relative 'base_command'
 require_relative '../services/shell_commands'
 
-VAGRANT_VERSION = '2.2.18'
-VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.4.1'
+VAGRANT_VERSION = '2.2.19'
+VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.6.3'
 
-TERRAFORM_VERSION = '1.1.0'
+TERRAFORM_VERSION = '1.1.7'
 TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
 
 # Command installs reqired dependencies for running mdbci
@@ -57,7 +57,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
       @dependency_manager = CentosDependencyManager.new(arg, env, logger)
     when 'debian'
       @dependency_manager = DebianDependencyManager.new(arg, env, logger)
-    when 'ubuntu'
+    when 'ubuntu', 'mint'
       @dependency_manager = UbuntuDependencyManager.new(arg, env, logger)
     end
   end
@@ -309,7 +309,7 @@ class DependencyManager
   # Answers whether the installation is needed or not
   # @param product [String] the name of the product
   def should_install?(product)
-    product == @env.nodeProduct || @env.nodeProduct.nil?
+    product == @env.nodeProduct || product == 'terraform'
   end
 
   # Extracts linux version codename from lsb_release command
