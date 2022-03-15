@@ -334,18 +334,18 @@ class CentosDependencyManager < DependencyManager
   end
 
   def install_dependencies
-    install_qemu
-    required_packages.each do |package|
-      unless installed?(package)
-        result = run_command("sudo yum install -y #{package}")[:value]
-        return ERROR_RESULT unless result.success?
-      end
-    end
     if 'docker' == @env.nodeProduct
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     if should_install?('libvirt')
+      install_qemu
+      required_packages.each do |package|
+        unless installed?(package)
+          result = run_command("sudo yum install -y #{package}")[:value]
+          return ERROR_RESULT unless result.success?
+        end
+      end
       return ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
@@ -419,16 +419,16 @@ class DebianDependencyManager < DependencyManager
   end
 
   def install_dependencies
-    run_command('sudo apt-get update')
-    result = run_sequence([
-                            "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
-                            'sudo systemctl restart libvirtd.service'
-                          ])
     if should_install?('docker')
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     if should_install?('libvirt')
+      run_command('sudo apt-get update')
+      result = run_sequence([
+        "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
+        'sudo systemctl restart libvirtd.service'
+      ])
       return result[:value].exitstatus unless result[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
@@ -439,7 +439,7 @@ class DebianDependencyManager < DependencyManager
   def install_docker
     run_command("sudo apt-get remove docker docker-engine docker.io containerd runc")
     run_command("curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -")
-    run_command("sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/debian  $(lsb_release -cs)  stable\"")
+    run_command("sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable\"")
     run_command("sudo apt-get update")
     result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
     result[:value].success?
