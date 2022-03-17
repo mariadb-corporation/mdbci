@@ -52,7 +52,8 @@ class BoxDefinitions
   def platform_key(box_name)
     check_box(box_name)
     box = @boxes[box_name]
-    "#{box['platform']}^#{box['platform_version']}_#{box['architecture']}"
+    platform = determine_platform(box)
+    "#{platform}^#{box['platform_version']}_#{box['architecture']}"
   end
 
   # Get the list of unique values for the specified field
@@ -119,6 +120,18 @@ class BoxDefinitions
     end
     REQUIRED_KEYS.each(&key_check)
     keys_for_provider(box_definition['provider']).each(&key_check)
+  end
+
+  PLATFORM_ALIASES = {
+    'rocky' => 'centos'
+  }.freeze
+
+  # Determines platform for the specified box
+  # @param box [Hash] the box
+  # @return [String] the platform of the vox
+  def determine_platform(box)
+    platform = box['platform']
+    PLATFORM_ALIASES.fetch(platform, platform)
   end
 
   # Gets the list of keys for the specified provider
