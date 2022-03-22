@@ -39,11 +39,11 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
-  "centos_8_gcp": {
+  "rocky_linux_8_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
-    "image": "centos-cloud/centos-8",
-    "platform": "centos",
+    "image": "rocky-linux-cloud/rocky-linux-8",
+    "platform": "rocky",
     "platform_version": "8",
     "default_machine_type": "g1-small",
     "default_cpu_count": "1",
