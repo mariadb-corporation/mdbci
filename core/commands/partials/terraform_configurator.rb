@@ -187,6 +187,7 @@ class TerraformConfigurator
   def wait_for_node_availability(node, node_network)
     @ui.info("Waiting for node '#{node}' to become available")
     private_network = node_network.merge({ 'network' => node_network['private_ip'] })
+    node_network = node_network.merge({ 'private_ip' => node_network['network'] })
     SSH_ATTEMPTS.times do
       return Result.ok(private_network) if can_connect?(private_network)
       return Result.ok(node_network) if can_connect?(node_network)
