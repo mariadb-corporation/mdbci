@@ -26,6 +26,7 @@ require_relative 'generate_repository_partials/max_scale_parser'
 require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
 require_relative 'generate_repository_partials/maxscale_ci_parser'
 require_relative 'generate_repository_partials/mysql_parser'
+require_relative 'generate_repository_partials/connector_odbc_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -51,7 +52,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'connector_c_ci' => 'connector_c_ci',
     'connector_cpp_ci' => 'connector_cpp_ci',
     'connector_odbc_ci' => 'connector_odbc_ci',
-    'mdbe_prestaging' => 'mdbe_prestaging'
+    'mdbe_prestaging' => 'mdbe_prestaging',
+    'connector_odbc' => 'connector_odbc'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -193,8 +195,8 @@ In order to specify the number of retries for repository configuration use --att
     true
   end
 
-  REQUIRED_KEYS = %i[repo repo_key platform platform_version product version architecture].freeze
-  OPTIONAL_KEYS = %i[components unsupported_repo]
+  REQUIRED_KEYS = %i[repo platform platform_version product version architecture].freeze
+  OPTIONAL_KEYS = %i[components repo_key unsupported_repo]
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
     updated_release = release.select do |key, _|
@@ -324,6 +326,8 @@ In order to specify the number of retries for repository configuration use --att
     when 'connector_odbc_ci'
       ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_odbc_ci',
                               'mariadb_connector_odbc-dev', 'mariadb-connector-odbc-devel', @ui, @logger)
+    when 'connector_odbc'
+      ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger)
     when 'mdbe_prestaging'
       MdbePrestagingParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     end
