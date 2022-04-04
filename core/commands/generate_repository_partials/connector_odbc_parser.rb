@@ -40,11 +40,11 @@ module ConnectorOdbcParser
       platform: 'ubuntu',
       platform_version: 'bionic'
     },
-    'sles_15' => {
+    'sles15' => {
       platform: 'sles',
       platform_version: '15'
     },
-    'sles_12' => {
+    'sles12' => {
       platform: 'sles',
       platform_version: '12'
     },
