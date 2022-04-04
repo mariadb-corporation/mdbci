@@ -3,8 +3,8 @@
 package 'tar'
 if %w[debian ubuntu].include?(node[:platform])
   package 'odbcinst'
-  package_name 'unixodbc'
+  package 'unixodbc'
 end
 if %w[redhat centos].include?(node[:platform])
-  package_name 'unixODBC'
+  package 'unixODBC'
 end
