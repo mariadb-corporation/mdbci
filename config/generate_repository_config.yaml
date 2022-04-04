@@ -122,3 +122,6 @@ connector_odbc_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/ConnectorODBC/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+connector_odbc:
+  repo:
+    path: https://dlm.mariadb.com/browse/odbc_connector/

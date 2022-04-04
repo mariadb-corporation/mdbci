@@ -408,15 +408,20 @@ module ProductAttributes
         name: 'rocksdb_tools'
     },
     'sysbench' => {
-      recipe: 'sysbench::default',
-      name: 'sysbench',
-      without_version: true,
+        recipe: 'sysbench::default',
+        name: 'sysbench',
+        without_version: true,
     },
     'core_dump' => {
         recipe: 'core_dump',
         name: 'core_dump',
         without_version: true
-    }
+    },
+    'connector_odbc' => {
+        recipe: 'connector_odbc',
+        name: 'connector_odbc',
+        repository: 'connector_odbc'
+    },
   }.freeze
 
   DEPENDENCE = {
