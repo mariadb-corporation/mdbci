@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 package 'tar'
-package 'odbcinst'
+if  %w[debian ubuntu].include?(node[:platform])
+  package 'odbcinst'
+end
 package 'install_unixODBC' do
   case node[:platform]
   when 'redhat', 'centos'
