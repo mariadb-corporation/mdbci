@@ -5,6 +5,6 @@ if %w[debian ubuntu].include?(node[:platform])
   package 'odbcinst'
   package 'unixodbc'
 end
-if %w[redhat centos].include?(node[:platform])
+if %w[redhat centos sles suse].include?(node[:platform])
   package 'unixODBC'
 end
