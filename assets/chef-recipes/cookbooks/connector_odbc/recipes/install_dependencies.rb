@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 package 'tar'
-if %w[debian ubuntu].include?(node[:platform])
+if platform?('debian', 'ubuntu')
   package 'odbcinst'
   package 'unixodbc'
 end
-if %w[redhat centos sles suse].include?(node[:platform])
+if platform?('redhat', 'centos', 'suse')
   package 'unixODBC'
 end
