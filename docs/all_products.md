@@ -40,4 +40,4 @@ google-authenticator | - | - | - | -
 [mariadb_plugins](detailed_topics/mdbe_pugins.md) | - | - | - | -
 sysbench | - | - | - | - |
 core_dump | - | - | - | - |
-
+[connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
