@@ -23,6 +23,7 @@ bash 'install_odbc' do
   user 'root'
   cwd '/odbc_package'
   code <<-SCRIPT
+    install -d /usr/lib64/
     install lib/mariadb/libmaodbc.so /usr/lib64/
     install -d /usr/lib64/mariadb/
     install -d /usr/lib64/mariadb/plugin/
