@@ -53,7 +53,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'connector_cpp_ci' => 'connector_cpp_ci',
     'connector_odbc_ci' => 'connector_odbc_ci',
     'mdbe_prestaging' => 'mdbe_prestaging',
-    'connector_odbc' => 'connector_odbc'
+    'connector_odbc' => 'connector_odbc',
+    'connector_odbc_staging' => 'connector_odbc_staging'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -328,6 +329,8 @@ In order to specify the number of retries for repository configuration use --att
                               'mariadb_connector_odbc-dev', 'mariadb-connector-odbc-devel', @ui, @logger)
     when 'connector_odbc'
       ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger)
+    when 'connector_odbc_staging'
+      ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger, 'connector_odbc_staging', @env.mdbe_private_key)
     when 'mdbe_prestaging'
       MdbePrestagingParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     end

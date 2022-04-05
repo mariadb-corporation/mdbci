@@ -6,15 +6,17 @@ require_relative 'repository_parser_core'
 module ConnectorOdbcParser
   extend RepositoryParserCore
 
-  def self.parse(config, product_version, user_ui, logger)
+  def self.parse(config, product_version, user_ui, logger, product = 'connector_odbc', private_key = nil)
+    base_url = config['repo']['path']
+    base_url = setup_private_key(base_url, private_key) if product == 'connector_odbc_staging'
     archive_directories = parse_web_directories(
-      config['repo']['path'],
+      base_url,
       nil,
       product_version,
       user_ui,
       logger,
-      extract_field(:base_version, /ODBC connector (\d.+)/),
-      extract_field(:version, /ODBC connector (\d.+)/)
+      extract_field(:base_version, /(\d.+)/),
+      extract_field(:version, /(\d.+)/)
     )
     archive_directories.each_with_object([]) do |directory, releases|
       archives_links = get_links(directory[:url], logger).filter { |link| link[:content].match?(/(x86_64)|(amd64)/) }
@@ -24,7 +26,7 @@ module ConnectorOdbcParser
       archives.each do |archive|
         releases.append(archive.merge({
                                         version: directory[:version],
-                                        product: 'connector_odbc',
+                                        product: product,
                                         architecture: 'amd64'
                                       }))
       end

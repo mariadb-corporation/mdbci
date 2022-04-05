@@ -125,3 +125,6 @@ connector_odbc_ci:
 connector_odbc:
   repo:
     path: https://dlm.mariadb.com/browse/odbc_connector/
+connector_odbc_staging:
+  repo:
+    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/odbc_connector_staging/
