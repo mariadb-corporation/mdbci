@@ -11,7 +11,7 @@ __deletion is available__ - indicates whether the product can be deleted. If del
 
 __unsupported repositories__ - indicates whether the product has an unsupported repositories
 
-product name | differenet versions support | cnf file support | deletion is available | unsupported repositories
+product name | different versions support | cnf file support | deletion is available | unsupported repositories
 --- | --- | --- | --- | ---
 mariadb | + | + | mariadb | -
 [mariadb_ci](detailed_topics/using_mariadb_from_ci_server.md) | + | + | mariadb | -
@@ -41,3 +41,4 @@ google-authenticator | - | - | - | -
 sysbench | - | - | - | - |
 core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
+connector_odbc_staging | + | - | - | - |
