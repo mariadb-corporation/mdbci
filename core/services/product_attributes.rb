@@ -422,6 +422,11 @@ module ProductAttributes
         name: 'connector_odbc',
         repository: 'connector_odbc'
     },
+    'connector_odbc_staging' => {
+        recipe: 'connector_odbc',
+        name: 'connector_odbc',
+        repository: 'connector_odbc_staging'
+    },
   }.freeze
 
   DEPENDENCE = {
