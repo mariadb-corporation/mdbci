@@ -7,8 +7,7 @@ module ConnectorOdbcParser
   extend RepositoryParserCore
 
   def self.parse(config, product_version, user_ui, logger, product = 'connector_odbc', private_key = nil)
-    base_url = config['repo']['path']
-    base_url = setup_private_key(base_url, private_key) if product == 'connector_odbc_staging'
+    base_url = setup_private_key(config['repo']['path'], private_key)
     archive_directories = parse_web_directories(
       base_url,
       nil,
