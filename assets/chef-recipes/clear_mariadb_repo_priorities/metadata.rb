@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-name             'connector_odbc'
+name             'clear_mariadb_repo_priorities'
 maintainer       'Yaroslavl FRUCT Laboratory'
 maintainer_email 'yarfruct@gmail.com'
 license          'All rights reserved'
