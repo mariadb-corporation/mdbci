@@ -1,3 +1,5 @@
+include_recipe 'clear_mariadb_repo_priorities::default'
+
 #
 # Cookbook:: mariadb_columnstore
 # Recipe:: configure_repository

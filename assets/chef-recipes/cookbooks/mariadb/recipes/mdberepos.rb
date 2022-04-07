@@ -1,3 +1,5 @@
+include_recipe 'clear_mariadb_repo_priorities::default'
+
 # Install default packages
 %w[net-tools psmisc].each do |pkg|
   package pkg do
