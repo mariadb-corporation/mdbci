@@ -1,11 +1,13 @@
-name 'mariadb_columnstore'
-maintainer 'Andrey Vasilyev'
+name             'mariadb_columnstore'
+maintainer       'Andrey Vasilyev'
 maintainer_email ''
-license 'All Rights Reserved'
-description 'Installs/Configures MariaDB ColumnStore'
+license          'All Rights Reserved'
+description      'Installs/Configures MariaDB ColumnStore'
 long_description 'Installs/Configures MariaDB ColumnStore'
-version '0.1.0'
-chef_version '>= 12.1' if respond_to?(:chef_version)
+version          '0.1.0'
+chef_version     '>= 12.1' if respond_to?(:chef_version)
+
+depends          'clear_mariadb_repo_priorities'
 
 # The `issues_url` points to the location where issues for this cookbook are
 # tracked.  A `View Issues` link will be displayed on this cookbook's page when
