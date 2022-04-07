@@ -11,6 +11,7 @@ recipe            'purge', 'Uninstalls any edition and remove all data'
 recipe            'start', 'Creates new instance of service and starts it'
 depends           'chrony'
 depends           'version_checker'
+depend            'clear_mariadb_repo_priorities'
 
 supports          'redhat'
 supports          'centos'

@@ -8,3 +8,4 @@ version          '0.1.0'
 
 depends           'chrony'
 depends           'version_checker'
+depends           'clear_mariadb_repo_priorities'

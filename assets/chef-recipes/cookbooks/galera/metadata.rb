@@ -9,6 +9,7 @@ version           '0.0.1'
 recipe            'install_galera', 'Installs gallera'
 
 depends           'chrony'
+depends           'clear_mariadb_repo_priorities'
 
 supports          'redhat'
 supports          'centos'
