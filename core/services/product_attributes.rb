@@ -391,12 +391,6 @@ module ProductAttributes
         name: 'connector_cpp',
         repository: 'connector_cpp_ci',
     },
-    'connector_odbc_ci' => {
-        recipe: 'connector_ci::connector_odbc',
-        repo_recipe: 'connector_ci::connector_repository',
-        name: 'connector_odbc',
-        repository: 'connector_odbc_ci',
-    },
     'rocksdb_tools' => {
         recipe: 'rocksdb_tools',
         name: 'rocksdb_tools',
@@ -426,6 +420,11 @@ module ProductAttributes
         recipe: 'connector_odbc',
         name: 'connector_odbc',
         repository: 'connector_odbc_staging'
+    },
+    'connector_odbc_ci' => {
+        recipe: 'connector_odbc',
+        name: 'connector_odbc',
+        repository: 'connector_odbc_ci',
     },
   }.freeze
 
