@@ -30,7 +30,7 @@ module ConnectorOdbcCiParser
 
       release[:architecture] = determine_architecture(release[:architecture])
       result << release.merge({
-                                repo: archive[:href],
+                                repo: add_auth_to_url(release[:url] + archive[:href], auth),
                                 product: PRODUCT_NAME
                               })
     end
