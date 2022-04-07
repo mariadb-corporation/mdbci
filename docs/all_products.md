@@ -42,3 +42,4 @@ sysbench | - | - | - | - |
 core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
 connector_odbc_staging | + | - | - | - |
+connector_odbc_ci | + | - | - | - |
