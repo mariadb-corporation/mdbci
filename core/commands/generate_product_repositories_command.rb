@@ -27,6 +27,7 @@ require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
 require_relative 'generate_repository_partials/maxscale_ci_parser'
 require_relative 'generate_repository_partials/mysql_parser'
 require_relative 'generate_repository_partials/connector_odbc_parser'
+require_relative 'generate_repository_partials/connector_odbc_ci_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -325,8 +326,7 @@ In order to specify the number of retries for repository configuration use --att
       ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_cpp_ci',
                               'mariadb_connector_cpp', 'mariadbcpp', @ui, @logger)
     when 'connector_odbc_ci'
-      ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_odbc_ci',
-                              'mariadb_connector_odbc-dev', 'mariadb-connector-odbc-devel', @ui, @logger)
+      ConnectorOdbcCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'connector_odbc'
       ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger)
     when 'connector_odbc_staging'
