@@ -1,3 +1,5 @@
+include_recipe 'clear_mariadb_repo_priorities::default'
+
 PORTS = (8600..8630).to_a.append(8700, 8800)
 
 case node[:platform_family]

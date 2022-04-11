@@ -1,3 +1,5 @@
+include_recipe 'clear_mariadb_repo_priorities::default'
+
 require 'shellwords'
 
 if node['mariadb']['repo'].include?('mdbe-ci-repo.mariadb.net')

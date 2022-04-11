@@ -1,5 +1,7 @@
-package 'cmake' 
-package 'make' 
+include_recipe 'clear_mariadb_repo_priorities::default'
+
+package 'cmake'
+package 'make'
 package 'gcc'
 package 'git'
 package 'vim'
