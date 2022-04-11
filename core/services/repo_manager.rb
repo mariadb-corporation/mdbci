@@ -65,8 +65,25 @@ class RepoManager
       end
     end
     @ui.info("Repo key is '#{repo_key}': #{repo.nil? ? 'Not found' : 'Found'}")
-    check_unsupported(repo, product)
+
+    if product.key?('include_unsupported')
+      repo = generate_unsupported_repo(repo, product_name)
+      check_unsupported(repo, product)
+    end
     repo
+  end
+
+  def generate_unsupported_repo(repo, product_name)
+    case product_name
+    when 'mdbe'
+      repo[:unsupported_repo] = repo[:repo].gsub(/mariadb-enterprise-server/, 'mariadb-enterprise-unsupported')
+      repo
+    when 'mdbe_staging'
+      repo[:unsupported_repo] = repo[:repo].gsub(/mariadb-enterprise-staging/, 'mariadb-enterprise-unsupported-staging')
+      repo
+    else
+      repo
+    end
   end
 
   def check_unsupported(repo, product)
