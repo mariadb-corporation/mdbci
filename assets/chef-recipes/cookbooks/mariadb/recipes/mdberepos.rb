@@ -48,6 +48,16 @@ when 'debian', 'ubuntu'
       key node['mariadb']['repo_key']
       sensitive true
     end
+    if node['mariadb'].key?('unsupported_repo')
+      apt_repository "#{repo_file_name}_unsupported" do
+        uri node['mariadb']['unsupported_repo']
+        distribution repo_distribution
+        components node['mariadb']['deb_components']
+        keyserver 'keyserver.ubuntu.com'
+        key node['mariadb']['repo_key']
+        sensitive true
+      end
+    end
   end
   apt_update do
     action :update
