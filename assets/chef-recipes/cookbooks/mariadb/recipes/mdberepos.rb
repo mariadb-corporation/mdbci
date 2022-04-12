@@ -49,8 +49,9 @@ when 'debian', 'ubuntu'
       sensitive true
     end
     if node['mariadb'].key?('unsupported_repo')
+      unsupported_repo_uri = node['mariadb']['unsupported_repo'].split(/\s+/).first
       apt_repository "#{repo_file_name}_unsupported" do
-        uri node['mariadb']['unsupported_repo']
+        uri unsupported_repo_uri
         distribution repo_distribution
         components node['mariadb']['deb_components']
         keyserver 'keyserver.ubuntu.com'
