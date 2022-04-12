@@ -73,17 +73,25 @@ class RepoManager
     repo
   end
 
+  UNSUPPORTED_REPOSITORIES = {
+    'mdbe' => {
+      repo_name: /mariadb-enterprise-server/,
+      unsupported_repo_name: 'mariadb-enterprise-unsupported'
+    },
+    'mdbe_staging' => {
+      repo_name: /mariadb-enterprise-staging/,
+      unsupported_repo_name: 'mariadb-enterprise-unsupported-staging'
+    }
+  }.freeze
   def generate_unsupported_repo(repo, product_name)
-    case product_name
-    when 'mdbe'
-      repo['unsupported_repo'] = repo['repo'].gsub(/mariadb-enterprise-server/, 'mariadb-enterprise-unsupported')
-      repo
-    when 'mdbe_staging'
-      repo['unsupported_repo'] = repo['repo'].gsub(/mariadb-enterprise-staging/, 'mariadb-enterprise-unsupported-staging')
-      repo
-    else
-      repo
+    if UNSUPPORTED_REPOSITORIES.key?(product_name)
+      unsupported_repo = UNSUPPORTED_REPOSITORIES[product_name]
+      repo['unsupported_repo'] = repo['repo'].gsub(
+        unsupported_repo[:repo_name],
+        unsupported_repo[:unsupported_repo_name]
+      )
     end
+    repo
   end
 
   def check_unsupported(repo, product)
