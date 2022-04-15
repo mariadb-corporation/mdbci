@@ -46,8 +46,8 @@ class RepoManager
       return { 'version' => product['version'] }
     end
     repository_key = @box_definitions.platform_key(box)
-    if !product.key?('version')
-      repo = find_last_repository_version(product, repository_key)
+    if !product.key?('version') || product['version'] == 'latest'
+      repo_key, repo = find_last_repository_version(product, repository_key)
     else
       version = product['version']
       repository_name = ProductAttributes.repository(product_name)
@@ -169,10 +169,17 @@ class RepoManager
   # @param repository_key [String] key of repository
   def find_last_repository_version(product, repository_key)
     all_available_repo = find_available_repo(product, repository_key)
-    repo = all_available_repo.last[1]
-    all_available_repo.delete_if { |elem| elem[1]['version'].include?('debug') }
-    repo = all_available_repo.last[1] unless all_available_repo.nil?
-    repo
+    all_available_repo.delete_if { |repo| repo[1]['version'].include?('debug') }
+    latest_repo = all_available_repo.find { |repo| repo[1]['version'].include?('latest') }
+    return latest_repo unless latest_repo.nil?
+
+    all_available_repo = all_available_repo.each do |release|
+      release[1][:sem_version] = SemVersionParser.parse_sem_version(release[1]['version'])
+    end
+    all_available_repo.delete_if { |elem| elem[1][:sem_version].nil? }
+    latest_repo = all_available_repo.max { |a, b| a[1][:sem_version] <=> b[1][:sem_version] }
+    latest_repo = all_available_repo.last if latest_repo.nil?
+    latest_repo
   end
 
   # Find the latest available repository version by major version if it's not exists.
