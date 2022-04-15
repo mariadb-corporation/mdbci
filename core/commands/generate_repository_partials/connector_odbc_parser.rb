@@ -6,13 +6,13 @@ require_relative 'repository_parser_core'
 module ConnectorOdbcParser
   extend RepositoryParserCore
 
-  def self.parse(config, product_version, user_ui, logger, product = 'connector_odbc', private_key = nil)
+  def self.parse(config, product_version, ui, logger, product = 'connector_odbc', private_key = nil)
     base_url = setup_private_key(config['repo']['path'], private_key)
     archive_directories = parse_web_directories(
       base_url,
       nil,
       product_version,
-      user_ui,
+      ui,
       logger,
       extract_field(:base_version, /(\d.+)/),
       extract_field(:version, /(\d.+)/)
@@ -39,10 +39,7 @@ module ConnectorOdbcParser
   def self.find_similar_rpm_releases(releases)
     rpm_platforms = %w[rhel centos rocky]
     rpm_releases = releases.filter { |release| rpm_platforms.include?(release[:platform]) }
-                           .each_with_object({}) do |release, versions|
-      versions[release[:version]] = [] unless versions.key?(:version)
-      versions[release[:version]] << release
-    end
+                           .group_by { |release| release[:version] }
     similar_releases = []
     rpm_releases.each do |_, founded_releases|
       missing_platforms = rpm_platforms - founded_releases.map { |release| release[:platform] }
