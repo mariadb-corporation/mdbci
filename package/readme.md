@@ -6,7 +6,7 @@ In order to package the AppImage you should install [Docker](https://www.docker.
 
 The purpose of the files in the directory is the following:
 
-* `build.sh` controlls the whole build process.
+* `build.sh` controls the whole build process.
 * `mdbci.desktop` is required to build AppImage, it specifies the name of the executable and the name of the icon to use in the AppImage.
 * `mdbci.png` is the icon that will be used in the AppImage.
 * `mdbci.sh` is script that runs during the packaging procedure.
