@@ -81,7 +81,8 @@ module ProductAttributes
       name: 'mariadb',
       repository: 'mdbe_ci',
       files_location: 'cookbooks/mariadb/files',
-      reverse_product: 'mariadb_remove'
+      reverse_product: 'mariadb_remove',
+      ci_product: true
     },
     'mdbe_staging' => {
       recipe: 'mariadb::install_enterprise',
@@ -122,7 +123,8 @@ module ProductAttributes
       name: 'maxscale',
       repository: 'maxscale_ci',
       repo_file_name: 'maxscale_ci',
-      reverse_product: 'maxscale_remove'
+      reverse_product: 'maxscale_remove',
+      ci_product: true
     },
     'mysql' => {
       recipe: 'mysql::install_community',
@@ -262,51 +264,63 @@ module ProductAttributes
         name: 'mariadb',
         repository: 'mariadb_ci',
         files_location: 'cookbooks/mariadb/files',
-        reverse_product: 'mariadb_remove'
+        reverse_product: 'mariadb_remove',
+        ci_product: true
     },
     'mariadb_ci_plugin_columnstore' => {
         recipe: 'mdbe_plugins::columnstore',
-        name: 'columnstore'
+        name: 'columnstore',
+        ci_product: true
     },
     'mariadb_ci_plugin_connect' => {
         recipe: 'mdbe_plugins::connect',
-        name: 'connect'
+        name: 'connect',
+        ci_product: true
     },
     'mariadb_ci_plugin_cracklib_password_check' => {
         recipe: 'mdbe_plugins::cracklib_password_check',
-        name: 'cracklib_password_check'
+        name: 'cracklib_password_check',
+        ci_product: true
     },
     'mariadb_ci_plugin_gssapi_client' => {
         recipe: 'mdbe_plugins::gssapi_client',
-        name: 'gssapi_client'
+        name: 'gssapi_client',
+        ci_product: true
     },
     'mariadb_ci_plugin_gssapi_server' => {
         recipe: 'mdbe_plugins::gssapi_server',
-        name: 'gssapi_server'
+        name: 'gssapi_server',
+        ci_product: true
     },
     'mariadb_ci_plugin_mariadb_test' => {
         recipe: 'mdbe_plugins::mariadb_test',
-        name: 'mariadb_test'
+        name: 'mariadb_test',
+        ci_product: true
     },
     'mariadb_ci_plugin_mroonga' => {
         recipe: 'mdbe_plugins::mroonga',
-        name: 'mroonga'
+        name: 'mroonga',
+        ci_product: true
     },
     'mariadb_ci_plugin_oqgraph' => {
         recipe: 'mdbe_plugins::oqgraph',
-        name: 'oqgraph'
+        name: 'oqgraph',
+        ci_product: true
     },
     'mariadb_ci_plugin_rocksdb' => {
         recipe: 'mdbe_plugins::rocksdb',
-        name: 'rocksdb'
+        name: 'rocksdb',
+        ci_product: true
     },
     'mariadb_ci_plugin_spider' => {
         recipe: 'mdbe_plugins::spider',
-        name: 'spider'
+        name: 'spider',
+        ci_product: true
     },
     'mariadb_ci_plugin_xpand' => {
         recipe: 'mdbe_plugins::xpand',
-        name: 'xpand'
+        name: 'xpand',
+        ci_product: true
     },
     'connectors_build' => {
         recipe: 'connectors_build',
@@ -384,12 +398,14 @@ module ProductAttributes
         repo_recipe: 'connector_ci::connector_repository',
         name: 'connector_c',
         repository: 'connector_c_ci',
+        ci_product: true
     },
     'connector_cpp_ci' => {
         recipe: 'connector_ci::connector_cpp',
         repo_recipe: 'connector_ci::connector_repository',
         name: 'connector_cpp',
         repository: 'connector_cpp_ci',
+        ci_product: true
     },
     'rocksdb_tools' => {
         recipe: 'rocksdb_tools',
@@ -425,6 +441,7 @@ module ProductAttributes
         recipe: 'connector_odbc',
         name: 'connector_odbc',
         repository: 'connector_odbc_ci',
+        ci_product: true
     },
   }.freeze
 
@@ -548,5 +565,9 @@ module ProductAttributes
   # Checks if the product needs version specification
   def self.need_version?(product)
     !PRODUCT_ATTRIBUTES.dig(product, :without_version)
+  end
+
+  def self.ci_product?(product)
+    PRODUCT_ATTRIBUTES[product].key?(:ci_product) && PRODUCT_ATTRIBUTES[product][:ci_product]
   end
 end
