@@ -7,8 +7,8 @@ MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 ARG IMAGE_DATE=2021-07-23
 
 ARG BUILD_JOBS=1
-ARG RUBY_VERSION=3.0.2
-ARG RUBY_INSTALL_VERSION=0.8.2
+ARG RUBY_VERSION=3.0.4
+ARG RUBY_INSTALL_VERSION=0.8.3
 
 # Please update the ENTRYPOINT if changing the WORKSPACE variable
 ENV DOCKER_BUILD=1 \
@@ -58,7 +58,7 @@ COPY functions.sh $WORKSPACE
 COPY scl_wrapper.sh $WORKSPACE
 
 # Download the AppImage functions
-RUN wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
+# RUN wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
 
 # Make the file executable
 RUN chmod 755 $WORKSPACE/gen_appimage.sh $WORKSPACE/scl_wrapper.sh
