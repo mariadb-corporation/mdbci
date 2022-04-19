@@ -68,6 +68,9 @@ class ConfigurationGenerator
     if product['include_unsupported'] && repo.key?('unsupported_repo')
       config['unsupported_repo'] = repo['unsupported_repo']
     end
+    if ProductAttributes.ci_product?(product_name)
+      config['ci_product'] = true
+    end
     setup_product_license_if_need(config, product_name).and_then do |updated_config|
       attribute_name = ProductAttributes.attribute_name(product_name)
       return Result.ok("#{attribute_name}": updated_config)
