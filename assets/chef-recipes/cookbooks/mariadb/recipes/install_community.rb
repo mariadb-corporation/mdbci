@@ -159,5 +159,5 @@ check_version 'Check the installed version of the MariaDB Server' do
   rhel_package_name 'MariaDB-server'
   suse_package_name 'MariaDB-server'
 
-  not_if node['mariadb']['ci_product'] == true
+  not_if { node['mariadb']['ci_product'] }
 end
