@@ -153,13 +153,11 @@ else
   end
 end
 
-if node['mariadb']['ci_product']
-  Chef::Log.info('Skip CI product version check')
-else
-  check_version 'Check the installed version of the MariaDB Server' do
-    version node['mariadb']['version']
-    deb_package_name 'mariadb-server'
-    rhel_package_name 'MariaDB-server'
-    suse_package_name 'MariaDB-server'
-  end
+check_version 'Check the installed version of the MariaDB Server' do
+  version node['mariadb']['version']
+  deb_package_name 'mariadb-server'
+  rhel_package_name 'MariaDB-server'
+  suse_package_name 'MariaDB-server'
+
+  not_if node['mariadb']['ci_product'] == true
 end

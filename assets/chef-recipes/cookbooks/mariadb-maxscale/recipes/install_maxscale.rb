@@ -129,13 +129,11 @@ file "/etc/shadow" do
   mode "640"
 end
 
-if node['maxscale']['ci_product']
-  Chef::Log.info('Skip CI product version check')
-else
-  check_version 'Check the installed version of the MaxScale server' do
-    version node['maxscale']['version']
-    deb_package_name 'maxscale'
-    rhel_package_name 'maxscale'
-    suse_package_name 'maxscale'
-  end
+check_version 'Check the installed version of the MaxScale server' do
+  version node['maxscale']['version']
+  deb_package_name 'maxscale'
+  rhel_package_name 'maxscale'
+  suse_package_name 'maxscale'
+
+  not_if node['mariadb']['ci_product'] == true
 end
