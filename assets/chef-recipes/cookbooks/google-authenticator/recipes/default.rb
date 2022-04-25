@@ -1,11 +1,11 @@
-packages = if %w[centos redhat].include?(node[:platform])
+packages = if platform?('redhat', 'centos', 'rocky')
              %w[google-authenticator]
-           elsif %w[debian ubuntu].include?(node[:platform])
+           elsif platform?('debian', 'ubuntu')
              %w[libpam-google-authenticator]
            end
 
 package packages do
-  if %w[redhat centos].include?(node[:platform])
+  if platform?('redhat', 'centos', 'rocky')
     flush_cache({ before: true })
   end
 end

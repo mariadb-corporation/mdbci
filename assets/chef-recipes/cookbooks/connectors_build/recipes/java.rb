@@ -7,7 +7,7 @@ when 'debian', 'ubuntu'
      (platform?('ubuntu') && node[:platform_version].to_f == 16.04)
     package 'openjdk-8-jdk'
   end
-when 'centos', 'redhat'
+when 'centos', 'redhat', 'rocky'
   if node['connectors_build']['java_version'] == '7'
     package 'java-1.7.0-openjdk-devel'
   end
