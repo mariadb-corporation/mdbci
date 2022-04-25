@@ -8,7 +8,7 @@ when 'debian', 'ubuntu'
   package 'cmake'
   package 'libssl-dev'
   package 'unixodbc-dev'
-when 'centos', 'redhat'
+when 'centos', 'redhat', 'rocky'
   execute 'install development tools' do
     command "yum -y groupinstall 'Development Tools'"
   end

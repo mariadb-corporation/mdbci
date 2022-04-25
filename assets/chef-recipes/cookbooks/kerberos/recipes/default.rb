@@ -1,6 +1,6 @@
-if %w[redhat centos].include?(node[:platform])
+if platform?('redhat', 'centos', 'rocky')
   packages = %w[krb5-workstation]
-  if node[:platform] == 'redhat' && node[:platform_version].to_i == 8
+  if platform?('redhat') && node[:platform_version].to_i == 8
     packages << 'sssd'
   else
     packages << 'pam_krb5'
@@ -8,6 +8,6 @@ if %w[redhat centos].include?(node[:platform])
   package packages do
     flush_cache({ before: true })
   end
-elsif %w[debian ubuntu].include?(node[:platform])
+elsif platform?('debian', 'ubuntu')
   package %w[krb5-user libpam-krb5]
 end

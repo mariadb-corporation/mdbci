@@ -5,11 +5,11 @@ package 'curl'
 case node[:platform]
 when 'debian', 'ubuntu'
   package 'software-properties-common'
-  execute 'intall repo' do
+  execute 'install repo' do
     command 'curl -sL https://deb.nodesource.com/setup_14.x | bash -'
   end
   package 'nodejs'
-when 'centos', 'redhat'
+when 'centos', 'redhat', 'rocky'
   package 'gcc-c++'
   package 'make'
   if node[:platform_version].to_i == 6

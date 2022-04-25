@@ -342,7 +342,7 @@ when 'ubuntu'
   execute 'install dependencies mariadb-server' do
     command 'apt-get -y build-dep -q mariadb-server'
   end
-when 'centos', 'redhat'
+when 'centos', 'redhat', 'rocky'
   case node[:platform_version].to_i
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
