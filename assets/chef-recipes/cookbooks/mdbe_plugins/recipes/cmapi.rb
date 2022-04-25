@@ -1,4 +1,3 @@
-include_recipe 'clear_mariadb_repo_priorities::default'
 package 'mariadb-columnstore-cmapi'
 
 execute 'Opening cmapi port' do

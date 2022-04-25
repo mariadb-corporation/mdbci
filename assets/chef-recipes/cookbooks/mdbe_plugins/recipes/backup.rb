@@ -1,4 +1,3 @@
-include_recipe 'clear_mariadb_repo_priorities::default'
 require 'mixlib/shellout'
 
 node.run_state[:plugin_name] ='mariadb-backup'
