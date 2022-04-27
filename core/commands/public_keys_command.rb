@@ -3,7 +3,6 @@
 require_relative '../models/network_settings'
 require_relative '../services/machine_configurator'
 require_relative '../models/result'
-require 'net/ssh'
 
 # This class loads ssh keys to configuration or selected nodes.
 class PublicKeysCommand < BaseCommand
@@ -79,28 +78,22 @@ class PublicKeysCommand < BaseCommand
   # @param machine [Hash] information about machine to connect
   def configure_server_ssh_key(machine)
     exit_code = SUCCESS_RESULT
-    options = Net::SSH.configuration_for(machine['network'], true)
-    options[:auth_methods] = %w[publickey none]
-    options[:verify_host_key] = false
-    options[:keys] = [machine['keyfile']]
-    begin
-      Net::SSH.start(machine['network'], machine['whoami'], options) do |ssh|
-        add_key(ssh)
-      end
-    rescue StandardError
-      @ui.error("Could not initiate connection to the node '#{machine['name']}'")
-      exit_code = ERROR_RESULT
-    end
+    result = add_key(machine)
+    exit_code = ERROR_RESULT if result.error?
     exit_code
   end
 
   # Adds ssh key to the specified server
   # param ssh [Connection] ssh connection to use
-  def add_key(ssh)
-    output = ssh.exec!('cat ~/.ssh/authorized_keys')
+  def add_key(machine)
+    null_logger = Logger.new(IO::NULL)
     key_file_content = File.read(@keyfile)
-    ssh.exec!('mkdir ~/.ssh')
-    ssh.exec!("echo '#{key_file_content}' >> ~/.ssh/authorized_keys") unless output.include? key_file_content
+    SshCommands.execute_ssh(machine, 'cat ~/.ssh/authorized_keys', null_logger).and_then do |authorized_keys_content|
+      if authorized_keys_content.include? key_file_content
+        SshCommands.execute_ssh(machine, 'mkdir -p ~/.ssh', null_logger)
+        return SshCommands.execute_ssh(machine, "echo '#{key_file_content}' >> ~/.ssh/authorized_keys", null_logger)
+      end
+    end
   end
 
   # Setup ssh key data
