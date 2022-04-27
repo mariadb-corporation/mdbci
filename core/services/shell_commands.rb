@@ -102,6 +102,28 @@ module ShellCommands
     ShellCommands.run_command(logger, command, options, env)
   end
 
+  # Run the command, return stdout, stderr outputs and the process results
+  # @param command [String] command to run
+  # @param logger [Out] logger to log information to
+  # @param show_command [Boolean] log information about invoking command or not
+  # @param options [Hash] parameters to pass to Open3 method
+  # @param env [Hash] environment to run command in
+  def self.run_command_with_stderr(command, logger, show_command = true, options = {}, env = ShellCommands.environment)
+    options[:unsetenv_others] = true
+    logger.info("Invoking command: #{command}") if show_command
+    stdout, stderr, status = Open3.capture3(env, command, options)
+    {
+      value: status,
+      stdout: stdout,
+      stderr: stderr
+    }
+  end
+
+  # Wrapper method for the module method
+  def run_command_with_stderr(command, logger = @ui, show_command = true, options = {}, env = ShellCommands.environment)
+    ShellCommands.run_command_with_stderr(command, logger, show_command, options, env)
+  end
+
   # Execute the command, log stdout and stderr.
   #
   # @param command [String] command to run
