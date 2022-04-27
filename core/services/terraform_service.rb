@@ -3,8 +3,6 @@
 require_relative 'shell_commands'
 require_relative 'machine_configurator'
 require_relative '../models/result'
-require 'net/ssh'
-require 'net/scp'
 
 # This class allows to execute commands of Terraform-cli
 module TerraformService
