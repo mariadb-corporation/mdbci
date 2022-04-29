@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../models/result'
+
 # This file is part of MDBCI.
 #
 # MDBCI is free software: you can redistribute it and/or modify it under the terms
@@ -47,10 +49,10 @@ module SshCommands
     )
   end
 
-  private
+  private_class_method :parse_result, :log_printable_lines
 
   # Parses command exit status, logs stdout and stderr and returns corresponding results
-  def parse_result(command_results, logger)
+  def self.parse_result(command_results, logger)
     if command_results[:value].exitstatus.zero?
       converted_data = command_results[:stdout].force_encoding('UTF-8')
       log_printable_lines(converted_data, logger)
@@ -63,7 +65,7 @@ module SshCommands
   end
 
   # Log command output in human-readable format
-  def log_printable_lines(lines, logger)
+  def self.log_printable_lines(lines, logger)
     lines.split("\n").map(&:chomp)
          .grep(/\p{Graph}+/mu)
          .each do |line|
