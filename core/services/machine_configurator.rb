@@ -3,6 +3,7 @@
 require 'io/console'
 require_relative '../models/result'
 require_relative '../services/log_storage'
+require_relative 'ssh_commands'
 
 # This file is part of MDBCI.
 #
@@ -178,7 +179,7 @@ class MachineConfigurator
     upload_tasks.reduce(status) do |result, (source, target)|
       result.and_then do
         logger.debug("Uploading #{source} to #{target}")
-        SshCommands.execute_scp(machine, source, target, logger)
+        SshCommands.execute_scp(machine, source, File.join(remote_dir, target), logger)
       end
     end
   end
