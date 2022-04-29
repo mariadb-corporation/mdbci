@@ -39,7 +39,7 @@ module ConnectorOdbcParser
   def self.find_similar_rpm_releases(releases)
     rpm_platforms = %w[rhel centos rocky]
     rpm_releases = releases.filter { |release| rpm_platforms.include?(release[:platform]) }
-                           .group_by { |release| release[:version] }
+                     .group_by { |release| "#{release[:version]} #{release[:platform_version]}" }
     similar_releases = []
     rpm_releases.each do |_, founded_releases|
       missing_platforms = rpm_platforms - founded_releases.map { |release| release[:platform] }
