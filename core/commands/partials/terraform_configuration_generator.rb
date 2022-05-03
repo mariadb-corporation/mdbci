@@ -21,7 +21,7 @@ require_relative '../../services/ssh_commands'
 # with Terraform backend
 class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
-  KEY_FILE_NAME = 'maxscale'
+  KEY_FILE_NAME = 'maxscale.pem'
 
   # Generate a configuration.
   #
@@ -49,12 +49,12 @@ class TerraformConfigurationGenerator < BaseCommand
   # in format { public_key_value, private_key_file_path }.
   def generate_ssh_keys
     login = Etc.getlogin
-    public_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
-    private_key_file_path = "#{public_key_file_path}.pem"
-    SshCommands.execute_ssh_keygen(public_key_file_path, login, Logger.new(IO::NULL))
+    private_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
+    public_key_file_path = "#{private_key_file_path}.pub"
+    SshCommands.execute_ssh_keygen(private_key_file_path, login, Logger.new(IO::NULL))
     File.chmod(0o400, private_key_file_path)
     File.chmod(0o400, public_key_file_path)
-    public_key_value = File.read(public_key_file_path)
+    public_key_value = File.read(public_key_file_path).strip
     @ssh_keys = { public_key_value: public_key_value,
                   private_key_file_path: private_key_file_path,
                   login: login }
