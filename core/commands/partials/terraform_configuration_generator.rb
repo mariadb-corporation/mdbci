@@ -12,17 +12,16 @@ require_relative '../../services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
-require_relative '../../services/configuration_generator'
-require_relative '../../models/configuration'
 require_relative '../../services/product_attributes'
 require_relative '../../services/product_and_subscription_registry'
 require_relative '../../services/ssh_user'
+require_relative '../../services/ssh_commands'
 
 # The class generates the MDBCI configuration for AWS provider nodes for use in pair
 # with Terraform backend
 class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
-  KEY_FILE_NAME = 'maxscale.pem'
+  KEY_FILE_NAME = 'maxscale'
 
   # Generate a configuration.
   #
@@ -49,15 +48,13 @@ class TerraformConfigurationGenerator < BaseCommand
   # Generate public and private ssh keys and set the @ssh_keys variable
   # in format { public_key_value, private_key_file_path }.
   def generate_ssh_keys
-    key = OpenSSL::PKey::RSA.new(2048)
-    type = key.ssh_type
-    data = [key.to_blob].pack('m0')
     login = Etc.getlogin
-    hostname = Socket.gethostname
-    public_key_value = "#{type} #{data} #{login}@#{hostname}"
-    private_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
-    File.open(private_key_file_path, 'w') { |file| file.write(key.to_pem) }
+    public_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
+    private_key_file_path = "#{public_key_file_path}.pem"
+    SshCommands.execute_ssh_keygen(public_key_file_path, login, Logger.new(IO::NULL))
     File.chmod(0o400, private_key_file_path)
+    File.chmod(0o400, public_key_file_path)
+    public_key_value = File.read(public_key_file_path)
     @ssh_keys = { public_key_value: public_key_value,
                   private_key_file_path: private_key_file_path,
                   login: login }
