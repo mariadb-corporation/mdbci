@@ -49,6 +49,21 @@ module SshCommands
     )
   end
 
+  # Generate ssh keys on the local machine using ssh-keygen command
+  # @param filepath [String] absolute path to the file to write ssh-keys into.
+  #   Private key will be created with the .pem extension
+  # @param user [String] user name to whom the keys will be created
+  # @param logger [Out] logger to log information into
+  # @return result of the command execution with stdout or stderr output
+  def self.execute_ssh_keygen(filepath, user, logger)
+    logger.info('Generating ssh keys')
+    command = "ssh-keygen -q -t rsa -f '#{filepath}' -C '#{user}' -b 2048 -N ''"
+    parse_result(
+      ShellCommands.run_command_with_stderr(command, logger, false),
+      logger
+    )
+  end
+
   private_class_method :parse_result, :log_printable_lines
 
   # Parses command exit status, logs stdout and stderr and returns corresponding results
