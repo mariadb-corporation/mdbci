@@ -49,6 +49,10 @@ module ConnectorOdbcParser
   end
 
   PLATFORMS = {
+    'jammy' => {
+      platform: 'ubuntu',
+      platform_version: 'jammy'
+    },
     'focal' => {
       platform: 'ubuntu',
       platform_version: 'focal'
