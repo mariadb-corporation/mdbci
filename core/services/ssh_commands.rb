@@ -26,7 +26,8 @@ module SshCommands
   # @return result of the command execution with stdin or stderr output
   def self.execute_ssh(machine, command, logger)
     logger.info("Running '#{command}' on the #{machine['network']} machine")
-    command = "ssh #{ARGUMENTS} -i '#{machine['keyfile']}' '#{machine['network']}' '#{command}'"
+    ssh_login = "#{machine['whoami']}@#{machine['network']}"
+    command = "ssh #{ARGUMENTS} -i '#{machine['keyfile']}' '#{ssh_login}' '#{command}'"
     parse_result(
       ShellCommands.run_command_with_stderr(command, logger, false),
       logger
@@ -42,7 +43,8 @@ module SshCommands
   # @return result of the command execution with stdout or stderr output
   def self.execute_scp(machine, source, target, logger, recursive = true)
     logger.info("Copying files via scp on the #{machine['network']} machine")
-    command = "scp #{ARGUMENTS} -i '#{machine['keyfile']}' #{recursive ? ' -r ' : ''} '#{source}' '#{machine['network']}:#{target}'"
+    ssh_login = "#{machine['whoami']}@#{machine['network']}"
+    command = "scp #{ARGUMENTS} -i '#{machine['keyfile']}' #{recursive ? ' -r ' : ''} '#{source}' '#{ssh_login}:#{target}'"
     parse_result(
       ShellCommands.run_command_with_stderr(command, logger, false),
       logger
