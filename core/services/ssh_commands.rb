@@ -64,8 +64,6 @@ module SshCommands
     )
   end
 
-  private_class_method :parse_result, :log_printable_lines
-
   # Parses command exit status, logs stdout and stderr and returns corresponding results
   def self.parse_result(command_results, logger)
     if command_results[:value].exitstatus.zero?
