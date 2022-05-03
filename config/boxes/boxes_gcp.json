@@ -79,6 +79,16 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
+  "ubuntu_jammy_gcp": {
+    "provider": "gcp",
+    "architecture": "amd64",
+    "image": "ubuntu-os-cloud/ubuntu-2204-lts",
+    "platform": "ubuntu",
+    "platform_version": "jammy",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  },
   "rhel_7_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
