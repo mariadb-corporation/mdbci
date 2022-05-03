@@ -147,6 +147,25 @@ ubuntu_focal_packages = %w[
   unixodbc
 ]
 
+ubuntu_jammy_packages = %w[
+ bison
+ chrpath
+ debhelper
+ default-jdk
+ dh-apparmor
+ gnutls-dev
+ libasan5
+ libcurl4-openssl-dev
+ libjemalloc2
+ libncurses5-dev
+ libpcre3-dev
+ psmisc
+ python-dev-is-python3
+ python2-dev
+ python3-dev
+ unixodbc
+]
+
 centos_packages = %w[
   bison
   boost-program-options
@@ -332,6 +351,11 @@ when 'ubuntu'
     end
   when 20.04 # Ubuntu Focal
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_focal_packages)
+    execute 'enable apt sources' do
+      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+    end
+  when 22.04 # Ubuntu Jammy
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages) - ['dh-systemd']
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
