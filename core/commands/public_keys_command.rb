@@ -99,12 +99,11 @@ class PublicKeysCommand < BaseCommand
   # Adds ssh key to the specified server
   # param ssh [Connection] ssh connection to use
   def add_key(machine)
-    null_logger = Logger.new(IO::NULL)
     key_file_content = File.read(@keyfile)
-    SshCommands.execute_ssh(machine, 'cat ~/.ssh/authorized_keys', null_logger).and_then do |authorized_keys_content|
+    SshCommands.execute_ssh(machine, 'cat ~/.ssh/authorized_keys').and_then do |authorized_keys_content|
       if authorized_keys_content.include? key_file_content
-        SshCommands.execute_ssh(machine, 'mkdir -p ~/.ssh', null_logger)
-        return SshCommands.execute_ssh(machine, "echo '#{key_file_content}' >> ~/.ssh/authorized_keys", null_logger)
+        SshCommands.execute_ssh(machine, 'mkdir -p ~/.ssh')
+        return SshCommands.execute_ssh(machine, "echo '#{key_file_content}' >> ~/.ssh/authorized_keys")
       end
     end
   end

@@ -33,7 +33,7 @@ class MachineConfigurator
   # Run command on the remote machine and return result to the caller
   def run_command(machine, command, logger = @log)
     logger.info("Running command '#{command}' on the '#{machine['network']}' machine")
-    SshCommands.execute_ssh(machine, command, logger)
+    ssh_exec(machine, command, logger)
   end
 
   # Upload chef scripts onto the machine and configure it using specified role. The method is able to transfer
@@ -56,11 +56,32 @@ class MachineConfigurator
   end
   # rubocop:enable Metrics/ParameterLists
 
+  def ssh_exec(machine, command, logger)
+    logger.info("Running '#{command}' on the remote server")
+    result = SshCommands.execute_ssh(machine, command)
+    output = if result.success?
+               result.value
+             else
+               result.error
+             end
+    log_printable_lines(output, logger)
+    result
+  end
+
   def sudo_exec(machine, command, logger = @log)
-    SshCommands.execute_ssh(machine, "sudo #{command}", logger)
+    ssh_exec(machine, "sudo #{command}", logger)
   end
 
   private
+
+  # Log output in the human-readable format
+  def log_printable_lines(lines, logger)
+    lines.split("\n").map(&:chomp)
+         .grep(/\p{Graph}+/mu)
+         .each do |line|
+      logger.debug("ssh: #{line}")
+    end
+  end
 
   # Check whether Chef is installed the correct version on the machine
   # @param machine [Hash] information about machine to connect
@@ -68,7 +89,7 @@ class MachineConfigurator
   # @param logger [Out] logger to log information to
   # @return [Boolean] true if Chef of the required version is installed, otherwise - false
   def chef_installed?(machine, chef_version, logger)
-    SshCommands.execute_ssh(machine, 'chef-solo --version', logger).and_then do |output|
+    ssh_exec(machine, 'chef-solo --version', logger).and_then do |output|
       if output.include?(chef_version)
         Result.ok(:installed)
       else
@@ -112,7 +133,7 @@ class MachineConfigurator
   # Determine the method to download Chef installation script: wget or curl
   def prepare_appimage_download_command(machine, chef_version, architecture, logger)
     appimage_url = "https://mdbe-ci-repo.mariadb.net/MDBCI/chef-solo-#{chef_version}.glibc-#{architecture}.AppImage"
-    result = SshCommands.execute_ssh(machine, 'which wget', logger)
+    result = ssh_exec(machine, 'which wget', logger)
     if result.success?
       "wget -q #{appimage_url} --output-document /tmp/chef-solo"
     else
@@ -121,7 +142,7 @@ class MachineConfigurator
   end
 
   def determine_machine_architecture(machine, logger)
-    SshCommands.execute_ssh(machine, 'uname -m', logger).and_then do |output|
+    ssh_exec(machine, 'uname -m', logger).and_then do |output|
       architecture = output.strip
       if %w[x86_64 aarch64].include?(architecture)
         Result.ok(architecture)
@@ -136,10 +157,10 @@ class MachineConfigurator
     chef_install_command = prepare_install_command(machine, chef_version, logger)
 
     CHEF_INSTALLATION_ATTEMPTS.times do
-      SshCommands.execute_ssh(machine, download_command, logger).and_then do
+      ssh_exec(machine, download_command, logger).and_then do
         sudo_exec(machine, chef_install_command, logger)
       end
-      SshCommands.execute_ssh(machine, 'rm -f install.sh', logger)
+      ssh_exec(machine, 'rm -f install.sh', logger)
       return Result.ok(:installed) if chef_installed?(machine, chef_version, logger)
 
       sleep(rand(3))
@@ -149,7 +170,7 @@ class MachineConfigurator
 
   # Determine the method to download Chef installation script: wget or curl
   def prepare_download_command(machine, logger)
-    result = SshCommands.execute_ssh(machine, 'which wget', logger)
+    result = ssh_exec(machine, 'which wget', logger)
     if result.success?
       'wget -q https://www.chef.io/chef/install.sh --output-document install.sh'
     else
@@ -158,7 +179,7 @@ class MachineConfigurator
   end
 
   def prepare_install_command(machine, chef_version, logger)
-    result = SshCommands.execute_ssh(machine, 'cat /etc/os-release | grep "openSUSE Leap 15"', logger)
+    result = ssh_exec(machine, 'cat /etc/os-release | grep "openSUSE Leap 15"', logger)
     if result.error?
       "bash install.sh -v #{chef_version}"
     else
@@ -174,12 +195,12 @@ class MachineConfigurator
                    .select { |path, _| File.exist?(path) }
                    .concat(extra_files)
     status = sudo_exec(machine, "rm -rf #{remote_dir}", logger).and_then do
-      SshCommands.execute_ssh(machine, "mkdir -p #{remote_dir}", logger)
+      ssh_exec(machine, "mkdir -p #{remote_dir}", logger)
     end
     upload_tasks.reduce(status) do |result, (source, target)|
       result.and_then do
         logger.debug("Uploading #{source} to #{target}")
-        SshCommands.execute_scp(machine, source, File.join(remote_dir, target), logger)
+        SshCommands.execute_scp(machine, source, File.join(remote_dir, target))
       end
     end
   end
