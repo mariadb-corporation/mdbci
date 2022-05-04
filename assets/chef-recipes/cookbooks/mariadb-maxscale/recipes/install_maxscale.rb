@@ -135,5 +135,5 @@ check_version 'Check the installed version of the MaxScale server' do
   rhel_package_name 'maxscale'
   suse_package_name 'maxscale'
 
-  not_if { node['mariadb']['ci_product'] }
+  not_if { node['maxscale']['ci_product'] }
 end
