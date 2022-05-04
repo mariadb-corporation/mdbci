@@ -56,6 +56,18 @@ class MachineConfigurator
   end
   # rubocop:enable Metrics/ParameterLists
 
+  # Connect to the specified machine and execute command with the root privileges
+  # @param machine [Hash] information about machine to connect
+  # @param command [String] command to execute
+  # @param logger [Logger] logger to log info
+  def sudo_exec(machine, command, logger = @log)
+    ssh_exec(machine, "sudo #{command}", logger)
+  end
+
+  # Connect to the specified machine and execute command
+  # @param machine [Hash] information about machine to connect
+  # @param command [String] command to execute
+  # @param logger [Logger] logger to log info
   def ssh_exec(machine, command, logger)
     logger.info("Running '#{command}' on the remote server")
     result = SshCommands.execute_ssh(machine, command)
@@ -66,10 +78,6 @@ class MachineConfigurator
              end
     log_printable_lines(output, logger)
     result
-  end
-
-  def sudo_exec(machine, command, logger = @log)
-    ssh_exec(machine, "sudo #{command}", logger)
   end
 
   private
