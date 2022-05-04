@@ -4,6 +4,19 @@ require_relative 'shell_commands'
 require_relative 'machine_configurator'
 require_relative '../models/result'
 
+# This file is part of MDBCI.
+#
+# MDBCI is free software: you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation,
+# either version 3 of the License, or (at your option) any later version.
+#
+# MDBCI is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with MDBCI.
+# If not, see <https://www.gnu.org/licenses/>.
+
 # This class allows to execute commands of Terraform-cli
 module TerraformService
 
