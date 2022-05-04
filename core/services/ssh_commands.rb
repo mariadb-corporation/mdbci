@@ -43,6 +43,8 @@ module SshCommands
   # @return result of the command execution with stdout or stderr output
   def self.execute_scp(machine, source, target, logger, recursive = true)
     logger.info("Copying files via scp on the #{machine['network']} machine")
+    target_dir = File.dirname(target)
+    execute_ssh(machine, "mkdir -p #{target_dir}", logger)
     ssh_login = "#{machine['whoami']}@#{machine['network']}"
     command = "scp #{ARGUMENTS} -i '#{machine['keyfile']}' #{recursive ? ' -r ' : ''} '#{source}' '#{ssh_login}:#{target}'"
     parse_result(
