@@ -14,7 +14,7 @@ file File.join('/etc', 'sudoers.d', node['user_creation']['name']) do
   content "#{node['user_creation']['name']} ALL=(ALL) NOPASSWD: ALL"
 end
 
-directory File.join(home_dir,  '.ssh') do
+directory File.join(home_dir, '.ssh') do
   owner node['user_creation']['name']
   action :create
 end
@@ -22,6 +22,7 @@ end
 user = ENV['SUDO_USER']
 execute 'copy ssh files' do
   command "cp -r #{File.join('/home', user, '.ssh')} #{home_dir}"
+  not_if { user == node['user_creation']['name'] }
 end
 
 execute 'set rights to ssh files' do
