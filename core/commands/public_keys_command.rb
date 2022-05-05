@@ -90,16 +90,6 @@ class PublicKeysCommand < BaseCommand
   # Connect and add ssh key on server
   # @param machine [Hash] information about machine to connect
   def configure_server_ssh_key(machine)
-    if add_key(machine).error?
-      ERROR_RESULT
-    else
-      SUCCESS_RESULT
-    end
-  end
-
-  # Adds ssh key to the specified server
-  # @param machine [Hash] information about machine to connect
-  def add_key(machine)
     key_file_content = File.read(@keyfile)
     SshCommands.execute_command_with_ssh(machine, 'mkdir -p ~/.ssh')
     SshCommands.execute_command_with_ssh(machine, 'cat ~/.ssh/authorized_keys').and_then do |authorized_keys_content|
