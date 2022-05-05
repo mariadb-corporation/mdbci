@@ -327,10 +327,12 @@ end
 
 # Class that manages CentOS specific packages
 class CentosDependencyManager < DependencyManager
+  SSH_PACKAGE = 'openssh'
+
   def required_packages
     %w[ceph-common gcc git libvirt libvirt-client libvirt-devel
        qemu-img qemu-kvm rsync wget yum-utils
-       device-mapper-persistent-data lvm2 zip openssh]
+       device-mapper-persistent-data lvm2 zip]
   end
 
   def install_dependencies
@@ -338,6 +340,7 @@ class CentosDependencyManager < DependencyManager
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
+    return ERROR_RESULT unless install_ssh
     if should_install?('libvirt')
       install_qemu
       required_packages.each do |package|
@@ -351,6 +354,11 @@ class CentosDependencyManager < DependencyManager
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
     end
     SUCCESS_RESULT
+  end
+
+  def install_ssh
+    result = run_command("sudo yum install -y #{SSH_PACKAGE}")
+    result[:value].success?
   end
 
   def remove_old_version_docker
@@ -412,11 +420,13 @@ end
 
 # Class that manages Debian specific packages
 class DebianDependencyManager < DependencyManager
+  SSH_PACKAGE = 'ssh'
+
   def required_packages
     %w[build-essential cmake git libvirt-daemon-system libvirt-dev
        libxml2-dev libxslt-dev qemu qemu-kvm rsync wget
        apt-transport-https ca-certificates curl gnupg2 software-properties-common
-       zip ssh]
+       zip]
   end
 
   def install_dependencies
@@ -424,6 +434,7 @@ class DebianDependencyManager < DependencyManager
       return ERROR_RESULT unless install_docker
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
+    return ERROR_RESULT unless install_ssh
     if should_install?('libvirt')
       run_command('sudo apt-get update')
       result = run_sequence([
@@ -443,6 +454,14 @@ class DebianDependencyManager < DependencyManager
     run_command("sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable\"")
     run_command("sudo apt-get update")
     result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
+    result[:value].success?
+  end
+
+  def install_ssh
+    result = run_sequence([
+                            'sudo apt-get update',
+                            "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{SSH_PACKAGE}"
+                          ])
     result[:value].success?
   end
 
@@ -471,7 +490,7 @@ class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
     packages = %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
                   qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
-                  software-properties-common zip ssh]
+                  software-properties-common zip]
     if get_linux_distro_version_codename == 'focal'
       packages.concat(%w[libvirt-daemon-system bridge-utils libvirt-clients])
     else
