@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../models/result'
-
 # This file is part of MDBCI.
 #
 # MDBCI is free software: you can redistribute it and/or modify it under the terms
@@ -14,6 +12,8 @@ require_relative '../models/result'
 #
 # You should have received a copy of the GNU General Public License along with MDBCI.
 # If not, see <https://www.gnu.org/licenses/>.
+
+require_relative '../models/result'
 
 # Module for executing commands on the remote machine using ssh package
 module SshCommands

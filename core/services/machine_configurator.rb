@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-require 'io/console'
-require_relative '../models/result'
-require_relative '../services/log_storage'
-require_relative 'ssh_commands'
-
 # This file is part of MDBCI.
 #
 # MDBCI is free software: you can redistribute it and/or modify it under the terms
@@ -17,6 +12,11 @@ require_relative 'ssh_commands'
 #
 # You should have received a copy of the GNU General Public License along with Foobar.
 # If not, see <https://www.gnu.org/licenses/>.
+
+require 'io/console'
+require_relative '../models/result'
+require_relative '../services/log_storage'
+require_relative 'ssh_commands'
 
 # Class allows to configure a specified machine using the chef-solo,
 # MDBCI coockbooks and roles.
