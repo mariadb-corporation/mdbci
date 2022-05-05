@@ -64,7 +64,7 @@ class TerraformConfigurationGenerator < BaseCommand
     login = Etc.getlogin
     private_key_file_path = File.join(@configuration_path, KEY_FILE_NAME)
     public_key_file_path = "#{private_key_file_path}.pub"
-    SshCommands.execute_ssh_keygen(private_key_file_path, login)
+    SshCommands.generate_ssh_key(private_key_file_path, login)
     File.chmod(0o400, private_key_file_path)
     File.chmod(0o400, public_key_file_path)
     public_key_value = File.read(public_key_file_path).strip

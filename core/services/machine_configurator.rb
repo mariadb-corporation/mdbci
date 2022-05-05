@@ -70,7 +70,7 @@ class MachineConfigurator
   # @param logger [Logger] logger to log info
   def ssh_exec(machine, command, logger)
     logger.info("Running '#{command}' on the remote server")
-    result = SshCommands.execute_ssh(machine, command)
+    result = SshCommands.execute_command_with_ssh(machine, command)
     output = if result.success?
                result.value
              else
@@ -208,7 +208,7 @@ class MachineConfigurator
     upload_tasks.reduce(status) do |result, (source, target)|
       result.and_then do
         logger.debug("Uploading #{source} to #{target}")
-        SshCommands.execute_scp(machine, source, File.join(remote_dir, target))
+        SshCommands.copy_with_scp(machine, source, File.join(remote_dir, target))
       end
     end
   end

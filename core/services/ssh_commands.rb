@@ -23,7 +23,7 @@ module SshCommands
   # @param machine [Hash] information about machine to connect
   # @param command [String] command to run
   # @return result of the command execution with stdin or stderr output
-  def self.execute_ssh(machine, command)
+  def self.execute_command_with_ssh(machine, command)
     ssh_login = "#{machine['whoami']}@#{machine['network']}"
     command = "ssh #{ARGUMENTS} -i '#{machine['keyfile']}' '#{ssh_login}' '#{command}'"
     execute_command(command)
@@ -35,9 +35,9 @@ module SshCommands
   # @param target [String] path to the file on the remote machine
   # @param recursive [Boolean] use recursive copying or not
   # @return result of the command execution with stdout or stderr output
-  def self.execute_scp(machine, source, target, recursive = true)
+  def self.copy_with_scp(machine, source, target, recursive = true)
     target_dir = File.dirname(target)
-    execute_ssh(machine, "mkdir -p #{target_dir}")
+    execute_command_with_ssh(machine, "mkdir -p #{target_dir}")
     ssh_login = "#{machine['whoami']}@#{machine['network']}"
     command = "scp #{ARGUMENTS} -i '#{machine['keyfile']}' #{recursive ? ' -r ' : ''} '#{source}' '#{ssh_login}:#{target}'"
     execute_command(command)
@@ -48,7 +48,7 @@ module SshCommands
   #   Private key will be created with the .pem extension
   # @param user [String] user name to whom the keys will be created
   # @return result of the command execution with stdout or stderr output
-  def self.execute_ssh_keygen(filepath, user)
+  def self.generate_ssh_key(filepath, user)
     command = "ssh-keygen -q -t rsa -f '#{filepath}' -C '#{user}' -b 2048 -N ''"
     execute_command(command)
   end
