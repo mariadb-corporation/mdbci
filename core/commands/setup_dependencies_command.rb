@@ -327,7 +327,7 @@ end
 
 # Class that manages CentOS specific packages
 class CentosDependencyManager < DependencyManager
-  SSH_PACKAGE = 'openssh'
+  SSH_PACKAGE = 'openssh-clients'
 
   def required_packages
     %w[ceph-common gcc git libvirt libvirt-client libvirt-devel
@@ -420,7 +420,7 @@ end
 
 # Class that manages Debian specific packages
 class DebianDependencyManager < DependencyManager
-  SSH_PACKAGE = 'ssh'
+  SSH_PACKAGE = 'openssh-client'
 
   def required_packages
     %w[build-essential cmake git libvirt-daemon-system libvirt-dev
