@@ -101,10 +101,10 @@ class PublicKeysCommand < BaseCommand
   # @param machine [Hash] information about machine to connect
   def add_key(machine)
     key_file_content = File.read(@keyfile)
-    SshCommands.execute_ssh(machine, 'mkdir -p ~/.ssh')
-    SshCommands.execute_ssh(machine, 'cat ~/.ssh/authorized_keys').and_then do |authorized_keys_content|
+    SshCommands.execute_command_with_ssh(machine, 'mkdir -p ~/.ssh')
+    SshCommands.execute_command_with_ssh(machine, 'cat ~/.ssh/authorized_keys').and_then do |authorized_keys_content|
       unless authorized_keys_content.include? key_file_content
-        return SshCommands.execute_ssh(machine, "echo '#{key_file_content}' >> ~/.ssh/authorized_keys")
+        return SshCommands.execute_command_with_ssh(machine, "echo '#{key_file_content}' >> ~/.ssh/authorized_keys")
       end
     end
   end
