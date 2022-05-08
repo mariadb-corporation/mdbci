@@ -82,11 +82,15 @@ class MachineConfigurator
 
   private
 
+  FILTER_LINES = ['Removing cookbooks'].freeze
+
   # Log output in the human-readable format
   def log_printable_lines(lines, logger)
     lines.split("\n").map(&:chomp)
          .grep(/\p{Graph}+/mu)
-         .each do |line|
+         .filter do |line|
+           FILTER_LINES.none? { |filter| line.include?(filter) }
+         end.each do |line|
       logger.debug("ssh: #{line}")
     end
   end
