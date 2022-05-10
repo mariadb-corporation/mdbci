@@ -378,7 +378,7 @@ when 'centos', 'redhat', 'rocky'
     end
   when 8 # CentOS 8
     packages = general_packages.concat(centos_packages).concat(centos_8_packages)
-    if node.attributes['kernel']['machine'] == 'aarch64'
+    if node.attributes['kernel']['machine'] == 'aarch64' && platform?('centos')
       yum_repository 'PowerTools' do
         baseurl 'http://centos.mirror.liquidtelecom.com/8/PowerTools/aarch64/os/'
         gpgcheck false
