@@ -60,7 +60,7 @@ module SshCommands
       converted_data = result[:stdout].force_encoding('UTF-8')
       Result.ok(converted_data)
     else
-      converted_data = result[:stderr].force_encoding('UTF-8')
+      converted_data = "stdout: #{result[:stdout]}\nstderr: #{result[:stderr]}".force_encoding('UTF-8')
       Result.error(converted_data)
     end
   end
