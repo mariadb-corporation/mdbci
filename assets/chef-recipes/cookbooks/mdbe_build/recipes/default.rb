@@ -403,7 +403,7 @@ when 'suse'
       action :add
       gpgcheck false
       if node.attributes['kernel']['machine'] == 'aarch64'
-        baseurl 'http://www.rpmfind.net/linux/opensuse/distribution/leap/15.0/repo/oss/'
+        baseurl 'https://download.opensuse.org/repositories/devel:/tools:/building/SLE_15_SP2/'
       else
         baseurl 'https://download.opensuse.org/distribution/leap/15.2/repo/oss/'
       end
