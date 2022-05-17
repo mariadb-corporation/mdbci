@@ -265,6 +265,17 @@ class TerraformAwsGenerator
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
     }
+    <% if attached_disk %>
+      resource "aws_ebs_volume" "<%= name %>-disk" {
+        availability_zone = local.availability_zone
+        size = 100
+      }
+      resource "aws_volume_attachment" "attach_disk" {
+        device_name = "/dev/sdh"
+        volume_id   = aws_ebs_volume.<%= name %>-disk.id
+        instance_id = aws_instance.<%= name %>.id
+      }
+    <% end %>
     output "<%= name %>_network" {
       value = {
         user = "<%= user %>"

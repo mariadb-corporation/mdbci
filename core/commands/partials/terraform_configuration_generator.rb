@@ -138,7 +138,7 @@ class TerraformConfigurationGenerator < BaseCommand
   def need_attached_disk?(node)
     ConfigurationGenerator.parse_products_info(node).map do |product|
       product['name']
-    end.include?('clustrix')
+    end.include?('clustrix') || node[1]['attach_disk'] == 'true'
   end
 
   # Get configuration file generator by nodes provider.
