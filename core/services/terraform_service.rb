@@ -141,7 +141,7 @@ module TerraformService
   def self.node_has_disk_resource?(node, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(
       logger,
-      "grep 'resource \"aws_volume_attachment\" \"#{node}\"-disk-attachment'",
+      "grep 'resource \"aws_volume_attachment\" \"#{node}-disk-attachment\"' infrastructure.tf",
       path
     )[:value].exitstatus.zero?
   end
