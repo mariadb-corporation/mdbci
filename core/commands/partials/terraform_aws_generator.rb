@@ -270,7 +270,7 @@ class TerraformAwsGenerator
         availability_zone = local.availability_zone
         size = 100
       }
-      resource "aws_volume_attachment" "attach_disk" {
+      resource "aws_volume_attachment" "<%= name %>-disk-attachment" {
         device_name = "/dev/sdh"
         volume_id   = aws_ebs_volume.<%= name %>-disk.id
         instance_id = aws_instance.<%= name %>.id
