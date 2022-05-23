@@ -122,10 +122,10 @@ module TerraformService
   # Generate additional disk resources names by node name,
   # if such resources declared in the terraform config file.
   #
-  # @param nodes [Array<String>] name of nodes
+  # @param nodes [Array<String>] names of the nodes
   # @param logger [Logger] logger to log into
   # @param path [String] path to the directory with terraform configuration
-  # @return [Array<String>] Hash with resources names in format 'aws_volume_attachment.node-disk-attachment'
+  # @return [Array<String>] Array with resources names in format 'aws_volume_attachment.node-disk-attachment'
   def self.additional_disk_resources(nodes, logger, path)
     logger.info('Looking for an additional disks of the nodes')
     nodes.filter { |node| node_has_disk_resource?(node, logger, path) }
