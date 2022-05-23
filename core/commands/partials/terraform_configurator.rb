@@ -81,13 +81,14 @@ class TerraformConfigurator
     TerraformService.resource_type(@config.provider).and_then do |resource_type|
       TerraformService.init(@ui, @config.path)
       target_nodes = TerraformService.nodes_to_resources(nodes, resource_type)
-      if @config.provider == 'aws'
-        target_nodes.merge(TerraformService.additional_disk_resources(nodes, @ui, @config.path))
-      end
       @attempts.times do |attempt|
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
         destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
-        result = TerraformService.apply(target_nodes.values, @ui, @config.path)
+        resources_to_bring = target_nodes.values
+        if @config.provider == 'aws'
+          resources_to_bring += TerraformService.additional_disk_resources(nodes, @ui, @config.path)
+        end
+        result = TerraformService.apply(resources_to_bring, @ui, @config.path)
         next if result.error?
 
         TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
