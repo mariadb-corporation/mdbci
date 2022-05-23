@@ -119,7 +119,7 @@ module TerraformService
     nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
   end
 
-  # Generate additional resource specs by node name,
+  # Generate additional disk resources names by node name,
   # if such resources declared in the terraform config file.
   #
   # @param nodes [Array<String>] name of nodes
