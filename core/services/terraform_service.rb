@@ -125,11 +125,11 @@ module TerraformService
   # @param nodes [Array<String>] name of nodes
   # @param logger [Logger] logger to log into
   # @param path [String] path to the directory with terraform configuration
-  # @return [Hash] Hash with resources in format { 'node_1-disk' => 'aws_volume_attachment.node_1' }
+  # @return [Hash] Hash with resources in format { 'node-disk' => 'aws_volume_attachment.node-disk-attachment' }
   def self.additional_disk_resources(nodes, logger, path)
     logger.info('Looking for an additional disks of the node')
     nodes.filter { |node| node_has_disk_resource?(node, logger, path) }
-         .map { |node| ["#{node}-disk", "aws_volume_attachment.#{node}"] }.to_h
+         .map { |node| ["#{node}-disk", "aws_volume_attachment.#{node}-disk-attachment"] }.to_h
   end
 
   # Determines if the specified node have attached disk resource
@@ -141,7 +141,7 @@ module TerraformService
   def self.node_has_disk_resource?(node, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(
       logger,
-      "grep 'resource \"aws_instance\" \"#{node}\"'",
+      "grep 'resource \"aws_volume_attachment\" \"#{node}\"-disk-attachment'",
       path
     )[:value].zero?
   end
