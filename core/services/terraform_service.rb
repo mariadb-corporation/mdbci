@@ -143,7 +143,7 @@ module TerraformService
       logger,
       "grep 'resource \"aws_volume_attachment\" \"#{node}\"-disk-attachment'",
       path
-    )[:value].zero?
+    )[:value].exitstatus.zero?
   end
 
   # Select resource names from list by it type.
