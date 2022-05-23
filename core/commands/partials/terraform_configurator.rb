@@ -1,5 +1,18 @@
 # frozen_string_literal: true
 
+# This file is part of MDBCI.
+#
+# MDBCI is free software: you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation,
+# either version 3 of the License, or (at your option) any later version.
+#
+# MDBCI is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with MDBCI.
+# If not, see <https://www.gnu.org/licenses/>.
+
 require_relative '../../models/result'
 require_relative '../../services/machine_configurator'
 require_relative '../../services/terraform_service'
@@ -68,6 +81,9 @@ class TerraformConfigurator
     TerraformService.resource_type(@config.provider).and_then do |resource_type|
       TerraformService.init(@ui, @config.path)
       target_nodes = TerraformService.nodes_to_resources(nodes, resource_type)
+      if @config.provider == 'aws'
+        target_nodes.merge(TerraformService.additional_disk_resources(nodes, @ui, @config.path))
+      end
       @attempts.times do |attempt|
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
         destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
