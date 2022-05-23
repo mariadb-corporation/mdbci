@@ -86,7 +86,7 @@ class TerraformConfigurator
         destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
         resources_to_bring = target_nodes.values
         if @config.provider == 'aws'
-          resources_to_bring += TerraformService.additional_disk_resources(nodes, @ui, @config.path)
+          resources_to_bring += TerraformService.additional_disk_resources(target_nodes.keys, @ui, @config.path)
         end
         result = TerraformService.apply(resources_to_bring, @ui, @config.path)
         next if result.error?
