@@ -119,6 +119,33 @@ module TerraformService
     nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
   end
 
+  # Generate additional resource specs by node name,
+  # if such resources declared in the terraform config file.
+  #
+  # @param nodes [Array<String>] name of nodes
+  # @param logger [Logger] logger to log into
+  # @param path [String] path to the directory with terraform configuration
+  # @return [Hash] Hash with resources in format { 'node_1-disk' => 'aws_volume_attachment.node_1' }
+  def self.additional_disk_resources(nodes, logger, path)
+    logger.info('Looking for an additional disks of the node')
+    nodes.filter { |node| node_has_disk_resource?(node, logger, path) }
+         .map { |node| ["#{node}-disk", "aws_volume_attachment.#{node}"] }.to_h
+  end
+
+  # Determines if the specified node have attached disk resource
+  #
+  # @param nodes [String] name of the node
+  # @param logger [Logger] logger to log into
+  # @param path [String] path to the directory with terraform configuration
+  # @return [Boolean] Does the node has additional disk
+  def self.node_has_disk_resource?(node, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(
+      logger,
+      "grep 'resource \"aws_instance\" \"#{node}\"'",
+      path
+    )[:value].zero?
+  end
+
   # Select resource names from list by it type.
   # For example, for list ['aws_instance.node1', 'aws_instance.node2', 'aws_keypair.keypair_name']
   # and resource_type is 'aws_instance', result: ['node1', 'node2']
