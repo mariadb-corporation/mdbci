@@ -258,6 +258,7 @@ class TerraformAwsGenerator
     resource "aws_instance" "<%= name %>" {
       ami = "<%= ami %>"
       instance_type = "<%= machine_type %>"
+      availability_zone = local.availability_zone
       key_name = aws_key_pair.ec2key.key_name
       <% if vpc %>
         vpc_security_group_ids = [aws_security_group.security_group_vpc.id]
