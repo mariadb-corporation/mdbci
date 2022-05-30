@@ -119,31 +119,17 @@ module TerraformService
     nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
   end
 
-  # Generate additional disk resources names by node name,
-  # if such resources declared in the terraform config file.
+  # Searches additional disk resources declared in the terraform config file
   #
-  # @param nodes [Array<String>] names of the nodes
-  # @param logger [Logger] logger to log into
   # @param path [String] path to the directory with terraform configuration
   # @return [Array<String>] Array with resources names in format 'aws_volume_attachment.node-disk-attachment'
-  def self.additional_disk_resources(nodes, logger, path)
-    logger.info('Looking for an additional disks of the nodes')
-    nodes.filter { |node| node_has_disk_resource?(node, logger, path) }
-         .map { |node| "aws_volume_attachment.#{node}-disk-attachment" }
-  end
-
-  # Determines if the specified node have attached disk resource
-  #
-  # @param nodes [String] name of the node
-  # @param logger [Logger] logger to log into
-  # @param path [String] path to the directory with terraform configuration
-  # @return [Boolean] Does the node has additional disk
-  def self.node_has_disk_resource?(node, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(
-      logger,
-      "grep 'resource \"aws_volume_attachment\" \"#{node}-disk-attachment\"' #{TerraformConfigurationGenerator::CONFIGURATION_FILE_NAME}",
-      path
-    )[:value].exitstatus.zero?
+  def self.additional_disk_resources(path)
+    configuration_path = "#{path}/#{TerraformConfigurationGenerator::CONFIGURATION_FILE_NAME}"
+    resources = []
+    File.open(configuration_path) do |file|
+      resources = file.grep('resource "aws_volume_attachment"')
+    end
+    resources.map { |line| "aws_volume_attachment.#{line.split[1].gsub('"', '')}" }
   end
 
   # Select resource names from list by it type.
