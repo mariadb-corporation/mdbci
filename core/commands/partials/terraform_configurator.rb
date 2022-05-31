@@ -80,7 +80,7 @@ class TerraformConfigurator
   def up_machines(nodes)
     TerraformService.resource_type(@config.provider).and_then do |resource_type|
       TerraformService.init(@ui, @config.path)
-      target_nodes = resources_to_bring(nodes)
+      target_nodes = resources_to_bring(nodes, resource_type)
       @attempts.times do |attempt|
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
         destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
@@ -105,7 +105,7 @@ class TerraformConfigurator
   #
   # @param nodes [Array<String>] name of nodes to bring up
   # @return [Hash]
-  def resources_to_bring(nodes)
+  def resources_to_bring(nodes, resource_type)
     nodes_resources = TerraformService.nodes_to_resources(nodes, resource_type)
     return nodes_resources unless @config.provider != 'aws'
 
