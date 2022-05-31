@@ -127,7 +127,7 @@ module TerraformService
   def self.additional_disk_resources(path)
     configuration_path = "#{path}/#{TerraformConfigurationGenerator::CONFIGURATION_FILE_NAME}"
     resources = File.open(configuration_path) do |file|
-      file.grep('resource "aws_volume_attachment"')
+      file.grep(/resource "aws_volume_attachment"/)
     end
     resources.to_h do |line|
       node = line.split[2].gsub('"', '')
