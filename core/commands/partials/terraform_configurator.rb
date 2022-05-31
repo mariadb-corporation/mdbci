@@ -80,15 +80,11 @@ class TerraformConfigurator
   def up_machines(nodes)
     TerraformService.resource_type(@config.provider).and_then do |resource_type|
       TerraformService.init(@ui, @config.path)
-      target_nodes = TerraformService.nodes_to_resources(nodes, resource_type)
+      target_nodes = resources_to_bring(nodes)
       @attempts.times do |attempt|
         @ui.info("Up nodes #{nodes}. Attempt #{attempt + 1}.")
         destroy_nodes(target_nodes.keys) if @recreate_nodes || attempt.positive?
-        resources_to_bring = target_nodes.values
-        if @config.provider == 'aws'
-          resources_to_bring += TerraformService.additional_disk_resources(target_nodes.keys, @ui, @config.path)
-        end
-        result = TerraformService.apply(resources_to_bring, @ui, @config.path)
+        result = TerraformService.apply(target_nodes.values, @ui, @config.path)
         next if result.error?
 
         TerraformService.running_resources(@ui, @config.path).and_then do |running_resources|
@@ -103,6 +99,23 @@ class TerraformConfigurator
       end
       Result.error("Error up of machines: #{target_nodes.keys}")
     end
+  end
+
+  # Determines which resources should be brought up via terraform
+  #
+  # @param nodes [Array<String>] name of nodes to bring up
+  # @return [Hash]
+  def resources_to_bring(nodes)
+    nodes_resources = TerraformService.nodes_to_resources(nodes, resource_type)
+    return nodes_resources unless @config.provider != 'aws'
+
+    @ui.info('Looking for additional disks')
+    nodes_resources.merge(
+      TerraformService.additional_disk_resources(@config.path).filter do |_, resource|
+        nodes.any? { |node| resource =~ ".#{node}-disk-attachment" }
+      end
+    )
+    nodes_resources
   end
 
   def retrieve_all_nodes_network(nodes)
