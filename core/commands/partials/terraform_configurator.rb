@@ -107,15 +107,14 @@ class TerraformConfigurator
   # @return [Hash]
   def resources_to_bring(nodes, resource_type)
     nodes_resources = TerraformService.nodes_to_resources(nodes, resource_type)
-    return nodes_resources unless @config.provider != 'aws'
+    return nodes_resources if @config.provider != 'aws'
 
     @ui.info('Looking for additional disks')
     nodes_resources.merge(
       TerraformService.additional_disk_resources(@config.path).filter do |_, resource|
-        nodes.any? { |node| resource =~ ".#{node}-disk-attachment" }
+        nodes.any? { |node| resource =~ /\.#{node}-disk-attachment/ }
       end
     )
-    nodes_resources
   end
 
   def retrieve_all_nodes_network(nodes)
