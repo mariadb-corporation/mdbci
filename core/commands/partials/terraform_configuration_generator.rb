@@ -131,14 +131,14 @@ class TerraformConfigurationGenerator < BaseCommand
     )
   end
 
-  # Enable an additional disk for nodes with the Clustrix product
+  # Determines whether the current node needs to attach an additional disk
   #
   # @param node [Array] information of the node from configuration file
   # @return [Boolean] result
   def need_attached_disk?(node)
-    ConfigurationGenerator.parse_products_info(node).map do |product|
-      product['name']
-    end.include?('clustrix') || node[1]['attach_disk'] == 'true'
+    ConfigurationGenerator.parse_products_info(node).any? do |product|
+      ProductAttributes.need_attached_disk?(product['name'])
+    end || node[1]['attach_disk'] == 'true'
   end
 
   # Get configuration file generator by nodes provider.
