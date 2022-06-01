@@ -168,7 +168,8 @@ module ProductAttributes
       name: 'clustrix',
       repository: 'clustrix',
       valid_repository_version: -> (version) { version.start_with?('http') },
-      license_file_name: 'clustrix_license'
+      license_file_name: 'clustrix_license',
+      attached_disk: true
     },
     'mdbe_build' => {
       recipe: 'mdbe_build',
@@ -567,7 +568,13 @@ module ProductAttributes
     !PRODUCT_ATTRIBUTES.dig(product, :without_version)
   end
 
+  # Checks whether the product is from ci repository
   def self.ci_product?(product)
     PRODUCT_ATTRIBUTES[product].key?(:ci_product) && PRODUCT_ATTRIBUTES[product][:ci_product]
+  end
+
+  # Checks whether the product needs to attach additional disk
+  def self.need_attached_disk?(product)
+    PRODUCT_ATTRIBUTES[product].key?(:attached_disk) && PRODUCT_ATTRIBUTES[product][:attached_disk]
   end
 end
