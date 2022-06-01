@@ -4,16 +4,6 @@ DEVICE_REGEX = /\/dev\/[a-zA-Z0-9]+(\d+)/
 
 ruby_block 'Get filesystem information' do
   block do
-    lsblk_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,SIZE,TYPE,MODEL | grep disk")
-    lsblk_cmd.run_command
-    lsblk_cmd_stdout = lsblk_cmd.stdout.chomp.split("\n")
-    disk_info = lsblk_cmd_stdout[0]
-    lsblk_cmd_stdout.each do |disk|
-      disk_info = disk if disk.include?('Block Store')
-    end
-    root_disk_name, root_disk_size = disk_info.split(' ')
-    device_base_name = "/dev/#{root_disk_name}"
-
     df_cmd = Mixlib::ShellOut.new('df -Th / -BG')
     df_cmd.run_command
     device_name, fs_type, device_size = df_cmd.stdout.lines.last.split(' ')
@@ -23,6 +13,16 @@ ruby_block 'Get filesystem information' do
       mount_cmd.run_command
       device_name = mount_cmd.stdout.chomp.split(' ').first
     end
+
+    lsblk_find_parent_name_cmd = Mixlib::ShellOut.new("lsblk -no PKNAME #{device_name}")
+    lsblk_find_parent_name_cmd.run_command
+    root_disk_name = lsblk_find_parent_name_cmd.stdout.chomp
+    lsblk_root_disk_info_cmd = Mixlib::ShellOut.new("lsblk -ln -o NAME,SIZE,TYPE,MODEL | grep '#{root_disk_name} .*disk'")
+    lsblk_root_disk_info_cmd.run_command
+    disk_info = lsblk_root_disk_info_cmd.stdout.chomp
+    root_disk_size = disk_info.split(' ')[1]
+    device_base_name = "/dev/#{root_disk_name}"
+
     if device_size == root_disk_size
       node.run_state[:need_grow_root_fs] = false
     else
