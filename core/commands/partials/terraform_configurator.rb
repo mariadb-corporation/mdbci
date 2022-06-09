@@ -112,8 +112,8 @@ class TerraformConfigurator
     @ui.info('Looking for additional disks')
     @config.node_configurations.filter do |_, configuration|
       configuration.key?('attach_disk') && configuration['attach_disk'] == 'true'
-    end.keys.each do |name|
-      nodes_resources.merge({ "#{name}-disk" => "aws_volume_attachment.#{node}" })
+    end.each_key do |name|
+      nodes_resources.merge({ "#{name}-disk" => "aws_volume_attachment.#{name}-disk-attachment" })
     end
   end
 
