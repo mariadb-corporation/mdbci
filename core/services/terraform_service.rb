@@ -119,22 +119,6 @@ module TerraformService
     nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
   end
 
-  # Searches additional disk resources declared in the terraform config file
-  #
-  # @param path [String] path to the directory with terraform configuration
-  # @return [Hash] Hash with node name keys and resources names values
-  # in format 'aws_volume_attachment.node-disk-attachment'
-  def self.additional_disk_resources(path)
-    configuration_path = "#{path}/#{TerraformConfigurationGenerator::CONFIGURATION_FILE_NAME}"
-    resources = File.open(configuration_path) do |file|
-      file.grep(/resource "aws_volume_attachment"/)
-    end
-    resources.to_h do |line|
-      node = line.split[2].gsub('"', '')
-      [node, "aws_volume_attachment.#{node}"]
-    end
-  end
-
   # Select resource names from list by it type.
   # For example, for list ['aws_instance.node1', 'aws_instance.node2', 'aws_keypair.keypair_name']
   # and resource_type is 'aws_instance', result: ['node1', 'node2']

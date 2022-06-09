@@ -110,11 +110,11 @@ class TerraformConfigurator
     return nodes_resources if @config.provider != 'aws'
 
     @ui.info('Looking for additional disks')
-    nodes_resources.merge(
-      TerraformService.additional_disk_resources(@config.path).filter do |_, resource|
-        nodes.any? { |node| resource =~ /\.#{node}-disk-attachment/ }
-      end
-    )
+    @config.node_configurations.filter do |_, configuration|
+      configuration.key?('attach_disk') && configuration['attach_disk'] == 'true'
+    end.keys.each do |name|
+      nodes_resources.merge({ "#{name}-disk" => "aws_volume_attachment.#{node}" })
+    end
   end
 
   def retrieve_all_nodes_network(nodes)
