@@ -225,7 +225,8 @@ class AwsService
   def terminate_instance_by_name(node_name)
     return unless configured?
 
-    terminate_instance(get_aws_instance_id_by_node_name(node_name))
+    instances_list.select { |instance| instance[:node_name] == node_name }
+                  .each { |instance| terminate_instance(instance[:instance_id]) }
   end
 
   # Terminate instance specified by the node name
