@@ -220,9 +220,9 @@ class AwsService
     nil
   end
 
-  # Terminate instance specified by the node name
+  # Terminate instances specified by the node name
   # @param [String] node_name name of node to terminate
-  def terminate_instance_by_name(node_name)
+  def terminate_instances_by_name(node_name)
     return unless configured?
 
     instances_list.select { |instance| instance[:node_name] == node_name }

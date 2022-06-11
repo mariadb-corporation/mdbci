@@ -146,7 +146,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_vagrant_vm_list.each do |provider, nodes|
       nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
     end
-    filtered_aws_vm_list.each { |node| @aws_service.terminate_instance_by_name(node) }
+    filtered_aws_vm_list.uniq.each { |node| @aws_service.terminate_instances_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
     @ui.info("Virtual machines was successfully deleted")
@@ -220,7 +220,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     if json_info['aws'].class == Array
       json_info['aws'].each do |instance|
         @ui.info("Destroy #{instance['node_name']}")
-        @aws_service.terminate_instance_by_name(instance['node_name'])
+        @aws_service.terminate_instances_by_name(instance['node_name'])
       end
     end
     if json_info['gcp'].class == Array
