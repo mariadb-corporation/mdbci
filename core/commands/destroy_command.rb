@@ -140,8 +140,8 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_digitalocean_vm_list = filter_nodes_by_name(digitalocean_vm_list, @env.node_name)
     summary_filtered_vm_list = filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list +
       filtered_gcp_vm_list + filtered_digitalocean_vm_list
-    return unless @ui.confirmation("Virtual machines to destroy: #{summary_filtered_vm_list}",
-                                   'Do you want to continue? [y/n]')
+    @ui.info("Next virtual machines will be destroyed: #{summary_filtered_vm_list}")
+    return unless @ui.confirmation("", 'Do you want to continue? [y/n]')
 
     filtered_vagrant_vm_list.each do |provider, nodes|
       nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
@@ -149,6 +149,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_aws_vm_list.each { |node| @aws_service.terminate_instance_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
+    @ui.info("Virtual machines was successfully deleted")
   end
 
   # Handle case when command calling with configuration.
