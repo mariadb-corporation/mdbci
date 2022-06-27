@@ -64,7 +64,7 @@ module GaleraCiParser
   end
 
   def self.generate_pool_link(url, logger, auth)
-    dir = get_directory_links(url.to_s, logger, auth)[0].attributes['href'].value
+    dir = get_directory_links(url.to_s, logger, auth)[0][:href]
     "#{url}/#{dir}"
   rescue OpenURI::HTTPError => e
     url
