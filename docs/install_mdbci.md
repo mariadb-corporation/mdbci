@@ -63,7 +63,7 @@ mdbci up my-setup
 Once the last command finishes, you should have a working set of VMs in the `my-setup` subfolder.
 
 See also:
-* [Tutorial](../tutorial.md).
-* [Example with explanations](../example_with_explanations.md).
-* [MDBCI generate-product-repositories](../commands/generate-product-repositories.md).
+* [Tutorial](./tutorial.md).
+* [Example with explanations](./example_with_explanations.md).
+* [MDBCI generate-product-repositories](./commands/generate-product-repositories.md).
 * [Template creation](detailed_topics/template_creation.md).
