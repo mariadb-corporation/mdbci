@@ -109,6 +109,16 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
+  "rhel_9_gcp":{
+    "provider": "gcp",
+    "architecture": "amd64",
+    "image": "rhel-cloud/rhel-9",
+    "platform": "rhel",
+    "platform_version": "9",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  },
   "sles_12_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
