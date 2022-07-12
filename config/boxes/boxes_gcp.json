@@ -117,7 +117,8 @@
     "platform_version": "9",
     "default_machine_type": "g1-small",
     "default_cpu_count": "1",
-    "default_memory_size": "1024"
+    "default_memory_size": "1024",
+    "configure_subscription_manager": "true"
   },
   "sles_12_gcp": {
     "provider": "gcp",

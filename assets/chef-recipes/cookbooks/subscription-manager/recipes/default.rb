@@ -1,3 +1,7 @@
+execute 'Install subscription-manager' do
+  command 'dnf -y install subscription-manager'
+end
+
 execute 'Register the system' do
   sensitive true
   command 'subscription-manager register '\
@@ -5,6 +9,10 @@ execute 'Register the system' do
           "--password #{node['subscription-manager']['password']} "\
 	        "--force"
   returns [0, 70]
+end
+
+execute 'Enable repository management' do
+  command 'subscription-manager config --rhsm.manage_repos=1'
 end
 
 execute 'Setting a Service Level Preference' do
@@ -19,14 +27,16 @@ execute 'Disable repositories' do
   command 'subscription-manager repos --disable=*'
 end
 
-ENABLE_REPOSITORIES = %w(rhel-8-for-x86_64-baseos-rpms
-                         rhel-8-for-x86_64-supplementary-rpms
-                         rhel-8-for-x86_64-appstream-rpms
-                         codeready-builder-for-rhel-8-x86_64-rpms
-                         codeready-builder-for-rhel-8-x86_64-debug-rpms
-                         codeready-builder-for-rhel-8-x86_64-source-rpms)
+platform_version = node[:platform_version].to_i
 
-ENABLE_REPOSITORIES.each do |repo|
+enable_repositories = ["rhel-#{platform_version}-for-$(arch)-baseos-rpms",
+                         "rhel-#{platform_version}-for-$(arch)-supplementary-rpms",
+                         "rhel-#{platform_version}-for-$(arch)-appstream-rpms",
+                         "codeready-builder-for-rhel-#{platform_version}-$(arch)-rpms",
+                         "codeready-builder-for-rhel-#{platform_version}-$(arch)-debug-rpms",
+                         "codeready-builder-for-rhel-#{platform_version}-$(arch)-source-rpms"]
+
+enable_repositories.each do |repo|
   execute "Enable #{repo} repo" do
     command "subscription-manager repos --enable \"#{repo}\""
   end

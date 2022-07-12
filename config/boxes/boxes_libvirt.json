@@ -104,6 +104,7 @@
     "architecture": "amd64",
     "box": "generic/alma9",
     "platform": "rhel",
-    "platform_version": "9"
+    "platform_version": "9",
+    "configure_subscription_manager": "true"
   }
 }
