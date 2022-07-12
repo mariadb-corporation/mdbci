@@ -206,7 +206,6 @@ centos_packages = %w[
   perl-XML-LibXML
   perl-XML-Simple
   readline-devel
-  redhat-lsb-core
   redhat-rpm-config
   rpmdevtools
   snappy-devel
@@ -224,11 +223,25 @@ centos_7_packages = %w[
   policycoreutils-python
   python-devel
   python-pip
+  redhat-lsb-core
   scons
   subversion
 ]
 
 centos_8_packages = %w[
+  Judy
+  cracklib
+  kernel-headers
+  lz4-devel
+  perl-Getopt-Long
+  perl-Memoize.noarch
+  policycoreutils
+  python3-devel
+  python3-pip
+  python3-scons
+  redhat-lsb-core
+]
+rhel_9_packages = %w[
   Judy
   cracklib
   kernel-headers
@@ -366,7 +379,7 @@ when 'ubuntu'
   execute 'install dependencies mariadb-server' do
     command 'apt-get -y build-dep -q mariadb-server'
   end
-when 'centos', 'redhat', 'rocky'
+when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
@@ -386,6 +399,14 @@ when 'centos', 'redhat', 'rocky'
     end
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
+    end
+    execute 'install development tools' do
+      command "dnf -y groupinstall 'Development Tools'"
+    end
+  when 9 # RHEL 9
+    packages = general_packages.concat(centos_packages).concat(rhel_9_packages)
+    execute 'install epel-release' do
+      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm'
     end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
