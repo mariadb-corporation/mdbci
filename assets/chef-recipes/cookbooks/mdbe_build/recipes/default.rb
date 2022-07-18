@@ -403,13 +403,18 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-  when 9 # RHEL 9
+  when 9 # RHEL 9 / AlmaLinux 9
     packages = general_packages.concat(centos_packages).concat(rhel_9_packages)
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm'
     end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
+    end
+    if node[:platform] == 'almalinux'
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --set-enabled crb'
+      end
     end
   end
 when 'opensuseleap' # Suse 15
