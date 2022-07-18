@@ -80,7 +80,7 @@
   "aarch64_rhel_9_aws": {
     "provider": "aws",
     "architecture": "aarch64",
-    "ami": "ami-014fea091ed40051c",
+    "ami": "ami-04f86108c32876f88",
     "user": "ec2-user",
     "platform": "rhel",
     "platform_version": "9",
