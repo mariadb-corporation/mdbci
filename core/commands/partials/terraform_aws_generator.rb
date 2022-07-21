@@ -285,10 +285,10 @@ class TerraformAwsGenerator
         size = 100
       }
       resource "aws_volume_attachment" "<%= name %>-disk-attachment" {
-        delete_on_termination = true
         device_name = "/dev/sdh"
         volume_id   = aws_ebs_volume.<%= name %>-disk.id
         instance_id = aws_instance.<%= name %>.id
+        skip_destroy = true
       }
     <% end %>
     output "<%= name %>_network" {
