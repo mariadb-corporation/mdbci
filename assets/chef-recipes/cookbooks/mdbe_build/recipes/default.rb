@@ -411,7 +411,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if node[:platform] == 'almalinux'
+    if %w[almalinux rocky].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled crb'
       end

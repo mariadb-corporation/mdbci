@@ -99,11 +99,18 @@
     "configure_subscription_manager": "true",
     "disk_bus": "sata"
   },
-  "rhel_9_libvirt": {
+  "alma_9_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
     "box": "generic/alma9",
     "platform": "rhel",
+    "platform_version": "9"
+  },
+  "rocky_linux_9_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/rocky9",
+    "platform": "rocky",
     "platform_version": "9"
   }
 }
