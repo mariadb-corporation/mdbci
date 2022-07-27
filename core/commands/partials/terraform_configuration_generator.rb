@@ -138,7 +138,7 @@ class TerraformConfigurationGenerator < BaseCommand
   def need_attached_disk?(node)
     ConfigurationGenerator.parse_products_info(node).any? do |product|
       ProductAttributes.need_attached_disk?(product['name'])
-    end || node[1]['attach_disk'] == 'true'
+    end || node[1]['attach_disk'] == 'true' || node[1]['attach_disk'] == true
   end
 
   # Get configuration file generator by nodes provider.
