@@ -273,26 +273,21 @@ class TerraformAwsGenerator
       root_block_device {
         volume_size = 500
       }
+      <% if attached_disk %>
+       ebs_block_device {
+        delete_on_termination = true
+        device_name = "/dev/sdh"
+        volume_size = 100
+     }
+     <% end %>
       <%= connection_block %>
       user_data = <<-EOT
       #!/bin/bash
       sed -i -e 's/^Defaults.*requiretty/# Defaults requiretty/g' /etc/sudoers
       EOT
     }
-    <% if attached_disk %>
-      resource "aws_ebs_volume" "<%= name %>-disk" {
-        availability_zone = local.availability_zone
-        size = 100
-      }
-      resource "aws_volume_attachment" "<%= name %>-disk-attachment" {
-        device_name = "/dev/sdh"
-        volume_id   = aws_ebs_volume.<%= name %>-disk.id
-        instance_id = aws_instance.<%= name %>.id
-        skip_destroy = true
-      }
-    <% end %>
     output "<%= name %>_network" {
-      value = {
+        value = {
         user = "<%= user %>"
         private_ip = aws_instance.<%= name %>.private_ip
         public_ip = aws_instance.<%= name %>.public_ip
