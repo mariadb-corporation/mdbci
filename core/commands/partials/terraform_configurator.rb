@@ -107,19 +107,7 @@ class TerraformConfigurator
   # @return [Hash]
   def resources_to_bring(nodes, resource_type)
     nodes_resources = TerraformService.nodes_to_resources(nodes, resource_type)
-<<<<<<< HEAD
     return nodes_resources
-=======
-    return nodes_resources if @config.provider != 'aws'
-
-    @ui.info('Looking for additional disks')
-    additional_disks_resources = @config.node_configurations.filter do |_, configuration|
-      configuration.key?('attach_disk') && (configuration['attach_disk'] == 'true' || configuration['attach_disk'] == true)
-    end.keys.to_h do |name|
-      ["#{name}-disk", "aws_volume_attachment.#{name}-disk-attachment"]
-    end
-    nodes_resources.merge(additional_disks_resources)
->>>>>>> 8f48ce9f (Add support for processing boolean input in 'attach_disk' property (refs #30162))
   end
 
   def retrieve_all_nodes_network(nodes)
