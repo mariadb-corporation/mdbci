@@ -1,8 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# This script outputs all instance types that satisfy the given AMI and Amazon Availability Zone
+
+require 'aws-sdk-core'
 require 'aws-sdk-ec2'
 require 'optparse'
+require 'yaml'
+
+MDBCI_CONFIG_FILE_PATH = '~/.config/mdbci/config.yaml'
 
 # Displays a list of instance types that satisfy the given parameters
 #
@@ -75,10 +81,22 @@ def parse_options
   options
 end
 
+# Obtains aws credentials from MDBCI configuration
+def load_mdbci_aws_configuration
+  config = YAML.load_file(File.expand_path(MDBCI_CONFIG_FILE_PATH))
+  config['aws']
+end
+
+# Initializes an EC2 client and configures its credentials
+def configure_ec2_client
+  aws_config = load_mdbci_aws_configuration
+  credentials = Aws::Credentials.new(aws_config['access_key_id'], aws_config['secret_access_key'])
+  Aws::EC2::Client.new(region: aws_config['region'], credentials: credentials)
+end
+
 def main
   options = parse_options
-  region = 'eu-west-1'
-  client = Aws::EC2::Client.new(region: region)
+  client = configure_ec2_client
   begin
     ami_params = get_ami_parameters(client, options[:ami])
     types_from_requirements = list_types_from_requirements(client,
