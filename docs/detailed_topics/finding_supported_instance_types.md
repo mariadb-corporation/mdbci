@@ -2,7 +2,7 @@
 To create an AWS box configuration you need to specify `supported_instance_types` parameter -  a list of machine types that can be launched with this AMI and are available in a certain [zone](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html). There are 2 ways to get them.
 
 ## Use [script](../../scripts/aws/find_supported_instance_types.rb)
-This script outputs all instance types that satisfy given parameters. To run this you need to have AWS-CLI tool configured.
+This script outputs all instance types that satisfy the given AMI and Amazon Availability Zone.
 
 ### Usage:
 ```shell script
@@ -15,7 +15,7 @@ This script outputs all instance types that satisfy given parameters. To run thi
 - `--ami` - Amazon Machine Image id
 
 ### Output format:
-The script outputs the list of availavle machine types in JSON format
+The script outputs the list of available machine types in JSON format
 Example:
 ```json
 ["c1.medium","c1.xlarge","c3.8xlarge","c3.large","c3.xlarge"]
