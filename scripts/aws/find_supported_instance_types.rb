@@ -30,7 +30,7 @@ end
 # Displays a list of instance types in the given Availability Zone
 #
 # @param client [Aws::EC2::Client] An initialized EC2 client.
-# @param zone [String] Availability Zone to search for in (e.g. 'eu-west-1a')
+# @param zone [String] Availability Zone to search for in (e.g 'eu-west-1a')
 def list_types_from_zone(client, zone)
   response = client.describe_instance_type_offerings(
     {
