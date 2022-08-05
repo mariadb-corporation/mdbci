@@ -7,10 +7,11 @@ require 'aws-sdk-core'
 require 'aws-sdk-ec2'
 require 'optparse'
 require 'yaml'
+require_relative '../../core/services/configuration_reader'
 
-MDBCI_CONFIG_FILE_PATH = '~/.config/mdbci/config.yaml'
+MDBCI_CONFIG_FILE_NAME = 'mdbci/config.yaml'
 
-# Displays a list of instance types that satisfy the given parameters
+# Returns a list of instance types that match the image requirements
 #
 # @param client [Aws::EC2::Client] An initialized EC2 client.
 # @param architecture [String] CPU architecture type ('x86_64' | 'arm64')
@@ -33,14 +34,14 @@ def list_types_from_requirements(client, architecture, virtualization_type)
   response.instance_types.map(&:instance_type)
 end
 
-# Displays a list of instance types in the given Availability Zone
+# Returns a list of instance types in the given Availability Zone
 #
 # @param client [Aws::EC2::Client] An initialized EC2 client.
-# @param zone [String] Availability Zone to search for in (e.g 'eu-west-1a')
+# @param zone [String] Availability Zone to search for in (e.g. 'eu-west-1a')
 def list_types_from_zone(client, zone)
   response = client.describe_instance_type_offerings(
     {
-      location_type: 'availability-zone', # accepts region, availability-zone, availability-zone-id
+      location_type: 'availability-zone',
       filters: [
         {
           name: 'location',
@@ -52,6 +53,10 @@ def list_types_from_zone(client, zone)
   response.instance_type_offerings.map(&:instance_type)
 end
 
+# Searches for an image by AMI and obtains required CPU architecture and virtualization type
+#
+# @param client [Aws::EC2::Client] An initialized EC2 client.
+# @param ami [String] Amazon Machine Image id
 def get_ami_parameters(client, ami)
   response = client.describe_images({ image_ids: [ami] })
   return {} if response.images.empty?
@@ -63,7 +68,7 @@ def get_ami_parameters(client, ami)
   }
 end
 
-# Parses cli arguments
+# Parses script arguments
 def parse_options
   options = {}
   OptionParser.new do |opt|
@@ -81,9 +86,10 @@ def parse_options
   options
 end
 
-# Obtains aws credentials from MDBCI configuration
+# Obtains AWS credentials from MDBCI configuration
 def load_mdbci_aws_configuration
-  config = YAML.load_file(File.expand_path(MDBCI_CONFIG_FILE_PATH))
+  config_path = ConfigurationReader.path_to_user_file(MDBCI_CONFIG_FILE_NAME)
+  config = YAML.safe_load(File.read(config_path))
   config['aws']
 end
 
@@ -94,20 +100,26 @@ def configure_ec2_client
   Aws::EC2::Client.new(region: aws_config['region'], credentials: credentials)
 end
 
+# Displays suitable instance types in JSON format
+#
+# @param client [Aws::EC2::Client] An initialized EC2 client.
+# @param options [Hash] Given AMI and Zone parsed from script arguments
+def print_supported_instance_types(client, options)
+  ami_params = get_ami_parameters(client, options[:ami])
+  types_from_requirements = list_types_from_requirements(client,
+                                                         ami_params[:architecture],
+                                                         ami_params[:virtualization_type])
+  types_from_zone = list_types_from_zone(client, options[:zone])
+  puts types_from_requirements.intersection(types_from_zone).to_json
+rescue Aws::EC2::Errors::InvalidAMIIDMalformed, Aws::EC2::Errors::InvalidAMIIDNotFound
+  puts "Invalid AMI: #{options[:ami]}"
+  exit 1
+end
+
 def main
   options = parse_options
   client = configure_ec2_client
-  begin
-    ami_params = get_ami_parameters(client, options[:ami])
-    types_from_requirements = list_types_from_requirements(client,
-                                                           ami_params[:architecture],
-                                                           ami_params[:virtualization_type])
-    types_from_zone = list_types_from_zone(client, options[:zone])
-    puts types_from_requirements.intersection(types_from_zone).to_json
-  rescue Aws::EC2::Errors::InvalidAMIIDMalformed, Aws::EC2::Errors::InvalidAMIIDNotFound
-    puts "Invalid AMI: #{options[:ami]}"
-    exit 1
-  end
+  print_supported_instance_types(client, options)
 end
 
 main if $PROGRAM_NAME == __FILE__
