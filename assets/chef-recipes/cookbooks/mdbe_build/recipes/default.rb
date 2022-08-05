@@ -183,6 +183,7 @@ centos_packages = %w[
   java-1.8.0-openjdk-devel
   jemalloc
   jemalloc-devel
+  krb5-devel
   libaio
   libaio-devel
   libasan
@@ -243,6 +244,7 @@ centos_8_packages = %w[
 ]
 rhel_9_packages = %w[
   Judy
+  Judy-devel
   cracklib
   kernel-headers
   lz4-devel
