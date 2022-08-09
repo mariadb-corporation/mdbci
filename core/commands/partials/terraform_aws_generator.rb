@@ -340,8 +340,7 @@ class TerraformAwsGenerator
                                       key_file: @private_key_file_path,
                                       subnet_id: subnet_id,
                                       use_existing_vpc: use_existing_vpc? })
-    supported_instance_types = @aws_service.supported_instance_types(node_params[:ami])
-    machine_types = @aws_service.machine_types_list(supported_instance_types)
+    machine_types = @aws_service.supported_machine_types_list(node_params[:ami])
     CloudServices.choose_instance_type(machine_types, node_params).and_then do |machine_type|
       Result.ok(node_params.merge(machine_type: machine_type))
     end
