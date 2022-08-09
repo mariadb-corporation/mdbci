@@ -49,6 +49,16 @@
     "default_cpu_count": "1",
     "default_memory_size": "1024"
   },
+  "rocky_linux_9_gcp": {
+    "provider": "gcp",
+    "architecture": "amd64",
+    "image": "rocky-linux-cloud/rocky-linux-9",
+    "platform": "rocky",
+    "platform_version": "9",
+    "default_machine_type": "g1-small",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
+  },
   "ubuntu_focal_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
