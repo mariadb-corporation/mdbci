@@ -272,22 +272,6 @@ class AwsService
     @aws_config['use_existing_vpc']
   end
 
-  # Searches for and fetches suitable machine types for the given AMI
-  # @param ami [String] Amazon Machine Image id
-  # @return [Array<Hash>] instance types in format { ram, cpu, type }.
-  def supported_machine_types_list(ami)
-    ami_params = get_ami_parameters(ami)
-    types_from_requirements = machine_types_list_from_requirements(ami_params[:architecture],
-                                                                   ami_params[:virtualization_type])
-    types_from_zone = machine_types_list_from_zone
-    supported_types_ids = types_from_requirements.intersection(types_from_zone)
-    machine_types_list(supported_types_ids)
-  rescue Aws::EC2::Errors::InvalidAMIIDMalformed, Aws::EC2::Errors::InvalidAMIIDNotFound
-    []
-  end
-
-  private
-
   # Fetch machines types list.
   # @param [Array<String>] supported_types supported machine types of box for limit the returning list of types.
   # @return [Array<Hash>] instance types in format { ram, cpu, type }.
@@ -359,6 +343,21 @@ class AwsService
       virtualization_type: image.virtualization_type
     }
   end
+
+  # Searches for suitable instance types for the given AMI
+  # @param ami [String] Amazon Machine Image id
+  # @return [Array<String>] instance types
+  def supported_instance_types(ami)
+    ami_params = get_ami_parameters(ami)
+    types_from_requirements = machine_types_list_from_requirements(ami_params[:architecture],
+                                                                   ami_params[:virtualization_type])
+    types_from_zone = machine_types_list_from_zone
+    types_from_requirements.intersection(types_from_zone)
+  rescue Aws::EC2::Errors::InvalidAMIIDMalformed, Aws::EC2::Errors::InvalidAMIIDNotFound
+    []
+  end
+
+  private
 
   def tags_to_filters(tags)
     tags.map { |name, value| { name: "tag:#{name}", values: [value.to_s] } }
