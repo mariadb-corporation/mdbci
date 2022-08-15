@@ -340,7 +340,10 @@ class TerraformGcpGenerator
         use_only_private_ip: use_only_private_ip?
     )
     machine_types = @gcp_service.machine_types_list
-    CloudServices.choose_instance_type(machine_types, node_params).and_then do |machine_type|
+    supported_machine_types = @gcp_service.select_supported_machine_types(
+      machine_types,
+      node_params[:supported_instance_types])
+    CloudServices.choose_instance_type(supported_machine_types, node_params).and_then do |machine_type|
       @gcp_service.check_quota(machine_types, machine_type, @ui).and_then do
         Result.ok(node_params.merge(machine_type: machine_type))
       end
