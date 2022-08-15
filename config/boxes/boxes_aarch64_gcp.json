@@ -20,5 +20,38 @@
     "default_cpu_count": "1",
     "default_memory_size": "4096",
     "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+  "aarch64_ubuntu_bionic_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "ubuntu-os-cloud/ubuntu-1804-lts-arm64",
+    "platform": "ubuntu",
+    "platform_version": "bionic",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+  "aarch64_ubuntu_focal_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "ubuntu-os-cloud/ubuntu-2004-lts-arm64",
+    "platform": "ubuntu",
+    "platform_version": "focal",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+  "aarch64_ubuntu_jammy_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "ubuntu-os-cloud/ubuntu-2204-lts-arm64",
+    "platform": "ubuntu",
+    "platform_version": "jammy",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
   }
 }
