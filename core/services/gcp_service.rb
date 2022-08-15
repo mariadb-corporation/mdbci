@@ -180,6 +180,17 @@ class GcpService
     end
   end
 
+  # Selects machine types with names present in a given list
+  # @param all_machine_types [Array<Hash>] all instance types from current zone in format { ram, cpu, type }
+  # @param supported_instance_types_names [Array<String>] list of suitable machine types names
+  # @return [Array<Hash>] instance types in format { ram, cpu, type }.
+  def select_supported_machine_types(all_machine_types, supported_instance_types_names)
+    all_machine_types.select do |machine_type|
+      supported_instance_types_names.include?(machine_type[:type])
+    end
+  end
+
+
   def generate_quota(logger)
     logger.info('Taking the GCP quotas')
     URI.open("https://serviceusage.googleapis.com/v1beta1/projects/#{@gcp_config['project']}/services/compute.googleapis.com/consumerQuotaMetrics",
