@@ -13,9 +13,10 @@ Full list of configuration files:
 
 ### boxes
 
-A box describes the image and necessary requirements for VM creation. They are described in json files. Each file can contain one or more box descriptions. Descriptions are usually grouped by provider and processor architecture.
+A box describes the image and necessary requirements for VM creation. They are described in json files. Each file can contain one or more box descriptions. Descriptions are usually grouped by the provider and the processor architecture.
 
 #### File format:
+
 ```json
 {
   "debian_bullseye_gcp": {
@@ -56,18 +57,21 @@ A box describes the image and necessary requirements for VM creation. They are d
 Each box name usually consists of distribution name, version and box provider
 
 #### Common parameters
-* `provider` - box provider (aws, gcp, libvirt, digitalocean...)
+
+* `provider` - box provider (aws, gcp, libvirt, digitalocean, docker)
 * `architecture` - processor arcitecture { amd64 | aarch64 }
 * `platform` - distribution name
 * `platfrom_version` - distribution version
 
 #### Common cloud boxes parameters:
+
 * `default_memory_size` - node RAM size
 * `default_cpu_count` - node number of processors
 * `default_machine_type` - node machine type
 * `supported_instance_types` - list of machine types that can de run with this image
 
 #### Provider-specific parameters:
+
 - AWS:
   * `ami` - Amazon Machine Image ID
   * `vpc` - boolean flag, indicates whether the machine will be lauched in an [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
@@ -77,8 +81,9 @@ Each box name usually consists of distribution name, version and box provider
   * `box` - Vagrant box name
 
 #### Distribution-specific parameters:
-* `configure_subscription_manager` - boolean flag for RedHat system registation
-* `configure_suse_connect` - boolean flag for SLES system registation
+
+* `configure_subscription_manager` - boolean flag for RedHat system registration. When the flag is set MDBCI registers the system via [RHSM](https://access.redhat.com/products/red-hat-subscription-management) and attaches it to an available subscription on the machine creation and unsubscribes and de-registers on the destruction.
+* `configure_suse_connect` - boolean flag for SLES system registration. When the flag is set MDBCI activates the system via SUSEConnect on the machine creation and deactivates it on the destruction.
 
 
 ### clustrix_license
