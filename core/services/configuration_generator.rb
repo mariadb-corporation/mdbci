@@ -27,7 +27,7 @@ class ConfigurationGenerator
     box = node[1]['box'].to_s
     products = ConfigurationGenerator.parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
-    get_role_description(node_params[:name], products, box, registry, force_version).and_then do |role|
+    get_role_description(node_params, products, box, registry, force_version).and_then do |role|
       Result.ok({ node_params: node_params, role_file_content: role, box: box })
     end
   end
@@ -145,14 +145,14 @@ class ConfigurationGenerator
   # Initialize product configs Hash and recipe names list with necessary recipes
   # and configurations on which the box depends.
   #
-  # @param box [String] name of the box
+  # @param node_params [Hash] machine parameters from the configuration file and the box description
   # @return [Result::Base] Hash in format { recipe_names: [], product_configs: {} }
-  def init_product_configs_and_recipes(box, name, registry)
+  def init_product_configs_and_recipes(node_params, registry)
     product_configs = {}
     recipe_names = []
-    provider = provider_by_box(box)
+    provider = node_params[:provider]
 
-    if @box_definitions.get_box(box)['configure_subscription_manager'] == 'true'
+    if node_params[:configure_subscription_manager] == 'true'
       if @rhel_config.nil?
         return Result.error('Credentials for Red Hat Subscription-Manager are not configured')
       end
@@ -162,7 +162,7 @@ class ConfigurationGenerator
       product_configs.merge!('subscription-manager': @rhel_config)
     end
 
-    if @box_definitions.get_box(box)['configure_suse_connect'] == 'true'
+    if node_params[:configure_suse_connect] == 'true'
       return Result.error('Credentials for SUSEConnect are not configured') if @suse_config.nil?
 
       recipe_names << 'suse-connect'
@@ -178,14 +178,15 @@ class ConfigurationGenerator
 
   # Generate the role description for the specified node.
   #
-  # @param name [String] internal name of the machine specified in the template
+  # @param node_params [Hash] machine parameters from the configuration file and the box description
   # @param products [Array<Hash>] list of parameters of products to configure from configuration file
   # @param box [String] name of the box
   # @return [Result::Base<String>] pretty formatted role description in JSON format
-  def get_role_description(name, products, box, registry, force_version)
+  def get_role_description(node_params, products, box, registry, force_version)
+    name = node_params[:name]
     extend_template(products).and_then do |products|
       generate_registry(registry, name, products)
-      recipes_result = init_product_configs_and_recipes(box, name, registry)
+      recipes_result = init_product_configs_and_recipes(node_params, registry)
       return recipes_result if recipes_result.error?
 
       product_configs = recipes_result.value[:product_configs]
