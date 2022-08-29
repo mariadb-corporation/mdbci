@@ -118,6 +118,9 @@ class TerraformConfigurationGenerator < BaseCommand
   # @return [Hash] list of the node parameters.
   def make_node_params(node, box_params)
     symbolic_box_params = box_params.transform_keys(&:to_sym)
+    if node[1].key?('box_parameters')
+      symbolic_box_params = override_box_params(node, symbolic_box_params)
+    end
     symbolic_box_params.merge(
       {
           name: node[0].to_s,
@@ -129,6 +132,18 @@ class TerraformConfigurationGenerator < BaseCommand
           attached_disk: need_attached_disk?(node)
       }
     )
+  end
+
+  # Override the box parameters with the values specified in the box_parameters section
+  # of the node configuration
+  #
+  # @param node [Array] information of the node from configuration file
+  # @param box_params [Hash] information of the box parameters with symbolic keys
+  # @return [Hash] list of the box parameters.
+
+  def override_box_params(node, box_params)
+    node_box_params = node[1]['box_parameters'].transform_keys(&:to_sym)
+    box_params.merge(node_box_params)
   end
 
   # Determines whether the current node needs to attach an additional disk

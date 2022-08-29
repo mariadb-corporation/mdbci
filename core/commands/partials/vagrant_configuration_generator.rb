@@ -147,22 +147,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     !@boxes.get_box(box).nil?
   end
 
-  # Make a hash list of node parameters by a node configuration and
-  # information of the box parameters.
-  #
-  # @param node [Array] information of the node from configuration file
-  # @param box_params [Hash] information of the box parameters
-  # @return [Hash] list of the node parameters.
-  def make_node_params(node, box_params)
-    symbolic_box_params = Hash[box_params.map { |k, v| [k.to_sym, v] }]
-    {
-      name: node[0].to_s,
-      host: node[1]['hostname'].to_s,
-      vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
-      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
-    }.merge(symbolic_box_params)
-  end
-
   # Log the information about the main parameters of the node.
   #
   # @param node_params [Hash] list of the node parameters
@@ -228,14 +212,26 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return [Hash] list of the node parameters.
   def make_node_params(node, box_params)
     symbolic_box_params = box_params.transform_keys(&:to_sym)
-    symbolic_box_params.merge!(
-        {
-            name: node[0].to_s,
-            host: node[1]['hostname'].to_s,
-            vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
-            vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
-        }
-    )
+    if node[1].key?('box_parameters')
+      symbolic_box_params = override_box_params(node, symbolic_box_params)
+    end
+    {
+      name: node[0].to_s,
+      host: node[1]['hostname'].to_s,
+      vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
+      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
+    }.merge(symbolic_box_params)
+  end
+
+  # Overrides the box parameters with the values specified in the 'box_parameters' section
+  # of the node configuration
+  #
+  # @param node [Array] information of the node from configuration file
+  # @param box_params [Hash] information of the box parameters with symbolic keys
+  # @return [Hash] list of the box parameters.
+  def override_box_params(node, box_params)
+    node_box_params = node[1]['box_parameters'].transform_keys(&:to_sym)
+    box_params.merge(node_box_params)
   end
 
   # Generate a Vagrantfile.
