@@ -151,6 +151,7 @@ class ConfigurationGenerator
     product_configs = {}
     recipe_names = []
     provider = node_params[:provider]
+    name = node_params[:name]
 
     if node_params[:configure_subscription_manager] == 'true'
       if @rhel_config.nil?
