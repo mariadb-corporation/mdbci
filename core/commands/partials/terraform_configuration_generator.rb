@@ -140,7 +140,6 @@ class TerraformConfigurationGenerator < BaseCommand
   # @param node [Array] information of the node from configuration file
   # @param box_params [Hash] information of the box parameters with symbolic keys
   # @return [Hash] list of the box parameters.
-
   def override_box_params(node, box_params)
     node_box_params = node[1]['box_parameters'].transform_keys(&:to_sym)
     box_params.merge(node_box_params)
