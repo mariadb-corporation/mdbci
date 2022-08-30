@@ -32,11 +32,12 @@ Example:
     }
 }
 ```
-__Optional__ parameters are product, products, labels, cnf_template_path:
+__Optional__ parameters are product, products, labels, cnf_template_path, box_parameters:
 * product is a description of a single product. [Full list of available products](../all_products.md).
 * products is a description of many products. [Full list of available products](../all_products.md).
 * labels is a set of labels. Names groups of machines that could be brought up independently of other machines in the configuration file. A set of machines with the same labels will be created when calling `mdbci up` with `--labels` option.
 * cnf_template_path is the path to the configuration files to be passed to the machine. When installing a database you must also specify the name of the configuration file and the path to the folder where the file is stored. It is advised to use absolute path in `cnf_template_path` as the relative path is calculated from within the configuration directory.
+* box_parameters is a description of the selected box parameters that are being overridden for a single node (e.g. disable RHEL system registration setting `configure_subscription_manager` flag to 'false'). See [boxes configuration](../configuration_files.md#boxes).
 
 Also need to specify for the product:
 * name is product name. [Full list of available products](../all_products.md).
@@ -83,6 +84,17 @@ Example:
             "name": "mdbe_prestaging",
             "version": "10.2.40-13",
             "include_unsupported": true
+        }
+  },
+    "node4": {
+        "box": "rhel_8_libvirt",
+        "hostname": "host4",
+        "product": {
+            "name": "mariadb",
+            "version": "10.6.5"
+        },
+        "box_parameters": {
+            "configure_subscription_manager": "false"
         }
     }
 }
