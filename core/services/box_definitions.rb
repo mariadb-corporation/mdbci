@@ -123,7 +123,7 @@ class BoxDefinitions
   end
 
   PLATFORM_ALIASES = {
-    'rocky' => 'centos'
+    'rocky' => 'rhel'
   }.freeze
 
   # Determines platform for the specified box
