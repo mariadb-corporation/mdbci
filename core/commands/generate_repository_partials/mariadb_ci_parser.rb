@@ -46,7 +46,7 @@ module MariadbCiParser
       config['path'], auth, nil, 'mariadb_ci', product_version,
       %w[mariadb-client mariadb-server],
       ->(url, _) { generate_mariadb_ci_deb_full_url(url) },
-      ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
+      ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       append_url(%w[apt], nil, true),
