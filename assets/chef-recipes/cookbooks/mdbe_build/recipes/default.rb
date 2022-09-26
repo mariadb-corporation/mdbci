@@ -50,12 +50,14 @@ debian_and_ubuntu_packages = %w[
   libdbi-perl
   libedit-dev
   libevent-dev
+  libfmt-dev
   libgcrypt20-dev
   libjemalloc-dev
   libjpeg-dev
   libjudy-dev
   libkrb5-dev
   liblcms2-2
+  liblzma-dev
   liblzo2-dev
   libmhash-dev
   libnspr4
