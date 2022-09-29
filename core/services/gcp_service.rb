@@ -229,6 +229,42 @@ class GcpService
     cpu_count
   end
 
+  def regions_quotas_list(logger)
+    region_names = @gcp_config['regions']
+    regions = region_names.map do |region|
+      region_description = @service.get_region(@gcp_config['project'], region)
+      quotas = extract_cpu_quotas(region_description.quotas, logger)
+      {
+        region_name: region_description.name,
+        quotas: quotas
+      }
+    end
+    sort_by_max_usage_percentage(regions, logger)
+  end
+
+  # Extracts metrics for CPUs count from the list of the region quotas
+  # @param region_quotas [Array<Google::Apis::ComputeV1::Quota>] list of region quotas
+  # @return [Array<Hash>] list of selected metrics in format { pool_name: String, limit: Integer, usage: Integer },
+  def extract_cpu_quotas(region_quotas, logger)
+    region_quotas.select do |quota|
+      quota.metric =~ /^[A-Z0-9]*_?CPUS$/
+    end.map do |quota|
+      {
+        pool_name: quota.metric,
+        limit: quota.limit,
+        usage: quota.usage
+      }
+    end
+  end
+
+  def sort_by_max_usage_percentage(regions, logger)
+    regions.sort_by do |region|
+      region[:quotas].map do |quota|
+        quota[:usage] / (quota[:limit].nonzero? || 1).to_f
+      end.max
+    end
+  end
+
   def check_quota(machines_types, machine_type, logger)
     get_cpu_quota(logger).and_then do |quota|
       cpu_count = count_all_cpu(machines_types)
