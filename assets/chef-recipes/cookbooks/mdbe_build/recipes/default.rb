@@ -407,6 +407,11 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
+    if %w[almalinux rocky].include? node[:platform]
+      execute 'Enable PowerTools repository' do
+        command 'sudo dnf config-manager --set-enabled powertools'
+      end
+    end
   when 9 # RHEL 9 / AlmaLinux 9
     packages = general_packages.concat(centos_packages).concat(rhel_9_packages)
     execute 'install epel-release' do
