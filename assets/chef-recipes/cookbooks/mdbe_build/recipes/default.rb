@@ -395,10 +395,17 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     end
   when 8 # CentOS 8
     packages = general_packages.concat(centos_packages).concat(centos_8_packages)
-    if node.attributes['kernel']['machine'] == 'aarch64' && platform?('centos')
-      yum_repository 'PowerTools' do
-        baseurl 'http://centos.mirror.liquidtelecom.com/8/PowerTools/aarch64/os/'
-        gpgcheck false
+    if node.attributes['kernel']['machine'] == 'aarch64'
+      case node[:platform]
+      when 'centos'
+        yum_repository 'PowerTools' do
+          baseurl 'http://centos.mirror.liquidtelecom.com/8/PowerTools/aarch64/os/'
+          gpgcheck false
+        end
+      when 'redhat'
+        execute 'Enable CodeReady Builder repository' do
+          command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
+        end
       end
     end
     execute 'install epel-release' do
@@ -409,7 +416,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     end
     if %w[almalinux rocky].include? node[:platform]
       execute 'Enable PowerTools repository' do
-        command 'sudo dnf config-manager --set-enabled powertools'
+        command 'dnf config-manager --set-enabled powertools'
       end
     end
   when 9 # RHEL 9 / AlmaLinux 9
