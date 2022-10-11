@@ -54,17 +54,16 @@ class TerraformGcpGenerator
     return Result.error('Google Cloud Platform is not configured') if @gcp_config.nil?
 
     file = File.open(configuration_file_path, 'w')
-    file.puts(file_header)
-    file.puts(provider_resource)
-    file.puts(vpc_resources) unless use_existing_network?
     result = Result.ok('')
-    node_params.each do |node|
-      result = generate_instance_params(node).and_then do |instance_params|
-        print_node_info(instance_params)
-        file.puts(instance_resources(instance_params))
-        Result.ok('')
+    result = create_instances_configuration(node_params).and_then do |instances_configuration|
+      file.puts(file_header)
+      file.puts(provider_resource(instances_configuration.value[:region], instances_configuration.value[:zone]))
+      file.puts(vpc_resources) unless use_existing_network?
+      instances_configuration.value[:instances].each do |instance_params|
+        print_node_info(instance_params.value)
+        file.puts(instance_resources(instance_params.value))
       end
-      break if result.error?
+      Result.ok('Configuration file was successfully generated')
     end
   rescue StandardError => e
     Result.error(e.message)
@@ -72,6 +71,54 @@ class TerraformGcpGenerator
     result
   ensure
     file.close unless file.nil? || file.closed?
+  end
+
+  def create_instances_configuration(node_params)
+    @ui.info('Selecting the GCP region')
+    result = Result.ok('')
+    all_regions_quotas = @gcp_service.regions_quotas_list(@ui)
+    all_regions_quotas.each do |regional_quotas|
+      region = regional_quotas[:region_name]
+      instances_configuration = select_zone_and_generate_config(region, node_params)
+      @ui.info(instances_configuration)
+      next if instances_configuration.error?
+
+      if @gcp_service.meets_quota?(instances_configuration, regional_quotas, @ui)
+        @ui.info("Selected region: #{region}")
+        return Result.ok(instances_configuration)
+      end
+    end
+    Result.error('Cannot select the region. CPU quota for all available regions will be exceeded')
+  end
+
+  # Selects the zone of the given region available to launch all the machines and generates their configuration
+  # @param region [String] region name
+  # @param node_params [Array<Hash>] list of node params
+  # @return [Hash] instances configuration in format { region: String, zone: String, instances: Array<Hash> }
+  def select_zone_and_generate_config(region, node_params)
+    zones = @gcp_service.list_region_zones(region)
+    @ui.info(zones)
+    zones.each do |zone|
+      generate_instances_configuration_for_zone(zone, node_params).and_then do |instances_configuration|
+        return Result.ok(
+          { region: region,
+            zone: zone,
+            instances: instances_configuration }
+        )
+      end
+    end
+    Result.error("Cannot find suitable machine types in #{region} region")
+  end
+
+  def generate_instances_configuration_for_zone(zone, nodes_params)
+    instances_configuration = []
+    nodes_params.each do |node|
+      result = generate_instance_params(node, zone)
+      return Result.error('Cannot launch the machines in the given zone') if result.error?
+
+      instances_configuration << result
+    end
+    Result.ok(instances_configuration)
   end
 
   # Generate the instance name.
@@ -114,7 +161,7 @@ class TerraformGcpGenerator
   end
 
   # Generate provider resource.
-  def provider_resource
+  def provider_resource(region, zone)
     <<-PROVIDER
     terraform {
       required_providers {
@@ -128,8 +175,8 @@ class TerraformGcpGenerator
     provider "google" {
       credentials = file("#{@gcp_config['credentials_file']}")
       project = "#{@gcp_config['project']}"
-      region = "#{@gcp_config['region']}"
-      zone = "#{@gcp_config['zone']}"
+      region = "#{region}"
+      zone = "#{zone}"
     }
     PROVIDER
   end
@@ -316,7 +363,7 @@ class TerraformGcpGenerator
   # Generate a instance params for the configuration file.
   # @param node_params [Hash] list of the node parameters
   # @return [Result::Base] instance params
-  def generate_instance_params(node_params)
+  def generate_instance_params(node_params, zone)
     if node_params[:platform] == 'windows'
       user = 'jenkins'
       private_key_file_path = ConfigurationReader.path_to_user_file('mdbci/windows.pem')
@@ -331,22 +378,20 @@ class TerraformGcpGenerator
                                          username: TerraformService.format_string(user),
                                          machinename: TerraformService.format_string(node_params[:name]))
     node_params = node_params.merge(
-        labels: labels,
-        instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
-        network: network_name,
-        user: user,
-        is_own_vpc: !use_existing_network?,
-        key_file: private_key_file_path,
-        use_only_private_ip: use_only_private_ip?
+      labels: labels,
+      instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
+      network: network_name,
+      user: user,
+      is_own_vpc: !use_existing_network?,
+      key_file: private_key_file_path,
+      use_only_private_ip: use_only_private_ip?
     )
-    machine_types = @gcp_service.machine_types_list
+    machine_types = @gcp_service.machine_types_list(zone)
     supported_machine_types = @gcp_service.select_supported_machine_types(
       machine_types,
       node_params[:supported_instance_types])
     CloudServices.choose_instance_type(supported_machine_types, node_params).and_then do |machine_type|
-      @gcp_service.check_quota(machine_types, machine_type, @ui).and_then do
-        Result.ok(node_params.merge(machine_type: machine_type))
-      end
+      Result.ok(node_params.merge(machine_type: machine_type))
     end
   end
 end

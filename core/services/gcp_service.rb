@@ -6,6 +6,7 @@ require 'google/apis/compute_v1'
 # This class allows to execute commands in accordance to the Google Cloud Compute
 class GcpService
   SCOPE = %w[https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/compute]
+  FAMILIES_FOR_CPUS_POOL = %w[E2 N1]
   Google::Apis::RequestOptions.default.retries = 5
 
   def initialize(gcp_config, logger)
@@ -34,25 +35,36 @@ class GcpService
   def instances_list
     return [] unless configured?
 
-    @service.fetch_all do |token|
-      @service.list_instances(@gcp_config['project'], @gcp_config['zone'], page_token: token)
-    end.map(&:name)
+
+    zones = list_zones.select do |zone|
+      @gcp_config['supported_regions'].include?(region_by_zone(zone))
+    end
+    zones.map do |zone|
+      @service.fetch_all do |token|
+        @service.list_instances(@gcp_config['project'], zone, page_token: token)
+      end.map(&:name)
+    end.flatten
   end
 
   # Fetch instances list and return instance names with time, type, configuration path, username.
   # @return [Array<{:name => String, :time => String, :type => String,
   # :path => String, :username => String, :zone => String}>]
   # instance names, time, type, configuration path, username.
-  def instances_list_with_time_and_type(zone=@gcp_config['zone'])
+  def instances_list_with_time_and_type
     return [] unless configured?
 
-    @service.fetch_all do |token|
-      @service.list_instances(
-        @gcp_config['project'], zone, page_token: token, order_by: 'creationTimestamp desc'
-      )
-    end.map do |instance|
-      generate_instance_info(instance, zone)
+    zones = list_zones.select do |zone|
+      @gcp_config['supported_regions'].include?(region_by_zone(zone))
     end
+    zones.map do |zone|
+      @service.fetch_all do |token|
+        @service.list_instances(
+          @gcp_config['project'], zone, page_token: token, order_by: 'creationTimestamp desc'
+        )
+      end.map do |instance|
+        generate_instance_info(instance, zone)
+      end
+    end.flatten
   end
 
   def generate_instance_info(instance, zone)
@@ -60,12 +72,12 @@ class GcpService
     path = generate_info_from_metadata(metadata, 'full-config-path')
     user = generate_info_from_metadata(metadata, 'username')
     {
-        type: instance.machine_type.split('/')[-1],
-        node_name: instance.name,
-        launch_time: instance.creation_timestamp,
-        zone: zone,
-        path: path,
-        username: user
+      type: instance.machine_type.split('/')[-1],
+      node_name: instance.name,
+      launch_time: instance.creation_timestamp,
+      zone: zone,
+      path: path,
+      username: user
     }
   end
 
@@ -87,7 +99,6 @@ class GcpService
     end
     zones
   end
-
 
   # Checks for instance existence.
   # @param instance_name [String] instance name
@@ -170,11 +181,11 @@ class GcpService
 
   # Fetch machines types list for current zone.
   # @return [Array<Hash>] instance types in format { ram, cpu, type }.
-  def machine_types_list
+  def machine_types_list(zone)
     return [] unless configured?
 
     @service.fetch_all do |token|
-      @service.list_machine_types(@gcp_config['project'], @gcp_config['zone'], page_token: token)
+      @service.list_machine_types(@gcp_config['project'], zone, page_token: token)
     end.map do |machine_type|
       { ram: machine_type.memory_mb, cpu: machine_type.guest_cpus, type: machine_type.name }
     end
@@ -190,62 +201,31 @@ class GcpService
     end
   end
 
-
-  def generate_quota(logger)
-    logger.info('Taking the GCP quotas')
-    URI.open("https://serviceusage.googleapis.com/v1beta1/projects/#{@gcp_config['project']}/services/compute.googleapis.com/consumerQuotaMetrics",
-             'Authorization' => "Bearer #{@service.authorization.access_token}",
-             'Content-Type' => 'Content-Type: application/json') do |file|
-      return JSON.parse(file.readlines.join(''))
-    end
-  end
-
-  def get_cpu_quota(logger)
-    generate_quota(logger)['metrics'].each do |metric|
-      next unless metric['displayName'] == 'CPUs'
-
-      metric['consumerQuotaLimits'][-1]['quotaBuckets'].each do |limit|
-        next unless limit.key?('dimensions')
-
-        if limit['dimensions']['region'] == @gcp_config['region']
-          return Result.ok(limit['effectiveLimit'].to_i)
-        end
-      end
-    end
-    Result.error('Unable to process the GCP quota')
-  end
-
   def count_cpu(machines_types, current_machine)
     machines_types.each do |machine|
       return machine[:cpu] if current_machine == machine[:type]
     end
   end
 
-  def count_all_cpu(machines_types)
-    cpu_count = 0
-    instances_list_with_time_and_type.each do |instance|
-      cpu_count += count_cpu(machines_types, instance[:type])
-    end
-    cpu_count
-  end
-
+  # Returns list of CPU quotas for all supported regions sorted by current usage
   def regions_quotas_list(logger)
     region_names = @gcp_config['regions']
+    logger.info('Taking the GCP quotas')
     regions = region_names.map do |region|
       region_description = @service.get_region(@gcp_config['project'], region)
-      quotas = extract_cpu_quotas(region_description.quotas, logger)
+      quotas = extract_cpu_quotas(region_description.quotas)
       {
         region_name: region_description.name,
         quotas: quotas
       }
     end
-    sort_by_max_usage_percentage(regions, logger)
+    sort_by_max_usage_percentage(regions)
   end
 
   # Extracts metrics for CPUs count from the list of the region quotas
   # @param region_quotas [Array<Google::Apis::ComputeV1::Quota>] list of region quotas
   # @return [Array<Hash>] list of selected metrics in format { pool_name: String, limit: Integer, usage: Integer },
-  def extract_cpu_quotas(region_quotas, logger)
+  def extract_cpu_quotas(region_quotas)
     region_quotas.select do |quota|
       quota.metric =~ /^[A-Z0-9]*_?CPUS$/
     end.map do |quota|
@@ -257,23 +237,62 @@ class GcpService
     end
   end
 
-  def sort_by_max_usage_percentage(regions, logger)
-    regions.sort_by do |region|
+  # Sorts the regions by the maximal CPU usage percentage from each regional pool
+  def sort_by_max_usage_percentage(regional_quotas)
+    regional_quotas.sort_by do |region|
       region[:quotas].map do |quota|
         quota[:usage] / (quota[:limit].nonzero? || 1).to_f
       end.max
     end
   end
 
-  def check_quota(machines_types, machine_type, logger)
-    get_cpu_quota(logger).and_then do |quota|
-      cpu_count = count_all_cpu(machines_types)
-      logger.info("#{cpu_count} / #{quota} resources are involved")
-      if cpu_count + count_cpu(machines_types, machine_type) <= quota
-        Result.ok('Resources are enough to create a machine')
-      else
-        Result.error('Resources are not enough to create a machine')
-      end
+  # Checks if the given set of instances does not exceed the CPU quota
+  def meets_quota?(instances_configuration, regional_quota, logger)
+    zone = instances_configuration.value[:zone]
+    instances = instances_configuration.value[:instances]
+    cpu_count = count_required_cpus(instances, zone)
+    regional_quota[:quotas].each do |quota_pool|
+      return false unless meets_pool_limit?(quota_pool, cpu_count)
+    end
+    true
+  end
+
+  # Checks if the given quota pool is not exceeded by the machines from the current configuration
+  def meets_pool_limit?(quota_pool, required_cpu_count)
+    pool_name = quota_pool[:pool_name]
+    return true unless required_cpu_count.key(pool_name)
+
+    required_cpu_count[pool_name] >= quota_pool[:limit] - quota_pool[:usage]
+  end
+
+  # Counts the number of CPUs (grouped by machine families) required to launch the machines from the current configuration
+  def count_required_cpus(instances_configuration, zone)
+    machine_types = machine_types_list(zone)
+    count_by_pools = Hash.new(0)
+    instances_configuration.each do |instance|
+      instance_type = instance.value[:machine_type]
+      cpu_count = count_cpu(machine_types, instance_type)
+      pool = cpu_quota_pool_by_machine_type(instance_type)
+      count_by_pools[pool] += cpu_count
+    end
+    count_by_pools
+  end
+
+  # Matches the quota pool name with the current machine type
+  def cpu_quota_pool_by_machine_type(machine_type)
+    machine_series = machine_type.split('-').first.capitalize
+    return 'CPUS' if FAMILIES_FOR_CPUS_POOL.include?(machine_series)
+
+    "#{machine_series}_CPUS"
+  end
+
+  def region_by_zone(zone)
+    zone[0...-2]
+  end
+
+  def list_region_zones(region)
+    list_zones.select do |zone|
+      region_by_zone(zone) == region
     end
   end
 end
