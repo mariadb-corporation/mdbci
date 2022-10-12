@@ -80,7 +80,6 @@ class TerraformGcpGenerator
     all_regions_quotas.each do |regional_quotas|
       region = regional_quotas[:region_name]
       instances_configuration = select_zone_and_generate_config(region, node_params)
-      @ui.info(instances_configuration)
       next if instances_configuration.error?
 
       if @gcp_service.meets_quota?(instances_configuration, regional_quotas, @ui)
@@ -97,7 +96,6 @@ class TerraformGcpGenerator
   # @return [Hash] instances configuration in format { region: String, zone: String, instances: Array<Hash> }
   def select_zone_and_generate_config(region, node_params)
     zones = @gcp_service.list_region_zones(region)
-    @ui.info(zones)
     zones.each do |zone|
       generate_instances_configuration_for_zone(zone, node_params).and_then do |instances_configuration|
         return Result.ok(
