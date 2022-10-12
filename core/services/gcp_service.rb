@@ -35,10 +35,7 @@ class GcpService
   def instances_list
     return [] unless configured?
 
-
-    zones = list_zones.select do |zone|
-      @gcp_config['supported_regions'].include?(region_by_zone(zone))
-    end
+    zones = list_supported_zones
     zones.map do |zone|
       @service.fetch_all do |token|
         @service.list_instances(@gcp_config['project'], zone, page_token: token)
@@ -53,9 +50,7 @@ class GcpService
   def instances_list_with_time_and_type
     return [] unless configured?
 
-    zones = list_zones.select do |zone|
-      @gcp_config['supported_regions'].include?(region_by_zone(zone))
-    end
+    zones = list_supported_zones
     zones.map do |zone|
       @service.fetch_all do |token|
         @service.list_instances(
@@ -154,7 +149,11 @@ class GcpService
   def delete_instance(instance_name)
     return if !configured? || !instance_exists?(instance_name)
 
-    @service.delete_instance(@gcp_config['project'], @gcp_config['zone'], instance_name)
+    instance_to_delete = instances_list_with_time_and_type.select do |instance|
+      instance[:node_name] == instance_name
+    end.first
+
+    @service.delete_instance(@gcp_config['project'], instance_to_delete[:zone], instance_to_delete[:node_name])
   rescue StandardError => e
     @logger.error(e.message)
   end
@@ -293,6 +292,12 @@ class GcpService
   def list_region_zones(region)
     list_zones.select do |zone|
       region_by_zone(zone) == region
+    end
+  end
+
+  def list_supported_zones
+    list_zones.select do |zone|
+      @gcp_config['regions'].include?(region_by_zone(zone))
     end
   end
 end
