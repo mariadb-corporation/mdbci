@@ -5,6 +5,7 @@ require_relative 'repository_parser_core'
 # This module handles the MariaDB CI repository
 module MariadbCiParser
   extend RepositoryParserCore
+  SUPPORTED_VERSIONS = %w[10.2 10.3 10.4 10.5 10.6 10.7 10.8 10.9 10.10 10.11]
 
   def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
@@ -66,11 +67,12 @@ module MariadbCiParser
     split_url.pop(2)
     url = split_url.join('/')
     mariadb_version = '10.5'
-    mariadb_version = '10.2' if url.include?('10.2')
-    mariadb_version = '10.3' if url.include?('10.3')
-    mariadb_version = '10.4' if url.include?('10.4')
-    mariadb_version = '10.6' if url.include?('10.6')
-    mariadb_version = '10.7' if url.include?('10.7')
+    SUPPORTED_VERSIONS.each do |version|
+      if url.include?(version)
+        mariadb_version = version
+        break
+      end
+    end
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 end
