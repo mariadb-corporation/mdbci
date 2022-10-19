@@ -85,6 +85,7 @@ class GcpService
     'unknown'
   end
 
+  # Lists the names of zones supported by MDBCI
   def list_zones
     zones = []
     return zones unless configured?
@@ -144,7 +145,7 @@ class GcpService
     @gcp_config['use_existing_network']
   end
 
-  # Delete instance specified by the it name
+  # Delete instance specified by its name
   # @param instance_name [String] name of the instance to delete.
   def delete_instance(instance_name)
     return if !configured? || !instance_exists?(instance_name)
@@ -158,7 +159,7 @@ class GcpService
     @logger.error(e.message)
   end
 
-  # Delete network specified by the it name
+  # Delete network specified by its name
   # @param network_name [String] name of the network to delete.
   def delete_network(network_name)
     return if !configured? || !network_exists?(network_name)
@@ -168,7 +169,7 @@ class GcpService
     @logger.error(e.message)
   end
 
-  # Delete firewall specified by the it name
+  # Delete firewall specified by its name
   # @param firewall_name [String] name of the firewall to delete.
   def delete_firewall(firewall_name)
     return if !configured? || !firewall_exists?(firewall_name)
@@ -178,7 +179,7 @@ class GcpService
     @logger.error(e.message)
   end
 
-  # Fetch machines types list for current zone.
+  # Fetch machines types list for the given zone.
   # @return [Array<Hash>] instance types in format { ram, cpu, type }.
   def machine_types_list(zone)
     return [] unless configured?
@@ -191,7 +192,7 @@ class GcpService
   end
 
   # Selects machine types with names present in a given list
-  # @param all_machine_types [Array<Hash>] all instance types from current zone in format { ram, cpu, type }
+  # @param all_machine_types [Array<Hash>] all instance types in format { ram, cpu, type }
   # @param supported_instance_types_names [Array<String>] list of suitable machine types names
   # @return [Array<Hash>] instance types in format { ram, cpu, type }.
   def select_supported_machine_types(all_machine_types, supported_instance_types_names)
@@ -200,6 +201,9 @@ class GcpService
     end
   end
 
+  # Calculates the number of CPUs for the given machine
+  # @param machine_types [Array<Hash>] all instance types in format { ram, cpu, type }
+  # @param current_machine [Hash] parameters of the machine
   def count_cpu(machines_types, current_machine)
     machines_types.each do |machine|
       return machine[:cpu] if current_machine == machine[:type]
@@ -207,9 +211,9 @@ class GcpService
   end
 
   # Returns list of CPU quotas for all supported regions sorted by current usage
-  def regions_quotas_list(logger)
+  def regions_quotas_list
     region_names = @gcp_config['regions']
-    logger.info('Taking the GCP quotas')
+    @logger.info('Taking the GCP quotas')
     regions = region_names.map do |region|
       region_description = @service.get_region(@gcp_config['project'], region)
       quotas = extract_cpu_quotas(region_description.quotas)
@@ -237,8 +241,9 @@ class GcpService
   end
 
   # Sorts the regions by the maximal CPU usage percentage from each regional pool
-  def sort_by_max_usage_percentage(regional_quotas)
-    regional_quotas.sort_by do |region|
+  # @param all_regions_quotas [Array<Hash>] list of CPU quotas for all supported regions
+  def sort_by_max_usage_percentage(all_regions_quotas)
+    all_regions_quotas.sort_by do |region|
       region[:quotas].map do |quota|
         quota[:usage] / (quota[:limit].nonzero? || 1).to_f
       end.max
@@ -246,7 +251,7 @@ class GcpService
   end
 
   # Checks if the given set of instances does not exceed the CPU quota
-  def meets_quota?(instances_configuration, regional_quota, logger)
+  def meets_quota?(instances_configuration, regional_quota)
     zone = instances_configuration.value[:zone]
     instances = instances_configuration.value[:instances]
     cpu_count = count_required_cpus(instances, zone)
@@ -277,7 +282,7 @@ class GcpService
     count_by_pools
   end
 
-  # Matches the quota pool name with the current machine type
+  # Matches the quota pool name for the given machine type
   def cpu_quota_pool_by_machine_type(machine_type)
     machine_series = machine_type.split('-').first.capitalize
     return 'CPUS' if FAMILIES_FOR_CPUS_POOL.include?(machine_series)
@@ -285,16 +290,19 @@ class GcpService
     "#{machine_series}_CPUS"
   end
 
+  # Returns the region of the given zone
   def region_by_zone(zone)
     zone[0...-2]
   end
 
+  # Lists all zones of the given region
   def list_region_zones(region)
     list_zones.select do |zone|
       region_by_zone(zone) == region
     end
   end
 
+  # lists all zones supported by MDBCI
   def list_supported_zones
     list_zones.select do |zone|
       @gcp_config['regions'].include?(region_by_zone(zone))

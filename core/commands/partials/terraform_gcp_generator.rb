@@ -47,7 +47,7 @@ class TerraformGcpGenerator
   end
 
   # Generate a Terraform configuration file.
-  # @param node_params [Array<Hash>] list of node params.
+  # @param node_params [Array<Hash>] list of all nodes params.
   # @param configuration_file_path [String] path to generated Terraform infrastructure file.
   # @return [Result::Base] generation result.
   def generate_configuration_file(node_params, configuration_file_path)
@@ -73,16 +73,20 @@ class TerraformGcpGenerator
     file.close unless file.nil? || file.closed?
   end
 
+  # Selects the available region and returns generated configuration.
+  # @param node_params [Array<Hash>] llist of all nodes params.
+  # @param configuration_file_path [String] path to generated Terraform infrastructure file.
+  # @return [Result::Base] generation result.
   def create_instances_configuration(node_params)
     @ui.info('Selecting the GCP region')
     result = Result.ok('')
-    all_regions_quotas = @gcp_service.regions_quotas_list(@ui)
+    all_regions_quotas = @gcp_service.regions_quotas_list
     all_regions_quotas.each do |regional_quotas|
       region = regional_quotas[:region_name]
       instances_configuration = select_zone_and_generate_config(region, node_params)
       next if instances_configuration.error?
 
-      if @gcp_service.meets_quota?(instances_configuration, regional_quotas, @ui)
+      if @gcp_service.meets_quota?(instances_configuration, regional_quotas)
         @ui.info("Selected region: #{region}")
         return Result.ok(instances_configuration)
       end
@@ -90,10 +94,10 @@ class TerraformGcpGenerator
     Result.error('Cannot select the region. CPU quota for all available regions will be exceeded')
   end
 
-  # Selects the zone of the given region available to launch all the machines and generates their configuration
+  # Selects the zone of the given region available to launch all the machines and returns generated configuration.
   # @param region [String] region name
-  # @param node_params [Array<Hash>] list of node params
-  # @return [Hash] instances configuration in format { region: String, zone: String, instances: Array<Hash> }
+  # @param node_params [Array<Hash>] list of all nodes params.
+  # @return [Result::Base] instances configuration in format { region: String, zone: String, instances: Array<Hash> }
   def select_zone_and_generate_config(region, node_params)
     zones = @gcp_service.list_region_zones(region)
     zones.each do |zone|
@@ -108,9 +112,13 @@ class TerraformGcpGenerator
     Result.error("Cannot find suitable machine types in #{region} region")
   end
 
-  def generate_instances_configuration_for_zone(zone, nodes_params)
+  # Generates instances configuration to launch in the given zone.
+  # @param zone [String] zone name.
+  # @param node_params [Array<Hash>] list of params of all nodes to be launched.
+  # @return [Result::Base] instances configuration.
+  def generate_instances_configuration_for_zone(zone, node_params)
     instances_configuration = []
-    nodes_params.each do |node|
+    node_params.each do |node|
       result = generate_instance_params(node, zone)
       return Result.error('Cannot launch the machines in the given zone') if result.error?
 
