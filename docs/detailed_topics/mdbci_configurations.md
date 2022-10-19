@@ -38,8 +38,9 @@ mdbe:
 gcp:
   credentials_file: "/path/to/credentials/gcp/file/credentials.json"
   project: # project id
-  region: us-central1
-  zone: us-central1-a
+  regions: # list of supported regions
+  - us-central1
+  - europe-west4
   use_existing_network: true
   network: # name of the existing vpc
   tags:
@@ -60,6 +61,10 @@ mdbe_ci:
     password: # password
 force: # true or false
 ```
+
+## How to add another region support for GCP?
+
+Add the region name to `regions` list in `GCP` section. Read more about [GCP regions management in MDBCI](./gcp_regions_management.md)
 
 ## How to use existing VPC for AWS and GCP?
 
