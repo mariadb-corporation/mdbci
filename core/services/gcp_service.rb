@@ -264,9 +264,9 @@ class GcpService
   # Checks if the given quota pool is not exceeded by the machines from the current configuration
   def meets_pool_limit?(quota_pool, required_cpu_count)
     pool_name = quota_pool[:pool_name]
-    return true unless required_cpu_count.key(pool_name)
+    return true unless required_cpu_count.key?(pool_name)
 
-    required_cpu_count[pool_name] >= quota_pool[:limit] - quota_pool[:usage]
+    required_cpu_count[pool_name] <= (quota_pool[:limit] - quota_pool[:usage])
   end
 
   # Counts the number of CPUs (grouped by machine families) required to launch the machines from the current configuration
@@ -284,7 +284,7 @@ class GcpService
 
   # Matches the quota pool name for the given machine type
   def cpu_quota_pool_by_machine_type(machine_type)
-    machine_series = machine_type.split('-').first.capitalize
+    machine_series = machine_type.split('-').first.upcase
     return 'CPUS' if FAMILIES_FOR_CPUS_POOL.include?(machine_series)
 
     "#{machine_series}_CPUS"
