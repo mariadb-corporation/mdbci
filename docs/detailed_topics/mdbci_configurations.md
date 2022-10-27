@@ -38,6 +38,7 @@ mdbe:
 gcp:
   credentials_file: "/path/to/credentials/gcp/file/credentials.json"
   project: # project id
+  default_region: # the region used when the CPU quota is met
   regions: # list of supported regions
   - us-central1
   - europe-west4

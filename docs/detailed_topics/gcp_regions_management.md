@@ -2,10 +2,13 @@
 
 ## Configuration file
 Currently supported regions are listed in `config.yaml` file in the `~/.config/mdbci`.
+If the set of machines to be created does not meet the CPU quota in the default region, MDBCI will select another one from the `regions`
+list
 
 ```yaml
 gcp:
   ...
+  default_region: # the region used when the CPU quota is met
   regions: # list of supported regions
   - us-central1
   - europe-west4
