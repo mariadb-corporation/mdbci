@@ -210,7 +210,8 @@ class GcpService
     end
   end
 
-  # Returns list of CPU quotas for all supported regions sorted by current usage
+  # Returns the list of CPU quotas for all supported regions with the default region as the first item
+  # followed by the rest of regions sorted by current usage
   def regions_quotas_list
     region_names = @gcp_config['regions']
     @logger.info('Taking the GCP quotas')
@@ -222,7 +223,8 @@ class GcpService
         quotas: quotas
       }
     end
-    sort_by_max_usage_percentage(regions)
+    sorted_quotas = sort_by_max_usage_percentage(regions)
+    move_default_region_first(sorted_quotas)
   end
 
   # Extracts metrics for CPUs count from the list of the region quotas
@@ -248,6 +250,15 @@ class GcpService
         quota[:usage] / (quota[:limit].nonzero? || 1).to_f
       end.max
     end
+  end
+
+  # Places the default region at the start of the quotas list
+  # @param quotas [Array<Hash>] list of CPU quotas for all supported regions
+  def move_default_region_first(quotas)
+    default_region_quotas = quotas.select do |regional_quota|
+      regional_quota[:region_name] == @gcp_config['default_region']
+    end.first
+    quotas.insert(0, quotas.delete(default_region_quotas))
   end
 
   # Checks if the given set of instances does not exceed the CPU quota
