@@ -130,6 +130,61 @@ class GcpService
     end.map(&:name)
   end
 
+  # List all GCP disks in the current project in format
+  # { name: String, zone: String, users: Array<String>, creationDate: DateTime }
+  def disks_list
+    return [] unless configured?
+
+    zones = list_supported_zones
+    disks = zones.map do |zone|
+      @service.fetch_all do |token|
+        @service.list_disks(
+          @gcp_config['project'], zone, page_token: token)
+      end.map do |disk|
+        {
+          name: disk.name,
+          zone: zone_by_url(disk.zone),
+          users: disk.users,
+          creation_date: DateTime.parse(disk.creation_timestamp)
+        }
+      end
+    end.flatten
+  end
+
+  # Destroy the given disk
+  # @param disk_name [String] name of the disk
+  # @param zone [String] GCP zone where the disk is located
+  def delete_disk(disk_name, zone)
+    return unless configured?
+
+    @service.delete_disk(@gcp_config['project'], zone, disk_name)
+  end
+
+  # List disks that are older than `expiration_threshold_days` days and aren't used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def list_unused_disks(expiration_threshold_days)
+    disks_list.select do |disk|
+      (disk[:users].nil? || disk[:users].empty?) && (DateTime.now - disk[:creation_date]) >= expiration_threshold_days
+    end
+  end
+
+  # Select only names from disk list
+  def list_disk_names(disks)
+    disks.map do |disk|
+      disk[:name]
+    end
+  end
+
+  # Delete disks that are older than `expiration_threshold_days` days and aren't used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def delete_unused_disks(expiration_threshold_days)
+    unused_disks = list_unused_disks(expiration_threshold_days)
+    unused_disks.each do |disk|
+      delete_disk(disk[:name], disk[:zone])
+      @logger.info("Disk #{disk[:name]} was destroyed")
+    end
+  end
+
   # Checks for firewall existence.
   # @param firewall_name [String] firewall name
   # @return [Boolean] true if firewall exists.
@@ -311,6 +366,11 @@ class GcpService
     list_zones.select do |zone|
       region_by_zone(zone) == region
     end
+  end
+
+  # Returns zone name from url
+  def zone_by_url(url)
+    url.split('/').last
   end
 
   # lists all zones supported by MDBCI
