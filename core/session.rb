@@ -22,6 +22,7 @@ require_relative 'commands/install_product_command.rb'
 require_relative 'commands/setup_repo_command'
 require_relative 'commands/update_configuration_command'
 require_relative 'commands/show_command'
+require_relative 'commands/clean_unused_resources_command'
 require_relative 'constants'
 require_relative 'models/configuration'
 require_relative 'models/tool_configuration'
@@ -208,6 +209,9 @@ EOF
     case ARGV.shift
     when 'check_relevance'
       command = CheckRelevanceCommand.new(ARGV.shift, self, $out)
+      exit_code = command.execute
+    when 'clean_unused_resources'
+      command = CleanUnusedResourcesCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'configure'
       command = ConfigureCommand.new(ARGV, self, $out)
