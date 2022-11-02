@@ -13,6 +13,6 @@ Specify the `attach_disk` parameter in the template file to do this:
 }
 ```
 
-You can also specify `additional_disk_size` parameter to configure the size of the additional disk (in GB). The default disk size is 100 GB.
+You can also specify `additional_disk_size` parameter to configure the size of the additional disk (in GB) that will be connected to this machine by MDBCI. The default disk size is 100 GB.
 - the disk will be available at `/dev/sdh` path on AWS machines
 - at `/dev/disk/by-id/google-data-disk-0` path on GCP machines
