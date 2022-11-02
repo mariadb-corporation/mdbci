@@ -251,7 +251,7 @@ class TerraformGcpGenerator
     resource "google_compute_disk" "<%= name %>-disk" {
       name    = "<%= instance_name %>-disk"
       type    = "pd-standard"
-      size    = 100
+      size    = <%= additional_disk_size %>
     }
   <% end %>
 
