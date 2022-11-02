@@ -35,6 +35,7 @@ require_relative '../../services/ssh_commands'
 class TerraformConfigurationGenerator < BaseCommand
   CONFIGURATION_FILE_NAME = 'infrastructure.tf'
   KEY_FILE_NAME = 'maxscale.pem'
+  DEFAULT_ADDITIONAL_DISK_SIZE_GB = 100
 
   # Generate a configuration.
   #
@@ -129,7 +130,8 @@ class TerraformConfigurationGenerator < BaseCommand
           memory_size: node[1]['memory_size']&.to_i,
           cpu_count: node[1]['cpu_count']&.to_i,
           preemptible: node[1]['preemptible'].nil? ? false : node[1]['preemptible'] == 'true',
-          attached_disk: need_attached_disk?(node)
+          attached_disk: need_attached_disk?(node),
+          additional_disk_size: retrieve_additional_disk_size(node)
       }
     )
   end
@@ -153,6 +155,14 @@ class TerraformConfigurationGenerator < BaseCommand
     ConfigurationGenerator.parse_products_info(node).any? do |product|
       ProductAttributes.need_attached_disk?(product['name'])
     end || node[1]['attach_disk'] == 'true' || node[1]['attach_disk'] == true
+  end
+
+  # Get node's additional disk size from the configuration
+  #
+  # @param node [Array] information of the node from configuration file
+  # @return [Integer] configured disk size in GB or default value (DEFAULT_MAIN_DISK_SIZE_GB)
+  def retrieve_additional_disk_size(node)
+    node[1].key?('additional_disk_size') ? node[1]['additional_disk_size'] : DEFAULT_ADDITIONAL_DISK_SIZE_GB
   end
 
   # Get configuration file generator by nodes provider.

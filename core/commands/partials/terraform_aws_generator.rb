@@ -277,7 +277,7 @@ class TerraformAwsGenerator
        ebs_block_device {
         delete_on_termination = true
         device_name = "/dev/sdh"
-        volume_size = 100
+        volume_size = <%= additional_disk_size %>
      }
      <% end %>
       <%= connection_block %>
