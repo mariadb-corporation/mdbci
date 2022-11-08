@@ -240,6 +240,9 @@ EOF
     when 'list_cloud_instances'
       command = ListCloudInstancesCommand.new(ARGV, self, $out)
       exit_code = command.execute
+    when 'list-unused-resources'
+      command = ListUnusedResourcesCommand.new(ARGV, self, $out)
+      exit_code = command.execute
     when 'remove_product'
       command = RemoveProductCommand.new(ARGV, self, $out)
       exit_code = command.execute
