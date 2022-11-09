@@ -211,7 +211,7 @@ EOF
     when 'check_relevance'
       command = CheckRelevanceCommand.new(ARGV.shift, self, $out)
       exit_code = command.execute
-    when 'clean_unused_resources'
+    when 'clean-unused-resources'
       command = CleanUnusedResourcesCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'configure'

@@ -10,7 +10,7 @@ class ListUnusedResourcesCommand < BaseCommand
   include ShellCommands
 
   def self.synopsis
-    'Destroy additional cloud resources that are lost or unused'
+    'Show additional cloud resources that are lost or unused'
   end
 
   def initialize(args, env, logger, options = nil)
