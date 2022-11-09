@@ -66,7 +66,7 @@ class CleanUnusedResourcesCommand < BaseCommand
     end
   end
 
-  # Outputs all unused disks names grouped by provider
+  # Outputs key pair names of the given key pair list
   def list_key_pair_names(key_pairs)
     key_pairs_to_destroy = key_pairs.map do |key_pair|
       key_pair[:name]
@@ -74,7 +74,7 @@ class CleanUnusedResourcesCommand < BaseCommand
     @ui.info("Next AWS key pairs will be destroyed: #{key_pairs_to_destroy}")
   end
 
-  # Outputs all unused disks names grouped by provider
+  # Outputs group IDs of the given security groups list
   def list_group_ids(groups)
     groups_to_destroy = groups.map do |group|
       group[:group_id]
