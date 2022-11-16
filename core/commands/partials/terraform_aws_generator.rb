@@ -30,7 +30,7 @@ class TerraformAwsGenerator
   # @return [Result::Base] generation result.
   def initialize(configuration_id, aws_config, logger, configuration_path, ssh_keys, aws_service)
     @configuration_id = configuration_id
-    @configuration_tags = { configuration_id: @configuration_id }
+    @configuration_tags = { configuration_id: @configuration_id, generated_at: Time.now }
     @aws_config = aws_config
     @ui = logger
     @configuration_path = configuration_path
@@ -203,7 +203,8 @@ class TerraformAwsGenerator
 
   def standard_security_group_resource
     group_name = "#{@configuration_id}-standard-security-group"
-    tags_block = tags_partial(@configuration_tags)
+    tags = @configuration_tags.merge(hostname: Socket.gethostname)
+    tags_block = tags_partial(tags)
     template = ERB.new <<-SECURITY_GROUP
     resource "aws_security_group" "security_group" {
       name = "<%= group_name %>"
@@ -224,7 +225,8 @@ class TerraformAwsGenerator
   # @return [String] security group resource definition.
   def vpc_security_group_resource
     group_name = "#{@configuration_id}-vpc-security-group"
-    tags_block = tags_partial(@configuration_tags)
+    tags = @configuration_tags.merge(hostname: Socket.gethostname)
+    tags_block = tags_partial(tags)
     <<-SECURITY_GROUP
     resource "aws_security_group" "security_group_vpc" {
       name = "#{group_name}"

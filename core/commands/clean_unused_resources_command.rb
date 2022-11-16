@@ -1,37 +1,84 @@
 # frozen_string_literal: true
 
 require_relative 'base_command'
-require_relative '../services/gcp_service'
+require_relative 'partials/unused_cloud_resources_manager'
+
 
 # Command that destroys unused or lost additional cloud resources
 class CleanUnusedResourcesCommand < BaseCommand
   include ShellCommands
 
-  # Time (in days) after which an unattached resource is considered unused and has to be destroyed
-  RESOURCE_EXPIRATION_THRESHOLD_DAYS = 1
-
   def self.synopsis
     'Destroy additional cloud resources that are lost or unused'
   end
 
+  def initialize(args, env, logger, options = nil)
+    super(args, env, logger)
+    @resources_manager = UnusedCloudResourcesManager.new(@env.gcp_service, @env.aws_service)
+  end
+
   def execute
     delete_unused_disks
-    return SUCCESS_RESULT
+    delete_unused_key_pairs
+    delete_unused_security_groups
+    SUCCESS_RESULT
   end
 
   # Destroys the disks that are not attached to any instance
   def delete_unused_disks
-    gcp_service = @env.gcp_service
-    unused_gcp_disks = gcp_service.list_unused_disks(RESOURCE_EXPIRATION_THRESHOLD_DAYS)
-    @ui.info("Next disks will be destroyed: #{gcp_service.list_disk_names(unused_gcp_disks)}")
+    unused_disks = @resources_manager.list_unused_disks
+    list_disk_names(unused_disks)
     return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
 
-    gcp_service.delete_unused_disks(RESOURCE_EXPIRATION_THRESHOLD_DAYS)
+    @resources_manager.delete_unused_disks
+    destroyed_disks_count = unused_disks.sum { |provider, disks| disks.length}
+    @ui.info("#{destroyed_disks_count} disks destroyed")
   end
 
-  def disks_names(disks)
-    disks.map do |disk|
-      disk[:name]
+  # Destroys the key pairs that are not used by any instance
+  def delete_unused_key_pairs
+    unused_key_pairs = @resources_manager.list_unused_aws_key_pairs
+    list_key_pair_names(unused_key_pairs)
+    return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
+
+    @resources_manager.delete_unused_aws_key_pairs
+    @ui.info("#{unused_key_pairs.length} key pairs destroyed")
+  end
+
+  # Destroys the security groups that are not used by any instance
+  def delete_unused_security_groups
+    unused_security_groups = @resources_manager.list_unused_aws_security_groups
+    list_group_ids(unused_security_groups)
+    return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
+
+    @resources_manager.delete_unused_aws_security_groups
+    @ui.info("#{unused_security_groups.length} security groups destroyed")
+  end
+
+  # Outputs all unused disks names grouped by provider
+  def list_disk_names(disks)
+    @ui.info('Next disks will be destroyed:')
+    disks.each_pair do |provider, disk_list|
+      provider_disks = disk_list.map do |disk|
+        disk[:name]
+      end
+      @ui.info("#{provider.to_s.upcase} disks: #{provider_disks}")
     end
+  end
+
+  # Outputs all unused disks names grouped by provider
+  def list_key_pair_names(key_pairs)
+    key_pairs_to_destroy = key_pairs.map do |key_pair|
+      key_pair[:name]
+    end
+    @ui.info("Next AWS key pairs will be destroyed: #{key_pairs_to_destroy}")
+  end
+
+  # Outputs all unused disks names grouped by provider
+  def list_group_ids(groups)
+    groups_to_destroy = groups.map do |group|
+      group[:group_id]
+    end
+    @ui.info("Next AWS security groups will be destroyed: #{groups_to_destroy}")
   end
 end

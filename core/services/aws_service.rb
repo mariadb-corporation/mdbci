@@ -59,7 +59,7 @@ class AwsService
   end
 
   # Get the instances list
-  # @return [Array] instances list in format [{ instance_id, node_name, configuration_id, launch_time }]
+  # @return [Array] instances list in format [{ instance_id, node_name, configuration_id, launch_time, key_name, security_groups }]
   def instances_list
     return [] unless configured?
 
@@ -69,7 +69,14 @@ class AwsService
 
         node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }&.fetch(:value, nil)
         configuration_id = instance[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
-        { instance_id: instance[:instance_id], node_name: node_name, configuration_id: configuration_id, launch_time: instance[:launch_time] }
+        {
+          instance_id: instance[:instance_id],
+          node_name: node_name,
+          configuration_id: configuration_id,
+          launch_time: instance[:launch_time],
+          key_name: instance[:key_name],
+          security_groups: instance[:security_groups]
+        }
       end
     end.flatten.compact
   end
@@ -123,14 +130,70 @@ class AwsService
     delete_vpc(vpc[:vpc_id]) unless vpc.nil?
   end
 
+  # List all volumes
+  # @return [Array] list of volumes in format { name: String, zone: String, attachments: Array, creation_date: DateTime }
+  def volumes_list
+    return [] if !configured?
+
+    response = @client.describe_volumes.to_h
+    response[:volumes].map do |volume|
+      {
+        name: volume[:volume_id],
+        zone: volume[:availability_zone],
+        attachments: volume[:attachments],
+        creation_date: DateTime.parse(volume[:create_time].to_s),
+      }
+    end
+  end
+
+  # List volumes that are older than `expiration_threshold_days` days and aren't used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def list_unused_volumes(expiration_threshold_days)
+    volumes_list.select do |volume|
+      (volume[:attachments].nil? || volume[:attachments].empty?) &&
+        resource_expired?(volume[:creation_date], expiration_threshold_days)
+    end
+  end
+
+  # Destroy the given volume
+  # @param volume_name [String] name of the disk
+  def delete_volume(volume_name)
+    return if !configured?
+
+    @client.delete_volume(volume_id: volume_name)
+  end
+
+  # Delete volumes that are older than `expiration_threshold_days` days and aren't used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def delete_unused_volumes(expiration_threshold_days)
+    volumes = list_unused_volumes(expiration_threshold_days)
+    volumes.each do |volume|
+      delete_volume(volume[:name])
+    end
+  end
+
   # Get the security_group list
   # @return [Array] security_group list in format [{ group_id, configuration_id }]
-  def security_group_list(tags)
+  def security_group_list(tags = {})
     return [] unless configured?
 
-    @client.describe_security_groups(filters: tags_to_filters(tags)).to_h[:security_groups].map do |security_group|
-      configuration_id = security_group[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
-      { group_id: security_group[:group_id], configuration_id: configuration_id }
+    response = if tags.empty?
+                 @client.describe_security_groups
+               else
+      @client.describe_security_groups(filters: tags_to_filters(tags))
+               end
+    security_groups = response.to_h[:security_groups]
+    security_groups.map do |security_group|
+      tags = security_group.fetch(:tags, {})
+      configuration_id = extract_tag_value(tags, 'configuration_id')
+      creation_date = extract_tag_value(tags, 'generated_at')
+      hostname = extract_tag_value(tags, 'hostname')
+      {
+        group_id: security_group[:group_id],
+        configuration_id: configuration_id,
+        hostname: hostname,
+        creation_date: creation_date.nil? ? nil : DateTime.parse(creation_date)
+      }
     end
   end
 
@@ -161,12 +224,78 @@ class AwsService
     end
   end
 
+  # List IDs of all security groups that are used by the running instances
+  def list_active_security_groups
+    instances_list.map do |instance|
+      instance[:security_groups].map do |security_group|
+        security_group[:group_id]
+      end
+    end.flatten
+  end
+
+  # List security groups that are older than `expiration_threshold_days` days and aren't used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def list_unused_security_groups(expiration_threshold_days)
+    hostname = Socket.gethostname
+    active_security_groups = list_active_security_groups
+    security_group_list({}).select do |security_group|
+      !active_security_groups.include?(security_group[:group_id]) &&
+        security_group[:hostname] == hostname &&
+        resource_expired?(security_group[:creation_date], expiration_threshold_days)
+    end
+  end
+
+  # Delete security groups that are older than `expiration_threshold_days` days and aren't used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def delete_unused_security_groups(expiration_threshold_days)
+    unused_groups = list_unused_security_groups(expiration_threshold_days)
+    unused_groups.each do |security_group|
+      delete_security_group(security_group[:group_id])
+    end
+  end
+
   # Delete key pair specified by it name
   # @param [String] key_name key pair name
   def delete_key_pair(key_name)
     return if key_name.nil? || !configured?
 
     @client.delete_key_pair(key_name: key_name)
+  end
+
+  # List all key pairs used in the project
+  # @return [Array<Hash>] list of key pairs in format { name: String, creation_date: DateTime }
+  def key_pairs_list
+    return [] if !configured?
+
+    response = @client.describe_key_pairs.to_h
+    response[:key_pairs].map do |key_pair|
+      {
+        name: key_pair[:key_name],
+        creation_date: DateTime.parse(key_pair[:create_time].to_s)
+      }
+    end
+  end
+
+  # List key pairs that are generated by MDBCI, older than `expiration_threshold_days` days
+  # and are not used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def list_unused_key_pairs(expiration_threshold_days)
+    hostname = Socket.gethostname
+    instances = instances_list
+    key_pairs_list.select do |key_pair|
+      key_pair[:name].end_with?(hostname) &&
+        instances.none? { |instance| key_pair[:name] == instance[:key_name] } &&
+        resource_expired?(key_pair[:creation_date], expiration_threshold_days)
+    end
+  end
+
+  # Delete key pairs that are generated by MDBCI, older than `expiration_threshold_days` days
+  # and are not used by any VM
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def delete_unused_key_pairs(expiration_threshold_days)
+    list_unused_key_pairs(expiration_threshold_days).each do |key_pair|
+      delete_key_pair(key_pair[:name])
+    end
   end
 
   # Method gets the AWS instances names list.
@@ -297,5 +426,16 @@ class AwsService
 
   def tags_to_filters(tags)
     tags.map { |name, value| { name: "tag:#{name}", values: [value.to_s] } }
+  end
+
+  # Checks if resource was created earlier than `expiration_threshold_days` days ago
+  # @param [DateTime] resource_creation_date date when the resource was created
+  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
+  def resource_expired?(resource_creation_date, expiration_threshold_days)
+    (DateTime.now - resource_creation_date) >= expiration_threshold_days
+  end
+
+  def extract_tag_value(tags, tag_name)
+    tags.find { |tag| tag[:key] == tag_name }&.fetch(:value, nil)
   end
 end
