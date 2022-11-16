@@ -70,6 +70,8 @@ COMMANDS:
 
 check\_relevance Check for relevance of network\_config file.
 
+clean-unused-resources Destroy additional cloud resources that are lost or unused.
+
 configure Creates configuration file for MDBCI
 
 create_user Creates a new user on the VM.
@@ -89,6 +91,8 @@ help Show information about MDBCI tool and it commands.
 install\_product Install a product onto the configuration node.
 
 list\_cloud\_instances Show list all active instances on Cloud Providers.
+
+list-unused-resources Show additional cloud resources that are lost or unused
 
 remove\_product Remove the product on selected node.
 
