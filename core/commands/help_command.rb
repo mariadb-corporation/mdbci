@@ -18,6 +18,8 @@ require_relative 'check_relevance_command'
 require_relative 'list_cloud_instances_command'
 require_relative 'create_user_command'
 require_relative 'self_upgrade_command'
+require_relative 'clean_unused_resources_command'
+require_relative 'list_unused_resources_command'
 
 # Command provides a documentation to the user on how to use the mdbci tool.
 class HelpCommand < BaseCommand
@@ -29,6 +31,7 @@ class HelpCommand < BaseCommand
 
   COMMANDS = {
     'check_relevance' => CheckRelevanceCommand.synopsis,
+    'clean-unused-resources' => CleanUnusedResourcesCommand.synopsis,
     'configure' => ConfigureCommand.synopsis,
     'create_user' => CreateUserCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
@@ -38,6 +41,7 @@ class HelpCommand < BaseCommand
     'help' => HelpCommand.synopsis,
     'install_product' => InstallProduct.synopsis,
     'list_cloud_instances' => ListCloudInstancesCommand.synopsis,
+    'list-unused-resources' => ListUnusedResourcesCommand.synopsis,
     'remove_product' => RemoveProductCommand.synopsis,
     'provide-files' => ProvideFiles.synopsis,
     'public_keys' => 'Copy ssh keys to configured nodes.',
