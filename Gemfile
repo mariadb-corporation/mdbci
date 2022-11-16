@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'aws-sdk-ec2'
+gem 'aws-sdk-ec2', '>= 1.309.0'
 gem 'bundler'
 gem 'concurrent-ruby'
 gem 'droplet_kit'
