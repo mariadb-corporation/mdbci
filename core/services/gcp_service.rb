@@ -35,7 +35,7 @@ class GcpService
   def instances_list
     return [] unless configured?
 
-    zones = list_supported_zones
+    zones = list_zones
     zones.map do |zone|
       @service.fetch_all do |token|
         @service.list_instances(@gcp_config['project'], zone, page_token: token)
@@ -50,7 +50,7 @@ class GcpService
   def instances_list_with_time_and_type
     return [] unless configured?
 
-    zones = list_supported_zones
+    zones = list_zones
     zones.map do |zone|
       @service.fetch_all do |token|
         @service.list_instances(
