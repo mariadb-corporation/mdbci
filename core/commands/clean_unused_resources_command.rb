@@ -14,7 +14,8 @@ class CleanUnusedResourcesCommand < BaseCommand
 
   def initialize(args, env, logger, options = nil)
     super(args, env, logger)
-    @resources_manager = UnusedCloudResourcesManager.new(@env.gcp_service, @env.aws_service)
+    threshold_days = @env.hours.to_i / 24.0
+    @resources_manager = UnusedCloudResourcesManager.new(@env.gcp_service, @env.aws_service, threshold_days)
   end
 
   def execute

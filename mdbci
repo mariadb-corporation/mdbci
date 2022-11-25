@@ -50,6 +50,7 @@ opts = GetoptLong.new(
   ['--list', GetoptLong::NO_ARGUMENT],
   ['--node-name', GetoptLong::REQUIRED_ARGUMENT],
   ['--override', '-w', GetoptLong::NO_ARGUMENT],
+  ['--output-dir', GetoptLong::REQUIRED_ARGUMENT],
   ['--path-to-nodes', GetoptLong::REQUIRED_ARGUMENT],
   ['--platform', '-o', GetoptLong::REQUIRED_ARGUMENT],
   ['--platform-version', '-i', GetoptLong::REQUIRED_ARGUMENT],
@@ -202,6 +203,9 @@ begin
 
     when '--include-unsupported'
       session.include_unsupported = true
+
+    when '--output-dir'
+      session.output_dir = File.absolute_path(arg) unless arg.empty?
 
     else
       out.error 'Option is not supported: ' + opt
