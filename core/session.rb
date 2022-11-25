@@ -97,6 +97,7 @@ class Session
   attr_accessor :architecture
   attr_accessor :mdbci_image_address
   attr_accessor :include_unsupported
+  attr_accessor :output_dir
 
   PLATFORM = 'platform'
   VAGRANT_NO_PARALLEL = '--no-parallel'
