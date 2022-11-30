@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'base_command'
-require_relative 'partials/unused_cloud_resources_manager'
 
 
 # Command that destroys unused or lost additional cloud resources
@@ -12,74 +11,83 @@ class CleanUnusedResourcesCommand < BaseCommand
     'Destroy additional cloud resources that are lost or unused'
   end
 
-  def initialize(args, env, logger, options = nil)
-    super(args, env, logger)
-    threshold_days = @env.hours.to_i / 24.0
-    @resources_manager = UnusedCloudResourcesManager.new(@env.gcp_service, @env.aws_service, threshold_days)
+  def show_help
+    info = <<-HELP
+The command destroys the additional cloud resources: disks (volumes), security groups, key pairs on GCP and AWS providers specified in a given JSON file.
+Add the --resources-list FILENAME flag with the path to the resources report.
+    HELP
+    @ui.info(info)
   end
 
   def execute
-    delete_unused_disks
-    delete_unused_key_pairs
-    delete_unused_security_groups
-    SUCCESS_RESULT
+    if @env.show_help
+      show_help
+      return SUCCESS_RESULT
+    end
+
+    resources = read_resources_file
+    return resources if resources.error?
+
+    begin
+      @resources_list = resources.value
+      delete_unused_disks
+      delete_unused_key_pairs
+      delete_unused_security_groups
+      SUCCESS_RESULT
+
+    rescue StandardError => e
+      Result.error(e.message)
+    end
   end
 
   # Destroys the disks that are not attached to any instance
   def delete_unused_disks
-    unused_disks = @resources_manager.list_unused_disks
-    list_disk_names(unused_disks)
-    return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
+    return unless @resources_list.key?(:disks)
 
-    @resources_manager.delete_unused_disks
-    destroyed_disks_count = unused_disks.sum { |provider, disks| disks.length}
-    @ui.info("#{destroyed_disks_count} disks destroyed")
+    disks = @resources_list[:disks]
+    aws_disks = disks.fetch(:aws, [])
+    gcp_disks = disks.fetch(:gcp, [])
+    aws_disks.each do |disk|
+      @ui.info("Destroying disk: #{disk[:name]}")
+      @env.aws_service.delete_volume(disk[:name])
+    end
+    gcp_disks.each do |disk|
+      @ui.info("Destroying disk: #{disk[:name]}")
+      @env.gcp_service.delete_disk(disk[:name], disk[:zone])
+    end
   end
 
   # Destroys the key pairs that are not used by any instance
   def delete_unused_key_pairs
-    unused_key_pairs = @resources_manager.list_unused_aws_key_pairs
-    list_key_pair_names(unused_key_pairs)
-    return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
+    return unless @resources_list.key?(:key_pairs)
 
-    @resources_manager.delete_unused_aws_key_pairs
-    @ui.info("#{unused_key_pairs.length} key pairs destroyed")
+    @resources_list[:key_pairs].each do |key_pair|
+      @ui.info("Destroying key pair: #{key_pair[:name]}")
+      @env.aws_service.delete_key_pair(key_pair[:name])
+    end
   end
 
   # Destroys the security groups that are not used by any instance
   def delete_unused_security_groups
-    unused_security_groups = @resources_manager.list_unused_aws_security_groups
-    list_group_ids(unused_security_groups)
-    return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
+    return unless @resources_list.key?(:security_groups)
 
-    @resources_manager.delete_unused_aws_security_groups
-    @ui.info("#{unused_security_groups.length} security groups destroyed")
-  end
-
-  # Outputs all unused disks names grouped by provider
-  def list_disk_names(disks)
-    @ui.info('Next disks will be destroyed:')
-    disks.each_pair do |provider, disk_list|
-      provider_disks = disk_list.map do |disk|
-        disk[:name]
-      end
-      @ui.info("#{provider.to_s.upcase} disks: #{provider_disks}")
+    @resources_list[:security_groups].each do |security_group|
+      @ui.info("Destroying security group: #{security_group[:name]}")
+      @env.aws_service.delete_security_group(security_group[:name])
     end
   end
 
-  # Outputs key pair names of the given key pair list
-  def list_key_pair_names(key_pairs)
-    key_pairs_to_destroy = key_pairs.map do |key_pair|
-      key_pair[:name]
-    end
-    @ui.info("Next AWS key pairs will be destroyed: #{key_pairs_to_destroy}")
-  end
+  def read_resources_file
+    return Result.error('No resources file specified') if @env.resources_list.nil?
 
-  # Outputs group IDs of the given security groups list
-  def list_group_ids(groups)
-    groups_to_destroy = groups.map do |group|
-      group[:group_id]
+    resources_filepath = File.expand_path(@env.resources_list)
+    return Result.error('The specified file does not exist') unless File.exist?(resources_filepath)
+
+    begin
+      config_file = File.read(resources_filepath)
+      Result.ok(JSON.parse(config_file, symbolize_names: true))
+    rescue IOError, JSON::ParserError => e
+      Result.error("The report file '#{resources_filepath}' is not valid. Error: #{e.message}")
     end
-    @ui.info("Next AWS security groups will be destroyed: #{groups_to_destroy}")
   end
 end
