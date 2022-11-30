@@ -5,7 +5,7 @@ require 'tty-table'
 require_relative 'base_command'
 
 # Command shows list all active resources on Cloud Providers
-class ListUnusedResourcesCommand < BaseCommand
+class ListCloudResourcesCommand < BaseCommand
   include ShellCommands
   HIDDEN_INSTANCES_FILE_NAME = 'hidden-instances.yaml'
 

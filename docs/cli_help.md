@@ -92,7 +92,7 @@ install\_product Install a product onto the configuration node.
 
 list\_cloud\_instances Show list all active instances on Cloud Providers.
 
-list-unused-resources Show additional cloud resources that are lost or unused
+list-cloud-resources Show additional cloud resources that are lost or unused
 
 remove\_product Remove the product on selected node.
 

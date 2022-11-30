@@ -23,7 +23,7 @@ require_relative 'commands/setup_repo_command'
 require_relative 'commands/update_configuration_command'
 require_relative 'commands/show_command'
 require_relative 'commands/clean_unused_resources_command'
-require_relative 'commands/list_unused_resources_command'
+require_relative 'commands/list_cloud_resources_command'
 require_relative 'constants'
 require_relative 'models/configuration'
 require_relative 'models/tool_configuration'
@@ -243,8 +243,8 @@ EOF
     when 'list_cloud_instances'
       command = ListCloudInstancesCommand.new(ARGV, self, $out)
       exit_code = command.execute
-    when 'list-unused-resources'
-      command = ListUnusedResourcesCommand.new(ARGV, self, $out)
+    when 'list-cloud-resources'
+      command = ListCloudResourcesCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'remove_product'
       command = RemoveProductCommand.new(ARGV, self, $out)
