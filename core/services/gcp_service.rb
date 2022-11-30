@@ -135,7 +135,7 @@ class GcpService
   def disks_list
     return [] unless configured?
 
-    zones = list_supported_zones
+    zones = list_zones
     disks = zones.map do |zone|
       @service.fetch_all do |token|
         @service.list_disks(
@@ -155,9 +155,18 @@ class GcpService
   # @param disk_name [String] name of the disk
   # @param zone [String] GCP zone where the disk is located
   def delete_disk(disk_name, zone)
-    return unless configured?
+    return unless (configured? && disk_exists?(disk_name, zone))
 
     @service.delete_disk(@gcp_config['project'], zone, disk_name)
+  rescue StandardError => e
+    @logger.error(e.message)
+  end
+
+  # Check for disk existance
+  # @param disk_name [String] name of the disk
+  # @param zone [String] GCP zone where the disk is located
+  def disk_exists?(disk_name, zone)
+    disks_list.any? { |disk| disk[:name] == disk_name && disk[:zone] == zone }
   end
 
   # List disks that are older than `expiration_threshold_days` days and aren't used by any VM
@@ -172,16 +181,6 @@ class GcpService
   def list_disk_names(disks)
     disks.map do |disk|
       disk[:name]
-    end
-  end
-
-  # Delete disks that are older than `expiration_threshold_days` days and aren't used by any VM
-  # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
-  def delete_unused_disks(expiration_threshold_days)
-    unused_disks = list_unused_disks(expiration_threshold_days)
-    unused_disks.each do |disk|
-      delete_disk(disk[:name], disk[:zone])
-      @logger.info("Disk #{disk[:name]} was destroyed")
     end
   end
 
