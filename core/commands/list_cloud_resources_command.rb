@@ -48,6 +48,7 @@ The command ends with an error if any resource is present, no otherwise
       @output_file = validate_file(@env.output_file)
       return @output_file if @output_file.error?
     end
+    @ui.info('Fetching cloud resources')
     resources = list_resources
     print_resources_list(resources)
     if @filter_unused && @resources_count.positive?
@@ -59,8 +60,8 @@ The command ends with an error if any resource is present, no otherwise
 
   # Outputs the resources in a table format
   def show_in_table_format(resources)
-    @ui.info("AWS Instances:\n#{instances_table(resources[:instances][:aws], with_user_info: false)}")
-    @ui.info("GCP Instances:\n#{instances_table(resources[:instances][:gcp], with_user_info: true)}")
+    @ui.info("AWS Instances:\n#{instances_table(resources[:instances][:aws], false)}")
+    @ui.info("GCP Instances:\n#{instances_table(resources[:instances][:gcp], true)}")
     @ui.info("Disks (volumes):\n#{disks_table(resources[:disks])}")
     @ui.info("AWS key pairs:\n#{key_pairs_table(resources[:key_pairs])}")
     @ui.info("AWS security groups:\n#{security_groups_table(resources[:security_groups])}")

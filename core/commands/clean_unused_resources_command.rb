@@ -29,10 +29,13 @@ Add the --resources-list FILENAME flag with the path to the resources report.
     return resources if resources.error?
 
     begin
+      @ui.info('Destroying cloud resources')
       @resources_list = resources.value
-      delete_unused_disks
-      delete_unused_key_pairs
-      delete_unused_security_groups
+      delete_instances
+      delete_disks
+      delete_key_pairs
+      delete_security_groups
+      @ui.info('Resources successfully destroyed')
       SUCCESS_RESULT
 
     rescue StandardError => e
@@ -40,8 +43,25 @@ Add the --resources-list FILENAME flag with the path to the resources report.
     end
   end
 
+  # Destroys the virtual machines
+  def delete_instances
+    return unless @resources_list.key?(:instances)
+
+    instances = @resources_list[:instances]
+    aws_instances = instances.fetch(:aws, [])
+    gcp_instances = instances.fetch(:gcp, [])
+    aws_instances.each do |instance|
+      @ui.info("Destroying instance: #{instance[:node_name]}")
+      @env.aws_service.terminate_instances_by_name(instance[:node_name])
+    end
+    gcp_instances.each do |instance|
+      @ui.info("Destroying instance: #{instance[:node_name]}")
+      @env.gcp_service.delete_instance(instance[:node_name])
+    end
+  end
+
   # Destroys the disks that are not attached to any instance
-  def delete_unused_disks
+  def delete_disks
     return unless @resources_list.key?(:disks)
 
     disks = @resources_list[:disks]
@@ -58,7 +78,7 @@ Add the --resources-list FILENAME flag with the path to the resources report.
   end
 
   # Destroys the key pairs that are not used by any instance
-  def delete_unused_key_pairs
+  def delete_key_pairs
     return unless @resources_list.key?(:key_pairs)
 
     @resources_list[:key_pairs].each do |key_pair|
@@ -68,7 +88,7 @@ Add the --resources-list FILENAME flag with the path to the resources report.
   end
 
   # Destroys the security groups that are not used by any instance
-  def delete_unused_security_groups
+  def delete_security_groups
     return unless @resources_list.key?(:security_groups)
 
     @resources_list[:security_groups].each do |security_group|
