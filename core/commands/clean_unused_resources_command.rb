@@ -92,8 +92,8 @@ Add the --resources-list FILENAME flag with the path to the resources report.
     return unless @resources_list.key?(:security_groups)
 
     @resources_list[:security_groups].each do |security_group|
-      @ui.info("Destroying security group: #{security_group[:name]}")
-      @env.aws_service.delete_security_group(security_group[:name])
+      @ui.info("Destroying security group: #{security_group[:group_id]}")
+      @env.aws_service.delete_security_group(security_group[:group_id])
     end
   end
 

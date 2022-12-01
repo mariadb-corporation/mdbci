@@ -178,11 +178,9 @@ class AwsService
       tags = security_group.fetch(:tags, {})
       configuration_id = extract_tag_value(tags, 'configuration_id')
       creation_date = extract_tag_value(tags, 'generated_at')
-      hostname = extract_tag_value(tags, 'hostname')
       {
         group_id: security_group[:group_id],
         configuration_id: configuration_id,
-        hostname: hostname,
         creation_date: creation_date.nil? ? nil : DateTime.parse(creation_date)
       }
     end

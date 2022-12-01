@@ -41,7 +41,7 @@ This command destroys the cloud resources.
   "instances": {
     "aws": [
       {
-        "node_name": "xpand", // Required to destroy
+        "node_name": "somename", // Required to destroy
         "launch_time": "2022-04-21T19:31:45+00:00"
       }
     ],
@@ -83,7 +83,7 @@ This command destroys the cloud resources.
 
   "security_groups": [
     {
-      "name": "sg-123456789abc", // Required to destroy
+      "group_id": "sg-0228b331c2a7be875", // Required to destroy
       "configuration_id": "mdbci-ezmlb5cv-1661161923",
       "creation_date": "2022-11-02T08:29:31-07:00"
     }
