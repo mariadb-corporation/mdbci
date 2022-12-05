@@ -5,7 +5,6 @@ require_relative 'repository_parser_core'
 # This module handles the MariaDB CI repository
 module MariadbCiParser
   extend RepositoryParserCore
-  SUPPORTED_VERSIONS = %w[10.2 10.3 10.4 10.5 10.6 10.7 10.8 10.9 10.10 10.11]
 
   def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
@@ -46,7 +45,7 @@ module MariadbCiParser
     parse_repository(
       config['path'], auth, nil, 'mariadb_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url, _) { generate_mariadb_ci_deb_full_url(url) },
+      ->(url, _) { generate_mariadb_ci_deb_full_url(url, logger, auth) },
       ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
@@ -62,17 +61,19 @@ module MariadbCiParser
     )
   end
 
-  def self.generate_mariadb_ci_deb_full_url(incorrect_url)
-    split_url = incorrect_url.split('/')
-    split_url.pop(2)
-    url = split_url.join('/')
-    mariadb_version = '10.5'
-    SUPPORTED_VERSIONS.each do |version|
-      if url.include?(version)
-        mariadb_version = version
-        break
-      end
-    end
-    "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
+  def self.generate_mariadb_ci_deb_full_url(incorrect_url, logger, auth)
+    url = self.go_up(incorrect_url, 2)
+    pool_url = URI.join(url, 'pool/main/m/').to_s
+    package_list_url = get_directory_links(pool_url, logger, auth).first
+    URI.join(pool_url, package_list_url[:href]).to_s
+  end
+
+  # Returns the url obtained by jumping number_of_levels above
+  # @param url {String} base path to start
+  # @param number_of_levels {Integer} number of levels to go up
+  def self.go_up(url, number_of_levels)
+    split_url = url.split('/')
+    split_url.pop(number_of_levels)
+    split_url.join('/') + '/'
   end
 end
