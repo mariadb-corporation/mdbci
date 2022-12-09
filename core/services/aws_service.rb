@@ -67,8 +67,8 @@ class AwsService
       reservation[:instances].map do |instance|
         next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
 
-        node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }&.fetch(:value, nil)
-        configuration_id = instance[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
+        node_name = fetch_instance_name(instance[:tags])
+        configuration_id = fetch_instance_tag_value(instance[:tags], 'configuration_id')
         {
           instance_id: instance[:instance_id],
           node_name: node_name,
@@ -88,10 +88,36 @@ class AwsService
       reservation[:instances].map do |instance|
         next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
 
-        node_name = instance[:tags].find { |tag| tag[:key] == 'machinename' }&.fetch(:value, nil)
-        { node_name: node_name, launch_time: instance[:launch_time] }
+        generate_instance_info(instance)
       end
     end.flatten.compact
+  end
+
+  def generate_instance_info(instance)
+    node_name = fetch_instance_name(instance[:tags])
+    path = fetch_instance_tag_value(instance[:tags], 'full_config_path')
+    username = fetch_instance_tag_value(instance[:tags], 'username')
+    {
+      type: instance[:instance_type],
+      node_name: node_name,
+      path: path,
+      launch_time: instance[:launch_time],
+      zone: instance[:placement][:availability_zone],
+      username: username
+    }
+  end
+
+  # Extract node name from instance tags. 'full_name' tag is used if specified, 'machinename' tag otherwise.
+  def fetch_instance_name(instance_tags)
+    node_name = fetch_instance_tag_value(instance_tags, 'full_name')
+    node_name = fetch_instance_tag_value(instance_tags, 'machinename') if node_name.nil?
+    node_name
+  end
+
+  def fetch_instance_tag_value(instance_tags, tag_key)
+    return nil if instance_tags.nil?
+
+    instance_tags.find { |tag| tag[:key] == tag_key }&.fetch(:value, nil)
   end
 
   # Get the vpc list
@@ -323,7 +349,7 @@ class AwsService
   # Terminate instances specified by the node name
   # @param [String] node_name name of node to terminate
   def terminate_instances_by_name(node_name)
-    return unless configured?
+    return if !configured? || node_name.nil?
 
     instances_list.select { |instance| instance[:node_name] == node_name }
                   .each { |instance| terminate_instance(instance[:instance_id]) }

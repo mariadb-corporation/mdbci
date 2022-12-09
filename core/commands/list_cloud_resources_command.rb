@@ -60,8 +60,8 @@ The command ends with an error if any resource is present, no otherwise
 
   # Outputs the resources in a table format
   def show_in_table_format(resources)
-    @ui.info("AWS Instances:\n#{instances_table(resources[:instances][:aws], false)}")
-    @ui.info("GCP Instances:\n#{instances_table(resources[:instances][:gcp], true)}")
+    @ui.info("AWS Instances:\n#{instances_table(resources[:instances][:aws])}")
+    @ui.info("GCP Instances:\n#{instances_table(resources[:instances][:gcp])}")
     @ui.info("Disks (volumes):\n#{disks_table(resources[:disks])}")
     @ui.info("AWS key pairs:\n#{key_pairs_table(resources[:key_pairs])}")
     @ui.info("AWS security groups:\n#{security_groups_table(resources[:security_groups])}")
@@ -209,16 +209,19 @@ The command ends with an error if any resource is present, no otherwise
 
   # Renders the table with list of instances
   # @param list {Array} list of instances
-  # @param with_user_info {Boolean} true if additional info (zone, path and user) will be displayed
-  def instances_table(list, with_user_info)
+  def instances_table(list)
     return 'No instances found' if list.empty?
 
-    header = ['Launch time', 'Node name']
-    header.concat(%w[Zone Path User]) if with_user_info
+    header = ['Launch time', 'Node name', 'Zone', 'Path', 'User']
     table = TTY::Table.new(header: header)
     list.each do |instance|
-      info = [instance[:launch_time], instance[:node_name]]
-      info.concat([instance[:zone], instance[:path], instance[:username]]) if with_user_info
+      info = [
+        instance[:launch_time],
+        instance[:node_name],
+        instance[:zone],
+        instance[:path],
+        instance[:username]
+      ]
       table << info
     end
     table.render(:unicode)
