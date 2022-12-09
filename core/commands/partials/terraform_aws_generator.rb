@@ -86,6 +86,14 @@ class TerraformAwsGenerator
     "#{configuration_id}-#{config_name}-#{hostname}"
   end
 
+  # Generate the instance name.
+  # @param configuration_id [String] configuration id.
+  # @param node_name [String] name of the node.
+  # @return [String] generated instance name.
+  def self.generate_instance_name(configuration_id, node_name)
+    "#{configuration_id}-#{TerraformService.format_string(node_name)}"
+  end
+
   private
 
   # Log the information about the main parameters of the node.
@@ -337,6 +345,7 @@ class TerraformAwsGenerator
     tags = @configuration_tags.merge(hostname: Socket.gethostname,
                                      username: Etc.getlogin,
                                      machinename: node_params[:name],
+                                     full_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
                                      full_config_path: @configuration_path)
     node_params = node_params.merge({ tags: tags,
                                       key_file: @private_key_file_path,
