@@ -4,11 +4,12 @@ if node[:platform_version].to_i == 15
     ignore_failure true
   end
 end
+execute 'Deregister and clean up a system' do
+  command 'registercloudguest --clean'
+  ignore_failure true
+end
 execute 'Clean up a system' do
   command 'SUSEConnect --cleanup'
   ignore_failure true
 end
-execute 'Clean up a system' do
-  command 'registercloudguest --clean'
-  ignore_failure true
-end
+
