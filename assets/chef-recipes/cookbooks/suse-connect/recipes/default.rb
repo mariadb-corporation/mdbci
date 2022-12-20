@@ -9,6 +9,24 @@ execute 'Change SUSEConnect server' do
   ignore_failure true
 end
 
+ruby_block 'Read old SUSE machine credentials' do
+  block do
+    node.run_state[:old_suse_credentials] = DeregistrationHelpers.load_credentials
+  end
+  action :run
+end
+
+execute 'Deregister the system if it has an old subscription' do
+  not_if { node.run_state[:old_suse_credentials].empty? }
+  command lazy { DeregistrationHelpers.deregister_node(node.run_state[:old_suse_credentials])}
+  ignore_failure true
+end
+
+execute 'Deregister and clean up a system' do
+  command 'registercloudguest --clean'
+  ignore_failure true
+end
+
 execute 'Cleanup registration' do
   command 'SUSEConnect --cleanup'
 end
@@ -28,7 +46,7 @@ CLEANUP_COMMANDS.each do |command|
     returns [0, 1]
     only_if { node['suse-connect']['provider'] == 'aws' }
   end
- end
+end
 
 execute 'Register system' do
   sensitive true
