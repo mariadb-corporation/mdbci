@@ -190,6 +190,8 @@ class TerraformConfigurationGenerator < BaseCommand
   # otherwise - ERROR_RESULT or ARGUMENT_ERROR_RESULT.
   def generate
     Dir.mkdir(@configuration_path)
+    subscriptions_dir = File.join(@configuration_path, '.subscriptions')
+    Dir.mkdir(subscriptions_dir)
     checks_result = @configuration_template.check_nodes_names
     return checks_result if checks_result.error?
 

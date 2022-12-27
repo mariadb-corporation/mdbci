@@ -7,6 +7,7 @@ require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
 require_relative 'partials/terraform_cleaner'
+require_relative 'partials/registration_manager'
 require_relative '../models/network_settings'
 require_relative '../services/vagrant_service'
 require_relative '../services/product_and_subscription_registry'
@@ -170,6 +171,7 @@ Labels should be separated with commas, do not contain any whitespaces.
         uninstall_products(configuration, network_settings_result.value, registry_result.value)
       end
     end
+    cleanup_leftover_subscriptions(configuration_path)
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)
@@ -194,6 +196,13 @@ Labels should be separated with commas, do not contain any whitespaces.
       remove_files(configuration, @env.keep_template) unless @env.keep_configuration
       Result.ok('')
     end
+  end
+
+  # Withdraw all subscriptions that were not removed by Chef
+  def cleanup_leftover_subscriptions(configuration_path)
+    @ui.info('Cleaning up leftover systems subscriptions')
+    registration_manager = RegistrationManager.new(configuration_path, @ui)
+    registration_manager.cleanup_subscriptions
   end
 
   # Handle cases when command calling with --all option.

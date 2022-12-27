@@ -25,6 +25,7 @@ require_relative '../../services/product_attributes'
 require_relative '../../services/configuration_generator'
 require_relative '../../services/chef_configuration_generator'
 require_relative '../../services/ssh_user'
+require_relative 'registration_manager'
 require 'workers'
 
 # The configurator brings up the configuration for the Vagrant
@@ -40,6 +41,7 @@ class TerraformConfigurator
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
+    @registration_manager = RegistrationManager.new(@config.path, @ui)
     NetworkSettings.from_file(config.network_settings_file).match(
         ok: ->(result) { @network_settings = result },
         error: ->(_result) { @network_settings = NetworkSettings.new }
@@ -140,6 +142,10 @@ class TerraformConfigurator
       @network_settings.add_network_configuration(node, node_network)
       result = NetworkChecker.resources_available?(@machine_configurator, node_network, logger).and_then do
         ChefConfigurationGenerator.configure_with_chef(node, logger, @network_settings.node_settings(node), @config, @ui, @machine_configurator)
+      end
+
+      if @registration_manager.configure_subscription?(node)
+        @registration_manager.copy_machine_credentials_to_server(node_network)
       end
 
       if result.success?
