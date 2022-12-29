@@ -444,6 +444,10 @@ module ProductAttributes
         repository: 'connector_odbc_ci',
         ci_product: true
     },
+    'extra_package_management' => {
+      recipe: 'extra_package_management',
+      name: 'extra_package_management'
+    },
   }.freeze
 
   DEPENDENCE = {
