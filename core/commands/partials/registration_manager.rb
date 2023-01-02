@@ -9,6 +9,7 @@ class RegistrationManager
 
   def initialize(configuration_path, logger)
     @configuration_path = configuration_path
+    @subscriptions_config = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR)
     @logger = logger
   end
 
@@ -22,7 +23,9 @@ class RegistrationManager
 
   # Create a file with subscription credentials on the server in the a configuration directory
   def write_credentials_file(machine, credentials)
-    file_path = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR, generate_credentials_filename(machine))
+    return Result.error('No subscriptions directory found') unless Dir.exist?(@subscriptions_config)
+
+    file_path = File.join(@subscriptions_config, generate_credentials_filename(machine))
     File.open(file_path, 'w') do |file|
       file.write(credentials)
     end
@@ -40,9 +43,10 @@ class RegistrationManager
 
   # Remove all SUSE subscriptions listed in the configuration
   def cleanup_subscriptions
-    subscriptions_config = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR)
-    Dir.each_child(subscriptions_config) do |filename|
-      withdraw_subscription(File.join(subscriptions_config, filename))
+    return Result.error('No subscriptions directory found') unless Dir.exist?(@subscriptions_config)
+
+    Dir.each_child(@subscriptions_config) do |filename|
+      withdraw_subscription(File.join(@subscriptions_config, filename))
     end
   end
 
