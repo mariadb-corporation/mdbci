@@ -16,7 +16,7 @@ end
 include_recipe 'packages::configure_apt'
 
 # install additional packages for all platform
-%w(net-tools psmisc curl rsync).each do |pkg|
+%w(net-tools psmisc curl rsync unzip).each do |pkg|
   package pkg do
     retries 2
     retry_delay 10
