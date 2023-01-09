@@ -446,8 +446,33 @@ module ProductAttributes
     },
     'extra_package_management' => {
       recipe: 'extra_package_management',
-      name: 'extra_package_management'
+      name: 'extra_package_management',
+      without_version: true,
     },
+    'debugging_tools' => {
+      recipe: 'debugging_tools',
+      name: 'debugging_tools',
+      without_version: true,
+    },
+    'caching_tools' => {
+      recipe: 'caching_tools',
+      name: 'caching_tools',
+      without_version: true,
+    },
+    'python' => {
+      recipe: 'python',
+      name: 'python',
+      without_version: true,
+    },
+    'java' => {
+      recipe: 'java',
+      name: 'java',
+    },
+    'security_tools' => {
+      recipe: 'security_tools',
+      name: 'security_tools',
+      without_version: true,
+    }
   }.freeze
 
   DEPENDENCE = {
