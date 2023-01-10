@@ -6,9 +6,8 @@ package 'yum-utils' do
   end
 end
 
-if [8, 9].include?(platform_version)
-  execute 'install epel-release' do
-    command "yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-#{platform_version}.noarch.rpm"
-  end
+execute 'install epel-release' do
+  command "yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-#{platform_version}.noarch.rpm"
+  ignore_failure true
 end
 
