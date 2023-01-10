@@ -43,3 +43,9 @@ core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
 connector_odbc_staging | + | - | - | - |
 connector_odbc_ci | + | - | - | - |
+[caching_tools](detailed_topics/additional_products_for_maxscale_test.md) | - | - | - | - |
+[debugging_tools](detailed_topics/additional_products_for_maxscale_test.md) | - | - | - | - |
+[extra_package_management](detailed_topics/additional_products_for_maxscale_test.md) | - | - | - | - |
+[security_tools](detailed_topics/additional_products_for_maxscale_test.md) | - | - | - | - |
+[java](detailed_topics/additional_products_for_maxscale_test.md) | + | - | - | - |
+[python](detailed_topics/additional_products_for_maxscale_test.md) | - | - | - | - |
