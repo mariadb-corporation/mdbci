@@ -26,7 +26,7 @@ class Chef
       def self.register_node_command(suse_connect_parameters)
         # Copying configuration script from the registration proxy requires HTTP protocol
         http_proxy_url = suse_connect_parameters['registration_proxy_url'].sub('https://', 'http://')
-        "curl #{http_proxy_url}/tools/rmt-client-setup --output rmt-client-setup; yes | sh rmt-client-setup #{suse_connect_parameters['registration_proxy_url']}; SUSEConnect -r #{suse_connect_parameters['key']} -e #{suse_connect_parameters['email']} --url #{suse_connect_parameters['registration_proxy_url']}"
+        "curl #{URI.join(http_proxy_url, '/tools/rmt-client-setup')} --output rmt-client-setup; yes | sh rmt-client-setup #{suse_connect_parameters['registration_proxy_url']}; SUSEConnect -r #{suse_connect_parameters['key']} -e #{suse_connect_parameters['email']} --url #{suse_connect_parameters['registration_proxy_url']}"
       end
 
       # Generate deregistration command for the machine
