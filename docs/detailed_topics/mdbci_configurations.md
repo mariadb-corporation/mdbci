@@ -53,6 +53,7 @@ digitalocean:
 suse:
   email: # email
   key: # key
+  registration_proxy: # Address for SUSE Registration Proxy Server
 mdbe_ci:
   mdbe_ci_repo:
     username: # username

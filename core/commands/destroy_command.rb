@@ -201,7 +201,7 @@ Labels should be separated with commas, do not contain any whitespaces.
   # Withdraw all subscriptions that were not removed by Chef
   def cleanup_leftover_subscriptions(configuration_path)
     @ui.info('Cleaning up leftover systems subscriptions')
-    registration_manager = RegistrationManager.new(configuration_path, @ui)
+    registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'], configuration_path, @ui)
     registration_manager.cleanup_subscriptions
   end
 
@@ -281,13 +281,17 @@ Labels should be separated with commas, do not contain any whitespaces.
 
   def generate_role_file_unsub(configuration, name, subscription)
     recipe_name = ["#{subscription}::unsubscription"]
-    generate_role_file(configuration, name, recipe_name)
+    override_params = {}
+    if subscription == 'suse-connect'
+      override_params['suse-connect'] = @env.suse_config
+    end
+    generate_role_file(configuration, name, recipe_name, override_params)
   end
 
   # Create a role file to install the product from the chef
-  def generate_role_file(configuration, name, recipe_names)
+  def generate_role_file(configuration, name, recipe_names, override_params = {})
     role_file_path = "#{configuration.path}/#{name}.json"
-    role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_names)
+    role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_names, override_params)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end

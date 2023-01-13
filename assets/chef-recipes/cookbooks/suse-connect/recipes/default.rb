@@ -3,22 +3,16 @@ package 'SUSEConnect' do
   ignore_failure true
 end
 
-execute 'Change SUSEConnect server' do
-  command "sed -i 's|https://smt-gce.susecloud.net|https://scc.suse.com|g' /etc/SUSEConnect"
-  only_if { node['suse-connect']['provider'] == 'gcp' }
-  ignore_failure true
-end
-
 ruby_block 'Read old SUSE machine credentials' do
   block do
-    node.run_state[:old_suse_credentials] = DeregistrationHelpers.load_credentials
+    node.run_state[:old_suse_credentials] = RegistrationHelpers.load_credentials
   end
   action :run
 end
 
 execute 'Deregister the system if it has an old subscription' do
   not_if { node.run_state[:old_suse_credentials].empty? }
-  command lazy { DeregistrationHelpers.deregister_node(node.run_state[:old_suse_credentials])}
+  command lazy { RegistrationHelpers.deregister_node_command(node.run_state[:old_suse_credentials])}
   ignore_failure true
 end
 
@@ -50,7 +44,7 @@ end
 
 execute 'Register system' do
   sensitive true
-  command "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']} --url https://scc.suse.com"
+  command lazy { RegistrationHelpers.register_node_command(node['suse-connect']) }
 end
 
 ruby_block 'Get SUSE product information' do
