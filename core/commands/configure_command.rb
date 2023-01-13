@@ -204,7 +204,8 @@ Use the following short product names to configure them:
   def input_suse_subscription_credentials
     {
         'email' => read_topic('Please input email for SUSEConnect', @configuration.dig('suse', 'email')),
-        'key' => read_topic('Please input key for SUSEConnect', @configuration.dig('suse', 'key'))
+        'key' => read_topic('Please input key for SUSEConnect', @configuration.dig('suse', 'key')),
+        'registration_proxy_url' => read_topic('Please input the URL of the SUSE Registration Proxy server', @configuration.dig('suse', 'registration_proxy_url'))
     }
   end
 
