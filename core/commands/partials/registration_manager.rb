@@ -5,9 +5,11 @@ require_relative '../../services/shell_commands'
 class RegistrationManager
   SUSE_CREDENTIALS_FILE = '/etc/zypp/credentials.d/SCCcredentials'
   REGISTRATION_COOKBOOK_NAME = 'suse-connect'
+  REGISTRATION_ENDPOINT = '/connect/systems'
   SUBSCRIPTION_CONFIG_DIR = ".subscriptions"
 
-  def initialize(configuration_path, logger)
+  def initialize(registration_proxy_url, configuration_path, logger)
+    @registration_proxy_url = registration_proxy_url
     @configuration_path = configuration_path
     @subscriptions_config = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR)
     @logger = logger
@@ -65,7 +67,7 @@ class RegistrationManager
 
   # Run request to deregister the system with the given credentials
   def run_deregistration_command(credentials)
-    command = "curl -X DELETE -u #{credentials['username']}:#{credentials['password']} 'https://scc.suse.com/connect/systems'"
+    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(@registration_proxy_url, REGISTRATION_ENDPOINT)}"
     ShellCommands.run_command(@logger, command)
   end
 end
