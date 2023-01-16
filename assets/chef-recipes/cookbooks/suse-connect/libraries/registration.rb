@@ -33,7 +33,7 @@ class Chef
       # @param credentials [Hash] machine credentials in format {'username' : String, 'password' : String }
       # @param registration_proxy_url [String] URL for SUSE Registration Proxy server
       def self.deregister_node_command(registration_proxy_url, credentials)
-        "sudo curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(registration_proxy_url, REGISTRATION_ENDPOINT)}"
+        "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(registration_proxy_url, REGISTRATION_ENDPOINT)}"
       end
     end
   end
