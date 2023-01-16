@@ -39,8 +39,11 @@ class RegistrationManager
 
   # Check if SUSE subscription is used for the node
   def configure_subscription?(node)
-    node_config_file = File.open(File.join(@configuration_path, "#{node}.json"))
-    return File.read(node_config_file).include?(REGISTRATION_COOKBOOK_NAME)
+    node_config_filename = File.join(@configuration_path, "#{node}.json")
+    return false unless File.exist?(node_config_filename)
+
+    node_config = File.open(node_config_filename)
+    File.read(node_config).include?(REGISTRATION_COOKBOOK_NAME)
   end
 
   # Remove all SUSE subscriptions listed in the configuration
