@@ -17,18 +17,18 @@ This section describes MDBCI architecture, workflow and other technical details.
   * maxscale -- Maxscale server and client,
   * mysql -- Mysql server and client,
   * galera -- Galera server and clients,
-  * clustrix -- Clustrix server. [Read more](detailed_topics/using_clustrix_product.md),
-  * mariadb_plugins -- Plugins for MariaDb. [Read more](detailed_topics/mdbe_pugins.md),
+  * clustrix -- Clustrix server. [Read more](src/products/using_clustrix_product.md),
+  * mariadb_plugins -- Plugins for MariaDb. [Read more](src/products/mdbe_pugins.md),
   * mdbe_build -- Dependencies for MariaDb build,
   * connetors_build -- Dependencies for MariaDb connectors build,
-  * kerberos -- Kerberos packages. [Read more](detailed_topics/using_kerberos_product.md),
+  * kerberos -- Kerberos packages. [Read more](src/products/using_kerberos_product.md),
   * docker -- Docker packages.
 
   [Full list products](./all_products.md).
 
-* **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json format and collected in repo.d directory (see. [repo.d files](./configuration_files.md#repod)).
+* **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json format and collected in repo.d directory (see. [repo.d files](src/general_configuration/configuration_files.md#repod)).
 
-* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](detailed_topics/template_creation.md).
+* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](src/virtual_machines/template_creation.md).
 
 ### Workflow
 
@@ -87,5 +87,5 @@ mdbe@?+opensuse^13 => [http://downloads.mariadb.com/enterprise/WY99-BC52/mariadb
 where mdbe@? means default mariadb community version on Opensuse13 target platfrom.
 
 See also:
-* [Configuration files](./configuration_files.md).
+* [Configuration files](src/general_configuration/configuration_files.md).
 * [Supported VM providers](./all_providers_and_boxes.md).
