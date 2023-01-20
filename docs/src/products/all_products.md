@@ -3,7 +3,7 @@
 __product name__ - name of the product to specify in the template or `install_product` command.
 
 __different version support__ - indicates whether different versions are supported.
-[MDBCI generate-product-repository](src/commands/generate-product-repositories.md).
+[MDBCI generate-product-repository](../commands/generate-product-repositories.md).
 
 __cnf file support__ - indicates whether cnf files are supported.
 
@@ -14,7 +14,7 @@ __unsupported repositories__ - indicates whether the product has an unsupported 
 product name | different versions support | cnf file support | deletion is available | unsupported repositories
 --- | --- | --- | --- | ---
 mariadb | + | + | mariadb | -
-[mariadb_ci](detailed_topics/using_mariadb_from_ci_server.md) | + | + | mariadb | -
+[mariadb_ci](../../detailed_topics/using_mariadb_from_ci_server.md) | + | + | mariadb | -
 mariadb_staging | + | + | mariadb | -
 mdbe | + | + | mariadb | -
 mdbe_ci | + | + | mariadb | -
@@ -27,25 +27,25 @@ columnstore | + | - | - | -
 galera | + (version for mariadb) | + | - | -
 galera_config | - | + | - | -
 docker | + | - | - | -
-[clustrix](src/products/using_clustrix_product.md) | + | - | - | -
+[clustrix](using_clustrix_product.md) | + | - | - | -
 mdbe_build | - | - | - | -
 connectors_build | - | - | - | -
-[galera_3_enterprise](src/products/using_galera_products.md) | + | - | - | -
-[galera_4_enterprise](src/products/using_galera_products.md) | + | - | - | -
-[galera_3_community](src/products/using_galera_products.md) | + | - | - | -
-[galera_4_community](src/products/using_galera_products.md) | + | - | - | -
+[galera_3_enterprise](using_galera_products.md) | + | - | - | -
+[galera_4_enterprise](using_galera_products.md) | + | - | - | -
+[galera_3_community](using_galera_products.md) | + | - | - | -
+[galera_4_community](using_galera_products.md) | + | - | - | -
 google-authenticator | - | - | - | -
-[kerberos](src/products/using_kerberos_product.md) | - | - | - | -
-[kerberos_server](src/products/using_kerberos_product.md) | - | - | - | -
-[mariadb_plugins](src/products/mdbe_pugins.md) | - | - | - | -
+[kerberos](using_kerberos_product.md) | - | - | - | -
+[kerberos_server](using_kerberos_product.md) | - | - | - | -
+[mariadb_plugins](mdbe_pugins.md) | - | - | - | -
 sysbench | - | - | - | - |
 core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
 connector_odbc_staging | + | - | - | - |
 connector_odbc_ci | + | - | - | - |
-[caching_tools](src/products/additional_products_for_maxscale_test.md) | - | - | - | - |
-[debugging_tools](src/products/additional_products_for_maxscale_test.md) | - | - | - | - |
-[extra_package_management](src/products/additional_products_for_maxscale_test.md) | - | - | - | - |
-[security_tools](src/products/additional_products_for_maxscale_test.md) | - | - | - | - |
-[java](src/products/additional_products_for_maxscale_test.md) | + | - | - | - |
-[python](src/products/additional_products_for_maxscale_test.md) | - | - | - | - |
+[caching_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
+[debugging_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
+[extra_package_management](additional_products_for_maxscale_test.md) | - | - | - | - |
+[security_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
+[java](additional_products_for_maxscale_test.md) | + | - | - | - |
+[python](additional_products_for_maxscale_test.md) | - | - | - | - |

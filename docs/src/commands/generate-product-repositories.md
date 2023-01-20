@@ -14,4 +14,4 @@ If you only need to generate a specific product with a specific version, use the
 ./mdbci generate-product-repositories --product mariadb --product-version 10.6
 ```
 
-[Full list products](../all_products.md)
+[Full list products](../products/all_products.md)
