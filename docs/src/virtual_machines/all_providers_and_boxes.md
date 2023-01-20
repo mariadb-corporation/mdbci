@@ -14,7 +14,7 @@ MDBCI uses the [Terraform](https://www.terraform.io/) to create cloud virtual ma
 
 MDBCI also supports:
 
-* [Dedicated servers](detailed_topics/using_dedicated_servers.md).
+* [Dedicated servers](src/virtual_machines/using_dedicated_servers.md).
 
 ### Boxes
 
@@ -25,4 +25,4 @@ MDBCI currently provides support for the following distributions:
 * RHEL 7, 8 via AWS or Google Cloud Platform,
 * SLES 12, 15,
 * Ubuntu 16.04, 18.04, 20.04,
-* Windows Server 2019 via Google Cloud Platform. [Read more](detailed_topics/using_windows_machines.md).
+* Windows Server 2019 via Google Cloud Platform. [Read more](src/virtual_machines/using_windows_machines.md).
