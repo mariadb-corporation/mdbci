@@ -16,7 +16,7 @@ Full list of configuration files:
 Main MDBCI configuration file.
 `config.yaml` file describes the configuration information obtained as a result of the command `./mdbci configure`.
 
-Read more about [config.yaml](src/general_configuration/mdbci_configurations.md).
+Read more about [config.yaml](mdbci_configurations.md).
 
 ### boxes
 
@@ -108,7 +108,7 @@ set global license=
 "signature":"KEY"}'
 ```
 
-[Clustrix product in MDBCI](src/products/using_clustrix_product.md).
+[Clustrix product in MDBCI](../products/using_clustrix_product.md).
 
 
 ### hidden-instances.yaml
@@ -123,7 +123,7 @@ aws:
   - aws-name
 ```
 
-Read more about [list_cloud_instances](src/commands/list_cloud_instances_command.md).
+Read more about [list_cloud_instances](../commands/list_cloud_instances_command.md).
 
 ### repo.d
 
@@ -174,4 +174,4 @@ File format:
 
 `windows.pem` file describes the RSA key for ssh connection to the Windows machine.
 
-Read more about [creation Windows machine](src/virtual_machines/using_windows_machines.md).
+Read more about [creation Windows machine](../virtual_machines/using_windows_machines.md).

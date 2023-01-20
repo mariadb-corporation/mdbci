@@ -101,6 +101,6 @@ Example:
 ```
 
 Also see:
-* [Tutorial](../../tutorial.md)
+* [Tutorial](../tutorial.md)
 * [Example with explanations](../../example_with_explanations.md)
 * [MDBCI generate-product-repositories](../commands/generate-product-repositories.md)
