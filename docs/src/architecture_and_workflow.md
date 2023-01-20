@@ -4,7 +4,7 @@ This section describes MDBCI architecture, workflow and other technical details.
 
 ### Terminology
 
-* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. Read more about [providers and boxes](./all_providers_and_boxes.md).
+* **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. Read more about [providers and boxes](virtual_machines/all_providers_and_boxes.md).
 
 * **[MDBCI](https://github.com/mariadb-corporation/mdbci)** is a standard set of tools for testing MariaDb components on the wide set of configurations.
 
@@ -17,18 +17,18 @@ This section describes MDBCI architecture, workflow and other technical details.
   * maxscale -- Maxscale server and client,
   * mysql -- Mysql server and client,
   * galera -- Galera server and clients,
-  * clustrix -- Clustrix server. [Read more](src/products/using_clustrix_product.md),
-  * mariadb_plugins -- Plugins for MariaDb. [Read more](src/products/mdbe_pugins.md),
+  * clustrix -- Clustrix server. [Read more](products/using_clustrix_product.md),
+  * mariadb_plugins -- Plugins for MariaDb. [Read more](products/mdbe_pugins.md),
   * mdbe_build -- Dependencies for MariaDb build,
   * connetors_build -- Dependencies for MariaDb connectors build,
-  * kerberos -- Kerberos packages. [Read more](src/products/using_kerberos_product.md),
+  * kerberos -- Kerberos packages. [Read more](products/using_kerberos_product.md),
   * docker -- Docker packages.
 
-  [Full list products](./all_products.md).
+  [Full list products](products/all_products.md).
 
-* **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json format and collected in repo.d directory (see. [repo.d files](src/general_configuration/configuration_files.md#repod)).
+* **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json format and collected in repo.d directory (see. [repo.d files](general_configuration/configuration_files.md#repod)).
 
-* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](src/virtual_machines/template_creation.md).
+* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](virtual_machines/template_creation.md).
 
 ### Workflow
 
@@ -87,5 +87,5 @@ mdbe@?+opensuse^13 => [http://downloads.mariadb.com/enterprise/WY99-BC52/mariadb
 where mdbe@? means default mariadb community version on Opensuse13 target platfrom.
 
 See also:
-* [Configuration files](src/general_configuration/configuration_files.md).
-* [Supported VM providers](./all_providers_and_boxes.md).
+* [Configuration files](general_configuration/configuration_files.md).
+* [Supported VM providers](virtual_machines/all_providers_and_boxes.md).

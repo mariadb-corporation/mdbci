@@ -6,7 +6,7 @@
 
 1. Linux terminal.
 2. Text editor.
-3. [Installed MDBCI](./install_mdbci.md).
+3. [Installed MDBCI](install_mdbci.md).
 
 #### Results of finishing tutorial
 
@@ -17,7 +17,7 @@ You will learn:
 ### MDBCI concepts
 
 MDBCI is the command-line utility that has a lots of commands and options.
-You can use the [help command](./help_command.md) to find out list of supported commands.
+You can use the [help command](commands/help_command.md) to find out list of supported commands.
 
 The core steps required to create virtual machines using MDBCI are:
 
@@ -50,7 +50,7 @@ The core steps required to create virtual machines using MDBCI are:
            }
     }
     ```
-   Read more about [template creation](detailed_topics/template_creation.md).
+   Read more about [template creation](src/virtual_machines/template_creation.md).
 3. Generate a configuration directory:
     ```
     ./mdbci generate --template template.json first_vm
@@ -60,15 +60,15 @@ The core steps required to create virtual machines using MDBCI are:
     ./mdbci up first_vm
     ```
 5. After creation, the virtual machine is available for operation:
-    * You can interact with it using MDBCI. [Read more](commands/interact_examples.md).
+    * You can interact with it using MDBCI. [Read more](../detailed_topics/interact_examples.md).
     * The machine is available for ssh connection:
         ```
         ssh -F first_vm_ssh_config mariadb
         ```
-        Read more about [ssh connection](detailed_topics/connect_to_vms.md).
+        Read more about [ssh connection](virtual_machines/connect_to_vms.md).
 6. When you finish working with the virtual machine, destroy it:
     ```
     ./mdbci destroy first_vm
     ```
 
-See an [example with explanations](./example_with_explanations.md) for more detailed description of the process.
+See an [example with explanations](../example_with_explanations.md) for more detailed description of the process.
