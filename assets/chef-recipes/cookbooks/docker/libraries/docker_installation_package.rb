@@ -3,6 +3,7 @@ module DockerCookbook
     # Resource properties
     resource_name :docker_installation_package
 
+    provides :docker_installation_package
     provides :docker_installation, platform: 'amazon'
 
     property :setup_docker_repo, [TrueClass, FalseClass], default: lazy { platform?('amazon') ? false : true }, desired_state: false
