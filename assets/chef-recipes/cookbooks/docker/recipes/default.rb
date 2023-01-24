@@ -9,6 +9,12 @@ if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 7) || no
     version docker_version unless docker_version.nil?
     action :create
   end
+  service 'docker' do
+    action :enable
+  end
+  service 'docker' do
+    action :start
+  end
 elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
   yum_repository 'name' do
     description 'Docker CE Stable'
