@@ -1,3 +1,5 @@
+SUSE_CUSTOMER_CENTER_URL = 'https://scc.suse.com'
+
 package 'SUSEConnect' do
   action :install
   ignore_failure true
@@ -14,14 +16,9 @@ execute 'Deregister the system if it has an old subscription' do
   not_if { node.run_state[:old_suse_credentials].empty? }
   command lazy {
     RegistrationHelpers.deregister_node_command(
-      node['suse-connect']['registration_proxy_url'],
+      node['suse-connect'],
       node.run_state[:old_suse_credentials])
   }
-  ignore_failure true
-end
-
-execute 'Deregister and clean up a system' do
-  command 'registercloudguest --clean'
   ignore_failure true
 end
 

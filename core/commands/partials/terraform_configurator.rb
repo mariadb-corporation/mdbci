@@ -41,7 +41,7 @@ class TerraformConfigurator
     @machine_configurator = MachineConfigurator.new(@ui)
     @attempts = @env.attempts&.to_i || 5
     @recreate_nodes = @env.recreate
-    @registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'], @config.path, @ui)
+    @registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'], @config.path, @provider, @ui)
     NetworkSettings.from_file(config.network_settings_file).match(
         ok: ->(result) { @network_settings = result },
         error: ->(_result) { @network_settings = NetworkSettings.new }
