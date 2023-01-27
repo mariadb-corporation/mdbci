@@ -7,12 +7,14 @@ class RegistrationManager
   REGISTRATION_COOKBOOK_NAME = 'suse-connect'
   REGISTRATION_ENDPOINT = '/connect/systems'
   SUBSCRIPTION_CONFIG_DIR = ".subscriptions"
+  CUSTOMER_CENTER_URL = 'https://scc.suse.com'
 
-  def initialize(registration_proxy_url, configuration_path, logger)
+  def initialize(registration_proxy_url, configuration_path, machines_provider, logger)
     @registration_proxy_url = registration_proxy_url
     @configuration_path = configuration_path
     @subscriptions_config = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR)
     @logger = logger
+    @use_proxy = use_proxy?(machines_provider)
   end
 
   def copy_machine_credentials_to_server(machine)
@@ -70,7 +72,18 @@ class RegistrationManager
 
   # Run request to deregister the system with the given credentials
   def run_deregistration_command(credentials)
-    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(@registration_proxy_url, REGISTRATION_ENDPOINT)}"
+    registration_server_address = @use_proxy ? @registration_proxy_url : CUSTOMER_CENTER_URL
+    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(registration_server_address, REGISTRATION_ENDPOINT)}"
     ShellCommands.run_command(@logger, command)
+  end
+
+  def use_proxy?(machines_provider)
+    machines_provider == 'gcp' && proxy_available?
+  end
+
+  def proxy_available?
+    @logger.info(@logger)
+    result = ShellCommands.run_command(@logger, "curl -k #{@registration_proxy_url} --connect-timeout 2")
+    result[:value].success?
   end
 end
