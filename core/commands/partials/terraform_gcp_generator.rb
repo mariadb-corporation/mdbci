@@ -79,9 +79,10 @@ class TerraformGcpGenerator
   # @return [Result::Base] generation result.
   def create_instances_configuration(node_params)
     @ui.info('Selecting the GCP region')
-    result = Result.ok('')
     all_regions_quotas = @gcp_service.regions_quotas_list
-    all_regions_quotas.each do |regional_quotas|
+    return all_regions_quotas if all_regions_quotas.error?
+
+    all_regions_quotas.value.each do |regional_quotas|
       region = regional_quotas[:region_name]
       instances_configuration = select_zone_and_generate_config(region, node_params)
       next if instances_configuration.error?

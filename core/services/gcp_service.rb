@@ -268,6 +268,8 @@ class GcpService
   # followed by the rest of regions sorted by current usage
   def regions_quotas_list
     region_names = @gcp_config['regions']
+    return Result.error('No GCP regions specified') if region_names.nil? || region_names.empty?
+
     @logger.info('Taking the GCP quotas')
     regions = region_names.map do |region|
       region_description = @service.get_region(@gcp_config['project'], region)
@@ -309,10 +311,14 @@ class GcpService
   # Places the default region at the start of the quotas list
   # @param quotas [Array<Hash>] list of CPU quotas for all supported regions
   def move_default_region_first(quotas)
+    return Result.error('No default GCP region specified') unless @gcp_config.key?('default_region')
+
     default_region_quotas = quotas.select do |regional_quota|
       regional_quota[:region_name] == @gcp_config['default_region']
-    end.first
-    quotas.insert(0, quotas.delete(default_region_quotas))
+    end
+    return Result.error('Invalid default GCP region') if default_region_quotas.empty?
+
+    Result.ok(quotas.insert(0, quotas.delete(default_region_quotas.first)))
   end
 
   # Checks if the given set of instances does not exceed the CPU quota
