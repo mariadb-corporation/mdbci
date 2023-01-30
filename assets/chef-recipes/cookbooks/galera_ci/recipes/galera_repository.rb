@@ -28,6 +28,9 @@ when 'rhel'
       command 'echo module_hotfixes=true >> /etc/yum.repos.d/galera.repo'
     end
   end
+  yum_repository 'galera' do
+    action :makecache
+  end
 when 'sles', 'suse', 'opensuse'
   zypper_repository 'galera' do
     action :remove
