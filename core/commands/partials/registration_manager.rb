@@ -77,12 +77,12 @@ class RegistrationManager
     ShellCommands.run_command(@logger, command)
   end
 
+  # Check if the system can be registered via the Registration Proxy Server
   def use_proxy?(machines_provider)
     machines_provider == 'gcp' && proxy_available?
   end
 
   def proxy_available?
-    @logger.info(@logger)
     result = ShellCommands.run_command(@logger, "curl -k #{@registration_proxy_url} --connect-timeout 2")
     result[:value].success?
   end
