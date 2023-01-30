@@ -1,5 +1,3 @@
-SUSE_CUSTOMER_CENTER_URL = 'https://scc.suse.com'
-
 package 'SUSEConnect' do
   action :install
   ignore_failure true

@@ -46,6 +46,8 @@ class Chef
         !cmd.error?
       end
 
+      # Check if the system can be registered via the Registration Proxy Server
+      # @param suse_connect_parameters [Hash] subscription parameters in format {'provider': String, 'email' : String, 'key' : String, 'registration_proxy_url' : String }
       def self.use_proxy?(suse_connect_parameters)
         suse_connect_parameters['provider'] == 'gcp' && proxy_available?(suse_connect_parameters['registration_proxy_url'])
       end
