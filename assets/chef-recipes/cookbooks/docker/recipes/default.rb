@@ -17,6 +17,9 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
     gpgcheck true
     enabled true
   end
+  yum_repository 'name' do
+    action :makecache
+  end
   # Hack for rhel 8, Chef on rhel 8 throw exception on yum_package resource
   # https://github.com/chef/chef/issues/7988
   # python3 installation does not solve this problem
