@@ -20,6 +20,9 @@ when 'rhel', 'centos'
     gpgkey repo_key
     sensitive true
   end
+  yum_repository connector do
+    action :makecache
+  end
 when 'sles', 'suse', 'opensuse'
   remote_file File.join('tmp', 'rpm.key') do
     source repo_key

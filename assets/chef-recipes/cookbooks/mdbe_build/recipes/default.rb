@@ -402,6 +402,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
           baseurl 'http://centos.mirror.liquidtelecom.com/8/PowerTools/aarch64/os/'
           gpgcheck false
         end
+        yum_repository 'PowerTools' do
+          action :makecache
+        end
       when 'redhat'
         execute 'Enable CodeReady Builder repository' do
           command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'

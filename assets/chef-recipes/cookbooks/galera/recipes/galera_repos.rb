@@ -50,6 +50,9 @@ when 'rhel', 'fedora', 'centos'
     sensitive true
     gpgcheck
   end
+  yum_repository 'galera' do
+    action :makecache
+  end
 when 'suse', 'opensuse', 'sles'
   remote_file File.join('tmp', 'rpm.key') do
     source node['galera']['repo_key']
