@@ -1,6 +1,8 @@
 include_recipe "mariadb-maxscale::maxscale_repos"
 include_recipe "chrony::default"
 
+package 'binutils'
+
 # check and install iptables
 case node[:platform_family]
 when "debian", "ubuntu"
