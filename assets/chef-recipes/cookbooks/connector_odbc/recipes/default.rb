@@ -25,6 +25,7 @@ bash 'install_odbc' do
   code <<-SCRIPT
     install -d /usr/lib64/
     install lib/mariadb/libmaodbc.so /usr/lib64/
+    install lib/mariadb/libmariadb.so.3 /usr/lib64/
     install -d /usr/lib64/mariadb/
     install -d /usr/lib64/mariadb/plugin/
     install lib/mariadb/plugin/auth_gssapi_client.so /usr/lib64/mariadb/plugin/
