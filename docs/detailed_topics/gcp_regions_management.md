@@ -51,7 +51,7 @@ gcloud compute routers nats create nat-config \
 
 Read more about [building internet connectivity to GCP VMs](https://cloud.google.com/architecture/building-internet-connectivity-for-private-vms)
 
-## Create and configure the Cloud Router using terraform
+## Create and configure the Cloud Router using Terraform
 
 ### 1. Create Terraform NAT configuration file
 ```terraform
