@@ -51,9 +51,9 @@ digitalocean:
   region: FRA1
   token: # token
 suse:
-  email: # email
-  key: # key
-  registration_proxy: # Address for SUSE Registration Proxy Server
+  email: # Customer's email
+  key: # Subscription registration code
+  registration_proxy: # SUSE Registration Proxy Server address
 mdbe_ci:
   mdbe_ci_repo:
     username: # username
