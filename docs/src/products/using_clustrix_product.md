@@ -2,7 +2,7 @@
 MDBCI supports installing Clustrix on virtual machines.
 
 You can specify two product versions:
-* Standard version. Version consists of 3 digits separated by dots. For expample `9.1.3`
+* Standard version. Version consists of 3 digits separated by dots. For example `9.1.3`
 ```json
 {
   "centos_node" :

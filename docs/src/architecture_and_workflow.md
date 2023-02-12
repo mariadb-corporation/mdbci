@@ -24,11 +24,11 @@ This section describes MDBCI architecture, workflow and other technical details.
   * kerberos -- Kerberos packages. [Read more](products/using_kerberos_product.md),
   * docker -- Docker packages.
 
-  [Full list products](products/all_products.md).
+  [Full list of products](products/all_products.md).
 
 * **Repo** is a description of package repository with particular product version. Usually, repositories are described in repo.json format and collected in repo.d directory (see. [repo.d files](general_configuration/configuration_files.md#repod)).
 
-* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](virtual_machines/template_creation.md).
+* **Template** is a set of node definitions in template.json format. Templates are being used for setup a teting cluster. Read more about [template creation](virtual_machines/machine_template.md).
 
 ### Workflow
 
@@ -38,11 +38,11 @@ MDBCI Workflow includes the following steps:
   * Configuring template.
   * Running up virtual machine.
   * Using virtual machine.
-  * Destroing virtual machine.
+  * Destroying virtual machine.
 
 #### Environmental variables
 
-**MDBCI_VM_PATH** varibale points to the directory for virtual machines definitions.
+**MDBCI_VM_PATH** variable points to the directory for virtual machines definitions.
 
 #### Creating configuration
 
@@ -60,7 +60,7 @@ In this example MDBCI will generate new vagrant/chef config from mynewstand.json
 
 ### Box, products, versions
 
-MDBCI makes matching between boxes, target platforms, products and vesions by lexicographical base. If we
+MDBCI makes matching between boxes, target platforms, products and versions by lexicographical base. If we
 have a look at the output of next command
 
 ```
@@ -79,12 +79,12 @@ It means that each exact product/platform version combination is encoded.
 
 product@version+platform^platform_version
 
-In cases, when we need to use default product version on particular platfrom this encoding will be
+In cases, when we need to use default product version on particular platform this encoding will be
 
 ```
 mdbe@?+opensuse^13 => [http://downloads.mariadb.com/enterprise/WY99-BC52/mariadb-enterprise/5.5.42-pgo/opensuse/13]
 ```
-where mdbe@? means default mariadb community version on Opensuse13 target platfrom.
+where mdbe@? means default mariadb community version on Opensuse13 target platform.
 
 See also:
 * [Configuration files](general_configuration/configuration_files.md).

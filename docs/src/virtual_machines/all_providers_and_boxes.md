@@ -21,7 +21,7 @@ MDBCI also supports:
 MDBCI currently provides support for the following distributions:
 
 * CentOS 7, 8,
-* Debian Buster, Bullseye
+* Debian Buster, Bullseye,
 * RHEL 7, 8, 9,
 * Rocky Linux 8, 9,
 * SLES 12, 15,

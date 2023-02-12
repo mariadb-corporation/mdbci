@@ -42,7 +42,7 @@ Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#t
 2. Run installing MDBCI dependencies: `mdbci setup-dependencies`
 3. Fill in the MDBCI configuration settings (for example, credentials of cloud platforms, private repositories, and etc.): `mdbci configure`
 
-   You can follow the [MDBCI configuration](general_configuration/mdbci_configurations.md) to read more about MDBCI configuration.
+   You can follow the [MDBCI configuration](general_configuration/configuration_files.md) to read more about MDBCI configuration.
 4. Log out and back in again. This needs to be done in order for the new groups to become active.
 
 ### Generate Configuration and Start VMs
@@ -64,6 +64,6 @@ Once the last command finishes, you should have a working set of VMs in the `my-
 
 See also:
 * [Quickstart](quickstart.md).
-* [Example with explanations](../example_with_explanations.md).
+* [Virtual machine usage](virtual_machines/virtual_machine_usage.md).
 * [MDBCI generate-product-repositories](commands/generate-product-repositories.md).
 * [Template creation](virtual_machines/machine_template.md).

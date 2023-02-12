@@ -1,4 +1,4 @@
-## Tutorial
+## Quickstart
 
 ### Brief description
 
@@ -28,19 +28,20 @@ The core steps required to create virtual machines using MDBCI are:
 5. When done, call the destroy command that will terminate VMs and clear all the artifacts: configuration, template (may be kept) and network configuration file.
 
 ### Steps
+1. Specify GCP (or other provider's) settings in the [config.yaml](general_configuration/config_yaml.md) file (including `credentials_file` path for GCP).
 
-1. Generate the product repository configuration before installation:
+2. Generate the product repository configuration before installation:
     ```
     ./mdbci generate-product-repositories --product mariadb
     ```
    See [generate-product-repositories command](commands/generate-product-repositories.md) documentation for details.
-2. Create a configuration template file (for example, call it `template.json`).
+3. Create a configuration template file (for example, call it `template.json`).
 
     Example of a configuration template file with a single product `mariadb` 10.5 version:
     ```json
     {
-           "mariadb":{
-                   "box": "centos_8_libvirt",
+           "mariadb": {
+                   "box": "ubuntu_jammy_gcp",
                    "hostname": "mariadb",
                    "products": [
                    {
@@ -50,25 +51,23 @@ The core steps required to create virtual machines using MDBCI are:
            }
     }
     ```
-   Read more about [template creation](src/virtual_machines/template_creation.md).
-3. Generate a configuration directory:
+   Read more about [template creation](virtual_machines/machine_template.md).
+4. Generate a configuration directory:
     ```
     ./mdbci generate --template template.json first_vm
     ```
-4. Bring up the virtual machine:
+5. Bring up the virtual machine:
     ```
     ./mdbci up first_vm
     ```
-5. After creation, the virtual machine is available for operation:
-    * You can interact with it using MDBCI. [Read more](../detailed_topics/interact_examples.md).
+6. After creation, the virtual machine is available for operation:
+    * You can interact with it using MDBCI.
     * The machine is available for ssh connection:
         ```
         ssh -F first_vm_ssh_config mariadb
         ```
         Read more about [ssh connection](virtual_machines/connect_to_vms.md).
-6. When you finish working with the virtual machine, destroy it:
+7. When you finish working with the virtual machine, destroy it:
     ```
     ./mdbci destroy first_vm
     ```
-
-See an [example with explanations](../example_with_explanations.md) for more detailed description of the process.
