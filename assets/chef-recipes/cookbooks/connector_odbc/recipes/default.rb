@@ -24,16 +24,9 @@ bash 'install_odbc' do
   cwd '/odbc_package'
   code <<-SCRIPT
     install -d /usr/lib64/
-    install lib/mariadb/libmaodbc.so /usr/lib64/
-    install lib/mariadb/libmariadb.so.3 /usr/lib64/
-    install -d /usr/lib64/mariadb/
+    install lib/mariadb/* /usr/lib64/
     install -d /usr/lib64/mariadb/plugin/
-    install lib/mariadb/plugin/auth_gssapi_client.so /usr/lib64/mariadb/plugin/
-    install lib/mariadb/plugin/caching_sha2_password.so /usr/lib64/mariadb/plugin/
-    install lib/mariadb/plugin/client_ed25519.so /usr/lib64/mariadb/plugin/
-    install lib/mariadb/plugin/dialog.so /usr/lib64/mariadb/plugin/
-    install lib/mariadb/plugin/mysql_clear_password.so /usr/lib64/mariadb/plugin/
-    install lib/mariadb/plugin/sha256_password.so /usr/lib64/mariadb/plugin/
+    install lib/mariadb/plugin/* /usr/lib64/mariadb/plugin/
   SCRIPT
 end
 
