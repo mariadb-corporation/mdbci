@@ -87,7 +87,7 @@ If no machines matches the required set of labels, then no machine will be broug
 
 ## Using the virtual machines
 
-After the successful startup the file `config_network_config` will be created. This file contains information about the network information of the created entities. You can either use this information or issue [commands directly](commands/interact_examples.md) using special MDBCI commands.
+After the successful startup the file `config_network_config` will be created. This file contains information about the network information of the created entities. You can either use this information or issue commands directly using special MDBCI commands.
 You can also connect to the VM via ssh using `config_ssh_config`: `ssh -F config_ssh_config several_products_host`
 
 ### Interaction examples
