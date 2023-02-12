@@ -1,0 +1,6 @@
+[book]
+authors = ["Grigoriy Kostryukov"]
+language = "en"
+multilingual = false
+src = "src"
+title = "docs"
