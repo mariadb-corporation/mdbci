@@ -7,31 +7,11 @@
 * creation and management of virtual machine state snapshots,
 * reliable destruction of created virtual machines.
 
-## Read More information about MDBCI
+Read More information about MDBCI in [project documentation](docs/src/README.md)
 
-* [Install MDBCI](docs/install_mdbci.md)
-* [Tutorial](docs/tutorial.md)
-* [MDBCI help command](docs/help_command.md)
-* [Example with explanations](docs/example_with_explanations.md)
-* [Configurations files](docs/configuration_files.md)
-* [All products](docs/all_products.md)
-* [All providers and boxes](docs/all_providers_and_boxes.md)
-* [Architecture](docs/architecture.md)
+## Generate HTML documentation via mdBook tool
 
-## Team
+You can generate documentation as an HTML document using the [mdBook](https://github.com/rust-lang/mdBook) tool. The document will be based on markdown files located in the `docs/src` directory.
 
-* Project leader: Sergey Balandin
-* Developers:
-  * Timofey Turenko
-  * Andrey Vasilyev
-  * Evgeny Vlasov
-  * Dmitriy Karpovskiy
-* Former Developers:
-  * Alexander Kaluzhniy
-  * Kirill Krinkin
-  * Ilfat Kinyaev
-  * Mark Zaslavskiy
-  * Tatyana Berlenko
-  * Kirill Yudenok
-  * Maksim Kosterin
-  * Roman Vlasov
+1. Install [mdBook tool](https://rust-lang.github.io/mdBook/guide/installation.html)
+2. Run `mdbook build` command in the `docs` directory to build the documentation pages. The result will be located in the `docs/book` directory.
