@@ -8,7 +8,7 @@ You need to select the Galera type and Galera version to install Galera.
 * `galera_3_community`
 * `galera_4_community`
 
-## Expample
+## Example
 
 ```json
 {

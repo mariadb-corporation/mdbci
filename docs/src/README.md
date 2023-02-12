@@ -1,4 +1,3 @@
-# Chapter 1
 # MariaDB continuous integration infrastructure (MDBCI)
 
 [MDBCI](https://github.com/mariadb-corporation/mdbci) is a set of tools for testing MariaDB components on the wide set of configurations. The main features of MDBCI are:
@@ -10,15 +9,13 @@
 
 ## Read More information about MDBCI
 
-* [Installation](docs/install_mdbci.md)
-* [Configuration](docs/configuration_files.md)
-* [Tutorial](docs/tutorial.md)
-* [MDBCI help command](docs/help_command.md)
-* [Example with explanations](docs/example_with_explanations.md)
-* [Configurations files](docs/configuration_files.md)
-* [All products](docs/all_products.md)
-* [All providers and boxes](docs/all_providers_and_boxes.md)
-* [Architecture](docs/architecture.md)
+* [Installation](install_mdbci.md)
+* [Configuration](general_configuration/configuration_files.md)
+* [Quickstart](quickstart.md)
+* [Commands](commands/commands_summary.md)
+* [Virtual machines usage](virtual_machines/virtual_machine_usage.md)
+* [Products](products/all_products.md)
+* [Architecture and workflow](architecture_and_workflow.md)
 
 ## Team
 
