@@ -1,4 +1,4 @@
-# Virtual machines usage
+# Virtual machine lifecycle
 
 ## Template creation
 
@@ -90,17 +90,47 @@ If no machines matches the required set of labels, then no machine will be broug
 After the successful startup the file `config_network_config` will be created. This file contains information about the network information of the created entities. You can either use this information or issue [commands directly](commands/interact_examples.md) using special MDBCI commands.
 You can also connect to the VM via ssh using `config_ssh_config`: `ssh -F config_ssh_config several_products_host`
 
+### Interaction examples
+
+#### Run a command on the machine using sudo
+
+```
+./mdbci sudo --command "tail /var/log/anaconda.syslog" config/node0 --silent
+```
+Where `config` is the path to the configuration directory and `node0` is the node name.
+
+#### Run a command on the machine via ssh
+```
+./mdbci ssh --command "cat anaconda.syslog" config/node0 --silent
+```
+
+#### Install a repository to the given configuration node
+```
+./mdbci setup_repo --product mariadb --product-version 10.0 config/node0
+```
+#### Install the product to the given configuration node
+```
+./mdbci install_product --product 'maxscale' config/node0
+```
+
 ## Shutting down the virtual machines
 
-When finished and virtual machines are no longer needed you can issue destroy command that will:
+When finished and virtual machines are no longer needed you can issue destroy command:
 
+```
+./mdbci destroy config
+```
+
+This will:
 * stop the virtual machines reliably;
 * remove configuration directory;
 * remove network information file;
 * remove ssh config file;
 * remove template that was used to generate the configuration.
 
+If you do not want to delete the template file, add the `--keep-template` option.
+
 See also:
-* [Providers and supported boxes](./all_providers_and_boxes.md)
-* [Machine template](./machine_template.md)
-* [Connect to machines](./connect_to_vms.md)
+* [Providers and supported boxes](all_providers_and_boxes.md)
+* [Machine template](machine_template.md)
+* [Connect to machines](connect_to_vms.md)

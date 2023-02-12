@@ -1,4 +1,4 @@
-# MDBCI configuration
+# config.yaml
 
 Configuration is required for some MDBCI commands.
 
@@ -36,7 +36,7 @@ rhel:
 mdbe:
   key: # key
 gcp:
-  credentials_file: "/path/to/credentials/gcp/file/credentials.json"
+  credentials_file: # path to credentials gcp file. Can be downloaded from https://console.cloud.google.com/apis/credentials
   project: # project id
   default_region: # the region used when the CPU quota is met
   regions: # list of supported regions
@@ -64,11 +64,14 @@ mdbe_ci:
 force: # true or false
 ```
 
-## How to add another region support for GCP?
 
-Add the region name to `regions` list in `GCP` section. Read more about [GCP regions management in MDBCI](../../detailed_topics/gcp_regions_management.md)
+## See also
 
-## How to use existing VPC for AWS and GCP?
+### How to add another region support for GCP?
+
+Add the region name to `regions` list in `GCP` section. Read more about [GCP regions management in MDBCI](../interaction_with_cloud_platforms/gcp_regions_management.md)
+
+### How to use existing VPC for AWS and GCP?
 
 Read more about how to create a new VPC for AWS or GCP in the corresponding
 README files - [AWS VPC](../../../scripts/aws/vpc/README.md) and [GCP VPC](../../../scripts/gcp/vpc/README.md).
