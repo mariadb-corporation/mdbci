@@ -1,4 +1,4 @@
-packages = %w[gdb valgrind]
+packages = %w[binutils gdb valgrind]
 
 package packages do
   if platform?('redhat', 'centos', 'rocky', 'almalinux')
