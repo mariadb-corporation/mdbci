@@ -472,6 +472,11 @@ module ProductAttributes
       recipe: 'security_tools',
       name: 'security_tools',
       without_version: true,
+    },
+    'binutils' => {
+      recipe: 'binutils',
+      name: 'binutils',
+      without_version: true
     }
   }.freeze
 

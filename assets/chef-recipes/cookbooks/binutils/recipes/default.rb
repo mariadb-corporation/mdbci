@@ -1,6 +1,4 @@
-packages = %w[gdb valgrind]
-
-package packages do
+package 'binutils' do
   if platform?('redhat', 'centos', 'rocky', 'almalinux')
     flush_cache({ before: true })
   end
