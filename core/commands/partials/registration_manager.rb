@@ -60,7 +60,7 @@ class RegistrationManager
   end
 
   def generate_credentials_filename(machine)
-    "#{machine['network']}-#{Time.now.to_i}"
+    "#{machine['network']}-#{Time.now.to_i}.json"
   end
 
   # Check if SUSE subscription is used for the node
@@ -89,7 +89,7 @@ class RegistrationManager
   # Remove SUSE subscription by credentials specified in the given file
   def withdraw_subscription(filename)
     file = File.open(filename)
-    credentials = JSON.parse(file)
+    credentials = JSON.load(file)
     command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(credentials['url'], REGISTRATION_ENDPOINT)}"
     ShellCommands.run_command(@logger, command)
   end
