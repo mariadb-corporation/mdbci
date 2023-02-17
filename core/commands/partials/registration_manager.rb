@@ -11,7 +11,7 @@ class RegistrationManager
   SUBSCRIPTION_CONFIG_DIR = '.subscriptions'
   SUSE_CONNECT_CONFIG = '/etc/SUSEConnect'
 
-  def initialize(registration_proxy_url, configuration_path, machines_provider, logger)
+  def initialize(registration_proxy_url, configuration_path, logger)
     @registration_proxy_url = registration_proxy_url
     @configuration_path = configuration_path
     @subscriptions_config = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR)
