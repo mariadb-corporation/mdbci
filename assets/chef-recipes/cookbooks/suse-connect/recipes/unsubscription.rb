@@ -8,7 +8,6 @@ end
 execute 'Deregister the system' do
   not_if { node.run_state[:suse_credentials].empty? }
   command lazy { RegistrationHelpers.deregister_node_command(
-    node['suse-connect'],
     node.run_state[:suse_credentials])}
 end
 
