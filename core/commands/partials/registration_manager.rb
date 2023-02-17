@@ -1,3 +1,5 @@
+require 'yaml'
+require 'json'
 require_relative '../../services/ssh_commands'
 require_relative '../../services/shell_commands'
 
@@ -6,23 +8,47 @@ class RegistrationManager
   SUSE_CREDENTIALS_FILE = '/etc/zypp/credentials.d/SCCcredentials'
   REGISTRATION_COOKBOOK_NAME = 'suse-connect'
   REGISTRATION_ENDPOINT = '/connect/systems'
-  SUBSCRIPTION_CONFIG_DIR = ".subscriptions"
-  CUSTOMER_CENTER_URL = 'https://scc.suse.com'
+  SUBSCRIPTION_CONFIG_DIR = '.subscriptions'
+  SUSE_CONNECT_CONFIG = '/etc/SUSEConnect'
 
   def initialize(registration_proxy_url, configuration_path, machines_provider, logger)
     @registration_proxy_url = registration_proxy_url
     @configuration_path = configuration_path
     @subscriptions_config = File.join(@configuration_path, SUBSCRIPTION_CONFIG_DIR)
     @logger = logger
-    @use_proxy = use_proxy?(machines_provider)
   end
 
   def copy_machine_credentials_to_server(machine)
+    credentials = read_machine_credentials(machine)
+    return credentials if credentials.error?
+
+    write_credentials_file(machine, credentials.value)
+  end
+
+  def read_registration_server_url(machine)
+    command = "sudo cat #{SUSE_CONNECT_CONFIG}"
+    result = SshCommands.execute_command_with_ssh(machine, command)
+    return if result.error?
+
+    connect_config = YAML.load(result.value)
+    connect_config['url']
+  end
+
+  def read_machine_credentials(machine)
     command = "sudo cat #{SUSE_CREDENTIALS_FILE}"
     result = SshCommands.execute_command_with_ssh(machine, command)
-    if result.success?
-      write_credentials_file(machine, result.value)
+    return Result.error('Cannot read credentials file from the machine') if result.error?
+
+    credentials = {}
+    result.value.split("\n").map do |line|
+      key, value = *line.chomp.split('=')
+      credentials[key] = value
     end
+    credentials['url'] = read_registration_server_url(machine)
+    if !%w[username password].all? { |key| credentials.key?(key)} || credentials['url'].nil?
+      return Result.error('Invalid system credentials files')
+    end
+    Result.ok(credentials)
   end
 
   # Create a file with subscription credentials on the server in the a configuration directory
@@ -30,9 +56,7 @@ class RegistrationManager
     return Result.error('No subscriptions directory found') unless Dir.exist?(@subscriptions_config)
 
     file_path = File.join(@subscriptions_config, generate_credentials_filename(machine))
-    File.open(file_path, 'w') do |file|
-      file.write(credentials)
-    end
+    File.write(file_path, JSON.pretty_generate(credentials))
   end
 
   def generate_credentials_filename(machine)
@@ -52,38 +76,21 @@ class RegistrationManager
   def cleanup_subscriptions
     return Result.error('No subscriptions directory found') unless Dir.exist?(@subscriptions_config)
 
-    Dir.each_child(@subscriptions_config) do |filename|
-      withdraw_subscription(File.join(@subscriptions_config, filename))
+    begin
+      Dir.each_child(@subscriptions_config) do |filename|
+        withdraw_subscription(File.join(@subscriptions_config, filename))
+      end
+      Result.ok('Unsubscribed successfully')
+    rescue StandardError => e
+      Result.error('Subscription configuration files are corrupted')
     end
   end
 
   # Remove SUSE subscription by credentials specified in the given file
   def withdraw_subscription(filename)
-    cred_file = File.open(filename)
-    credentials = {}
-    cred_file.readlines.map do |line|
-      key, value = *line.chomp.split("=")
-      credentials[key] = value
-    end
-    return unless %w[username password].all? { |key| credentials.key?(key)}
-
-    run_deregistration_command(credentials)
-  end
-
-  # Run request to deregister the system with the given credentials
-  def run_deregistration_command(credentials)
-    registration_server_address = @use_proxy ? @registration_proxy_url : CUSTOMER_CENTER_URL
-    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(registration_server_address, REGISTRATION_ENDPOINT)}"
+    file = File.open(filename)
+    credentials = JSON.parse(file)
+    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(credentials['url'], REGISTRATION_ENDPOINT)}"
     ShellCommands.run_command(@logger, command)
-  end
-
-  # Check if the system can be registered via the Registration Proxy Server
-  def use_proxy?(machines_provider)
-    machines_provider == 'gcp' && proxy_available?
-  end
-
-  def proxy_available?
-    result = ShellCommands.run_command(@logger, "curl -k #{@registration_proxy_url} --connect-timeout 2")
-    result[:value].success?
   end
 end

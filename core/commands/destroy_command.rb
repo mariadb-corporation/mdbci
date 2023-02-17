@@ -171,7 +171,8 @@ Labels should be separated with commas, do not contain any whitespaces.
         uninstall_products(configuration, network_settings_result.value, registry_result.value)
       end
     end
-    cleanup_leftover_subscriptions(configuration.provider, configuration_path)
+    cleanup_result = cleanup_leftover_subscriptions(configuration.provider, configuration_path)
+    @ui.error(cleanup_result.error) if cleanup_result.error?
     if configuration.docker_configuration?
       docker_cleaner = DockerSwarmCleaner.new(@env, @ui)
       docker_cleaner.destroy_stack(configuration)

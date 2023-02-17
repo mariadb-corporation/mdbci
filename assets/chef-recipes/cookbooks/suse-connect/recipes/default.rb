@@ -14,7 +14,6 @@ execute 'Deregister the system if it has an old subscription' do
   not_if { node.run_state[:old_suse_credentials].empty? }
   command lazy {
     RegistrationHelpers.deregister_node_command(
-      node['suse-connect'],
       node.run_state[:old_suse_credentials])
   }
   ignore_failure true
