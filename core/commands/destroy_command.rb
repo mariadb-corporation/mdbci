@@ -202,7 +202,7 @@ Labels should be separated with commas, do not contain any whitespaces.
   # Withdraw all subscriptions that were not removed by Chef
   def cleanup_leftover_subscriptions(provider, configuration_path)
     @ui.info('Cleaning up leftover systems subscriptions')
-    registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'], configuration_path, provider, @ui)
+    registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'], configuration_path, @ui)
     registration_manager.cleanup_subscriptions
   end
 
