@@ -40,10 +40,14 @@ when 'debian', 'ubuntu'
     end
   else
     repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
+    deb_components = node['mariadb']['deb_components'].dup
+    if node[:platform] == 'ubuntu' && !deb_components.include?('main/debug')
+      deb_components.append('main/debug')
+    end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
-      components node['mariadb']['deb_components']
+      components deb_components
       keyserver 'keyserver.ubuntu.com'
       key node['mariadb']['repo_key']
       sensitive true
@@ -53,7 +57,7 @@ when 'debian', 'ubuntu'
       apt_repository "#{repo_file_name}_unsupported" do
         uri unsupported_repo_uri
         distribution repo_distribution
-        components node['mariadb']['deb_components']
+        components deb_components
         keyserver 'keyserver.ubuntu.com'
         key node['mariadb']['repo_key']
         sensitive true
