@@ -49,3 +49,4 @@ connector_odbc_ci | + | - | - | - |
 [security_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
 [java](additional_products_for_maxscale_test.md) | + | - | - | - |
 [python](additional_products_for_maxscale_test.md) | - | - | - | - |
+[binutils](additional_products_for_maxscale_test.md) | - | - | - | - |
