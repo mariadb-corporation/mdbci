@@ -60,7 +60,7 @@ module MdbeParser
       baseurl, version, platform, platform_version, mdbe_private_key
     )
     repo_path = "#{repo_path} #{platform_version}" if deb_repo
-    {
+    release_info = {
       repo: repo_path,
       repo_key: key,
       platform: platform,
@@ -69,6 +69,13 @@ module MdbeParser
       version: version,
       architecture: architecture
     }
+    if deb_repo
+      release_info[:components] = ['main']
+    end
+    if platform == 'ubuntu'
+      release_info[:components].append('main/debug')
+    end
+    release_info
   end
 
   def self.parse_mdbe_repository(config, mdbe_private_key, link_name, product_name, deb_repo = false)
