@@ -16,11 +16,18 @@ module DockerCookbook
     # Actions
     action :create do
       if new_resource.setup_docker_repo
+        architecture = node[:kernel][:machine]
+        Chef::Log.warn(node['platform'])
         if platform_family?('rhel', 'fedora')
+          if node['platform'] == 'redhat' && arm?
+            execute 'Enable extras repository' do
+              command "yum-config-manager --enable rhel-#{node['platform_version'].to_i}-for-arm-64-extras-rhui-rpms"
+              ignore_failure true
+            end
+          end
           platform = platform?('fedora') ? 'fedora' : 'centos'
-
           yum_repository 'Docker' do
-            baseurl "https://download.docker.com/linux/#{platform}/#{node['platform_version'].to_i}/x86_64/#{new_resource.repo_channel}"
+            baseurl "https://download.docker.com/linux/#{platform}/#{node['platform_version'].to_i}/#{architecture}/#{new_resource.repo_channel}"
             gpgkey "https://download.docker.com/linux/#{platform}/gpg"
             description "Docker #{new_resource.repo_channel.capitalize} repository"
             gpgcheck true
@@ -30,7 +37,7 @@ module DockerCookbook
           apt_repository 'Docker' do
             components Array(new_resource.repo_channel)
             uri "https://download.docker.com/linux/#{node['platform']}"
-            arch 'amd64'
+            arch arch_alias(architecture)
             keyserver 'keyserver.ubuntu.com'
             key "https://download.docker.com/linux/#{node['platform']}/gpg"
             action :add
@@ -55,7 +62,9 @@ module DockerCookbook
 
     # These are helpers for the properties so they are not in an action class
     def default_docker_version
-      return '19.03.10' if focal?
+      return '20.10.13' if jammy? || bullseye?
+
+      return '19.03.10' if focal? || buster?
 
       '18.06.0'
     end
@@ -105,6 +114,10 @@ module DockerCookbook
       false
     end
 
+    def bullseye?
+      node['platform'] == 'debian' && node['platform_version'].to_i == 11
+    end
+
     def trusty?
       return true if node['platform'] == 'ubuntu' && node['platform_version'] == '14.04'
       false
@@ -130,10 +143,28 @@ module DockerCookbook
       false
     end
 
+    def jammy?
+      node['platform'] == 'ubuntu' && node['platform_version'] == '22.04'
+    end
 
     def amazon?
       return true if node['platform'] == 'amazon'
       false
+    end
+
+    def arm?
+      node[:kernel][:machine] == 'aarch64'
+    end
+
+    def arch_alias(architecture)
+      case architecture
+      when 'aarch64'
+        return 'arm64'
+      when 'x86_64'
+        return 'amd64'
+      else
+        return architecture
+      end
     end
 
     # https://github.com/chef/chef/issues/4103
@@ -144,6 +175,8 @@ module DockerCookbook
                    'stretch'
                  elsif buster?
                    'buster'
+                 elsif bullseye?
+                   'bullseye'
                  elsif trusty?
                    'trusty'
                  elsif xenial?
@@ -152,8 +185,10 @@ module DockerCookbook
                    'artful'
                  elsif bionic?
                    'bionic'
-                elsif focal?
-                  'focal'
+                 elsif focal?
+                   'focal'
+                 elsif jammy?
+                   'jammy'
                  end
 
       # https://github.com/seemethere/docker-ce-packaging/blob/9ba8e36e8588ea75209d813558c8065844c953a0/deb/gen-deb-ver#L16-L20
@@ -173,6 +208,8 @@ module DockerCookbook
         return "5:#{v}~#{test_version}-0~ubuntu-#{codename}" if ubuntu?
       elsif v.to_f >= 18.09 && el7?
         return "#{v}-#{test_version}.el7"
+      elsif v == '18.06.0' && el7? && arm?
+        return"#{v}.ce-3.el7.centos"
       else
         return "#{v}.ce" if fedora?
         return "#{v}.ce-#{test_version}.el7" if el7?
