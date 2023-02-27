@@ -17,7 +17,6 @@ module DockerCookbook
     action :create do
       if new_resource.setup_docker_repo
         architecture = node[:kernel][:machine]
-        Chef::Log.warn(node['platform'])
         if platform_family?('rhel', 'fedora')
           if node['platform'] == 'redhat' && arm?
             execute 'Enable extras repository' do
@@ -62,11 +61,7 @@ module DockerCookbook
 
     # These are helpers for the properties so they are not in an action class
     def default_docker_version
-      return '20.10.13' if jammy? || bullseye?
-
-      return '19.03.10' if focal? || buster?
-
-      '18.06.0'
+      '23.0.1'
     end
 
     def default_package_name
@@ -203,13 +198,16 @@ module DockerCookbook
         return "#{v}.ce-1.el7.centos" if el7?
         return "#{v}~ce-0~debian" if debian?
         return "#{v}~ce-0~ubuntu" if ubuntu?
-      elsif v.to_f >= 18.09 && debuntu?
+      elsif v.to_f >= 18.09 && v.to_f < 23.0 && (debuntu? || el7?)
+        return "#{v}-#{test_version}.el7" if el7?
         return "5:#{v}~#{test_version}-0~debian-#{codename}" if debian?
         return "5:#{v}~#{test_version}-0~ubuntu-#{codename}" if ubuntu?
-      elsif v.to_f >= 18.09 && el7?
-        return "#{v}-#{test_version}.el7"
       elsif v == '18.06.0' && el7? && arm?
         return"#{v}.ce-3.el7.centos"
+      elsif v.to_f >= 23.0
+        return "5:#{v}-1~debian.#{node['platform_version'].to_i}~#{codename}" if debian?
+        return "5:#{v}-1~ubuntu.#{node['platform_version']}~#{codename}" if ubuntu?
+        return "#{v}-1.el7" if el7?
       else
         return "#{v}.ce" if fedora?
         return "#{v}.ce-#{test_version}.el7" if el7?
