@@ -1,4 +1,4 @@
-## MDBCI setup_repo command
+# setup_repo
 
 This command installs a repository to the given configuration node.
 

@@ -1,4 +1,4 @@
-## Full list of supported products
+# Supported products
 
 __product name__ - name of the product to specify in the template or `install_product` command.
 

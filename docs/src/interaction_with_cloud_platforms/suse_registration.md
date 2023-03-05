@@ -12,8 +12,8 @@ suse:
 ```
 
 ## Registration Proxy
+
 SLES systems can be registered in 2 ways: to the Customer Center directly or via a Registration Proxy. A Registration Proxy is a server authorized by SUSE that can register systems and exchange information daily with the Customer Center in order to reduce the load on the SUSE servers. Currently only SLES GCP machines are able to use proxy if possible.
 
 See also:
 * [SUSE Repository Mirroring Tool guide](https://documentation.suse.com/sles/15-SP1/single-html/SLES-rmt/index.html)
-

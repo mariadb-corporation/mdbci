@@ -1,4 +1,4 @@
-# Extra products for Maxscale system test for RPM systems
+# Products for Maxscale system tests
 
 * `caching_tools` - in-memory data structure store instruments. Includes `memcached` and `redis` packages.
 * `debugging_tools` - suite of tools for debugging and profiling. Includes `gdb` and `valgrind`.

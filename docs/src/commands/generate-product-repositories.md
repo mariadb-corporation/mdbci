@@ -1,4 +1,4 @@
-## MDBCI Generate Product Repositories command
+# generate-product-repositories
 
 Most MDBCI products require additional information that is stored in the `repo.d`.
 Use the `generate-product-repositories` command to generate the `repo.d`:

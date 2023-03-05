@@ -1,4 +1,4 @@
-# Connecting to the Virtual Machine using SSH file
+# Connecting to a virtual machine
 
 MDBCI generates the SSH configuration file that eases interaction with the created virtual machines. The file is located near by the configuration directory with the `_ssh_config` suffix.
 

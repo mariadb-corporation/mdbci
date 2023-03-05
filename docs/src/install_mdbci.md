@@ -1,8 +1,8 @@
-## Install MDBCI
+# Installation
 
 These instructions install the bare minimum that is required to run the MaxScale system test setup. This configuration requires about 10GB of memory to run.
 
-### Install MDBCI dependencies
+## Install MDBCI dependencies
 
 MDBCI is a tool written in Ruby programming language.
 In order to ease the deployment of the tool the AppImage distribution is provided.
@@ -33,7 +33,7 @@ sudo usermod -a -G fuse $(whoami)
 
 Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#troubleshooting) section for additional help.
 
-### Install MDBCI and configure MDBCI
+## Install MDBCI and configure MDBCI
 
 1. Download MDBCI:
    ```
@@ -45,7 +45,7 @@ Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#t
    You can follow the [MDBCI configuration](general_configuration/configuration_files.md) to read more about MDBCI configuration.
 4. Log out and back in again. This needs to be done in order for the new groups to become active.
 
-### Generate Configuration and Start VMs
+## Generate Configuration and Start VMs
 
 To get configuration examples, use command:
 ```
@@ -63,7 +63,6 @@ mdbci up my-setup
 Once the last command finishes, you should have a working set of VMs in the `my-setup` subfolder.
 
 See also:
-* [Quickstart](quickstart.md).
 * [Virtual machine usage](virtual_machines/virtual_machine_usage.md).
 * [MDBCI generate-product-repositories](commands/generate-product-repositories.md).
 * [Template creation](virtual_machines/machine_template.md).

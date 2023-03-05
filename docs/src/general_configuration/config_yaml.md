@@ -7,7 +7,6 @@ Configuration is required for some MDBCI commands.
 ```
 ./mdbci configure
 ```
-
 You can use the `./mdbci configure` command to configure all products, or you can use
 the `./mdbci configure --product <product-name>` command to configure a specific product.
 
@@ -15,7 +14,6 @@ the `./mdbci configure --product <product-name>` command to configure a specific
 
 To configure MDBCI manually, create a `config.yaml` file in the `~/.config/mdbci` folder and fill
 in the necessary settings based on the file template below:
-
 ```yaml
 ---
 aws:
@@ -63,7 +61,6 @@ mdbe_ci:
     password: # password
 force: # true or false
 ```
-
 
 ## See also
 
