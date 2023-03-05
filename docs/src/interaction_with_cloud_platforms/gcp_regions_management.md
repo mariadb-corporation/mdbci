@@ -1,9 +1,10 @@
-# GCP regions management in MDBCI
+# Google Cloud Platform regions management
 
 ## Configuration file
+
 Currently supported regions are listed in `config.yaml` file in the `~/.config/mdbci`.
 If the set of machines to be created does not meet the CPU quota in the default region, MDBCI will select another one from the `regions`
-list
+list.
 
 ```yaml
 gcp:
@@ -24,7 +25,6 @@ Add region name to the configuration file described above.
 ### 2. Check Cloud Routers
 
 Check if the added zone has a Cloud Router. The Router allows the machines without external IPs to access the external resources. You can list the routers in the current project using this command:
-
 ```
 gcloud compute routers list
 ```
@@ -40,7 +40,9 @@ gcloud compute routers create ROUTER_REGION \
     --network default \
     --region ROUTER_REGION
 ```
+
 #### Configure the router for Cloud NAT:
+
 ```
 gcloud compute routers nats create nat-config \
     --router-region ROUTER_REGION \
@@ -48,12 +50,12 @@ gcloud compute routers nats create nat-config \
     --nat-all-subnet-ip-ranges \
     --auto-allocate-nat-external-ips
 ```
-
 Read more about [building internet connectivity to GCP VMs](https://cloud.google.com/architecture/building-internet-connectivity-for-private-vms)
 
 ## Create and configure the Cloud Router using Terraform
 
 ### 1. Create Terraform NAT configuration file
+
 ```terraform
 terraform {
   required_providers {
@@ -82,7 +84,9 @@ resource "google_compute_router_nat" "<NAT name>" {
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 ```
+
 ### 2. Apply the Terraform configuration
+
 ```
 terraform apply
 ```

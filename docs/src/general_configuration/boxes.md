@@ -2,6 +2,7 @@
 
 A ***box*** describes the image and necessary requirements for VM creation. They are described in json files. Each file can contain one or more box descriptions. Descriptions are usually grouped by the provider and the processor architecture.
 Box description files are located in `~/.config/mdbci/boxes` folder or in `config/boxes` directory of the project.
+
 ## File format:
 
 ```json

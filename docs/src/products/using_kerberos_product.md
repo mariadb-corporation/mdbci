@@ -1,4 +1,5 @@
-# Using the Kerberos product
+# Kerberos
+
 MDBCI supports installing Kerberos on virtual machines.
 
 The MDBCI allows you to install the `kerberos` and `kerberos_server` products.

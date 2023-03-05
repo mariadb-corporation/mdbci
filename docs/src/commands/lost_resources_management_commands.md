@@ -1,8 +1,8 @@
-# Lost or unused cloud resource management
+# Lost resources management commands
 
 ## General description
-MDBCI can find and destroy unused cloud resources, such as:
 
+MDBCI can find and destroy unused cloud resources, such as:
 - GCP and AWS instances
 - GCP disks
 - AWS volumes
@@ -31,7 +31,9 @@ The command ends with an error if any resource is present, no otherwise
 mdbci clean-unused-resources --resources-list PATH_TO_REPORT_FILE
 ```
 This command destroys the cloud resources.
+
 ### Options
+
 * (__Required__) `--resources-list PATH_TO_REPORT_FILE` The name of the JSON report file with the list of resources that will be destroyed.
 
 ## Report file format

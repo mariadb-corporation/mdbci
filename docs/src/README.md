@@ -11,7 +11,6 @@
 
 * [Installation](install_mdbci.md)
 * [Configuration](general_configuration/configuration_files.md)
-* [Quickstart](quickstart.md)
 * [Commands](commands/commands_summary.md)
 * [Virtual machines usage](virtual_machines/virtual_machine_usage.md)
 * [Products](products/all_products.md)

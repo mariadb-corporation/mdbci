@@ -1,4 +1,4 @@
-## MDBCI install_product command
+# install_product
 
 This command installs a product to the given configuration node.
 

@@ -1,6 +1,6 @@
-## All providers and boxes
+# Providers and supported boxes
 
-### Providers
+## Providers
 
 MDBCI uses the [Vagrant](https://www.vagrantup.com/) and a set of low-level tools to create virtual machines and reliably destroy them when the need for them is over. Currently the following Vagrant back ends are supported:
 
@@ -16,14 +16,14 @@ MDBCI also supports:
 
 * [Dedicated servers](using_dedicated_servers.md).
 
-### Boxes
+## Boxes
 
 MDBCI currently provides support for the following distributions:
 
-* CentOS 7, 8,
-* Debian Buster, Bullseye,
-* RHEL 7, 8, 9,
-* Rocky Linux 8, 9,
-* SLES 12, 15,
-* Ubuntu 18.04, 20.04, 22.04,
+* CentOS 7, 8;
+* Debian Buster, Bullseye;
+* RHEL 7, 8, 9;
+* Rocky Linux 8, 9;
+* SLES 12, 15;
+* Ubuntu 18.04, 20.04, 22.04;
 * Windows Server 2019 via Google Cloud Platform. [Read more](using_windows_machines.md).

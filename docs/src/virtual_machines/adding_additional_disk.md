@@ -1,4 +1,4 @@
-# Configuring cloud nodes
+# Additional disks
 
 You can attach an additional disk to the aws/gcp machine.
 Specify the `attach_disk` parameter in the template file to do this:

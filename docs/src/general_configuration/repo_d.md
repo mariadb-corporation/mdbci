@@ -5,10 +5,11 @@ Each file could contain one or more repo definitions (fields are commented below
 During the start mdbci scans repo.d directory and builds full set of available product versions.
 
 ## File format:
+
 ```json
 [
   {
-    "repo": "http://yum.mariadb.org/10.5/centos/7/x86_64/",repo.d
+    "repo": "http://yum.mariadb.org/10.5/centos/7/x86_64/",
     "repo_key": "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
     "platform": "centos",
     "platform_version": "7",
@@ -26,6 +27,7 @@ During the start mdbci scans repo.d directory and builds full set of available p
 ]
 
 ```
+
 ## Available options
 
 * `product` - product name,

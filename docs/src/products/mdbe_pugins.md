@@ -1,4 +1,4 @@
-# Plugins for MariaDB Enterprise
+# MariaDB Enterprise plugins
 
 MDBCI supports installation of plugins for MariaDB Enterprise as a stand-alone product or as an additional product to
 the MDBE server. In the first case you must specify it's name in the list of products and version of the MDBE server
@@ -27,7 +27,6 @@ The list of plugins and their corresponding MDCI product names:
 ### Install standalone plugin
 
 This will install MDBE server 10.5 and `columnstore` plugin.
-
 ```json
 {
   "node_product" : {
@@ -46,7 +45,6 @@ This will install MDBE server 10.5 and `columnstore` plugin.
 ### Install plugin along with MDBE server
 
 This will install MDBE server 10.5 and `connect` plugin.
-
 ```json
 {
   "node_product" : {
@@ -68,7 +66,6 @@ This will install MDBE server 10.5 and `connect` plugin.
 ### Install several plugins
 
 This will install MDBE server 10.5 and two plugins: `xpand` and `gssapi server`.
-
 ```json
 {
   "node_product" : {

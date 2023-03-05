@@ -1,8 +1,8 @@
-## Architecture
+# Architecture and workflow
 
 This section describes MDBCI architecture, workflow and other technical details.
 
-### Terminology
+## Terminology
 
 * **Box** is a description of virtual machine image template. For vagrant provider the _box_ have the same meaning; for AWS EC2 _box_ is similar to _image_. Boxes described in file. Read more about [providers and boxes](virtual_machines/all_providers_and_boxes.md).
 
@@ -32,7 +32,7 @@ This section describes MDBCI architecture, workflow and other technical details.
 
 * **Configuration** is a directory that contains a set of files that MDBCI uses to state of manage virtual machines.
 
-### Workflow
+## Workflow
 
 MDBCI Workflow includes the following steps:
 
@@ -43,11 +43,11 @@ MDBCI Workflow includes the following steps:
 * Using created virtual machine(s).
 * Destroying virtual machine(s).
 
-#### Environmental variables
+### Environmental variables
 
 **MDBCI_VM_PATH** variable points to the directory for virtual machines definitions.
 
-#### Creating configuration
+### Creating configuration
 
 MDBCI generates service files from template and stores them inside the configuration directory. Template example is available as instance.json. You can copy this file with another name and tailor configuration for your needs. It's possible to create multi-VM configurations.
 
@@ -61,7 +61,7 @@ In this example MDBCI will generate new configuration from vm_template.json temp
 
 *NB* Many configurations could be configured by MDBCI in subdirectories. Each configuration is autonomous.
 
-### Box, products, versions
+## Box, products, versions
 
 MDBCI makes matching between boxes, target platforms, products and versions by lexicographical base. If we have a look at the output of next command
 

@@ -1,10 +1,12 @@
-# Finding AWS virtual machines
+# Finding AWS virtual machine images
+
 MDBCI stores various information about every provided box - it's provider, distribution, architecture, etc.
 You can find that information into `configuration/boxes/` directory.
 
 Every AWS box requires AMI (Amazon Machine Image) id. There is several ways to find the desired image.
 
 ## 1. Looking at official distributions wiki
+
 Many popular linux distributions have a detailed page with official AMI ids. There is list of these pages:
 - [Ubuntu](https://cloud-images.ubuntu.com/locator/ec2/)
 - [Debian](https://wiki.debian.org/Cloud/AmazonEC2Image)
@@ -12,8 +14,8 @@ Many popular linux distributions have a detailed page with official AMI ids. The
 - [Rocky Linux](https://rockylinux.org/cloud-images)
 
 ## 2. Using AWS-CLI tool
-[AWS-CLI](https://aws.amazon.com/cli/) is a powerfull tool for managing AWS services.
-The following steps will show you how to find the desired AMI using this tool.
+
+[AWS-CLI](https://aws.amazon.com/cli/) is a powerfull tool for managing AWS services. The following steps will show you how to find the desired AMI using this tool.
 1. Install the tool with `pip install awscli` command
 2. Configure the tool with the `aws configure` command. It will require you to enter amazon `access_key_id`,
 `secret_access_key` and the output format (json / yaml / text / table)

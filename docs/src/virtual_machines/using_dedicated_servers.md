@@ -1,4 +1,4 @@
-# Using dedicated servers with MDBCI
+# Using dedicated servers
 
 MDBCI allows to configure dedicated servers too.
 

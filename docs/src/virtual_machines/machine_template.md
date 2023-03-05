@@ -34,8 +34,10 @@ Example:
     }
 }
 ```
+See the [list of available providers and boxes](all_providers_and_boxes.md)
 
 ### Optional attributes
+
 Optional parameters are product, products, labels, cnf_template_path, box_parameters:
 * `product` is a description of a single product. [Full list of available products](../products/all_products.md).
 * `products` is a description of a list of several products. [Full list of available products](../products/all_products.md).
@@ -44,6 +46,7 @@ Optional parameters are product, products, labels, cnf_template_path, box_parame
 * `box_parameters` is a description of the selected box parameters that are being overridden for a single node (e.g. disable RHEL system registration setting `configure_subscription_manager` flag to `false`). See [boxes configuration](../general_configuration/boxes.md) for more information.
 
 #### Cloud node attributes
+
 You can specify some special parameters when creating a cloud node template (via AWS, Digitalocean or GCP):
 - `memory_size` - node RAM size
 - `cpu_count` - node number of processors
@@ -62,8 +65,8 @@ Example:
 }
 ```
 
-
 #### Product attributes
+
 Also need to specify for the product:
 * `name` is the product name. [Full list of available products](../products/all_products.md).
 * `version` is the product version. The version is required for some products, see [full list of available products](../products/all_products.md).
