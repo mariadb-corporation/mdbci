@@ -153,7 +153,7 @@ The command ends with an error if any resource is present, no otherwise
       File.write(@output_file.value, JSON.pretty_generate(resources))
       @ui.info("A JSON report was generated in: #{@output_file.value}")
     elsif @env.json
-      @ui.out(resources.to_json)
+      @ui.out(JSON.pretty_generate(resources))
     else
       show_in_table_format(resources)
     end
