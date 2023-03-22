@@ -24,7 +24,7 @@
   - [Clustrix](products/using_clustrix_product.md)
   - [Galera](products/using_galera_products.md)
   - [Kerberos](products/using_kerberos_product.md)
-  - [MariaDB Enterprise plugins](products/mdbe_pugins.md)
+  - [MariaDB plugins](products/mariadb_plugins.md)
   - [Auxiliary products](products/auxiliary_products.md)
 - [Interaction with cloud platforms](interaction_with_cloud_platforms/cloud_platforms_summary.md)
   - [Google Cloud Platform regions management](interaction_with_cloud_platforms/gcp_regions_management.md)
