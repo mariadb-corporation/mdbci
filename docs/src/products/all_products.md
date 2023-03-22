@@ -37,7 +37,7 @@ connectors_build | - | - | - | -
 google-authenticator | - | - | - | -
 [kerberos](using_kerberos_product.md) | - | - | - | -
 [kerberos_server](using_kerberos_product.md) | - | - | - | -
-[mariadb_plugins](mdbe_pugins.md) | - | - | - | -
+[mariadb_plugins](mariadb_pugins.md) | - | - | - | -
 sysbench | - | - | - | - |
 core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |

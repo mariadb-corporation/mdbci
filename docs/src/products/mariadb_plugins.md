@@ -1,8 +1,8 @@
-# MariaDB Enterprise plugins
+# MariaDB plugins
 
-MDBCI supports installation of plugins for MariaDB Enterprise as a stand-alone product or as an additional product to
-the MDBE server. In the first case you must specify it's name in the list of products and version of the MDBE server
-you want to install. In the latter case you must provide version for the MDBE product and leave it empty for the plugin.
+MDBCI supports installation of plugins for MariaDB Enterprise or Community as a stand-alone product or as an additional product to
+the MariaDB server. In the first case you must specify it's name in the list of products and version of the MariaDB server
+you want to install. In the latter case you must provide version for the MariaDB product and leave it empty for the plugin.
 
 The list of plugins and their corresponding MDCI product names:
 
