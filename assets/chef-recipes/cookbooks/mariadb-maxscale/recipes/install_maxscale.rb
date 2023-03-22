@@ -72,7 +72,7 @@ when "rhel", "centos", "fedora"
       EOF
     end
   end
-  # service iptables restart
+# service iptables restart
 when "suse", "opensuse", nil # nil stands for SLES 15
   execute "Save iptables rules" do
     command "iptables-save > /etc/sysconfig/iptables"
