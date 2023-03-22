@@ -47,6 +47,12 @@ Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#t
 
 ## Generate Configuration and Start VMs
 
+Most products to be installed on the machines require additional information to be stored on the MDBCI host. Run the following command to generate product repositories configuration files.
+```
+./mdbci generate-product-repositories
+```
+See [generate-product-repositories command](commands/generate-product-repositories.md) documentation for details.
+
 To get configuration examples, use command:
 ```
 mdbci deploy-examples
