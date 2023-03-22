@@ -43,10 +43,10 @@ core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
 connector_odbc_staging | + | - | - | - |
 connector_odbc_ci | + | - | - | - |
-[caching_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
-[debugging_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
-[extra_package_management](additional_products_for_maxscale_test.md) | - | - | - | - |
-[security_tools](additional_products_for_maxscale_test.md) | - | - | - | - |
-[java](additional_products_for_maxscale_test.md) | + | - | - | - |
-[python](additional_products_for_maxscale_test.md) | - | - | - | - |
-[binutils](additional_products_for_maxscale_test.md) | - | - | - | - |
+[caching_tools](auxiliary_products.md) | - | - | - | - |
+[debugging_tools](auxiliary_products.md) | - | - | - | - |
+[extra_package_management](auxiliary_products.md) | - | - | - | - |
+[security_tools](auxiliary_products.md) | - | - | - | - |
+[java](auxiliary_products.md) | + | - | - | - |
+[python](auxiliary_products.md) | - | - | - | - |
+[binutils](auxiliary_products.md) | - | - | - | - |
