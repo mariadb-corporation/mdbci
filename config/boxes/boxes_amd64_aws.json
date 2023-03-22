@@ -171,7 +171,7 @@
   "sles_12_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-0c007f7970588f55c",
+    "ami": "ami-099f228207b9b1bda",
     "user": "ec2-user",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",
