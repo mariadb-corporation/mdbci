@@ -1,6 +1,6 @@
-# Clustrix
+# Xpand
 
-MDBCI supports installing Clustrix on virtual machines.
+MDBCI supports installing Xpand on virtual machines.
 
 You can specify two product versions:
 * Standard version. Version consists of 3 digits separated by dots. For example `9.1.3`
@@ -12,13 +12,13 @@ You can specify two product versions:
     "box" : "centos_7_libvirt",
     "products": [
     {
-            "name": "clustrix",
+            "name": "xpand",
             "version": "9.1.4"
     }]
   }
 }
 ```
-* Internet version. Version starts with `http`. For example `http://clustrix.sourse/clustrix-.el7.tar.bz2`
+* Internet version. Version starts with `http`. For example `http://xpand.source/xpand-.el7.tar.bz2`
 ```json
 {
   "centos_node" :
@@ -27,10 +27,10 @@ You can specify two product versions:
     "box" : "centos_7_libvirt",
     "products": [
     {
-            "name": "clustrix",
-            "version": "http://clustrix.sourse/clustrix-.el7.tar.bz2"
+            "name": "xpand",
+            "version": "http://xpand.source/xpand-.el7.tar.bz2"
     }]
   }
 }
 ```
-The second time Clustrix is not installed. To reinstall, you need to recreate the machine.
+The second time Xpand is not installed. To reinstall, you need to recreate the machine.

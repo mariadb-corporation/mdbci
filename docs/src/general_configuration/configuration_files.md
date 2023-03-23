@@ -23,7 +23,7 @@ More about [boxes](boxes.md)
 
 ## clustrix_license
 
-`clustrix_license` file describes the Clustrix configuration.
+`clustrix_license` file describes the Xpand configuration.
 File format:
 ```
 set global license=
@@ -35,7 +35,7 @@ set global license=
 "person":"NAME",
 "signature":"KEY"}'
 ```
-[Clustrix product in MDBCI](../products/using_clustrix_product.md).
+[Xpand product in MDBCI](../products/using_xpand_product.md).
 
 ## hidden-instances.yaml
 
