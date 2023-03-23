@@ -21,7 +21,7 @@
   - [show repository](commands/show_repository.md)
   - [Lost resources management commands](commands/lost_resources_management_commands.md)
 - [Supported products](products/all_products.md)
-  - [Clustrix](products/using_clustrix_product.md)
+  - [Xpand](products/using_xpand_product.md)
   - [Galera](products/using_galera_products.md)
   - [Kerberos](products/using_kerberos_product.md)
   - [MariaDB plugins](products/mariadb_plugins.md)

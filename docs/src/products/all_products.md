@@ -27,7 +27,7 @@ columnstore | + | - | - | -
 galera | + (version for mariadb) | + | - | -
 galera_config | - | + | - | -
 docker | + | - | - | -
-[clustrix](using_clustrix_product.md) | + | - | - | -
+[xpand](using_xpand_product.md) | + | - | - | -
 mdbe_build | - | - | - | -
 connectors_build | - | - | - | -
 [galera_3_enterprise](using_galera_products.md) | + | - | - | -
