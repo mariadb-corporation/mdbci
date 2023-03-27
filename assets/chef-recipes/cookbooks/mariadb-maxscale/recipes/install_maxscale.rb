@@ -25,19 +25,8 @@ when "rhel", "fedora", "centos"
     end
   end
 when "suse"
-  if node[:platform_version].to_i == 15 && node.attributes['kernel']['machine'] == 'aarch64'
-    zypper_repository 'Add repository for SuSEfirewall2' do
-      action :add
-      gpgcheck false
-      baseurl 'https://download.opensuse.org/repositories/home:/frispete:/Tumbleweed/15.4/'
-    end
-  end
-  execute 'Update zypper cache' do
-    command 'zypper refresh'
-  end
-  execute "Install iptables and SuSEfirewall2" do
+  execute "Install iptables" do
     command "zypper install -y iptables"
-    command "zypper install -y SuSEfirewall2"
   end
 end
 
