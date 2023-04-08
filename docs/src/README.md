@@ -16,6 +16,8 @@
 * [Products](products/all_products.md)
 * [Architecture and workflow](architecture_and_workflow.md)
 
+MDBCI documentation is also available in the HTML format. Read more about [building docs](../build_documentation.md).
+
 ## Team
 
 * Project leader: Sergey Balandin
