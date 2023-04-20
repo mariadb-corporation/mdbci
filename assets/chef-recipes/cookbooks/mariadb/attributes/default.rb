@@ -19,4 +19,4 @@ default["mariadb"]["cnf_template"] = nil
 default['mariadb']['repo_file_name'] = 'mariadb'
 
 # MariaDB components for Debian repo
-default['mariadb']['deb_components'] = ['main']
+default['mariadb']['components'] = ['main']

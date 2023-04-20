@@ -12,7 +12,7 @@ when 'debian', 'ubuntu'
     uri repo_uri
     distribution repo_distribution
     keyserver 'keyserver.ubuntu.com'
-    components node['galera_ci']['deb_components']
+    components node['galera_ci']['components']
     key repo_key
     sensitive true
   end
