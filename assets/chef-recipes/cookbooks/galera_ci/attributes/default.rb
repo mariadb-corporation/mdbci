@@ -1,1 +1,1 @@
-default['galera_ci']['deb_components'] = ['main']
+default['galera_ci']['components'] = ['main']
