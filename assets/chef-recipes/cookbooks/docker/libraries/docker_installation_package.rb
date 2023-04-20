@@ -9,8 +9,7 @@ module DockerCookbook
     property :setup_docker_repo, [TrueClass, FalseClass], default: lazy { platform?('amazon') ? false : true }, desired_state: false
     property :repo_channel, String, default: 'stable'
     property :package_name, String, default: lazy { default_package_name }, desired_state: false
-    property :package_version, String, default: lazy { version_string(version) }, desired_state: false
-    property :version, String, default: lazy { default_docker_version }, desired_state: false
+    property :version, String, default: 'latest', desired_state: false
     property :package_options, String, desired_state: false
 
     # Actions
@@ -47,7 +46,7 @@ module DockerCookbook
       end
 
       package new_resource.package_name do
-        version new_resource.package_version unless amazon?
+        version version_string(new_resource.version) unless install_latest?(new_resource.version)
         options new_resource.package_options
         action :install
       end
@@ -60,10 +59,6 @@ module DockerCookbook
     end
 
     # These are helpers for the properties so they are not in an action class
-    def default_docker_version
-      '23.0.1'
-    end
-
     def default_package_name
       return 'docker' if amazon?
       'docker-ce'
@@ -160,6 +155,10 @@ module DockerCookbook
       else
         return architecture
       end
+    end
+
+    def install_latest?(version)
+      version.nil? || version == 'latest' || amazon?
     end
 
     # https://github.com/chef/chef/issues/4103
