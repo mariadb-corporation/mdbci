@@ -73,17 +73,9 @@ module ConnectorOdbcParser
       platform: 'debian',
       platform_version: 'buster'
     },
-    'stretch' => {
+    'bullseye' => {
       platform: 'debian',
-      platform_version: 'stretch'
-    },
-    'jessie' => {
-      platform: 'debian',
-      platform_version: 'jessie'
-    },
-    'debian8' => {
-      platform: 'debian',
-      platform_version: 'jessie'
+      platform_version: 'bullseye'
     },
     'centos6' => {
       platform: 'centos',
@@ -112,6 +104,10 @@ module ConnectorOdbcParser
     'rhel8' => {
       platform: 'rhel',
       platform_version: '8'
+    },
+    'rhel9' => {
+      platform: 'rhel',
+      platform_version: '9'
     }
   }.freeze
   def self.get_releases_platform_info(links)
