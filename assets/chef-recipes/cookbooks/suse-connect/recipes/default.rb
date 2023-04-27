@@ -96,8 +96,3 @@ bash 'Activate extensions and modules' do
     end.join(' && ')
   }
 end
-
-execute 'Remove broken service' do
-  command 'rm /etc/zypp/services.d/SUSE_Linux_Enterprise_Server_x86_64.service'
-  ignore_failure true
-end
