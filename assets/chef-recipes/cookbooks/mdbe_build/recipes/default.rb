@@ -448,13 +448,13 @@ when 'suse'
       action :add
       gpgcheck false
       if node.attributes['kernel']['machine'] == 'aarch64'
-        baseurl 'https://download.opensuse.org/repositories/devel:/tools:/building/SLE_15_SP2/'
+        baseurl 'https://download.opensuse.org/repositories/devel:/tools:/building/15.4/'
       else
-        baseurl 'https://download.opensuse.org/distribution/leap/15.2/repo/oss/'
+        baseurl 'https://download.opensuse.org/distribution/leap/15.4/repo/oss/'
       end
     end
     execute 'install libboost-devel' do
-      command 'zypper -n install libboost_*-devel'
+      command 'zypper -n install --force libboost_*-devel'
     end
   end
 end
