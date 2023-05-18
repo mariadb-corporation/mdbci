@@ -14,7 +14,7 @@ __unsupported repositories__ - indicates whether the product has an unsupported 
 product name | different versions support | cnf file support | deletion is available | unsupported repositories
 --- | --- | --- | --- | ---
 mariadb | + | + | mariadb | -
-[mariadb_ci](../../detailed_topics/using_mariadb_from_ci_server.md) | + | + | mariadb | -
+[mariadb_ci](using_mariadb_from_ci_server.md) | + | + | mariadb | -
 mariadb_staging | + | + | mariadb | -
 mdbe | + | + | mariadb | -
 mdbe_ci | + | + | mariadb | -
@@ -37,7 +37,7 @@ connectors_build | - | - | - | -
 google-authenticator | - | - | - | -
 [kerberos](using_kerberos_product.md) | - | - | - | -
 [kerberos_server](using_kerberos_product.md) | - | - | - | -
-[mariadb_plugins](mariadb_pugins.md) | - | - | - | -
+[mariadb_plugins](mariadb_plugins.md) | - | - | - | -
 sysbench | - | - | - | - |
 core_dump | - | - | - | - |
 [connector_odbc](https://mariadb.com/kb/en/mariadb-connector-odbc/) | + | - | - | - |
