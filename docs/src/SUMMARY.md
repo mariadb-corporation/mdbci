@@ -26,6 +26,7 @@
   - [Kerberos](products/using_kerberos_product.md)
   - [MariaDB plugins](products/mariadb_plugins.md)
   - [Auxiliary products](products/auxiliary_products.md)
+  - [Using MariaDB from CI server](products/using_mariadb_from_ci_server.md)
 - [Interaction with cloud platforms](interaction_with_cloud_platforms/cloud_platforms_summary.md)
   - [Google Cloud Platform regions management](interaction_with_cloud_platforms/gcp_regions_management.md)
   - [SUSE registration](interaction_with_cloud_platforms/suse_registration.md)
