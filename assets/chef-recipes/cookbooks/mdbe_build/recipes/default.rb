@@ -461,7 +461,7 @@ when 'suse'
       end
     end
     execute 'install libboost-devel' do
-      command 'zypper -n install --force libboost_*-devel'
+      command 'zypper -n install --force --repo SLE-Module-Basesystem15-SP4-Pool libboost_*-devel'
     end
   end
 end
