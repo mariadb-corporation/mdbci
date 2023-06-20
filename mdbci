@@ -231,6 +231,7 @@ out.info "MariaDB CI CLI, version: #{Version.version(session.mdbci_dir, out)}"
 out.info "mdbci called with: #{initial_arguments}"
 
 at_exit do
+  session.cleanup
   if $ERROR_INFO.nil? || $ERROR_INFO.is_a?(SystemExit) && $ERROR_INFO.success?
     out.debug('MDBCI success with code: 0')
   else

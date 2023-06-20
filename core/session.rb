@@ -206,6 +206,11 @@ EOF
     Concurrent.processor_count / 4 + 1
   end
 
+  # Remove temporary files at exit
+  def cleanup
+    @aws_service.delete_temporary_token if !@aws_service.nil? && @aws_service.configured?
+  end
+
   # all mdbci commands swith
   def commands
     exit_code = 1

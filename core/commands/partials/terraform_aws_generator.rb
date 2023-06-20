@@ -17,6 +17,8 @@ require 'date'
 require 'socket'
 require 'erb'
 require_relative '../../models/result'
+require_relative '../../models/configuration'
+require_relative '../../constants'
 
 # The class generates the Terraform infrastructure file for AWS provider
 class TerraformAwsGenerator
@@ -116,6 +118,10 @@ class TerraformAwsGenerator
   def provider_resource
     aws_config = @aws_config
     use_existing_vpc = use_existing_vpc?
+    if aws_config['authorization_type'] == AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
+      web_identity_token_path = Configuration.aws_identity_token_path(@configuration_path)
+    end
+
     template = ERB.new <<-PROVIDER
     terraform {
       required_providers {
@@ -127,8 +133,16 @@ class TerraformAwsGenerator
     }
     provider "aws" {
       region = "<%= aws_config['region'] %>"
-      access_key = "<%= aws_config['access_key_id'] %>"
-      secret_key = "<%= aws_config['secret_access_key'] %>"
+      <% if aws_config['authorization_type'] == AWS_AUTHORIZATION_TYPE_WEB_IDENTITY %>
+      assume_role_with_web_identity {
+        session_name = "mdbci_session"
+        role_arn = "<%= aws_config['role_arn'] %>"
+        web_identity_token_file = "<%= web_identity_token_path %>"
+      }
+      <% elsif aws_config['authorization_type'] == AWS_AUTHORIZATION_TYPE_STANDARD %>
+        access_key = "<%= aws_config['access_key_id'] %>"
+        secret_key = "<%= aws_config['secret_access_key'] %>"
+      <% end %>
     }
     locals {
       <% unless use_existing_vpc %>

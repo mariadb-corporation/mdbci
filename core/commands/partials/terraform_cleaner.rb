@@ -32,6 +32,13 @@ class TerraformCleaner
   # @param provider [String] provider of nodes
   # @param configuration_id [String] configuration id
   def destroy_nodes(nodes, path, provider, configuration_id)
+    if provider == 'aws'
+      update_result = @aws_service.update_identity_token_for_terraform(
+        Configuration.aws_identity_token_path(path)
+      )
+      return update_result if update_result.error?
+    end
+
     @ui.info('Destroying the machines using terraform')
     result = TerraformService.resource_type(provider).and_then do |resource_type|
       resources = TerraformService.nodes_to_resources(nodes, resource_type).values
