@@ -2,6 +2,8 @@
 
 require 'aws-sdk-ec2'
 require 'socket'
+require 'tempfile'
+require_relative '../constants'
 
 # To get AMI supported machine types:
 # go to EC2-console -> Instances -> click on button "Launch instances",
@@ -38,12 +40,64 @@ class AwsService
     end
 
     @aws_config = aws_config
-    @client = Aws::EC2::Client.new(
-      access_key_id: @aws_config['access_key_id'],
-      secret_access_key: @aws_config['secret_access_key'],
-      region: @aws_config['region']
-    )
+    begin
+      case @aws_config['authorization_type']
+      when AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
+        @client = create_authorized_client_web_identity
+      else
+        @client = Aws::EC2::Client.new(
+          access_key_id: @aws_config['access_key_id'],
+          secret_access_key: @aws_config['secret_access_key'],
+          region: @aws_config['region']
+        )
+      end
+    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
+      @logger.error("AWS authorization error: #{error.message}")
+      return
+    end
     @configured = true
+  end
+
+  # Create authorized AWS client via web identity token
+  # @return [Aws::EC2::Client] AWS client
+  def create_authorized_client_web_identity
+    @identity_token_file = Tempfile.new('identity-token')
+    write_identity_token_file(@identity_token_file)
+    credentials = Aws::AssumeRoleWebIdentityCredentials.new(
+      role_arn: @aws_config['role_arn'],
+      web_identity_token_file: @identity_token_file.path,
+      role_session_name: 'mdbci_session'
+    )
+    Aws::EC2::Client.new(credentials: credentials)
+  end
+
+  # Retrieve AWS web identity token via GCloud Auth and write it to a given file
+  def write_identity_token_file(identity_token_file)
+    command = 'gcloud auth print-identity-token'
+    command_result = ShellCommands.run_command_with_stderr(command)
+    raise command_result[:stderr] unless command_result[:value].success?
+
+    token = command_result[:stdout]
+    identity_token_file.write(token)
+    identity_token_file.close
+  end
+
+  # Create authorized AWS client via SSO credentials from user's default profile
+  # @return [Aws::EC2::Client] AWS client
+  def create_authorized_client_sso
+    begin
+      sso_credentials = Aws::SSOCredentials.new(
+        sso_account_id: '123456789',
+        sso_role_name: "role_name",
+        sso_region: @aws_config['sso_region'],
+        sso_session: 'mdbci_session'
+      )
+      ec2 = Aws::EC2::Client.new(credentials: sso_credentials)
+      Aws::EC2::Client.new(credentials: credentials)
+    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
+      @logger.error("AWS SSO authorization error: #{error.message}")
+      return nil
+    end
   end
 
   def configured?
@@ -91,6 +145,11 @@ class AwsService
         generate_instance_info(instance)
       end
     end.flatten.compact
+  end
+
+  # Delete the temporary file with the web identity token
+  def delete_temporary_token
+    @identity_token_file.unlink unless @identity_token_file.nil?
   end
 
   def generate_instance_info(instance)
@@ -416,6 +475,22 @@ class AwsService
       { ram: instance_type.memory_info.size_in_mi_b,
         cpu: instance_type.v_cpu_info.default_v_cpus,
         type: instance_type.instance_type }
+    end
+  end
+
+  # Renew the AWS web identity token in the given location
+  # @param [String] token_file_path path to the token file
+  def update_identity_token_for_terraform(token_file_path)
+    if @aws_config['authorization_type'] != AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
+      return Result.ok('Token update is not required')
+    end
+
+    begin
+      token_file = File.new(token_file_path, "w")
+      write_identity_token_file(token_file)
+      Result.ok('AWS token was successfully updated')
+    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
+      Result.error("AWS authentication for Terraform failure: #{error.message}")
     end
   end
 

@@ -91,6 +91,15 @@ class Configuration
     File.join(File.expand_path(configuration_path), 'provider')
   end
 
+  # Forms the path to the provider configuration file that resides
+  # in the configuration specified by the path
+  #
+  # @param configuration_path [String] path to the configuration
+  # @return [String] path to the provider file
+  def self.aws_identity_token_path(configuration_path)
+    File.join(File.expand_path(configuration_path), 'aws_identity_token')
+  end
+
   # Forms the path to the product registry configuration file that resides
   # in the configuration specified by the path
   #

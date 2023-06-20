@@ -54,6 +54,13 @@ class TerraformConfigurator
   #
   # @return [Result::Base] execution status
   def up
+    if @provider == 'aws'
+      update_result = @env.aws_service.update_identity_token_for_terraform(
+        Configuration.aws_identity_token_path(@config.path)
+      )
+      return update_result if update_result.error?
+    end
+
     nodes = @config.node_names
     result = up_machines(nodes).and_then do
       configure_nodes(nodes)
