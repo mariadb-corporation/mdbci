@@ -84,11 +84,11 @@ debian_and_ubuntu_packages = %w[
 ]
 
 debian_packages = %w[
-  default-jdk
   unixodbc
 ]
 
 debian_stretch_packages = %w[
+  default-jdk
   autoconf
   automake
   dh-systemd
@@ -102,6 +102,7 @@ debian_stretch_packages = %w[
 ]
 
 debian_buster_packages = %w[
+  default-jdk
   dh-systemd
   libjemalloc2
   libpmem-dev
@@ -111,7 +112,9 @@ debian_buster_packages = %w[
   libboost-filesystem-dev
 ]
 
+
 debian_bullseye_packages = %w[
+  default-jdk
   debhelper
   libjemalloc2
   libpmem-dev
@@ -131,6 +134,9 @@ debian_bookworm_packages = %w[
   python-dev-is-python3
 #  libboost-filesystem-dev - NOT found
 #   dpatch - NOT found
+  № temporarary disable java
+#  ca-certificates-java
+#  default-jdk
 ]
 
 ubuntu_packages = %w[
