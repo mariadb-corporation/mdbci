@@ -132,12 +132,10 @@ debian_bookworm_packages = %w[
   liburing-dev
   netcat-traditional
   python-dev-is-python3
+  default-jdk
+]
 #  libboost-filesystem-dev - NOT found
 #  dpatch - NOT found
-#  temporarary disable java
-#  ca-certificates-java
-#  default-jdk
-]
 
 ubuntu_packages = %w[
   autoconf
