@@ -348,7 +348,6 @@ when 'debian'
     end
   when 11 # Debian Bullseye
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
-  end
   when 12 # Debian Bookworm
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bookworm_packages)
   end
