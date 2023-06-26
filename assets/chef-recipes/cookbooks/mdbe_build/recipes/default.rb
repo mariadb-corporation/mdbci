@@ -134,7 +134,7 @@ debian_bookworm_packages = %w[
   python-dev-is-python3
 #  libboost-filesystem-dev - NOT found
 #   dpatch - NOT found
-  № temporarary disable java
+  # temporarary disable java
 #  ca-certificates-java
 #  default-jdk
 ]
