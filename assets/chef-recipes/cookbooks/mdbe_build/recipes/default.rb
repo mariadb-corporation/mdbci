@@ -113,6 +113,13 @@ debian_bullseye_packages = %w[
   liburing-dev
 ]
 
+debian_bookworm_packages = %w[
+  debhelper
+  libjemalloc2
+  libpmem-dev
+  liburing-dev
+]
+
 ubuntu_packages = %w[
   autoconf
   automake
@@ -341,6 +348,9 @@ when 'debian'
     end
   when 11 # Debian Bullseye
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
+  end
+  when 12 # Debian Bookworm
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bookworm_packages)
   end
   apt_update 'update apt cache' do
     action :update
