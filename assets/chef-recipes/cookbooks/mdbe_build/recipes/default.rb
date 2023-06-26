@@ -25,7 +25,6 @@ debian_and_ubuntu_packages = %w[
   check
   devscripts
   dirmngr
-  dpatch
   equivs
   fakeroot
   flex
@@ -89,6 +88,7 @@ debian_packages = %w[
   default-jdk
   python-dev
   unixodbc
+  dpatch
 ]
 
 debian_stretch_packages = %w[
@@ -98,12 +98,14 @@ debian_stretch_packages = %w[
   libgnutls28-dev
   libgnutls30
   libjemalloc1
+  dpatch
 ]
 
 debian_buster_packages = %w[
   dh-systemd
   libjemalloc2
   libpmem-dev
+  dpatch
 ]
 
 debian_bullseye_packages = %w[
@@ -111,6 +113,7 @@ debian_bullseye_packages = %w[
   libjemalloc2
   libpmem-dev
   liburing-dev
+  dpatch
 ]
 
 debian_bookworm_packages = %w[
@@ -127,6 +130,7 @@ ubuntu_packages = %w[
   libjpeg8
   libjpeg-turbo8
   libpmem-dev
+  dpatch
 ]
 
 ubuntu_bionic_packages = %w[
