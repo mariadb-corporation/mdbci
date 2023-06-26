@@ -133,8 +133,8 @@ debian_bookworm_packages = %w[
   netcat-traditional
   python-dev-is-python3
 #  libboost-filesystem-dev - NOT found
-#   dpatch - NOT found
-  # temporarary disable java
+#  dpatch - NOT found
+#  temporarary disable java
 #  ca-certificates-java
 #  default-jdk
 ]
@@ -370,6 +370,10 @@ when 'debian'
   when 11 # Debian Bullseye
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
   when 12 # Debian Bookworm
+    package 'ca-certificates-java' do
+      action :install
+      ignore_failure true
+    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bookworm_packages)
   end
   apt_update 'update apt cache' do
