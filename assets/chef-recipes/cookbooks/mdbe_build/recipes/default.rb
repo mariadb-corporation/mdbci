@@ -73,7 +73,6 @@ debian_and_ubuntu_packages = %w[
   libxml2-dev
   liblz4-dev
   libzstd-dev
-  netcat
   odbcinst
   pkg-config
   python3
@@ -99,6 +98,7 @@ debian_stretch_packages = %w[
   libgnutls30
   libjemalloc1
   dpatch
+  netcat
 ]
 
 debian_buster_packages = %w[
@@ -106,6 +106,7 @@ debian_buster_packages = %w[
   libjemalloc2
   libpmem-dev
   dpatch
+  netcat
 ]
 
 debian_bullseye_packages = %w[
@@ -114,6 +115,7 @@ debian_bullseye_packages = %w[
   libpmem-dev
   liburing-dev
   dpatch
+  netcat
 ]
 
 debian_bookworm_packages = %w[
@@ -121,6 +123,7 @@ debian_bookworm_packages = %w[
   libjemalloc2
   libpmem-dev
   liburing-dev
+  netcat-traditional
 ]
 
 ubuntu_packages = %w[
@@ -131,6 +134,7 @@ ubuntu_packages = %w[
   libjpeg-turbo8
   libpmem-dev
   dpatch
+  netcat
 ]
 
 ubuntu_bionic_packages = %w[
