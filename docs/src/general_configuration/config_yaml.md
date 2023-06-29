@@ -17,8 +17,10 @@ in the necessary settings based on the file template below:
 ```yaml
 ---
 aws:
-  access_key_id:
-  secret_access_key:
+  authorization_type: web-identity # AWS authorization type ('web-identity' or 'standard')
+  access_key_id: # only for 'standard' authorization type
+  secret_access_key: # only for 'standard' authorization type
+  role_arn: # AWS role ARN (only for 'web-identity' authorization type)
   region: eu-west-1
   availability_zone: eu-west-1a
   use_existing_vpc: true
@@ -60,6 +62,30 @@ mdbe_ci:
     username: # username
     password: # password
 force: # true or false
+```
+
+### AWS authorization types
+Currently MDBCI supports 2 authorization types:
+- `standard` is based on permanent credentials specified in the `config.yaml` file (`access_key_id` and `secret_access_key`)
+- `web-identity` is based on a Web Identity Token retrieved from GCloud Auth (via `gcloud auth print-identity-token` command) and the AWS Role ARN, that should be specified in the `config.yaml`.
+
+#### Web Identity AWS configuration example
+
+```yaml
+aws:
+  authorization_type: web-identity
+  role_arn: arn:aws:iam::012345678910:role/buildbot_aws
+  ...
+```
+
+#### Standard configuration example
+
+```yaml
+aws:
+  authorization_type: standard
+  access_key_id: AKIAIOSFODNN7EXAMPLE
+  secret_access_key: wJalrXUtnFEMI/K7MDENG/qwertyuiopEXAMPLE
+  ...
 ```
 
 ## See also
