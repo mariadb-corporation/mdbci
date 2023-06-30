@@ -14,14 +14,12 @@ require_relative '../constants'
 
 # This class allows to execute commands in accordance to the AWS EC2
 class AwsService
-  def self.check_credentials(logger, key_id, secret_key, region)
-    client = Aws::EC2::Client.new(
-      access_key_id: key_id,
-      secret_access_key: secret_key,
-      region: region
-    )
+  def self.check_credentials(logger, credentials)
     begin
-      client.describe_account_attributes(dry_run: true)
+      service = AwsService.new(credentials, logger)
+      return false unless service.configured?
+
+      service.describe_account_attributes
     rescue Aws::EC2::Errors::DryRunOperation
       true
     rescue Aws::EC2::Errors::AuthFailure, StandardError => error
@@ -82,24 +80,6 @@ class AwsService
     identity_token_file.close
   end
 
-  # Create authorized AWS client via SSO credentials from user's default profile
-  # @return [Aws::EC2::Client] AWS client
-  def create_authorized_client_sso
-    begin
-      sso_credentials = Aws::SSOCredentials.new(
-        sso_account_id: '123456789',
-        sso_role_name: "role_name",
-        sso_region: @aws_config['sso_region'],
-        sso_session: 'mdbci_session'
-      )
-      ec2 = Aws::EC2::Client.new(credentials: sso_credentials)
-      Aws::EC2::Client.new(credentials: credentials)
-    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
-      @logger.error("AWS SSO authorization error: #{error.message}")
-      return nil
-    end
-  end
-
   def configured?
     @configured
   end
@@ -110,6 +90,12 @@ class AwsService
     return { reservations: [] } unless configured?
 
     @client.describe_instances.to_h
+  end
+
+  # Get user's account parameters
+  # @return [Hash] account parameters
+  def describe_account_attributes
+    @client.describe_account_attributes(dry_run: true).to_h
   end
 
   # Get the instances list
