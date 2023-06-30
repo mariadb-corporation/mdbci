@@ -65,18 +65,11 @@ force: # true or false
 ```
 
 ### AWS authorization types
+
 Currently MDBCI supports 2 authorization types:
-- `standard` is based on permanent credentials specified in the `config.yaml` file (`access_key_id` and `secret_access_key`)
+
+- `standard` is based on AWS credentials specified in the `config.yaml` file (`access_key_id` and `secret_access_key`).
 - `web-identity` is based on a Web Identity Token retrieved from GCloud Auth (via `gcloud auth print-identity-token` command) and the AWS Role ARN, that should be specified in the `config.yaml`.
-
-#### Web Identity AWS configuration example
-
-```yaml
-aws:
-  authorization_type: web-identity
-  role_arn: arn:aws:iam::012345678910:role/buildbot_aws
-  ...
-```
 
 #### Standard configuration example
 
@@ -85,6 +78,15 @@ aws:
   authorization_type: standard
   access_key_id: AKIAIOSFODNN7EXAMPLE
   secret_access_key: wJalrXUtnFEMI/K7MDENG/qwertyuiopEXAMPLE
+  ...
+```
+
+#### Web Identity AWS configuration example
+
+```yaml
+aws:
+  authorization_type: web-identity
+  role_arn: arn:aws:iam::012345678910:role/buildbot_aws
   ...
 ```
 
