@@ -248,25 +248,50 @@ Use the following short product names to configure them:
 
   def input_aws_credentials
     key_id = ''
+    credentials = {}
     secret_key = ''
+    role_arn = ''
     region = 'eu-west-1'
     availability_zone = 'eu-west-1a'
     loop do
-      key_id = read_topic('Please input AWS key id', key_id)
-      secret_key = read_topic('Please input AWS secret key', secret_key)
       region = read_topic('Please input AWS region', region)
-      availability_zone = read_topic('Please input AWS availability zone to create subnet', availability_zone)
-      check_complete = AwsService.check_credentials(@ui, key_id, secret_key, region)
+      availability_zone = read_topic('Please input AWS availability zone to create subnet',
+                                     availability_zone)
+      authorization_type = read_topic(
+        "Please input AWS authorization type : '#{AWS_AUTHORIZATION_TYPE_STANDARD}' or '#{AWS_AUTHORIZATION_TYPE_WEB_IDENTITY}'",
+        authorization_type
+      )
+      credentials = {
+        'authorization_type' => authorization_type,
+        'region' => region,
+        'availability_zone' => availability_zone
+      }
+      case authorization_type
+      when AWS_AUTHORIZATION_TYPE_STANDARD
+        key_id = read_topic('Please input AWS key id', key_id)
+        secret_key = read_topic('Please input AWS secret key', secret_key)
+        credentials = credentials.merge(
+          {
+            'access_key_id' => key_id,
+            'secret_access_key' => secret_key
+          }
+        )
+      when AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
+        role_arn = read_topic('Please input AWS role ARN', role_arn)
+        credentials = credentials.merge({ 'role_arn' => role_arn })
+      else
+        @ui.error("Please specify the correct authorization type: '#{AWS_AUTHORIZATION_TYPE_STANDARD}' or '#{AWS_AUTHORIZATION_TYPE_WEB_IDENTITY}'")
+        return nil unless read_topic('Try again?', 'y').casecmp('y').zero?
+
+        next
+      end
+      check_complete = AwsService.check_credentials(@ui, credentials)
       break if check_complete
 
       @ui.error('You have provided inappropriate information.')
       return nil unless read_topic('Try again?', 'y').casecmp('y').zero?
     end
-    settings = { 'access_key_id' => key_id,
-                 'secret_access_key' => secret_key,
-                 'region' => region,
-                 'availability_zone' => availability_zone,
-                 'use_existing_vpc' => false }
+    settings = credentials.merge({ 'use_existing_vpc' => false })
     return settings unless read_topic('Use existing VPC for AWS instances?', 'y').casecmp('y').zero?
 
     settings.merge(
