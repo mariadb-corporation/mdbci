@@ -55,7 +55,7 @@ module MdbeCiParser
     parse_repository(
       config['path'], auth, nil, 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url, repo) { generate_mdbe_ci_deb_full_url(url, repo[:version]) },
+      ->(url, _) { generate_mariadb_ci_deb_full_url(url, logger, auth) },
       ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
@@ -69,15 +69,6 @@ module MdbeCiParser
         release
       end
     )
-  end
-
-  # An example of the url param is https://mdbe-ci-repo.mariadb.net/MariaDBEnterprise/version/apt/dists/focal/
-  # The last two paths are unnecessary (dists, focal)
-  def self.generate_mdbe_ci_deb_full_url(url, version)
-    mariadb_version = version.match(/^\D*(\d+\.\d+).*$/)&.captures&.fetch(0) || DEFAULT_MDBE_VERSION
-    splited_url = url.split('/')
-    splited_url.pop(2)
-    "#{splited_url.join('/')}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 
   def self.parse_mdbe_ci_es_repo_rpm_repository(config, product_version, auth, log, logger)
