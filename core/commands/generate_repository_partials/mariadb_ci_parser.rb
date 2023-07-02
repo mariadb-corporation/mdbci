@@ -60,20 +60,4 @@ module MariadbCiParser
       end
     )
   end
-
-  def self.generate_mariadb_ci_deb_full_url(incorrect_url, logger, auth)
-    url = self.go_up(incorrect_url, 2)
-    pool_url = URI.join(url, 'pool/main/m/').to_s
-    package_list_url = get_directory_links(pool_url, logger, auth).first
-    URI.join(pool_url, package_list_url[:href]).to_s
-  end
-
-  # Returns the url obtained by jumping number_of_levels above
-  # @param url {String} base path to start
-  # @param number_of_levels {Integer} number of levels to go up
-  def self.go_up(url, number_of_levels)
-    split_url = url.split('/')
-    split_url.pop(number_of_levels)
-    split_url.join('/') + '/'
-  end
 end

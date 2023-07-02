@@ -447,6 +447,23 @@ module RepositoryParserCore
     "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
   end
 
+  # Generate full URL for MariaDB Community and Enterprise from CI repo
+  def generate_mariadb_ci_deb_full_url(incorrect_url, logger, auth)
+    url = go_up(incorrect_url, 2)
+    pool_url = URI.join(url, 'pool/main/m/').to_s
+    package_list_url = get_directory_links(pool_url, logger, auth).first
+    URI.join(pool_url, package_list_url[:href]).to_s
+  end
+
+  # Returns the url obtained by jumping number_of_levels above
+  # @param url {String} base path to start
+  # @param number_of_levels {Integer} number of levels to go up
+  def go_up(url, number_of_levels)
+    split_url = url.split('/')
+    split_url.pop(number_of_levels)
+    "#{split_url.join('/')}/"
+  end
+
   def add_unsupported_repo(main_path, unsupported_path, auth, log, logger)
     lambda do |release, _links|
       additional_link = release[:url].sub(main_path, unsupported_path)
