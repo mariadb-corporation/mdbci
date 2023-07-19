@@ -49,7 +49,7 @@ mysql:
       key: "5072E1F5"
 clustrix:
   repo:
-    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand_staging/
+    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand/
     platforms: ["centos_7", "rhel_7"]
 mdbe_ci:
   repo:
