@@ -4,7 +4,7 @@ WARN_ABOUT_CURRENT_VERSION = 'This version of the docker to the platform is not 
 docker_version = node['docker']['version']
 
 # Install Docker
-if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 7) || node[:platform_family] == 'debian'
+if (node[:platform_family] == 'rhel' && (node[:platform_version].to_i == 7 || node[:platform_version].to_i == 9)) || node[:platform_family] == 'debian'
   docker_installation_package 'default' do
     version docker_version unless docker_version.nil?
     action :create
