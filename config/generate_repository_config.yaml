@@ -51,6 +51,10 @@ clustrix:
   repo:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand/
     platforms: ["centos_7", "rhel_7"]
+clustrix_staging:
+  repo:
+    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand_staging/
+    platforms: ["centos_7", "rhel_7", "centos_9", "rhel_9"]
 mdbe_ci:
   repo:
     mdbe_ci_repo:
