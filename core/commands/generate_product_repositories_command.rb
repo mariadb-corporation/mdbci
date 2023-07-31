@@ -43,6 +43,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'maxscale_ci_docker' => 'maxscale_ci_docker',
     'clustrix' => 'clustrix',
     'clustrix_staging' => 'clustrix_staging',
+    'xpand' => 'clustrix',
+    'xpand_staging' => 'clustrix',
     'mdbe_ci' => 'mdbe_ci',
     'galera_3_enterprise' => 'galera_3_enterprise',
     'galera_4_enterprise' => 'galera_4_enterprise',
@@ -126,7 +128,7 @@ In order to specify the number of retries for repository configuration use --att
     @logger.error(message)
   end
 
-  # Send iformation about the error to the error stream
+  # Send information about the error to the error stream
   def error_and_log_error(error)
     error_and_log(error.message)
     error_and_log(error.backtrace.reverse.join("\n"))
@@ -310,6 +312,10 @@ In order to specify the number of retries for repository configuration use --att
     when 'clustrix'
       ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand')
     when 'clustrix_staging'
+      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging')
+    when 'xpand'
+      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand')
+    when 'xpand_staging'
       ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging')  
     when 'galera_3_enterprise'
       GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
