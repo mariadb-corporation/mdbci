@@ -96,17 +96,8 @@ when "suse", "opensuse", nil # Enabling SLES 15 support
   execute "Install MaxScale" do
     command "zypper install -f -y maxscale"
   end
-
-  execute "Install MaxScale experimental package" do
-    command "zypper install -f -y maxscale-experimental"
-    ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
-  end
 else
   package 'maxscale' do
-    action :upgrade
-  end
-  package 'maxscale-experimental' do
-    ignore_failure MaxScale.is_older_than?(node['maxscale']['version'], '2.2')
     action :upgrade
   end
 end
