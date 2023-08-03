@@ -44,7 +44,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'clustrix' => 'clustrix',
     'clustrix_staging' => 'clustrix_staging',
     'xpand' => 'clustrix',
-    'xpand_staging' => 'clustrix',
+    'xpand_staging' => 'clustrix_staging',
     'mdbe_ci' => 'mdbe_ci',
     'galera_3_enterprise' => 'galera_3_enterprise',
     'galera_4_enterprise' => 'galera_4_enterprise',
