@@ -42,6 +42,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mysql' => 'mysql',
     'maxscale_ci_docker' => 'maxscale_ci_docker',
     'clustrix' => 'clustrix',
+    'clustrix_staging' => 'clustrix_staging',
     'mdbe_ci' => 'mdbe_ci',
     'galera_3_enterprise' => 'galera_3_enterprise',
     'galera_4_enterprise' => 'galera_4_enterprise',
@@ -223,7 +224,10 @@ In order to specify the number of retries for repository configuration use --att
       releases_by_version = Hash.new { |hash, key| hash[key] = [] }
       releases.each do |release|
         next if release[:platform] != platform
-
+        package_platform = release[:repo].match(/el\d+.tar.bz/i).to_s
+        if [nil, 'clustrix'].include?(release[:product]) && package_platform != ''
+          release[:platform_version] = package_platform.split(/[^\d]/).join
+        end
         release[:architecture] = 'amd64' if [nil, 'x86_64'].include?(release[:architecture])
         releases_by_version[release[:version]] << extract_release_fields(release)
       end
@@ -305,6 +309,8 @@ In order to specify the number of retries for repository configuration use --att
       MysqlParser.parse(product_config, @product_version, @ui, @logger)
     when 'clustrix'
       ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand')
+    when 'clustrix_staging'
+      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging')  
     when 'galera_3_enterprise'
       GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
     when 'galera_4_enterprise'
