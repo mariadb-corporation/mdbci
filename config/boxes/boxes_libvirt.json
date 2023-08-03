@@ -1,18 +1,4 @@
 {
-  "debian_jessie_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/debian8",
-    "platform": "debian",
-    "platform_version": "jessie"
-  },
-  "debian_stretch_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/debian9",
-    "platform": "debian",
-    "platform_version": "stretch"
-  },
   "debian_buster_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
@@ -26,29 +12,6 @@
     "box": "generic/debian11",
     "platform": "debian",
     "platform_version": "bullseye"
-  },
-  "ubuntu_trusty_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "mrlesmithjr/trusty64",
-    "platform": "ubuntu",
-    "platform_version": "trusty"
-  },
-  "ubuntu_xenial_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/ubuntu1604",
-    "ssh_pty" : "false",
-    "platform": "ubuntu",
-    "platform_version": "xenial"
-  },
-  "ubuntu_bionic_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/ubuntu1804",
-    "ssh_pty" : "false",
-    "platform": "ubuntu",
-    "platform_version": "bionic"
   },
   "ubuntu_focal_libvirt": {
     "provider": "libvirt",
