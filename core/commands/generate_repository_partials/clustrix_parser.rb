@@ -7,6 +7,7 @@ require_relative '../../services/sem_version_parser'
 module ClustrixParser
   extend RepositoryParserCore
   PRODUCT_NAME = 'clustrix'
+  STAGING_PRODUCT_NAME = 'clustrix_staging'
 
   def self.parse(config, private_key, link_name)
     parse_clustrix_repository(config['repo'], private_key, link_name)
@@ -50,6 +51,14 @@ module ClustrixParser
     end.flatten
   end
 
+  def self.determine_product_name(link)
+    if link.match?('xpand-staging')
+      STAGING_PRODUCT_NAME
+    else
+      PRODUCT_NAME
+    end
+  end
+
   def self.get_clustrix_release_versions(config, private_key, link_name)
     paths = [setup_private_key(config['path'], private_key)]
     path_uri = URI.parse(paths.first)
@@ -66,10 +75,12 @@ module ClustrixParser
   end
 
   def self.generate_clustrix_release_info(platforms, release_info)
+    repo_link = release_info[:repo]
+    product_name = determine_product_name(repo_link)
     platforms.map do |platform_and_version|
       platform, platform_version = platform_and_version.split('_')
       release_info.merge({ repo_key: nil, platform: platform, platform_version: platform_version,
-                           product: PRODUCT_NAME })
+                           product: product_name })
     end.flatten
   end
 
