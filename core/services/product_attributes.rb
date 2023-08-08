@@ -179,6 +179,22 @@ module ProductAttributes
       license_file_name: 'clustrix_license',
       attached_disk: true
     },
+     'clustrix_staging' => {
+      recipe: 'clustrix',
+      name: 'clustrix',
+      repository: 'clustrix_staging',
+      valid_repository_version: -> (version) { version.start_with?('http') },
+      license_file_name: 'clustrix_license',
+      attached_disk: true
+    },
+    'xpand_staging' => {
+      recipe: 'clustrix',
+      name: 'clustrix_staging',
+      repository: 'clustrix_staging',
+      valid_repository_version: -> (version) { version.start_with?('http') },
+      license_file_name: 'clustrix_license',
+      attached_disk: true
+    },
     'mdbe_build' => {
       recipe: 'mdbe_build',
       name: 'mdbe_build'
