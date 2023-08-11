@@ -64,9 +64,14 @@ module ClustrixParser
     end
   end
 
+  def self.get_platform_version_by_link(link)
+    link.match(/el\d+.tar.bz/i).to_s.split(/[^\d]/).join
+  end
+
   def self.generate_clustrix_release_info(platforms, release_info, product_name)
     platforms.map do |platform_and_version|
       platform, platform_version = platform_and_version.split('_')
+      platform_version = get_platform_version_by_link(release_info[:repo])
       release_info.merge({ repo_key: nil, platform: platform, platform_version: platform_version,
                            product: product_name })
     end.flatten
@@ -74,7 +79,7 @@ module ClustrixParser
 
   def self.parse_clustrix_repository(config, private_key, link_name, product_name)
     get_clustrix_release_versions(config, private_key, link_name).map do |release_info|
-      generate_clustrix_release_info(config['platforms'], release_info, product_name)
+      generate_clustrix_release_info(config['platforms'], release_info, product_name).uniq
     end.flatten
   end
 end

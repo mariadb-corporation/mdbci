@@ -226,10 +226,6 @@ In order to specify the number of retries for repository configuration use --att
       releases_by_version = Hash.new { |hash, key| hash[key] = [] }
       releases.each do |release|
         next if release[:platform] != platform
-        package_platform = release[:repo].match(/el\d+.tar.bz/i).to_s
-        if [nil, 'clustrix'].include?(release[:product]) && package_platform != ''
-          release[:platform_version] = package_platform.split(/[^\d]/).join
-        end
         release[:architecture] = 'amd64' if [nil, 'x86_64'].include?(release[:architecture])
         releases_by_version[release[:version]] << extract_release_fields(release)
       end
