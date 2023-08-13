@@ -6,6 +6,8 @@ require_relative '../../services/sem_version_parser'
 # This module handles the Clustrix repository
 module ClustrixParser
   extend RepositoryParserCore
+  CLUSTRIX_PLATFORMS = %w[centos_7 rhel_7].freeze
+  CLUSTRIX_STAGING_PLATFORMS = %w[centos_7 rhel_7 centos_9 rhel_9].freeze
 
   def self.parse(config, private_key, link_name, product_name)
     parse_clustrix_repository(config['repo'], private_key, link_name, product_name)
@@ -68,23 +70,6 @@ module ClustrixParser
     link.match(/el\d+.tar.bz/i).to_s.split(/[^\d]/).join
   end
 
-  def self.get_supported_platforms(config, private_key, link_name)
-    supported_platforms = []
-    paths = [setup_private_key(config['path'], private_key)]
-    path_uri = URI.parse(paths.first)
-    2.times do
-      paths = get_release_paths(path_uri, paths, link_name)
-    end
-    paths.map do |path|
-      get_clustrix_tar_links(path)
-    end.flatten.map do |link|
-      tar_url = generate_url_by_link(path_uri, link)
-      platform_version = get_platform_version_by_link(tar_url).to_s
-      supported_platforms += ["centos_#{platform_version}", "rhel_#{platform_version}"]
-    end
-    supported_platforms.uniq
-  end
-
   def self.generate_clustrix_release_info(platforms, release_info, product_name)
     platforms.map do |platform_and_version|
       platform, platform_version = platform_and_version.split('_')
@@ -95,8 +80,13 @@ module ClustrixParser
   end
 
   def self.parse_clustrix_repository(config, private_key, link_name, product_name)
-    supported_platforms = get_supported_platforms(config, private_key, link_name)
     get_clustrix_release_versions(config, private_key, link_name).map do |release_info|
+      case product_name
+      when 'clustrix'
+        supported_platforms = CLUSTRIX_PLATFORMS
+      when 'clustrix_staging'
+        supported_platforms = CLUSTRIX_STAGING_PLATFORMS
+      end
       generate_clustrix_release_info(supported_platforms, release_info, product_name).uniq
     end.flatten
   end
