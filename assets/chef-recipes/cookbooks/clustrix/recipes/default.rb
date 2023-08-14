@@ -1,5 +1,5 @@
 # Install Operating System Dependent Packages
-if platform?('rhel', 'fedora', 'centos', 'rocky')
+if platform?('redhat', 'fedora', 'centos', 'rocky')
   package %w[epel-release yum-utils] do
     action :install
   end
