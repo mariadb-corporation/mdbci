@@ -1,6 +1,14 @@
 # Install Operating System Dependent Packages
-package %w[epel-release yum-utils] if %w[rhel fedora centos].include?(node[:platform_family])
-package %w[bzip2 wget screen mdadm]
+if platform?('rhel', 'fedora', 'centos', 'rocky')
+  package %w[epel-release yum-utils] do
+    action :install
+  end
+end
+
+package %w[bzip2 wget screen mdadm] do
+  action :install
+end
+
 # If platform is RHEL, edit the following repo file
 if node[:platform] == 'redhat'
   execute 'Edit the repo file' do
