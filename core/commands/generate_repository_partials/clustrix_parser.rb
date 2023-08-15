@@ -6,8 +6,7 @@ require_relative '../../services/sem_version_parser'
 # This module handles the Clustrix repository
 module ClustrixParser
   extend RepositoryParserCore
-  CLUSTRIX_PLATFORMS = %w[centos_7 rhel_7].freeze
-  CLUSTRIX_STAGING_PLATFORMS = %w[centos_7 rhel_7 centos_9 rhel_9].freeze
+  CLUSTRIX_PLATFORMS = %w[centos rhel].freeze
 
   def self.parse(config, private_key, link_name, product_name)
     parse_clustrix_repository(config['repo'], private_key, link_name, product_name)
@@ -71,8 +70,7 @@ module ClustrixParser
   end
 
   def self.generate_clustrix_release_info(platforms, release_info, product_name)
-    platforms.map do |platform_and_version|
-      platform, platform_version = platform_and_version.split('_')
+    platforms.map do |platform|
       platform_version = get_platform_version_by_link(release_info[:repo])
       release_info.merge({ repo_key: nil, platform: platform, platform_version: platform_version,
                            product: product_name })
@@ -81,12 +79,7 @@ module ClustrixParser
 
   def self.parse_clustrix_repository(config, private_key, link_name, product_name)
     get_clustrix_release_versions(config, private_key, link_name).map do |release_info|
-      case product_name
-      when 'clustrix'
-        supported_platforms = CLUSTRIX_PLATFORMS
-      when 'clustrix_staging'
-        supported_platforms = CLUSTRIX_STAGING_PLATFORMS
-      end
+      supported_platforms = CLUSTRIX_PLATFORMS
       generate_clustrix_release_info(supported_platforms, release_info, product_name).uniq
     end.flatten
   end
