@@ -28,6 +28,7 @@ galera | + (version for mariadb) | + | - | -
 galera_config | - | + | - | -
 docker | + | - | - | -
 [xpand](using_xpand_product.md) | + | - | - | -
+[xpand_staging](using_xpand_product.md) | + | - | - | -
 mdbe_build | - | - | - | -
 connectors_build | - | - | - | -
 [galera_3_enterprise](using_galera_products.md) | + | - | - | -
