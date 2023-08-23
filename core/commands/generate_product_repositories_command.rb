@@ -43,8 +43,6 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'maxscale_ci_docker' => 'maxscale_ci_docker',
     'clustrix' => 'clustrix',
     'clustrix_staging' => 'clustrix_staging',
-    'xpand' => 'clustrix',
-    'xpand_staging' => 'clustrix_staging',
     'mdbe_ci' => 'mdbe_ci',
     'galera_3_enterprise' => 'galera_3_enterprise',
     'galera_4_enterprise' => 'galera_4_enterprise',
@@ -61,6 +59,11 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'connector_odbc_staging' => 'connector_odbc_staging'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
+
+  PRODUCTS_ALIASES = {
+    'xpand' => 'clustrix',
+    'xpand_staging' => 'clustrix_staging'
+  }.freeze
 
   def self.synopsis
     'Generate product repository configuration for all known products'
@@ -134,6 +137,14 @@ In order to specify the number of retries for repository configuration use --att
     error_and_log(error.backtrace.reverse.join("\n"))
   end
 
+  def get_product_by_alias(product_name)
+    if PRODUCTS_ALIASES.key?(product_name)
+      PRODUCTS_ALIASES[product_name]
+    else
+      product_name
+    end
+  end
+
   def load_configuration_file
     config_path = @env.configuration_file || @env.find_configuration(CONFIGURATION_FILE)
     unless File.exist?(config_path)
@@ -146,7 +157,9 @@ In order to specify the number of retries for repository configuration use --att
 
   def determine_products_to_parse
     if @env.nodeProduct
+      @env.nodeProduct = get_product_by_alias(@env.nodeProduct)
       unless PRODUCTS_DIR_NAMES.key?(@env.nodeProduct)
+        puts @env.nodeProduct
         error_and_log("Unknown product #{@env.nodeProduct}.\n"\
                       "Known products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}")
         return false
@@ -305,14 +318,10 @@ In order to specify the number of retries for repository configuration use --att
       ColumnstoreParser.parse(product_config, @product_version, @ui, @logger)
     when 'mysql'
       MysqlParser.parse(product_config, @product_version, @ui, @logger)
-    when 'clustrix'
+    when 'clustrix', 'xpand'
       ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand', 'clustrix')
-    when 'clustrix_staging'
+    when 'clustrix_staging', 'xpand_staging'
       ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging', 'clustrix_staging')
-    when 'xpand'
-      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand', 'clustrix')
-    when 'xpand_staging'
-      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging', 'clustrix_staging')  
     when 'galera_3_enterprise'
       GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
     when 'galera_4_enterprise'
@@ -364,7 +373,8 @@ In order to specify the number of retries for repository configuration use --att
 
     remainning_products = @products.dup
     @attempts.times do
-      remainning_products = remainning_products.reject do |product|
+      remainning_products = remainning_products.reject do |init_product|
+        product = get_product_by_alias(init_product)
         create_repository(product)
       end
       break if remainning_products.empty?

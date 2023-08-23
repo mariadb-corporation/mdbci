@@ -53,12 +53,6 @@ clustrix:
 clustrix_staging:
   repo:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand_staging/
-xpand:  
-  repo:
-    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand/
-xpand_staging:
-  repo:
-    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand_staging/
 mdbe_ci:
   repo:
     mdbe_ci_repo:
