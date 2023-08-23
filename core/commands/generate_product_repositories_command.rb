@@ -157,14 +157,13 @@ In order to specify the number of retries for repository configuration use --att
 
   def determine_products_to_parse
     if @env.nodeProduct
-      @env.nodeProduct = get_product_by_alias(@env.nodeProduct)
-      unless PRODUCTS_DIR_NAMES.key?(@env.nodeProduct)
-        puts @env.nodeProduct
-        error_and_log("Unknown product #{@env.nodeProduct}.\n"\
+      node_product = get_product_by_alias(@env.nodeProduct)
+      unless PRODUCTS_DIR_NAMES.key?(node_product)
+        error_and_log("Unknown product #{node_product}.\n"\
                       "Known products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}")
         return false
       end
-      @products = [@env.nodeProduct]
+      @products = [node_product]
     else
       @products = PRODUCTS_DIR_NAMES.keys
     end
