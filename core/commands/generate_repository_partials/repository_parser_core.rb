@@ -437,20 +437,36 @@ module RepositoryParserCore
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = split_url.join('/')
-    mariadb_version = '10.5'
+
+    mariadb_version = '10.5' if url.include?('10.5')
     mariadb_version = '10.0' if url.include?('10.0')
     mariadb_version = '10.1' if url.include?('10.1')
     mariadb_version = '10.2' if url.include?('10.2')
     mariadb_version = '10.3' if url.include?('10.3')
     mariadb_version = '10.4' if url.include?('10.4')
     mariadb_version = '10.6' if url.include?('10.6')
-    "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
+    mariadb_version = '23.08' if url.include?('23.08')
+    if mariadb_version == '23.08'
+      "#{url}/pool/main/m/mariadb/"
+    else
+      "#{url}/pool/main/m/mariadb-#{mariadb_version}/"
+    end
   end
 
   # Generate full URL for MariaDB Community and Enterprise from CI repo
-  def generate_mariadb_ci_deb_full_url(incorrect_url, logger, auth)
+  def generate_mariadb_ci_deb_full_url(incorrect_url, logger, log, auth)
     url = go_up(incorrect_url, 2)
-    pool_url = URI.join(url, 'pool/main/m/').to_s
+    pool_url = URI.join(url, 'pool/main/').to_s
+    pool_sub_links = get_directory_links(pool_url, logger, auth)
+    has_mariadb_dir = false
+    pool_sub_links.map do |pool_dir|
+      has_mariadb_dir = true if pool_dir[:href] == 'm/'
+    end
+    if has_mariadb_dir
+      pool_url = URI.join(pool_url, 'm/').to_s
+    else
+      error_and_log('MariaDB directory not found in repo. Skipped.', log, logger)
+    end
     package_list_url = get_directory_links(pool_url, logger, auth).first
     URI.join(pool_url, package_list_url[:href]).to_s
   end

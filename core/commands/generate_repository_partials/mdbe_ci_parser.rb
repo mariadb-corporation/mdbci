@@ -55,7 +55,7 @@ module MdbeCiParser
     parse_repository(
       config['path'], auth, nil, 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url, _) { generate_mariadb_ci_deb_full_url(url, logger, auth) },
+      ->(url, _) { generate_mariadb_ci_deb_full_url(url, logger, log, auth) },
       ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),

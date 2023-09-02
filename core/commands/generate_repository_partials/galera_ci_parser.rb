@@ -41,7 +41,7 @@ module GaleraCiParser
       config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
       %w[galera],
       ->(url, _) { generate_galera_ci_deb_full_url(url, logger, auth) },
-      ->(package, platform) { /#{package}.*/ },
+      ->(package, _) { /#{package}.*/ },
       log, logger,
       save_as_field(:version),
       append_url(%w[apt], nil, true),
