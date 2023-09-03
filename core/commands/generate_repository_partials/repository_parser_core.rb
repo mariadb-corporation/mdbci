@@ -115,16 +115,31 @@ module RepositoryParserCore
       link_names = links.map { |link| link[:content].delete('/') }
       releases = []
       link_names.each do |platform_and_version|
-        platform_version = if platform == :deb
-                             DEB_VERSIONS[platform_and_version.split('-').last]
-                           else
-                             platform_and_version.split('-').last
-                           end
-        releases << {
-          url: "#{release[:url]}#{platform_and_version}/",
-          platform: platform_and_version.split('-').first,
-          platform_version: platform_version
-        }
+        if platform == :deb
+          if platform_and_version.include?('arm')
+            release_data = platform_and_version.split('-')
+            releases << {
+              url: "#{release[:url]}#{platform_and_version}/",
+              platform: release_data[0],
+              platform_version: DEB_VERSIONS[release_data[1]],
+              architecture: 'aarch64'
+            }
+          else
+            platform_version = DEB_VERSIONS[platform_and_version.split('-').last]
+            releases << {
+              url: "#{release[:url]}#{platform_and_version}/",
+              platform: platform_and_version.split('-').first,
+              platform_version: platform_version
+            }
+          end
+        else
+          platform_version = platform_and_version.split('-').last
+          releases << {
+            url: "#{release[:url]}#{platform_and_version}/",
+            platform: platform_and_version.split('-').first,
+            platform_version: platform_version
+          }
+        end
       end
       releases
     end
