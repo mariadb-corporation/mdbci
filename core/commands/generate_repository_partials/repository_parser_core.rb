@@ -133,12 +133,22 @@ module RepositoryParserCore
             }
           end
         else
-          platform_version = platform_and_version.split('-').last
-          releases << {
-            url: "#{release[:url]}#{platform_and_version}/",
-            platform: platform_and_version.split('-').first,
-            platform_version: platform_version
-          }
+          if platform_and_version.include?('arm')
+            release_data = platform_and_version.split('-')
+            releases << {
+              url: "#{release[:url]}#{platform_and_version}/",
+              platform: release_data[0],
+              platform_version: release_data[1],
+              architecture: 'aarch64'
+            }
+          else
+            platform_version = platform_and_version.split('-').last
+            releases << {
+              url: "#{release[:url]}#{platform_and_version}/",
+              platform: platform_and_version.split('-').first,
+              platform_version: platform_version
+            }
+          end
         end
       end
       releases
@@ -511,3 +521,4 @@ module RepositoryParserCore
     end
   end
 end
+
