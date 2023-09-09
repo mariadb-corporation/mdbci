@@ -36,6 +36,7 @@ connectors_build | - | - | - | -
 [galera_3_community](using_galera_products.md) | + | - | - | -
 [galera_4_community](using_galera_products.md) | + | - | - | -
 google-authenticator | - | - | - | -
+kafka | + | - | - | -
 [kerberos](using_kerberos_product.md) | - | - | - | -
 [kerberos_server](using_kerberos_product.md) | - | - | - | -
 [mariadb_plugins](mariadb_plugins.md) | - | - | - | -
