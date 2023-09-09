@@ -130,3 +130,6 @@ connector_odbc:
 connector_odbc_staging:
   repo:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/odbc_connector_staging/
+kafka:
+  repo:
+    path: https://dlcdn.apache.org/kafka/

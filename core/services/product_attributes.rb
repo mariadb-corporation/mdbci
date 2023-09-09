@@ -501,6 +501,11 @@ module ProductAttributes
       recipe: 'binutils',
       name: 'binutils',
       without_version: true
+    },
+    'kafka' => {
+      recipe: 'kafka',
+      name: 'kafka',
+      repository: 'kafka'
     }
   }.freeze
 
