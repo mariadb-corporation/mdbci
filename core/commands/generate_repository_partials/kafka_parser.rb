@@ -34,6 +34,8 @@ module KafkaParser
                                       }))
         end
       end
+      latest_version = find_latest_version(releases)
+      append_latest_version(latest_version, releases)
       releases
     end
 
@@ -113,6 +115,22 @@ module KafkaParser
       PLATFORMS.keys.map do |platform|
         releases << (PLATFORMS[platform].merge({ repo: link[:href] }))
       end
+    end
+  end
+
+  def self.find_latest_version(releases)
+    max_version = releases.max { |a, b| a[:version] <=> b[:version] }
+    max_version
+  end
+
+  def self.append_latest_version(latest_version, releases)
+    PLATFORMS.keys.map do |platform|
+      releases << (PLATFORMS[platform].merge({
+                                                repo: latest_version[:repo],
+                                                version: 'latest',
+                                                product: 'kafka',
+                                                architecture: 'amd64'
+                                            }))
     end
   end
 end
