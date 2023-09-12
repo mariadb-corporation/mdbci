@@ -24,7 +24,7 @@ MDBCI documentation is also available in the HTML format. Read more about [build
 * Developers:
   * Timofey Turenko
   * Andrey Vasilyev
-  * Grigoriy Kostryukov
+  * Danil Nazarov
 
 * Former Developers:
   * Alexander Kaluzhniy
@@ -37,3 +37,4 @@ MDBCI documentation is also available in the HTML format. Read more about [build
   * Roman Vlasov
   * Evgeny Vlasov
   * Dmitriy Karpovskiy
+  * Grigoriy Kostryukov
