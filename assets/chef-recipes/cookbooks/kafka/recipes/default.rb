@@ -8,10 +8,6 @@ remote_file File.join(home_dir, 'kafka.tgz') do
   action :create
 end
 
-#execute 'Untar Kafka archive' do
-#  command "tar zxf #{File.join(home_dir, 'kafka.tgz')}"
-#end
-
 directory File.join(home_dir, 'kafka')
 
 execute 'Untar Kafka archive' do
