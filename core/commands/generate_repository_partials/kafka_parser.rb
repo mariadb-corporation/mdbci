@@ -23,7 +23,7 @@ module KafkaParser
       archives_links.map do |link|
         link[:href] = directory[:url] + link[:content]
       end
-      archives = append_releases_platforms(archives_links)
+      archives = RepositoryParserCore.append_releases_platforms(archives_links)
       next unless !archives.nil? && !archives.empty?
       archives.each do |archive|
         version = archive[:repo].match(/\d+.\d+-\d.\d.\d/).to_s
@@ -34,103 +34,13 @@ module KafkaParser
                                       }))
         end
       end
-      latest_version = find_latest_version(releases)
-      append_latest_version(latest_version, releases)
+      latest_version = find_latest_kafka_version(releases)
+      RepositoryParserCore.append_latest_version(latest_version, releases, 'kafka', 'amd64')
       releases
     end
 
-  PLATFORMS = {
-    'jammy' => {
-      platform: 'ubuntu',
-      platform_version: 'jammy'
-    },
-    'focal' => {
-      platform: 'ubuntu',
-      platform_version: 'focal'
-    },
-    'bionic' => {
-      platform: 'ubuntu',
-      platform_version: 'bionic'
-    },
-    'sles15' => {
-      platform: 'sles',
-      platform_version: '15'
-    },
-    'sles12' => {
-      platform: 'sles',
-      platform_version: '12'
-    },
-    'buster' => {
-      platform: 'debian',
-      platform_version: 'buster'
-    },
-    'bullseye' => {
-      platform: 'debian',
-      platform_version: 'bullseye'
-    },
-    'bookworm' => {
-      platform: 'debian',
-      platform_version: 'bookworm'
-    },
-    'centos6' => {
-      platform: 'centos',
-      platform_version: '6'
-    },
-    'centos7' => {
-      platform: 'centos',
-      platform_version: '7'
-    },
-    'centos8' => {
-      platform: 'centos',
-      platform_version: '8'
-    },
-    'centos9' => {
-      platform: 'centos',
-      platform_version: '9'
-    },
-    'xenial' => {
-      platform: 'ubuntu',
-      platform_version: 'xenial'
-    },
-    'rhel6' => {
-      platform: 'rhel',
-      platform_version: '6'
-    },
-    'rhel7' => {
-      platform: 'rhel',
-      platform_version: '7'
-    },
-    'rhel8' => {
-      platform: 'rhel',
-      platform_version: '8'
-    },
-    'rhel9' => {
-      platform: 'rhel',
-      platform_version: '9'
-    }
-  }.freeze
-
-  def self.append_releases_platforms(links)
-    links.each_with_object([]) do |link, releases|
-      PLATFORMS.keys.map do |platform|
-        releases << (PLATFORMS[platform].merge({ repo: link[:href] }))
-      end
-    end
-  end
-
-  def self.find_latest_version(releases)
+  def self.find_latest_kafka_version(releases)
     max_version = releases.max { |a, b| a[:version] <=> b[:version] }
     max_version
-  end
-
-  def self.append_latest_version(latest_version, releases)
-    PLATFORMS.keys.map do |platform|
-      releases << (PLATFORMS[platform].merge({
-                                                repo: latest_version[:repo],
-                                                version: 'latest',
-                                                product: 'kafka',
-                                                architecture: 'amd64'
-                                            }))
-    end
   end
 end
