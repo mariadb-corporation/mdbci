@@ -5,14 +5,6 @@ mariadb:
   deb:
     path: https://dlm.mariadb.com/browse/mariadb_server/
     key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
-columnstore:
-  repo:
-    rpm:
-      path: https://downloads.mariadb.com/ColumnStore/
-      key: https://downloads.mariadb.com/ColumnStore/MariaDB-ColumnStore.gpg.key
-    deb:
-      path: https://downloads.mariadb.com/ColumnStore/
-      key: "AD0DEAFDA41F5C14"
 maxscale_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/Maxscale/

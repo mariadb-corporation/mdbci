@@ -14,7 +14,6 @@ require_relative 'base_command'
 
 require_relative 'generate_repository_partials/galera_ci_parser'
 require_relative 'generate_repository_partials/clustrix_parser'
-require_relative 'generate_repository_partials/columnstore_parser'
 require_relative 'generate_repository_partials/connector_ci_parser'
 require_relative 'generate_repository_partials/maria_db_community_parser'
 require_relative 'generate_repository_partials/mariadb_ci_parser'
@@ -34,7 +33,6 @@ require_relative 'generate_repository_partials/kafka_parser'
 class GenerateProductRepositoriesCommand < BaseCommand
   CONFIGURATION_FILE = 'generate_repository_config.yaml'
   PRODUCTS_DIR_NAMES = {
-    'columnstore' => 'columnstore',
     'mariadb' => 'mariadb',
     'maxscale_ci' => 'maxscale_ci',
     'maxscale' => 'maxscale',
@@ -313,8 +311,6 @@ In order to specify the number of retries for repository configuration use --att
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
       MariaDBCommunityParser.parse(product_config, @product_version, @ui, @logger)
-    when 'columnstore'
-      ColumnstoreParser.parse(product_config, @product_version, @ui, @logger)
     when 'mysql'
       MysqlParser.parse(product_config, @product_version, @ui, @logger)
     when 'clustrix', 'xpand'
