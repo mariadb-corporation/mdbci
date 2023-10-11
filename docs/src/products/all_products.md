@@ -22,7 +22,6 @@ mdbe_staging | + | + | mariadb | -
 maxscale | + | + | maxscale | -
 maxscale_ci | + | + | maxscale | -
 mysql | + | + | - | -
-columnstore | + | - | - | -
 galera | + (version for mariadb) | + | - | -
 galera_config | - | + | - | -
 docker | + | - | - | -

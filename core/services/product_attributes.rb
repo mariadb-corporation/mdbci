@@ -125,12 +125,6 @@ module ProductAttributes
       repository: 'mysql',
       files_location: 'cookbooks/mysql/files'
     },
-    'columnstore' => {
-      recipe: 'mariadb_columnstore',
-      repo_recipe: 'mariadb_columnstore::configure_repository',
-      name: 'columnstore',
-      repository: 'columnstore'
-    },
     'galera' => {
       recipe: 'galera',
       repo_recipe: 'galera::galera_repos',
