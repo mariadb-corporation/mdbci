@@ -21,7 +21,6 @@ require_relative 'generate_repository_partials/mariadb_ci_parser'
 require_relative 'generate_repository_partials/mariadb_staging_parser'
 require_relative 'generate_repository_partials/mdbe_ci_parser'
 require_relative 'generate_repository_partials/mdbe_parser'
-require_relative 'generate_repository_partials/mdbe_prestaging_parser'
 require_relative 'generate_repository_partials/max_scale_parser'
 require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
 require_relative 'generate_repository_partials/maxscale_ci_parser'
@@ -55,7 +54,6 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'connector_c_ci' => 'connector_c_ci',
     'connector_cpp_ci' => 'connector_cpp_ci',
     'connector_odbc_ci' => 'connector_odbc_ci',
-    'mdbe_prestaging' => 'mdbe_prestaging',
     'connector_odbc' => 'connector_odbc',
     'connector_odbc_staging' => 'connector_odbc_staging',
     'kafka' => 'kafka'
@@ -349,8 +347,6 @@ In order to specify the number of retries for repository configuration use --att
       ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger)
     when 'connector_odbc_staging'
       ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger, 'connector_odbc_staging', @env.mdbe_private_key)
-    when 'mdbe_prestaging'
-      MdbePrestagingParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'kafka'
       KafkaParser.parse(product_config, @product_version, @ui, @logger)
     end
