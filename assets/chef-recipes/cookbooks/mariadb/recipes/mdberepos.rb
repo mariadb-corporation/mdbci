@@ -65,6 +65,7 @@ when 'debian', 'ubuntu'
   end
 when 'rhel', 'fedora', 'centos'
   yum_repository repo_file_name do
+    description 'MariaDB Enterprise Server'
     baseurl node['mariadb']['repo']
     gpgkey node['mariadb']['repo_key']
     sensitive true
@@ -72,6 +73,7 @@ when 'rhel', 'fedora', 'centos'
   end
   if node['mariadb'].key?('unsupported_repo')
     yum_repository "#{repo_file_name}_unsupported" do
+      description 'MariaDB Enterprise Server Unsupported'
       baseurl node['mariadb']['unsupported_repo']
       gpgkey node['mariadb']['repo_key']
       sensitive true
@@ -94,6 +96,7 @@ when 'suse', 'opensuse', 'sles'
   end
   zypper_repository 'mariadb' do
     action :add
+    description 'MariaDB Enterprise Server'
     baseurl node['mariadb']['repo']
     sensitive true
   end
@@ -103,6 +106,7 @@ when 'suse', 'opensuse', 'sles'
   if node['mariadb'].key?('unsupported_repo')
     zypper_repository 'mariadb_unsupported' do
       action :add
+      description 'MariaDB Enterprise Server Unsupported'
       baseurl node['mariadb']['unsupported_repo']
       sensitive true
     end
