@@ -16,14 +16,14 @@ when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
   if node['mariadb']['repo'].include?('es-repo.mariadb.net')
     file "/etc/apt/sources.list.d/#{repo_file_name}.list" do
-      content "deb [trusted=yes] #{node['mariadb']['repo']}"
+      content "deb [arch=amd64,arm64] #{node['mariadb']['repo']}"
       mode '0644'
       owner 'root'
       group 'root'
     end
     if node['mariadb'].key?('unsupported_repo')
       file "/etc/apt/sources.list.d/#{repo_file_name}_unsupported.list" do
-        content "deb [trusted=yes] #{node['mariadb']['unsupported_repo']}"
+        content "deb [arch=amd64,arm64] #{node['mariadb']['unsupported_repo']}"
         mode '0644'
         owner 'root'
         group 'root'
