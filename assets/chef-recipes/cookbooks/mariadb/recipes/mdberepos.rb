@@ -15,18 +15,20 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
   if node['mariadb']['repo'].include?('es-repo.mariadb.net')
-    file "/etc/apt/sources.list.d/#{repo_file_name}.list" do
-      content "deb [arch=amd64,arm64] #{node['mariadb']['repo']}"
-      mode '0644'
-      owner 'root'
-      group 'root'
+    apt_repository repo_file_name do
+      arch 'amd64,arm64'
+      distribution node[:platform_version]
+      repo_name 'MariaDB Enterprise Server'
+      trusted :true
+      uri node['mariadb']['repo']
     end
     if node['mariadb'].key?('unsupported_repo')
-      file "/etc/apt/sources.list.d/#{repo_file_name}_unsupported.list" do
-        content "deb [arch=amd64,arm64] #{node['mariadb']['unsupported_repo']}"
-        mode '0644'
-        owner 'root'
-        group 'root'
+      apt_repository "#{repo_file_name}_unsupported" do
+        arch 'amd64,arm64'
+        distribution node[:platform_version]
+        repo_name 'MariaDB Enterprise Server Unsupported'
+        trusted :true
+        uri node['mariadb']['unsupported_repo']
       end
     end
     remote_file "/tmp/#{repo_file_name}.public" do
