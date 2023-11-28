@@ -22,6 +22,14 @@ when 'debian', 'ubuntu'
       trusted :true
       uri node['mariadb']['repo']
     end
+    apt_repository repo_file_name do
+      arch 'amd64,arm64'
+      distribution node[:platform_version]
+      repo_name 'MariaDB Enterprise Server Source'
+      trusted :true
+      deb_src :true
+      uri node['mariadb']['repo']
+    end
     if node['mariadb'].key?('unsupported_repo')
       apt_repository "#{repo_file_name}_unsupported" do
         arch 'amd64,arm64'
@@ -48,6 +56,15 @@ when 'debian', 'ubuntu'
       components node['mariadb']['components']
       keyserver 'keyserver.ubuntu.com'
       key node['mariadb']['repo_key']
+      sensitive true
+    end
+    apt_repository repo_file_name do
+      uri repo_uri
+      distribution repo_distribution
+      components node['mariadb']['components']
+      keyserver 'keyserver.ubuntu.com'
+      key node['mariadb']['repo_key']
+      deb_src true
       sensitive true
     end
     if node['mariadb'].key?('unsupported_repo')
