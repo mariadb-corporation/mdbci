@@ -11,6 +11,14 @@ when 'debian', 'ubuntu', 'mint'
     cache_rebuild true
     action :add
   end
+  apt_repository 'mariadb' do
+    uri node['mariadb']['repo']
+    components node['mariadb']['components']
+    key node['mariadb']['repo_key']
+    cache_rebuild true
+    deb_src true
+    action :add
+  end
 when 'rhel', 'fedora', 'centos'
   yum_repository 'mariadb' do
     baseurl node['mariadb']['repo']
