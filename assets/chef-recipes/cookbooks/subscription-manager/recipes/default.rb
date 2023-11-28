@@ -1,5 +1,7 @@
-execute 'Install subscription-manager' do
-  command 'dnf -y install subscription-manager'
+if node[:platform_version].to_i > 7
+  execute 'Install subscription-manager' do
+    command 'dnf -y install subscription-manager'
+  end
 end
 
 execute 'Register the system' do
@@ -36,16 +38,39 @@ enable_repositories = ["rhel-#{platform_version}-for-$(arch)-baseos-rpms",
                          "codeready-builder-for-rhel-#{platform_version}-$(arch)-debug-rpms",
                          "codeready-builder-for-rhel-#{platform_version}-$(arch)-source-rpms"]
 
-enable_repositories.each do |repo|
-  execute "Enable #{repo} repo" do
-    command "subscription-manager repos --enable \"#{repo}\""
+enable_repositories_rhel_7 = ["rhel-7-server-rpms",
+                              "rhel-7-server-supplementary-rpms"]
+
+if node[:platform_version].to_i == 7
+  enable_repositories_rhel_7.each do |repo|
+    execute "Enable #{repo} repo" do
+      command "subscription-manager repos --enable \"#{repo}\""
+    end
+  end
+else
+  enable_repositories.each do |repo|
+    execute "Enable #{repo} repo" do
+      command "subscription-manager repos --enable \"#{repo}\""
+    end
   end
 end
 
-execute 'dnf clean packages' do
-  command 'dnf clean packages'
+if node[:platform_version].to_i > 7
+  execute 'dnf clean packages' do
+    command 'dnf clean packages'
+  end
+else
+  execute 'yum clean packages' do
+    command 'yum clean packages'
+  end
 end
 
-execute 'Clean repo cache' do
-  command 'dnf clean all --enablerepo=* && yum clean all'
+if node[:platform_version].to_i > 7
+  execute 'Clean repo cache' do
+    command 'dnf clean all --enablerepo=* && yum clean all'
+  end
+else
+  execute 'Clean repo cache' do
+    command 'yum clean all'
+  end
 end
