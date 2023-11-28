@@ -13,6 +13,13 @@
     "platform": "debian",
     "platform_version": "bullseye"
   },
+  "debian_bookworm_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/debian12",
+    "platform": "debian",
+    "platform_version": "bookworm"
+  },
   "ubuntu_focal_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
@@ -53,6 +60,15 @@
     "platform_version": "12",
     "configure_suse_connect": "true"
   },
+  "rhel_7_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/rhel7",
+    "platform": "rhel",
+    "platform_version": "7",
+    "configure_subscription_manager": "true",
+    "disk_bus": "sata"
+  },
   "rhel_8_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
@@ -77,6 +93,13 @@
     "box": "generic/alma9",
     "platform": "rhel",
     "platform_version": "9"
+  },
+  "rocky_linux_8_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/rocky8",
+    "platform": "rocky",
+    "platform_version": "8"
   },
   "rocky_linux_9_libvirt": {
     "provider": "libvirt",
