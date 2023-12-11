@@ -66,6 +66,9 @@ end
     template = ERB.new <<-VBOX
       config.vm.define '<%= name %>' do |box|
         box.vm.box = '<%= box %>'
+        <% if box_version %>
+          box.vm.box_version = '<%= box_version %>'
+        <% end %>
         box.vm.hostname = '<%= host %>'
         <% if ssh_pty %>
            box.ssh.pty = <%= ssh_pty %>
@@ -91,6 +94,9 @@ end
       #  --> Begin definition for machine: <%= name %>
       config.vm.define '<%= name %>' do |box|
         box.vm.box = '<%= box %>'
+        <% if box_version %>
+          box.vm.box_version = '<%= box_version %>'
+        <% end %>
         box.vm.hostname = '<%= host %>'
         <% if ssh_pty %>
           box.ssh.pty = <%= ssh_pty %>
