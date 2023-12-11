@@ -21,6 +21,15 @@
     "platform": "ubuntu",
     "platform_version": "focal"
   },
+  "ubuntu_jammy_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/ubuntu2204",
+    "box_version": "4.2.16",
+    "ssh_pty" : "false",
+    "platform": "ubuntu",
+    "platform_version": "jammy"
+  },
   "centos_8_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
