@@ -449,7 +449,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if %w[almalinux rocky].include? node[:platform]
+    if %w[almalinux rocky centos].include? node[:platform]
       execute 'Enable PowerTools repository' do
         command 'dnf config-manager --set-enabled powertools'
       end
