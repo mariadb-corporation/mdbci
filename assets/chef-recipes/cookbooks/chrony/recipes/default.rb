@@ -1,7 +1,9 @@
 return if node[:platform_family] == 'suse' && node[:platform_version].to_i < 15
 
-package 'ntp' do
-  action :remove
+if node[:platform] != 'sles' && node[:platform_version].to_i != 15
+  package 'ntp' do
+    action :remove
+  end
 end
 
 if node[:platform] == 'debian' || node[:platform] == 'ubuntu'
