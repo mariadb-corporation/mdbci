@@ -102,7 +102,8 @@ module ProductAttributes
       repo_recipe: 'mariadb-maxscale::maxscale_repos',
       name: 'maxscale',
       repository: 'maxscale',
-      reverse_product: 'maxscale_remove'
+      reverse_product: 'maxscale_remove',
+      exclude_pre_release_latest: true
     },
     'maxscale_remove' => {
       recipe: 'mariadb-maxscale::purge_maxscale',
@@ -625,5 +626,10 @@ module ProductAttributes
   # Checks whether the product needs to attach additional disk
   def self.need_attached_disk?(product)
     PRODUCT_ATTRIBUTES[product].key?(:attached_disk) && PRODUCT_ATTRIBUTES[product][:attached_disk]
+  end
+
+  # Checks whether the product's pre-release version cannot be recognized as latest 
+  def self.exclude_pre_release_latest?(product)
+    PRODUCT_ATTRIBUTES[product].key?(:exclude_pre_release_latest) && PRODUCT_ATTRIBUTES[product][:exclude_pre_release_latest]
   end
 end

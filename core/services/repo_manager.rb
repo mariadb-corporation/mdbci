@@ -197,6 +197,7 @@ class RepoManager
     find_available_repo(product, repository_key).select do |repo|
       repo[1]['sem_version'] = SemVersionParser.parse_sem_version(repo[1]['version'])
       next false if repo[1]['sem_version'].nil?
+      next false if ProductAttributes.exclude_pre_release_latest?(repo[1]['product']) && repo[1]['sem_version'].count() > 3
       version.each_with_index.all? { |version_part, index| version_part == repo[1]['sem_version'][index]  }
     end.max do |a, b|
       a[1]['sem_version'] <=> b[1]['sem_version']
