@@ -21,6 +21,7 @@ mdbe_ci | + | + | mariadb | -
 mdbe_staging | + | + | mariadb | -
 maxscale | + | + | maxscale | -
 maxscale_ci | + | + | maxscale | -
+maxscale_enterprise_ci | + | + | maxscale | -
 mysql | + | + | - | -
 galera | + (version for mariadb) | + | - | -
 galera_config | - | + | - | -
