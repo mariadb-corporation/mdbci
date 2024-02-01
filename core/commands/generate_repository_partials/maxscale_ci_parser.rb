@@ -6,25 +6,24 @@ require_relative 'repository_parser_core'
 module MaxscaleCiParser
   extend RepositoryParserCore
 
-  def self.parse(config, product_version, mdbe_ci_config, log, logger)
+  def self.parse(config, product_version, mdbe_ci_config, maxscale_version, log, logger)
     return [] if mdbe_ci_config.nil?
-
     auth = mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
-                                                         log, logger))
+                                                         maxscale_version, log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
-                                                         log, logger))
+                                                         maxscale_version, log, logger))
     releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
-                                                         log, logger))
+                                                         maxscale_version, log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_old(config['repo'], product_version, auth,
-                                                         log, logger))
+                                                         maxscale_version, log, logger))
     releases
   end
 
-  def self.parse_maxscale_ci_rpm_repository_new(config, product_version, auth, log, logger)
+  def self.parse_maxscale_ci_rpm_repository_new(config, product_version, auth, maxscale_version, log, logger)
     parse_repository(
-      config['path'], auth, nil, 'maxscale_ci', product_version,
+      config['path'], auth, nil, maxscale_version, product_version,
       %w[maxscale],
       ->(url, _) { url },
       ->(package, _) { /#{package}/ }, log, logger,
@@ -40,9 +39,9 @@ module MaxscaleCiParser
     )
   end
 
-  def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, log, logger)
+  def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, maxscale_version, log, logger)
     parse_repository(
-      config['path'], auth, nil, 'maxscale_ci', product_version,
+      config['path'], auth, nil, maxscale_version, product_version,
       %w[maxscale],
       ->(url, _) { generate_maxscale_ci_deb_full_url(url) },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
@@ -67,9 +66,9 @@ module MaxscaleCiParser
     "#{url}/pool/main/m/maxscale/"
   end
 
-  def self.parse_maxscale_ci_rpm_repository_old(config, product_version, auth, log, logger)
+  def self.parse_maxscale_ci_rpm_repository_old(config, product_version, auth, maxscale_version, log, logger)
     parse_repository(
-      config['path'], auth, nil, 'maxscale_ci', product_version,
+      config['path'], auth, nil, maxscale_version, product_version,
       %w[maxscale],
       ->(url, _) { url },
       ->(package, _) { /#{package}/ }, log, logger,
@@ -85,9 +84,9 @@ module MaxscaleCiParser
     )
   end
 
-  def self.parse_maxscale_ci_deb_repository_old(config, product_version, auth, log, logger)
+  def self.parse_maxscale_ci_deb_repository_old(config, product_version, auth, maxscale_version, log, logger)
     parse_repository(
-      config['path'], auth, nil, 'maxscale_ci', product_version,
+      config['path'], auth, nil, maxscale_version, product_version,
       %w[maxscale], ->(url, _) { "#{url}main/binary-amd64/" },
       ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),

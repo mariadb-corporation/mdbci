@@ -23,7 +23,6 @@ require_relative 'generate_repository_partials/mdbe_parser'
 require_relative 'generate_repository_partials/max_scale_parser'
 require_relative 'generate_repository_partials/maxscale_ci_docker_parser'
 require_relative 'generate_repository_partials/maxscale_ci_parser'
-require_relative 'generate_repository_partials/maxscale_enterprise_ci_parser'
 require_relative 'generate_repository_partials/mysql_parser'
 require_relative 'generate_repository_partials/connector_odbc_parser'
 require_relative 'generate_repository_partials/connector_odbc_ci_parser'
@@ -304,9 +303,9 @@ In order to specify the number of retries for repository configuration use --att
     when 'mdbe_ci'
       MdbeCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'maxscale_ci'
-      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
+      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'maxscale_ci', @ui, @logger)
     when 'maxscale_enterprise_ci'
-      MaxscaleEnterpriseCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
+      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'maxscale_enterprise_ci', @ui, @logger)
     when 'maxscale_ci_docker'
       MaxscaleCiDockerParser.parse(@ui, @env.tool_config)
     when 'maxscale'
