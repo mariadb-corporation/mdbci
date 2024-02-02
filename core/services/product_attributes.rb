@@ -119,6 +119,15 @@ module ProductAttributes
       reverse_product: 'maxscale_remove',
       ci_product: true
     },
+    'maxscale_enterprise_ci' => {
+      recipe: 'mariadb-maxscale::install_maxscale',
+      repo_recipe: 'mariadb-maxscale::maxscale_repos',
+      name: 'maxscale',
+      repository: 'maxscale_enterprise_ci',
+      repo_file_name: 'maxscale_enterprise_ci',
+      reverse_product: 'maxscale_remove',
+      ci_product: true
+    },
     'mysql' => {
       recipe: 'mysql::install_community',
       repo_recipe: 'mysql::mdbcrepos',

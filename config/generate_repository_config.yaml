@@ -10,6 +10,11 @@ maxscale_ci:
     path: https://mdbe-ci-repo.mariadb.net/Maxscale/
     old_key: https://mdbe-ci-repo.mariadb.net/MariaDBManager-GPG-KEY.public
     new_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+maxscale_enterprise_ci:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/MaxscaleEnterprise/
+    old_key: https://mdbe-ci-repo.mariadb.net/MariaDBManager-GPG-KEY.public
+    new_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
 maxscale:
   rpm:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
