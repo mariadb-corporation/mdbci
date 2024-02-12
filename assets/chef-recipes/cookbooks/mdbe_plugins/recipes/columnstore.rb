@@ -2,9 +2,18 @@ PORTS = (8600..8630).to_a.append(8700, 8800)
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
-  package 'mariadb-plugin-columnstore'
+  ['mariadb-plugin-columnstore','mariadb-columnstore-cmapi'].each do |cmpackage|
+    package cmpackage do
+      action :install
+    end
+  end
+
 when 'rhel', 'centos', 'suse', 'opensuse'
-  package 'MariaDB-columnstore-engine'
+  ['MariaDB-columnstore-engine','MariaDB-columnstore-cmapi'].each do |cmpackage|
+    package cmpackage do
+      action :install
+    end
+  end
 end
 
 
