@@ -12,6 +12,7 @@ include_recipe "chrony::default"
 # Remove mysql-libs
 package 'mysql-libs' do
   action :remove
+  only_if { node['packages'].keys.include? "mysql-libs" }
 end
 
 # check and install iptables
