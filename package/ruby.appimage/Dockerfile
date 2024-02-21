@@ -1,6 +1,6 @@
 # Beware: only meant for use to build ruby appimages
 
-FROM centos:7 as ruby-appimage-builder
+FROM rockylinux:8 as ruby-appimage-builder
 
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
@@ -15,16 +15,18 @@ ENV DOCKER_BUILD=1 \
   RUBY_DIR=/build/ruby-dir \
   WORKSPACE=/build
 
-RUN yum install -y \
-  centos-release-scl
+RUN dnf install -y 'dnf-command(config-manager)' && \
+    dnf config-manager --set-enabled powertools
 
-RUN yum install -y \
+RUN dnf install -y \
   bzip2 \
-  devtoolset-9 \
   ca-certificates \
   cmake \
   curl \
   file \
+  findutils \
+  gcc \
+  gcc-c++ \
   wget \
   sudo \
   patch \
@@ -34,7 +36,7 @@ RUN yum install -y \
   cd ruby-install-$RUBY_INSTALL_VERSION && \
   make install && \
   install -m 0755 -d $WORKSPACE && \
-  scl enable devtoolset-9 "ruby-install --cleanup --jobs $BUILD_JOBS --prefix $RUBY_DIR/usr ruby $RUBY_VERSION -- --disable-install-doc --disable-debug --disable-dependency-tracking --enable-shared --enable-load-relative"
+  ruby-install --cleanup --jobs $BUILD_JOBS --prefix $RUBY_DIR/usr ruby $RUBY_VERSION -- --disable-install-doc --disable-debug --disable-dependency-tracking --enable-shared --enable-load-relative
 
 # Install and configure the Rust compilation toolchain
 ENV RUSTUP_HOME=/opt/rustup \
@@ -48,20 +50,19 @@ RUN wget https://sh.rustup.rs -O /tmp/install-rust.sh && \
 # Build the appimage wrapper
 COPY ruby-exec-wrapper $WRAPPER_BUILD_DIR
 WORKDIR $WRAPPER_BUILD_DIR
-RUN scl enable devtoolset-9 'cargo build --release' && \
+RUN cargo build --release && \
   cp target/release/ruby-appimage-wrapper $RUBY_DIR/usr/bin/
 
 # Put gen_appimage.sh script into the root
 WORKDIR $WORKSPACE
 COPY gen_appimage.sh $WORKSPACE
 COPY functions.sh $WORKSPACE
-COPY scl_wrapper.sh $WORKSPACE
 
 # Download the AppImage functions
 # RUN wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O "$WORKSPACE/functions.sh"
 
 # Make the file executable
-RUN chmod 755 $WORKSPACE/gen_appimage.sh $WORKSPACE/scl_wrapper.sh
+RUN chmod 755 $WORKSPACE/gen_appimage.sh
 
 # Allow to run sudo without password for all users
 # Create a builder user that will govern the appimage build process
@@ -73,4 +74,4 @@ RUN echo "ALL ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 
 USER builder
 
-ENTRYPOINT ["/build/scl_wrapper.sh"]
+ENTRYPOINT ["/build/gen_appimage.sh"]
