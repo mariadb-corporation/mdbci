@@ -3,6 +3,8 @@
 echo "--> installing chef gem and it's dependencies"
 gem install bundler --force --no-document
 gem install chef -v "$VERSION" --no-document
+gem install ast --no-document
+gem install rubocop-ast --no-document
 
 echo "--> fixing path to the Ruby interpreter"
 install -m 0755 chef-solo.rb "$APP_DIR/usr/bin/chef-solo"
