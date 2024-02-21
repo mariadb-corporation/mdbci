@@ -23,6 +23,6 @@ echo "--> creating and installing custom runner"
 sudo yum install -y cmake
 pushd runner
 cmake .
-make
+cmake --build .
 cp AppRun "$APP_DIR"
 popd
