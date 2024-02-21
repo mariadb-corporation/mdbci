@@ -46,3 +46,5 @@ In order to create the package you must go to the directory with the mentioned f
 ```
 
 The resulting AppImage will be in the result sub-directory of the current working directory.
+
+You may pass the third argument — the version of the ruby interpreter to use. If not directly specified the default version will be used.
