@@ -34,7 +34,7 @@ if [ -z "${docker_image_id}" ]; then
     pushd $script_dir
 
     process_count=$(getconf _NPROCESSORS_ONLN)
-    docker image pull centos:7
+    docker image pull rockylinux:8
     export DOCKER_BUILDKIT=1
     docker image build \
            --build-arg BUILD_JOBS="$process_count" \
