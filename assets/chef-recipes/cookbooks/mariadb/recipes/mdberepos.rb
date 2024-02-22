@@ -79,6 +79,12 @@ when 'debian', 'ubuntu'
       end
     end
   end
+  %w[mariadb-server mariadb-client mariadb-server-10.5].each do |pkg|
+    apt_preference pkg do
+      pin "origin dlm.mariadb.com"
+      pin_priority '100'
+    end
+  end
   apt_update do
     action :update
   end
