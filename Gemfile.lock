@@ -174,11 +174,10 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
-    webrick (1.7.0)
+    webrick (1.8.1)
     workers (0.6.1)
     xdg (5.3.0)
-    yard (0.9.27)
-      webrick (~> 1.7.0)
+    yard (0.9.35)
 
 PLATFORMS
   ruby
