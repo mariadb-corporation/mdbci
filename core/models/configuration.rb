@@ -429,7 +429,7 @@ class Configuration
   # @return [Hash] data from the template JSON file
   def read_template(template_path)
     raise ArgumentError, "The template #{template_path} does not exist." unless File.exist?(template_path)
-
-    JSON.parse(File.read(template_path))
+    orig_json = JSON.parse(File.read(template_path))
+    orig_json['vms']
   end
 end

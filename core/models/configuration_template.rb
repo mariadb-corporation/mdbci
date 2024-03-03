@@ -78,7 +78,8 @@ class ConfigurationTemplate
 
     begin
       instance_config_file = File.read(@template_path)
-      JSON.parse(instance_config_file)
+      orig_json = JSON.parse(instance_config_file)
+      orig_json['vms']
     rescue IOError, JSON::ParserError => e
       raise "The configuration file '#{@template_path}' is not valid. Error: #{e.message}"
     end
