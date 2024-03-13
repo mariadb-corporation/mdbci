@@ -96,6 +96,14 @@
     "configure_subscription_manager": "true",
     "disk_bus": "sata"
   },
+  "alma_8_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/alma8",
+    "box_version": "4.3.10",
+    "platform": "rhel",
+    "platform_version": "8"
+  },
   "alma_9_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
