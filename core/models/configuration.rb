@@ -7,6 +7,7 @@ class Configuration
   attr_reader :labels
   attr_reader :name
   attr_reader :node_configurations
+  attr_reader :disk_configurations
   attr_reader :node_names
   attr_reader :path
   attr_reader :provider
@@ -163,6 +164,7 @@ class Configuration
     @configuration_id = read_configuration_id(@path)
     @template_path = read_template_path(@path)
     @node_configurations = extract_node_configurations(read_template(@template_path))
+    @disk_configurations = extract_disk_configurations(read_template(@template_path))
     @docker_configuration = read_docker_configuration
     @labels = labels.nil? ? [] : labels.split(',')
     @node_names = select_node_names(node)
@@ -359,6 +361,14 @@ class Configuration
     node_names
   end
 
+  # Select disks from the template that are attached to the given node
+  #
+  # @return [Array<Hash>] list of disks attached to given nodes
+  def select_disks_by_node(node)
+    all_disks = @disk_configurations.keys
+    puts all_disks
+  end
+
   # Select the part of the configuration that corresponds only to the boxes
   #
   # @param template [Hash] the template of the configuration to parse
@@ -368,6 +378,17 @@ class Configuration
       element.instance_of?(Hash) &&
         element.key?('box')
     end
+  end
+
+  # Filter the shared disk definitions from out of other data
+  #
+  # @param template [Hash] the template of the configuration to parse
+  # @return [Array<Hash>] list of shared disk configuration from the template
+  def extract_disk_configurations(template)
+    template.select do |_, element|
+      element.instance_of?(Hash) &&
+        element['type'] == 'disk'
+     end
   end
 
   # Read configuration id specified in the configuration.
