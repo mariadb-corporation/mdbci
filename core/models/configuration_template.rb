@@ -41,6 +41,7 @@ class ConfigurationTemplate
     @template_path = template_path
     @template = read_template_file
     @node_configurations = extract_node_configurations
+    @disk_configurations = extract_disk_configurations
   end
 
   def cookbook_path
@@ -89,6 +90,14 @@ class ConfigurationTemplate
     @template.select do |_, element|
       element.instance_of?(Hash) &&
         element.key?('box')
+    end
+  end
+
+  # Filter the shared disk definitions from out of other data
+  def extract_disk_configurations
+    @template.select do |_, element|
+      element.instance_of?(Hash) &&
+        element['type'] == 'disk'
     end
   end
 
