@@ -361,14 +361,6 @@ class Configuration
     node_names
   end
 
-  # Select disks from the template that are attached to the given node
-  #
-  # @return [Array<Hash>] list of disks attached to given nodes
-  def select_disks_by_node(node)
-    all_disks = @disk_configurations.keys
-    puts all_disks
-  end
-
   # Select the part of the configuration that corresponds only to the boxes
   #
   # @param template [Hash] the template of the configuration to parse
