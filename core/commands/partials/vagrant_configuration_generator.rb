@@ -10,6 +10,7 @@ require 'erb'
 require 'set'
 require_relative '../base_command'
 require_relative '../../models/configuration'
+require_relative '../../models/configuration_template'
 require_relative '../../services/configuration_generator'
 require_relative '../../services/product_attributes'
 require_relative '../../services/shell_commands'
@@ -91,6 +92,11 @@ end
   def get_libvirt_definition(_cookbook_path, path, node_params)
     node_params = node_params.merge(expand_path: File.expand_path(path), ipv6: @env.ipv6)
     template = ERB.new <<-LIBVIRT
+      config.vm.provider :libvirt do |libvirt|
+      <% vm_disks.each do |disk| %>
+        libvirt.storage :file, :size => '<%= disk['size'] %>', :type => 'raw', :path => '<%= disk['id'] %>_shared_disk.img', :device => 'vd<%= disk['dev_name'] %>', :allow_existing => true
+      <% end %>
+      end
       #  --> Begin definition for machine: <%= name %>
       config.vm.define '<%= name %>' do |box|
         box.vm.box = '<%= box %>'
@@ -221,11 +227,20 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     if node[1].key?('box_parameters')
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
+    vm_disks = node[1]['disks']
+    config = ConfigurationTemplate.new(File.expand_path(@env.template_file))
+    disks = config.instance_variable_get(:@disk_configurations)
+    vm_disks.each do |node_disk|
+      id = node_disk['id']
+      node_disk['size'] = disks[id]['size']
+      node_disk['filesystem'] = disks[id]['filesystem']
+    end
     {
       name: node[0].to_s,
       host: node[1]['hostname'].to_s,
       vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
-      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
+      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
+      vm_disks: vm_disks
     }.merge(symbolic_box_params)
   end
 
@@ -255,6 +270,9 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     vagrant.puts provider_config
     config.map do |node|
       @ui.info("Generating node definition for [#{node[0]}]")
+      node[1]['disks'].each do |disk|
+        @ui.info("Shared disk [#{disk['id']}] will be available on /dev/vd#{disk['dev_name']}")
+      end
       node_definition = node_definition(node, path, cookbook_path)
       raise node_definition.error if node_definition.error?
 
