@@ -26,6 +26,7 @@ class VagrantConfigurator
     @specification = specification
     @config = config
     @provider = config.provider
+    @node_configurations = config.node_configurations
     @env = env
     @repos = env.repos
     @ui = logger
@@ -93,6 +94,10 @@ class VagrantConfigurator
       settings = SshUser.create_user(@machine_configurator, node, settings_result.value, @config.path, logger)
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
+
+      @node_configurations.fetch(node)['disks'].each do |disk|
+        @machine_configurator.run_command(@network_settings.node_settings(node), "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+      end
 
       configuration_result = ChefConfigurationGenerator.configure_with_chef(
         node, logger, @network_settings.node_settings(node),
