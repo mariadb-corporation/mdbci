@@ -75,14 +75,17 @@ class VagrantConfigurator
   def attach_images_to_vm(node, vm_name, network_settings)
     image_dir_path = "#{@config.path}/images"
     @node_configurations[node]['disks'].each do |disk|
-      @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
-      puts "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}"
-        ShellCommands.run_command_in_dir(
-        @ui, 
-        "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}",
-        image_dir_path
-        )
-      @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+      if disk['dev_name'] != 'a'
+        @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
+          ShellCommands.run_command_in_dir(
+          @ui, 
+          "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}",
+          image_dir_path
+          )
+        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+      else
+        @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
+      end
     end
   end
 
