@@ -22,7 +22,7 @@ class GenerateCommand < BaseCommand
     setup_command.and_then do
       shared_disks = fetch_template_disks
       libvirt_disks = filter_libvirt_disks(shared_disks)
-      disk_configurator = SharedDiskConfigurator.new(libvirt_disks, @env, @ui)
+      disk_configurator = SharedDiskConfigurator.new(libvirt_disks, @configuration_path, @env, @ui)
       disk_configurator.create_libvirt_disk_images(libvirt_disks)
       case @template_type
       when :docker

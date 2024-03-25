@@ -71,6 +71,21 @@ class VagrantConfigurator
     Dir.chdir(current_dir)
   end
 
+  # Attach shared disks images to the given node and write /dev names to file on VM.
+  def connect_images_to_vm(node, vm_name, network_settings)
+    image_dir_path = "#{@config.path}/images"
+    @node_configurations[node]['disks'].each do |disk|
+      @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
+      puts "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}"
+        ShellCommands.run_command_in_dir(
+        @ui, 
+        "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}",
+        image_dir_path
+        )
+      @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+    end
+  end
+
   # Create and configure node, or recreate if it needs to fix.
   #
   # @param node [String] name of node which needs to be configured
@@ -95,8 +110,8 @@ class VagrantConfigurator
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
-      @node_configurations.fetch(node)['disks'].each do |disk|
-        @machine_configurator.run_command(@network_settings.node_settings(node), "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+      if @node_configurations[node].has_key?('disks')
+        connect_images_to_vm(node, "#{@config.name}_#{node}", @network_settings.node_settings(node))
       end
 
       configuration_result = ChefConfigurationGenerator.configure_with_chef(
