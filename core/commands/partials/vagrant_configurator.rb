@@ -72,7 +72,7 @@ class VagrantConfigurator
   end
 
   # Attach shared disks images to the given node and write /dev names to file on VM.
-  def connect_images_to_vm(node, vm_name, network_settings)
+  def attach_images_to_vm(node, vm_name, network_settings)
     image_dir_path = "#{@config.path}/images"
     @node_configurations[node]['disks'].each do |disk|
       @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
@@ -111,7 +111,7 @@ class VagrantConfigurator
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
       if @node_configurations[node].has_key?('disks')
-        connect_images_to_vm(node, "#{@config.name}_#{node}", @network_settings.node_settings(node))
+        attach_images_to_vm(node, "#{@config.name}_#{node}", @network_settings.node_settings(node))
       end
 
       configuration_result = ChefConfigurationGenerator.configure_with_chef(
