@@ -26,6 +26,7 @@ class VagrantConfigurator
     @specification = specification
     @config = config
     @provider = config.provider
+    @node_configurations = config.node_configurations
     @env = env
     @repos = env.repos
     @ui = logger
@@ -70,6 +71,24 @@ class VagrantConfigurator
     Dir.chdir(current_dir)
   end
 
+  # Attach shared disks images to the given node and write /dev names to file on VM.
+  def attach_images_to_vm(node, vm_name, network_settings)
+    image_dir_path = "#{@config.path}/images"
+    @node_configurations[node]['disks'].each do |disk|
+      if disk['dev_name'] != 'a'
+        @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
+          ShellCommands.run_command_in_dir(
+          @ui, 
+          "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}",
+          image_dir_path
+          )
+        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+      else
+        @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
+      end
+    end
+  end
+
   # Create and configure node, or recreate if it needs to fix.
   #
   # @param node [String] name of node which needs to be configured
@@ -93,6 +112,10 @@ class VagrantConfigurator
       settings = SshUser.create_user(@machine_configurator, node, settings_result.value, @config.path, logger)
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
+
+      if @node_configurations[node].has_key?('disks')
+        attach_images_to_vm(node, "#{@config.name}_#{node}", @network_settings.node_settings(node))
+      end
 
       configuration_result = ChefConfigurationGenerator.configure_with_chef(
         node, logger, @network_settings.node_settings(node),
