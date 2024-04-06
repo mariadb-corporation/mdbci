@@ -79,7 +79,7 @@ class VagrantConfigurator
         @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
           ShellCommands.run_command_in_dir(
           @ui, 
-          "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']}",
+          "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']} --shareable",
           image_dir_path
           )
         @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
