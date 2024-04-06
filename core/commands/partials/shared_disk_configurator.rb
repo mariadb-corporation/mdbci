@@ -5,8 +5,7 @@ require_relative '../base_command'
 require_relative '../../services/shell_commands'
 
 # The class handles shared disks utilities
-# rubocop:disable Metrics/ClassLength
-class SharedDiskConfigurator < BaseCommand
+class SharedDiskConfigurator
   def initialize(shared_disks, configuration_path, env, logger)
     @env = env
     @ui = logger
@@ -33,4 +32,3 @@ class SharedDiskConfigurator < BaseCommand
     end
   end
 end
-# rubocop:enable Metrics/ClassLength

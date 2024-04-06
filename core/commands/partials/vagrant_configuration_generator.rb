@@ -8,8 +8,10 @@ require 'securerandom'
 require 'socket'
 require 'erb'
 require 'set'
+require_relative 'shared_disk_configurator'
 require_relative '../base_command'
 require_relative '../../models/configuration'
+require_relative '../../models/configuration_template'
 require_relative '../../services/configuration_generator'
 require_relative '../../services/product_attributes'
 require_relative '../../services/shell_commands'
@@ -361,6 +363,27 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     true
   end
 
+  # Read the template and return all libvirt shared disks
+  #
+  # @return libvirt_disks [Hash] list of shared disks and their attributes
+  def fetch_libvirt_disks
+    template_disks = @configuration_template
+      .instance_variable_get(:@disk_configurations)
+    libvirt_disks = []
+    template_disks.each do |disk|
+      if disk[1]['provider'] == 'libvirt'
+          libvirt_disks.append(disk)
+        end
+    end
+    libvirt_disks
+  end
+
+  # Create shared disk image files using virsh
+  def create_disks_images(libvirt_disks, configuration_path)
+    disk_configurator = SharedDiskConfigurator.new(libvirt_disks, configuration_path, @env, @ui)
+    disk_configurator.create_libvirt_disk_images(libvirt_disks)
+  end
+
   # Set required parameters as instance variables,
   # defines the path for generating the configuration, parse the config JSON-file.
   #
@@ -371,6 +394,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     @configuration_generator = ConfigurationGenerator.new(@ui, @env)
     @configuration_path = name.nil? ? File.join(Dir.pwd, 'default') : File.absolute_path(name.to_s)
     @registry = ProductAndSubscriptionRegistry.new
+    @configuration_template = ConfigurationTemplate.new(File.expand_path(@env.template_file))
     @ssh_users = {}
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file))
   end
@@ -381,6 +405,13 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return [Result::Base] exit code for the command execution
   def execute(name)
     setup_command(name).and_then do |config|
+      begin
+        libvirt_disks = fetch_libvirt_disks
+        create_disks_images(libvirt_disks, @configuration_path)
+      rescue Exception => e
+        @ui.error("Failed to create libvirt disks images: #{e.message}")
+      end
+
       nodes_checking_result = load_nodes_provider_and_check_it(config)
       return ARGUMENT_ERROR_RESULT unless nodes_checking_result
 

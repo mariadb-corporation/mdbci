@@ -7,7 +7,6 @@ require_relative 'partials/vagrant_configuration_generator'
 require_relative 'partials/terraform_configuration_generator'
 require_relative 'partials/docker_configuration_generator'
 require_relative 'partials/dedicated_configuration_generator'
-require_relative 'partials/shared_disk_configurator'
 require_relative '../models/configuration_template'
 require_relative '../models/result'
 
@@ -20,10 +19,6 @@ class GenerateCommand < BaseCommand
 
   def execute
     setup_command.and_then do
-      shared_disks = fetch_template_disks
-      libvirt_disks = filter_libvirt_disks(shared_disks)
-      disk_configurator = SharedDiskConfigurator.new(libvirt_disks, @configuration_path, @env, @ui)
-      disk_configurator.create_libvirt_disk_images(libvirt_disks)
       case @template_type
       when :docker
         generator = DockerConfigurationGenerator.new(@configuration_path, @template_file, @template, @env, @ui)
@@ -71,22 +66,5 @@ class GenerateCommand < BaseCommand
       @template_type = template_type
       Result.ok('Template read')
     end
-  end
-
-  # Read the template file and return all shared disks to create
-  def fetch_template_disks
-    @template_file = File.expand_path(@env.template_file)
-    ConfigurationTemplate.new(@template_file).instance_variable_get(:@disk_configurations)
-  end
-
-  # Filters out libvirt disks from all shared disks in the template
-  def filter_libvirt_disks(template_disks)
-    libvirt_disks = []
-      template_disks.each do |disk|
-        if disk[1]['provider'] == 'libvirt'
-          libvirt_disks.append(disk)
-        end
-      end
-    libvirt_disks
   end
 end
