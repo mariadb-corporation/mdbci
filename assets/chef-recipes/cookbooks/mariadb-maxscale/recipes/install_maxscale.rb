@@ -119,6 +119,14 @@ file "/etc/shadow" do
   mode "640"
 end
 
+# Fixes ASAN/UBSAN problems on Ubuntu Jammy
+# https://github.com/actions/runner-images/issues/9491#issuecomment-1989718917
+if node[:platform] == "ubuntu" && node[:platform_version] == 22.04
+  execute "Disable high-entropy ASLR" do
+    command "sudo sysctl -w vm.mmap_rnd_bits=28"
+  end
+end
+
 check_version 'Check the installed version of the MaxScale server' do
   version node['maxscale']['version']
   deb_package_name 'maxscale'
