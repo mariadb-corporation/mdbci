@@ -21,7 +21,7 @@
     "default_memory_size": "4096",
     "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
   },
-  "aarch64_rocky_linux_9_gcp": {
+  "aarch64_rocky_9_gcp": {
     "provider": "gcp",
     "architecture": "aarch64",
     "image": "rocky-linux-cloud/rocky-linux-9-arm64",
