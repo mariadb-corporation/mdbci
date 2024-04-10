@@ -111,14 +111,14 @@
     "platform": "rhel",
     "platform_version": "9"
   },
-  "rocky_linux_8_libvirt": {
+  "rocky_8_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
     "box": "generic/rocky8",
     "platform": "rocky",
     "platform_version": "8"
   },
-  "rocky_linux_9_libvirt": {
+  "rocky_9_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
     "box": "generic/rocky9",
