@@ -6,7 +6,7 @@ require 'sem_version'
 require_relative 'base_command'
 require_relative '../services/shell_commands'
 
-VAGRANT_VERSION = '2.2.19'
+VAGRANT_VERSION = '2.4.1'
 VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.6.3'
 
 TERRAFORM_VERSION = '1.1.7'
