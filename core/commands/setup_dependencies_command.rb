@@ -7,7 +7,7 @@ require_relative 'base_command'
 require_relative '../services/shell_commands'
 
 VAGRANT_VERSION = '2.4.1'
-VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.6.3'
+VAGRANT_LIBVIRT_PLUGIN_VERSION = '0.12.2'
 
 TERRAFORM_VERSION = '1.1.7'
 TERRAFORM_ZIP_URL = "https://releases.hashicorp.com/terraform/#{TERRAFORM_VERSION}/terraform_#{TERRAFORM_VERSION}_linux_amd64.zip"
