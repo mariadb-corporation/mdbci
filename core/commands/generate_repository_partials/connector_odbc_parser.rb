@@ -18,20 +18,23 @@ module ConnectorOdbcParser
       extract_field(:version, /(\d.+)/)
     )
     releases = archive_directories.each_with_object([]) do |directory, releases|
-      archives_links = get_links(directory[:url], logger).filter { |link| link[:content].match?(/(x86_64)|(amd64)/) }
+      archives_links = get_links(directory[:url], logger).filter { |link| link[:content].match?(/(x86_64)|(amd64)|(arm64)|(aarch64)/) }
       archives = get_releases_platform_info(archives_links)
       next unless !archives.nil? && !archives.empty?
-
       archives.each do |archive|
+        if archive[:repo].match(/(x86_64)|(amd64)/) 
+          product_architecture = 'amd64'
+        elsif archive[:repo].match(/(arm64)|(aarch64)/) 
+          product_architecture = 'aarch64'
+        end
         releases.append(archive.merge({
                                         version: directory[:version],
                                         product: product,
-                                        architecture: 'amd64'
+                                        architecture: product_architecture
                                       }))
       end
     end
     releases += find_similar_rpm_releases(releases)
-
     releases
   end
 
