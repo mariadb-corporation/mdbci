@@ -143,7 +143,7 @@ class AwsService
     path = fetch_instance_tag_value(instance[:tags], 'full_config_path')
     username = fetch_instance_tag_value(instance[:tags], 'username')
     instance_info = {
-      id: instance[:instance_id]
+      id: instance[:instance_id],
       type: instance[:instance_type],
       node_name: node_name,
       path: path,
