@@ -80,6 +80,10 @@ module ConnectorOdbcParser
       platform: 'debian',
       platform_version: 'bullseye'
     },
+    'bookworm' => {
+      platform: 'debian',
+      platform_version: 'bookworm'
+    },
     'centos6' => {
       platform: 'centos',
       platform_version: '6'
