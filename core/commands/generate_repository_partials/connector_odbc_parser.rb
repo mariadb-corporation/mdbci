@@ -18,7 +18,7 @@ module ConnectorOdbcParser
       extract_field(:version, /(\d.+)/)
     )
     releases = archive_directories.each_with_object([]) do |directory, releases|
-      archives_links = get_links(directory[:url], logger).filter { |link| link[:content].match?(/(x86_64)|(amd64)|(arm64)|(aarch64)/) }
+      archives_links = get_links(directory[:url], logger).filter { |link| link[:content].match?(/(x86_64)|(amd64)|(arm64)|(aarch64)/) && !link[:content].match?(/\.deb/) }
       archives = get_releases_platform_info(archives_links)
       next unless !archives.nil? && !archives.empty?
       archives.each do |archive|
