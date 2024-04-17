@@ -142,7 +142,8 @@ class AwsService
     node_name = fetch_instance_name(instance[:tags])
     path = fetch_instance_tag_value(instance[:tags], 'full_config_path')
     username = fetch_instance_tag_value(instance[:tags], 'username')
-    {
+    instance_info = {
+      id: instance[:instance_id]
       type: instance[:instance_type],
       node_name: node_name,
       path: path,
@@ -150,6 +151,7 @@ class AwsService
       zone: instance[:placement][:availability_zone],
       username: username
     }
+    instance_info
   end
 
   # Extract node name from instance tags. 'full_name' tag is used if specified, 'machinename' tag otherwise.
