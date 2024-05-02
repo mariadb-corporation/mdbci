@@ -21,6 +21,7 @@ when 'debian', 'ubuntu'
       repo_name 'MariaDB Enterprise Server'
       trusted :true
       uri node['mariadb']['repo']
+      sensitive true
     end
     apt_repository repo_file_name do
       arch 'amd64,arm64'
@@ -29,6 +30,7 @@ when 'debian', 'ubuntu'
       trusted :true
       deb_src :true
       uri node['mariadb']['repo']
+      sensitive true
     end
     if node['mariadb'].key?('unsupported_repo')
       apt_repository "#{repo_file_name}_unsupported" do
@@ -37,6 +39,7 @@ when 'debian', 'ubuntu'
         repo_name 'MariaDB Enterprise Server Unsupported'
         trusted :true
         uri node['mariadb']['unsupported_repo']
+        sensitive true
       end
     end
     remote_file "/tmp/#{repo_file_name}.public" do
