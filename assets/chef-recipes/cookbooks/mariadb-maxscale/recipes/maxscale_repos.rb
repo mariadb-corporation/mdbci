@@ -11,7 +11,7 @@ when "debian", "ubuntu"
     components node['maxscale']['components']
     sensitive true
   end
-when "rhel", "fedora", "centos"
+when "rhel", "fedora", "centos", "almalinux"
   yum_repository node['maxscale']['repo_file_name'] do
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']

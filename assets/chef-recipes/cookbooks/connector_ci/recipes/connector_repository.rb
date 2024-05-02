@@ -14,7 +14,7 @@ when 'debian', 'ubuntu'
     sensitive true
   end
   apt_update
-when 'rhel', 'centos'
+when 'rhel', 'centos', 'almalinux'
   yum_repository connector do
     baseurl repo
     gpgkey repo_key
