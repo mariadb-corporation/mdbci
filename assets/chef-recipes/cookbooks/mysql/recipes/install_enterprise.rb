@@ -51,7 +51,7 @@ unless node['mysql']['cnf_template'].nil?
         command addlinecmd
       end
 
-    when "rhel", "fedora", "centos", "suse", "opensuse"
+    when "rhel", "fedora", "centos", "suse", "opensuse", "almalinux"
 
       # /etc/my.cnf.d -- dir for *.cnf files
       cookbook_file File.join('/etc/my.cnf.d', ['mysql']['cnf_template']) do

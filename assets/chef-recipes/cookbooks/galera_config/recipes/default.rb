@@ -14,7 +14,7 @@ when 'debian', 'ubuntu'
   execute 'Save MariaDB iptables rules' do
     command 'iptables-save > /etc/iptables/rules.v4'
   end
-when 'rhel', 'centos', 'suse'
+when 'rhel', 'centos', 'suse', 'almalinux'
   bash 'Save iptables rules' do
     code <<-EOF
       iptables-save > /etc/sysconfig/iptables
@@ -30,7 +30,7 @@ unless node['galera_config']['cnf_template'].nil?
   case node[:platform_family]
   when 'debian', 'ubuntu'
     db_config_dir = '/etc/mysql/my.cnf.d/'
-  when 'rhel', 'fedora', 'centos', 'suse', 'opensuse'
+  when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'almalinux'
     db_config_dir = '/etc/my.cnf.d/'
   end
   configuration_file = File.join(db_config_dir, node['galera_config']['cnf_template'])
@@ -62,7 +62,7 @@ unless node['galera_config']['cnf_template'].nil?
       flags '-x'
       live_stream true
     end
-  when 'rhel', 'fedora', 'centos', 'suse'
+  when 'rhel', 'fedora', 'centos', 'suse', 'almalinux'
     bash 'Configure Galera server.cnf - Get/Set Galera LIB_PATH' do
       code <<-CODE
         galera_package=$(rpm -qa | grep galera | head -n 1)

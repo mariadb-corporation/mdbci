@@ -28,7 +28,7 @@ when 'debian', 'ubuntu', 'mint'
     command 'apt-get update'
   end
 
-when 'rhel', 'fedora', 'centos'
+when 'rhel', 'fedora', 'centos', 'almalinux'
   template '/etc/yum.repos.d/mysql.repo' do
     source 'mdbci.mysql.rhel.erb'
     action :create

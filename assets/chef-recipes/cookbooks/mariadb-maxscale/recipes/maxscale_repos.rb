@@ -10,7 +10,7 @@ when "debian", "ubuntu"
     uri node['maxscale']['repo']
     components node['maxscale']['components']
   end
-when "rhel", "fedora", "centos"
+when "rhel", "fedora", "centos", "almalinux"
   yum_repository node['maxscale']['repo_file_name'] do
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']

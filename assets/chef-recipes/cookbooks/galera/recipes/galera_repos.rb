@@ -35,7 +35,7 @@ when 'debian', 'ubuntu'
     sensitive true
   end
   apt_update
-when 'rhel', 'fedora', 'centos'
+when 'rhel', 'fedora', 'centos', 'almalinux'
   remote_file File.join('tmp', 'rpm.key') do
     source node['galera']['repo_key']
     action :create
