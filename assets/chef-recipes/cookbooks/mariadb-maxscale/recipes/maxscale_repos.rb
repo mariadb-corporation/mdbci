@@ -9,6 +9,7 @@ when "debian", "ubuntu"
     key node['maxscale']['repo_key']
     uri node['maxscale']['repo']
     components node['maxscale']['components']
+    sensitive true
   end
 when "rhel", "fedora", "centos"
   yum_repository node['maxscale']['repo_file_name'] do
@@ -16,12 +17,14 @@ when "rhel", "fedora", "centos"
     gpgkey node['maxscale']['repo_key']
     gpgcheck true
     options({ 'module_hotfixes' => '1' })
+    sensitive true
   end
 when "suse", "opensuse", "sles"
   zypper_repository node['maxscale']['repo_file_name'] do
     baseurl node['maxscale']['repo']
     gpgkey node['maxscale']['repo_key']
     gpgcheck true
+    sensitive true
   end
 
   execute 'Update zypper cache' do
