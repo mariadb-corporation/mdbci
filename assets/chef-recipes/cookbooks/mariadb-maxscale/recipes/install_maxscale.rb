@@ -103,7 +103,7 @@ else
 end
 
 # Install packages for Enterprise releases
-if node[:repo_file_name].to_s.match?('enterprise')
+if node['maxscale']['repo_file_name'].include?('enterprise')
   package 'maxscale-enterprise' do
     action :install
   end
