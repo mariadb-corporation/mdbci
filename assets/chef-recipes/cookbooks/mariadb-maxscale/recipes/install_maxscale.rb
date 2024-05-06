@@ -102,6 +102,13 @@ else
   end
 end
 
+# Install packages for Enterprise releases
+if node[:repo_file_name].to_s.match?('enterprise')
+  package 'maxscale-enterprise' do
+    action :install
+  end
+end
+
 # Allow read access for the maxscale user to /etc/shadow
 shadow_group = case node[:platform_family]
                when "rhel", "centos", "almalinux"
