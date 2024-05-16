@@ -37,6 +37,14 @@
     "platform": "ubuntu",
     "platform_version": "jammy"
   },
+  "ubuntu_noble_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "generic/ubuntu2404",
+    "ssh_pty" : "false",
+    "platform": "ubuntu",
+    "platform_version": "noble"
+  },
   "centos_8_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
