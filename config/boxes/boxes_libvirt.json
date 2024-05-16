@@ -40,7 +40,7 @@
   "ubuntu_noble_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
-    "box": "generic/ubuntu2404",
+    "box": "cloud-image/ubuntu-24.04",
     "ssh_pty" : "false",
     "platform": "ubuntu",
     "platform_version": "noble"
