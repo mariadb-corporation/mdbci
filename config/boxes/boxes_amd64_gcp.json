@@ -83,7 +83,7 @@
   "ubuntu_noble_gcp": {
     "provider": "gcp",
     "architecture": "amd64",
-    "image": "ubuntu-os-cloud/ubuntu-2404-lts",
+    "image": "ubuntu-os-cloud/ubuntu-2404-lts-amd64",
     "platform": "ubuntu",
     "platform_version": "noble",
     "default_machine_type": "g1-small",
