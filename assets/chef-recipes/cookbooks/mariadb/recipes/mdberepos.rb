@@ -93,7 +93,7 @@ when 'debian', 'ubuntu'
   apt_update do
     action :update
   end
-when 'rhel', 'fedora', 'centos', 'alma'
+when 'rhel', 'fedora', 'centos', 'almalinux'
   yum_repository repo_file_name do
     description 'MariaDB Enterprise Server'
     baseurl node['mariadb']['repo']

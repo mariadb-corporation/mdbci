@@ -21,7 +21,7 @@ case node[:platform_family]
     execute "Install iptables-persistent" do
       command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
     end
-  when 'rhel', 'centos', 'fedora', 'alma'
+  when 'rhel', 'centos', 'fedora', 'almalinux'
     if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
       bash 'Install and configure iptables' do
       code <<-EOF
@@ -44,7 +44,7 @@ end
 
 # iptables rules
 case node[:platform_family]
-  when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "alma"
+  when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "almalinux"
     execute "Opening MariaDB ports" do
       command "iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT"
       command "iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW"
@@ -59,7 +59,7 @@ case node[:platform_family]
       command "iptables-save > /etc/iptables/rules.v4"
       #command "/usr/sbin/service iptables-persistent save"
     end
-  when 'rhel', 'centos', 'fedora', 'alma'
+  when 'rhel', 'centos', 'fedora', 'almalinux'
     if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
       bash 'Save iptables rules' do
         code <<-EOF
@@ -103,7 +103,7 @@ when "windows"
     installer_type :msi
     action :install
   end
-when "rhel", "centos", "alma"
+when "rhel", "centos", "almalinux"
   package 'MariaDB-server' do
     flush_cache [:before]
     action :upgrade
@@ -118,7 +118,7 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   db_config_dir = '/etc/mysql/my.cnf.d/'
   db_base_config = '/etc/mysql/my.cnf'
-when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'alma'
+when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'almalinux'
   db_config_dir = '/etc/my.cnf.d/'
   db_base_config = '/etc/my.cnf'
 end

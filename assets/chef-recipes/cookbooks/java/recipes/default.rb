@@ -2,7 +2,7 @@ java_version = node['java']['version'].nil? ? 'latest' : node['java']['version']
 platform_version = node[:platform_version].to_i
 platform = node[:platform]
 
-if ['rhel', 'rocky', 'centos', 'alma'].include?(platform)
+if ['rhel', 'rocky', 'centos', 'almalinux'].include?(platform)
     if java_version == 'latest' && platform_version == 7
         java_version = 11
     end

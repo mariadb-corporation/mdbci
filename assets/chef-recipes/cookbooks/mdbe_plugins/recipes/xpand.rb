@@ -2,7 +2,7 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   package 'mariadb-plugin-xpand'
   configuration_path = '/etc/mysql/mariadb.conf.d/xpand.cnf'
-when 'rhel', 'centos', 'suse', 'opensuse', 'alma'
+when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux'
   package 'MariaDB-xpand-engine'
   configuration_path = '/etc/my.cnf.d/xpand.cnf'
 end
