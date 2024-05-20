@@ -101,14 +101,14 @@
     "architecture": "amd64",
     "box": "generic/alma8",
     "box_version": "4.3.10",
-    "platform": "rhel",
+    "platform": "alma",
     "platform_version": "8"
   },
   "alma_9_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
     "box": "generic/alma9",
-    "platform": "rhel",
+    "platform": "alma",
     "platform_version": "9"
   },
   "rocky_8_libvirt": {
