@@ -20,7 +20,7 @@ when "debian"
   execute "update" do
     command "apt-get update"
   end
-when "rhel", "fedora", "almalinux"
+when "rhel", "fedora", "alma"
   # Add the repo
   template "/etc/yum.repos.d/mysql.repo" do
     source "mysql.rhel.erb"

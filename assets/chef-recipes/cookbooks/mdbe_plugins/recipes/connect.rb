@@ -1,6 +1,6 @@
 case node[:platform_family]
 when 'debian', 'ubuntu'
   package 'mariadb-plugin-connect'
-when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux'
+when 'rhel', 'centos', 'suse', 'opensuse', 'alma'
   package 'MariaDB-connect-engine'
 end

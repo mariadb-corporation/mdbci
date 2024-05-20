@@ -26,7 +26,7 @@ unless node['mysql']['cnf_template'].nil?
   when 'debian', 'ubuntu'
     db_config_dir = '/etc/mysql/my.cnf.d/'
     db_base_config = '/etc/mysql/my.cnf'
-  when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'almalinux'
+  when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'alma'
     db_config_dir = '/etc/my.cnf.d/'
     db_base_config = '/etc/my.cnf'
   end

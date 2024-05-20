@@ -5,7 +5,7 @@ service 'maxscale' do
 end
 
 case node[:platform_family]
-when "debian", "ubuntu", "centos", "rhel", "almalinux"
+when "debian", "ubuntu", "centos", "rhel", "alma"
   package 'maxscale' do
     action :purge
   end
