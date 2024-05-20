@@ -9,7 +9,7 @@ when "debian"
   execute "update" do
     command "apt-get update"
   end
-when "rhel", "fedora", "suse", "almalinux"
+when "rhel", "fedora", "suse", "alma"
   package "MariaDB-common" do
     action :remove
   end

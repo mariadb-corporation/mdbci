@@ -19,7 +19,7 @@ when 'debian', 'ubuntu', 'mint'
     deb_src true
     action :add
   end
-when 'rhel', 'fedora', 'centos', 'almalinux'
+when 'rhel', 'fedora', 'centos', 'alma'
   yum_repository 'mariadb' do
     baseurl node['mariadb']['repo']
     gpgkey node['mariadb']['repo_key']

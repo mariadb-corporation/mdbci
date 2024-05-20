@@ -7,7 +7,7 @@ execute 'install epel-release' do
 end
 
 package packages do
-  if platform?('redhat', 'centos', 'rocky', 'almalinux')
+  if platform?('redhat', 'centos', 'rocky', 'alma')
     flush_cache({ before: true })
   end
 end

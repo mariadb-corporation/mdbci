@@ -1,7 +1,7 @@
 platform_version = node[:platform_version].to_i
 
 package 'yum-utils' do
-  if platform?('redhat', 'centos', 'rocky', 'almalinux')
+  if platform?('redhat', 'centos', 'rocky', 'alma')
     flush_cache({ before: true })
   end
 end

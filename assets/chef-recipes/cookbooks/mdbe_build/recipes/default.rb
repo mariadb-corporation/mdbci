@@ -410,7 +410,7 @@ when 'ubuntu'
   execute 'install dependencies mariadb-server' do
     command 'apt-get -y build-dep -q mariadb-server'
   end
-when 'centos', 'redhat', 'rocky', 'almalinux'
+when 'centos', 'redhat', 'rocky', 'alma'
   case node[:platform_version].to_i
   when 7 # CentOS 7
     packages = general_packages.concat(centos_packages).concat(centos_7_packages)
@@ -449,7 +449,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if %w[almalinux rocky centos].include? node[:platform]
+    if %w[alma rocky centos].include? node[:platform]
       execute 'Enable PowerTools repository' do
         command 'dnf config-manager --set-enabled powertools'
       end
@@ -462,7 +462,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if %w[almalinux rocky].include? node[:platform]
+    if %w[alma rocky].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled crb'
       end
@@ -544,7 +544,7 @@ rm cmake-#{cmake_path}.tar.gz"
   only_if { node.run_state['cmake_flag'] }
 end
 
-if %w[centos redhat rocky almalinux].include?(node[:platform]) && [7, 8].include?(node[:platform_version].to_i)
+if %w[centos redhat rocky alma].include?(node[:platform]) && [7, 8].include?(node[:platform_version].to_i)
   devtoolset_name = node[:platform_version].to_i == 7 ? 'devtoolset-10' : 'gcc-toolset-10'
   execute 'Enable devtoolset-10' do
     command "scl enable #{devtoolset_name} bash"

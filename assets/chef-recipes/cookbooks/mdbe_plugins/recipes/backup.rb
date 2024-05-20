@@ -16,7 +16,7 @@ when 'debian', 'ubuntu'
   package 'Install backup package' do
     package_name(lazy { node.run_state[:plugin_name] } )
   end
-when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux'
+when 'rhel', 'centos', 'suse', 'opensuse', 'alma'
   package 'MariaDB-backup'
 end
 

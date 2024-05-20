@@ -19,7 +19,7 @@ case node[:platform_family]
       command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
     end
   when "rhel", "fedora", "centos"
-    if platform?('centos', 'redhat', 'rocky', 'almalinux') && node["platform_version"].to_f >= 7.0
+    if platform?('centos', 'redhat', 'rocky', 'alma') && node["platform_version"].to_f >= 7.0
       bash 'Install and configure iptables' do
       code <<-EOF
         yum --assumeyes install iptables-services
@@ -41,7 +41,7 @@ end
 
 # iptables rules
 case node[:platform_family]
-  when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "almalinux"
+  when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "alma"
     execute "Opening MariaDB ports" do
       command "iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT"
       command "iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW"
@@ -56,7 +56,7 @@ case node[:platform_family]
       command "iptables-save > /etc/iptables/rules.v4"
       #command "/usr/sbin/service iptables-persistent save"
     end
-  when "rhel", "centos", "fedora", "almalinux"
+  when "rhel", "centos", "fedora", "alma"
     execute "Save MariaDB iptables rules" do
       command "/sbin/service iptables save"
     end
@@ -97,7 +97,7 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   db_config_dir = '/etc/mysql/my.cnf.d/'
   db_base_config = '/etc/mysql/my.cnf'
-when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'almalinux'
+when 'rhel', 'fedora', 'centos', 'suse', 'opensuse', 'alma'
   db_config_dir = '/etc/my.cnf.d/'
   db_base_config = '/etc/my.cnf'
 end
