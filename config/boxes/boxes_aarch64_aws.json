@@ -162,7 +162,7 @@
     "architecture": "aarch64",
     "ami": "ami-05b03744aec8b58ed",
     "user": "ec2-user",
-    "platform": "rhel",
+    "platform": "alma",
     "platform_version": "9",
     "vpc": "true",
     "default_machine_type": "c6g.xlarge",
