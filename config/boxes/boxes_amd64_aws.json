@@ -28,7 +28,7 @@
   "ubuntu_noble_aws": {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-08012c0a9ee8e21c4",
+    "ami": "ami-0776c814353b4814d",
     "user": "ubuntu",
     "default_machine_type": "m3.medium",
     "default_cpu_count": "1",
