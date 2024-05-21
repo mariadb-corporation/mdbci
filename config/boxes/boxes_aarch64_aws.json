@@ -28,7 +28,7 @@
   "aarch64_ubuntu_noble_aws": {
     "provider": "aws",
     "architecture": "aarch64",
-    "ami": "ami-02404fb4d4dc3c0c7",
+    "ami": "ami-0a636034c582e2138",
     "user": "ubuntu",
     "platform": "ubuntu",
     "platform_version": "noble",
