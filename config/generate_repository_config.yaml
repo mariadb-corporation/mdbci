@@ -58,6 +58,12 @@ mdbe_ci:
     es_repo:
       path: https://es-repo.mariadb.net/jenkins/
       key: https://es-repo.mariadb.net/jenkins/MDBE.public
+    cs_repo:
+      path: https://cspkg.s3.amazonaws.com/
+      branches: ["develop-23.02/cron", "develop-23.02/pull_request", "develop-22.08/cron", 
+                 "develop-22.08/pull_request", "develop/cron", "develop/pull_request", 
+                 "stable-23.10/cron", "stable-23.10/pull_request", "custom"]
+      latest_branches: ["develop-23.02", "develop-22.08", "develop", "stable-23.10"]
 galera_3_community:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera3/
