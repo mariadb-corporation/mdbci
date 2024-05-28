@@ -60,6 +60,7 @@ mdbe_ci:
       key: https://es-repo.mariadb.net/jenkins/MDBE.public
     cs_repo:
       path: https://cspkg.s3.amazonaws.com/
+      yum_key: http://yum.mariadb.org/
       branches: ["develop-23.02/cron", "develop-23.02/pull_request", "develop-22.08/cron", 
                  "develop-22.08/pull_request", "develop/cron", "develop/pull_request", 
                  "stable-23.10/cron", "stable-23.10/pull_request", "custom"]

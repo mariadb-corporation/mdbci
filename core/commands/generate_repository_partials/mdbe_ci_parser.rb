@@ -29,7 +29,8 @@ module MdbeCiParser
       parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], product_version,
                                            auth_es_repo, log, logger)
     )
-    releases.concat(parse_cs_repos(config['repo']['cs_repo']['path'], 
+    releases.concat(parse_cs_repos(config['repo']['cs_repo']['path'],
+                                   config['repo']['cs_repo']['yum_key'],
                                    config['repo']['cs_repo']['branches'],
                                    config['repo']['cs_repo']['latest_branches'],
                                    ))
@@ -157,21 +158,21 @@ module MdbeCiParser
     },
   }.freeze
 
-  def self.parse_cs_repos(url, branches, latest_branches)
+  def self.parse_cs_repos(url, yum_key, branches, latest_branches)
     releases = []
 
     branches.each do |branch_dir|
-      releases.concat(fetch_cs_repo_files(url, branch_dir, '10.6-enterprise'))
+      releases.concat(fetch_cs_repo_files(url, yum_key, branch_dir, '10.6-enterprise'))
     end
 
     latest_branches.each do |branch_dir|
-      releases.concat(fetch_cs_repo_latest(url, branch_dir, '10.6-enterprise'))
+      releases.concat(fetch_cs_repo_latest(url, yum_key, branch_dir, '10.6-enterprise'))
     end
 
     releases
   end
 
-  def self.fetch_cs_repo_latest(repo_url, branch, repo_product_ver)
+  def self.fetch_cs_repo_latest(repo_url, yum_key, branch, repo_product_ver)
     releases = []
     CS_PLATFORMS_VERSIONS.keys.map do |platform|
       releases << (CS_PLATFORMS_VERSIONS[platform].merge({
@@ -187,10 +188,15 @@ module MdbeCiParser
                                                 architecture: 'aarch64'
                                             }))
     end
+    releases.each do |release|
+      if release[:platform] == 'rhel' || release[:platform] == 'centos'
+        release[:repo_key] = yum_key
+      end
+    end
     releases
   end
 
-  def self.fetch_cs_repo_files(repo_url, branch_dir, repo_product_ver)
+  def self.fetch_cs_repo_files(repo_url, yum_key, branch_dir, repo_product_ver)
     links = []
     full_url = "#{repo_url}?prefix=#{branch_dir}/&delimiter=/"
     doc = Nokogiri.XML(URI.open(full_url))
@@ -221,6 +227,11 @@ module MdbeCiParser
                                                   product: 'mdbe_ci',
                                                   architecture: 'aarch64'
                                               }))
+      end
+    end
+    releases.each do |release|
+      if release[:platform] == 'rhel' || release[:platform] == 'centos'
+        release[:repo_key] = yum_key
       end
     end
     releases
