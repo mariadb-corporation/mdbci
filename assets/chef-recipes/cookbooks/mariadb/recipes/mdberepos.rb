@@ -99,6 +99,7 @@ when 'rhel', 'fedora', 'centos', 'almalinux'
     baseurl node['mariadb']['repo']
     gpgkey node['mariadb']['repo_key']
     sensitive true
+    gpgcheck false
     options({ 'module_hotfixes' => '1' })
   end
   if node['mariadb'].key?('unsupported_repo')
