@@ -94,12 +94,23 @@ when 'debian', 'ubuntu'
     action :update
   end
 when 'rhel', 'fedora', 'centos', 'almalinux'
-  yum_repository repo_file_name do
-    description 'MariaDB Enterprise Server'
-    baseurl node['mariadb']['repo']
-    gpgkey node['mariadb']['repo_key']
-    sensitive true
-    options({ 'module_hotfixes' => '1' })
+  if node['mariadb']['repo'].include?('cspkg')
+    yum_repository repo_file_name do
+      description 'MariaDB Enterprise Server'
+      baseurl node['mariadb']['repo']
+      gpgkey node['mariadb']['repo_key']
+      gpgcheck false
+      sensitive true
+      options({ 'module_hotfixes' => '1' })
+    end
+  else
+    yum_repository repo_file_name do
+      description 'MariaDB Enterprise Server'
+      baseurl node['mariadb']['repo']
+      gpgkey node['mariadb']['repo_key']
+      sensitive true
+      options({ 'module_hotfixes' => '1' })
+    end
   end
   if node['mariadb'].key?('unsupported_repo')
     yum_repository "#{repo_file_name}_unsupported" do
