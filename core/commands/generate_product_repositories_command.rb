@@ -212,7 +212,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   REQUIRED_KEYS = %i[repo platform platform_version product version architecture].freeze
-  OPTIONAL_KEYS = %i[components repo_key unsupported_repo]
+  OPTIONAL_KEYS = %i[components repo_key unsupported_repo disable_gpgcheck]
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
     updated_release = release.select do |key, _|

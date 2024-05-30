@@ -119,123 +119,16 @@ module MdbeCiParser
     "#{add_auth_to_url(full_url, auth)}/ #{platform_and_version}/"
   end
 
-  CS_PLATFORMS_VERSIONS = {
-    'ubuntu20.04' => {
-      platform: 'ubuntu',
-      platform_version: 'focal'
-    },
-    'ubuntu22.04' => {
-      platform: 'ubuntu',
-      platform_version: 'jammy'
-    },
-    'ubuntu24.04' => {
-      platform: 'ubuntu',
-      platform_version: 'noble'
-    },
-    'debian10' => {
-      platform: 'debian',
-      platform_version: 'buster'
-    },
-    'debian11' => {
-      platform: 'debian',
-      platform_version: 'bullseye'
-    },
-    'debian12' => {
-      platform: 'debian',
-      platform_version: 'bookworm'
-    },
-    'rockylinux8' => {
-      platform: 'rhel',
-      platform_version: '8'
-    },
-    'rockylinux9' => {
-      platform: 'rhel',
-      platform_version: '9'
-    },
-    'centos7' => {
-      platform: 'centos',
-      platform_version: '7'
-    },
-  }.freeze
 
   def self.parse_cs_repos(url, yum_key, branches, latest_branches)
     releases = []
-
     branches.each do |branch_dir|
-      releases.concat(fetch_cs_repo_files(url, yum_key, branch_dir, '10.6-enterprise'))
+      releases.concat(parse_cs_all_platforms(url, yum_key, branch_dir, '10.6-enterprise'))
     end
-
     latest_branches.each do |branch_dir|
-      releases.concat(fetch_cs_repo_latest(url, yum_key, branch_dir, '10.6-enterprise'))
-    end
-
-    releases
-  end
-
-  def self.fetch_cs_repo_latest(repo_url, yum_key, branch, repo_product_ver)
-    releases = []
-    CS_PLATFORMS_VERSIONS.keys.map do |platform|
-      releases << (CS_PLATFORMS_VERSIONS[platform].merge({
-                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/amd64/#{platform}/",
-                                                version: "columnstore/#{branch}/latest/#{repo_product_ver}",
-                                                product: 'mdbe_ci',
-                                                architecture: 'amd64'
-                                            }))
-      releases << (CS_PLATFORMS_VERSIONS[platform].merge({
-                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/arm64/#{platform}/",
-                                                version: "columnstore/#{branch}/latest/#{repo_product_ver}",
-                                                product: 'mdbe_ci',
-                                                architecture: 'aarch64'
-                                            }))
-    end
-    releases.each do |release|
-      if release[:platform] == 'rhel' || release[:platform] == 'centos'
-        release[:repo_key] = yum_key
-      end
+      releases.concat(parse_cs_latest_all_platforms(url, yum_key, branch_dir, '10.6-enterprise'))
     end
     releases
   end
-
-  def self.fetch_cs_repo_files(repo_url, yum_key, branch_dir, repo_product_ver)
-    links = []
-    full_url = "#{repo_url}?prefix=#{branch_dir}/&delimiter=/"
-    doc = Nokogiri.XML(URI.open(full_url))
-    docArray = doc.at_css("ListBucketResult").children
-    elements = docArray.count
-    docArray.each do |file|
-      file_link = file.to_s.match(/<Prefix>.*<\/Prefix>/).to_s[8..-10]
-      links.append(file_link)
-    end
-    
-    links.compact!
-    links.map! { |link| link.match(/(?<=(#{branch_dir})\/)[0-9]+/).to_s }
-    links = links.reject { |element| element.empty? }
-
-    releases = []
-
-    links.each do |link|
-      CS_PLATFORMS_VERSIONS.keys.map do |platform|
-        releases << (CS_PLATFORMS_VERSIONS[platform].merge({
-                                                  repo: "#{repo_url}#{branch_dir}/#{link}/#{repo_product_ver}/amd64/#{platform}/",
-                                                  version: "columnstore/#{branch_dir}/#{link}/#{repo_product_ver}",
-                                                  product: 'mdbe_ci',
-                                                  architecture: 'amd64'
-                                              }))
-        releases << (CS_PLATFORMS_VERSIONS[platform].merge({
-                                                  repo: "#{repo_url}#{branch_dir}/#{link}/#{repo_product_ver}/arm64/#{platform}/",
-                                                  version: "columnstore/#{branch_dir}/#{link}/#{repo_product_ver}",
-                                                  product: 'mdbe_ci',
-                                                  architecture: 'aarch64'
-                                              }))
-      end
-    end
-    releases.each do |release|
-      if release[:platform] == 'rhel' || release[:platform] == 'centos'
-        release[:repo_key] = yum_key
-      end
-    end
-    releases
-  end
-
 end
 

@@ -14,7 +14,7 @@ repo_file_name = node['mariadb']['repo_file_name']
 case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
-  if node['mariadb']['repo'].include?('es-repo.mariadb.net')
+  if node['mariadb']['repo'].include?('es-repo.mariadb.net') || node['mariadb']['disable_gpgcheck']
     apt_repository repo_file_name do
       arch 'amd64,arm64'
       distribution node[:platform_version]
@@ -94,7 +94,7 @@ when 'debian', 'ubuntu'
     action :update
   end
 when 'rhel', 'fedora', 'centos', 'almalinux'
-  if node['mariadb']['repo'].include?('cspkg')
+  if node['mariadb']['disable_gpgcheck']
     yum_repository repo_file_name do
       description 'MariaDB Enterprise Server'
       baseurl node['mariadb']['repo']

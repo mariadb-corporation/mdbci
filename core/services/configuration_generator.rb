@@ -61,6 +61,9 @@ class ConfigurationGenerator
       config['cnf_template'] = product['cnf_template']
       config['cnf_template_path'] = product['cnf_template_path']
     end
+    if product.key?('disable_gpgcheck')
+      config['disable_gpgcheck'] = product['disable_gpgcheck']
+    end
     repo_file_name = ProductAttributes.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['provider'] = provider
@@ -299,7 +302,7 @@ class ConfigurationGenerator
   end
 
 
-  CHEF_REPO_PARAMETERS = %w[components repo repo_key version]
+  CHEF_REPO_PARAMETERS = %w[components repo repo_key version disable_gpgcheck]
   # Make list of not-null product attributes
   # @param repo [Hash] repository info
   def self.make_product_attributes_hash(repo)
