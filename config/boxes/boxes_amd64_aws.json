@@ -67,7 +67,11 @@
   "debian_bookworm_aws" : {
     "provider": "aws",
     "architecture": "amd64",
-    "ami": "ami-09176e8784b68a502",
+    "ami": {
+      "default": "ami-09176e8784b68a502",
+      "us-east-1": "ami-09176e8784b68a502",
+      "us-west-1": "ami-09176e8784b68a502",
+    },
     "user": "admin",
     "default_machine_type": "t3.medium",
     "default_cpu_count": "2",

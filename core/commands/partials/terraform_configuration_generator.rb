@@ -122,6 +122,20 @@ class TerraformConfigurationGenerator < BaseCommand
     if node[1].key?('box_parameters')
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
+    if box_params.key?('ami') && box_params['ami'].is_a?(Hash)
+      if node[1].key?('aws_region')
+        aws_region = node[1]['aws_region']
+        if box_params['ami'].key?(aws_region)
+          symbolic_box_params[:ami] = box_params['ami'][aws_region]
+        else
+          symbolic_box_params[:ami] = box_params['ami']['default']
+          @ui.info('Specified AWS region not found. Using default ami.')
+        end
+      else
+        symbolic_box_params[:ami] = box_params['ami']['default']
+        @ui.info('There is no region specified for this AWS machine. Using default ami.')
+      end
+    end
     symbolic_box_params.merge(
       {
           name: node[0].to_s,
