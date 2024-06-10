@@ -14,12 +14,12 @@ repo_file_name = node['mariadb']['repo_file_name']
 case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
-  if node['mariadb']['repo'].include?('es-repo.mariadb.net') || node['mariadb']['disable_gpgcheck']
+  if node['mariadb']['disable_gpgcheck']
     apt_repository repo_file_name do
       arch 'amd64,arm64'
       distribution node[:platform_version]
       repo_name 'MariaDB Enterprise Server'
-      trusted :true
+      trusted true
       uri node['mariadb']['repo']
       sensitive true
     end
@@ -27,8 +27,8 @@ when 'debian', 'ubuntu'
       arch 'amd64,arm64'
       distribution node[:platform_version]
       repo_name 'MariaDB Enterprise Server Source'
-      trusted :true
-      deb_src :true
+      trusted true
+      deb_src true
       uri node['mariadb']['repo']
       sensitive true
     end
@@ -37,7 +37,7 @@ when 'debian', 'ubuntu'
         arch 'amd64,arm64'
         distribution node[:platform_version]
         repo_name 'MariaDB Enterprise Server Unsupported'
-        trusted :true
+        trusted true
         uri node['mariadb']['unsupported_repo']
         sensitive true
       end
@@ -94,23 +94,15 @@ when 'debian', 'ubuntu'
     action :update
   end
 when 'rhel', 'fedora', 'centos', 'almalinux'
-  if node['mariadb']['disable_gpgcheck']
-    yum_repository repo_file_name do
-      description 'MariaDB Enterprise Server'
-      baseurl node['mariadb']['repo']
-      gpgkey node['mariadb']['repo_key']
+  yum_repository repo_file_name do
+    description 'MariaDB Enterprise Server'
+    baseurl node['mariadb']['repo']
+    gpgkey node['mariadb']['repo_key']
+    if node['mariadb']['disable_gpgcheck']
       gpgcheck false
-      sensitive true
-      options({ 'module_hotfixes' => '1' })
     end
-  else
-    yum_repository repo_file_name do
-      description 'MariaDB Enterprise Server'
-      baseurl node['mariadb']['repo']
-      gpgkey node['mariadb']['repo_key']
-      sensitive true
-      options({ 'module_hotfixes' => '1' })
-    end
+    sensitive true
+    options({ 'module_hotfixes' => '1' })
   end
   if node['mariadb'].key?('unsupported_repo')
     yum_repository "#{repo_file_name}_unsupported" do

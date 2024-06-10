@@ -107,6 +107,7 @@ module MdbeCiParser
       { lambda: lambda do |release, _|
         release[:version] = release[:version].join('/')
         release[:repo] = generate_deb_path(release[:url], auth)
+        release[:disable_gpgcheck] = true
         release
       end }
     )
@@ -123,10 +124,75 @@ module MdbeCiParser
   def self.parse_cs_repos(url, yum_key, branches, latest_branches)
     releases = []
     branches.each do |branch_dir|
-      releases.concat(parse_cs_all_platforms(url, yum_key, branch_dir, '10.6-enterprise'))
+      releases.concat(parse_s3_dirs(url, yum_key, branch_dir, '10.6-enterprise'))
     end
     latest_branches.each do |branch_dir|
-      releases.concat(parse_cs_latest_all_platforms(url, yum_key, branch_dir, '10.6-enterprise'))
+      releases.concat(parse_s3_latest(url, yum_key, branch_dir, '10.6-enterprise'))
+    end
+    releases
+  end
+
+  def self.parse_s3_latest(repo_url, yum_key, branch, repo_product_ver)
+    releases = []
+    platforms = get_mdbe_platforms
+    platforms.keys.map do |platform|
+      releases << (platforms[platform].merge({
+                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/amd64/#{platform}/",
+                                                version: "columnstore/#{branch}/latest/#{repo_product_ver}",
+                                                product: 'mdbe_ci',
+                                                architecture: 'amd64',
+                                                repo_key: yum_key,
+                                                disable_gpgcheck: true
+                                            }))
+      releases << (platforms[platform].merge({
+                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/arm64/#{platform}/",
+                                                version: "columnstore/#{branch}/latest/#{repo_product_ver}",
+                                                product: 'mdbe_ci',
+                                                architecture: 'aarch64',
+                                                repo_key: yum_key,
+                                                disable_gpgcheck: true
+                                            }))
+    end
+    releases
+  end
+
+  def self.parse_s3_dirs(repo_url, yum_key, branch_dir, repo_product_ver)
+    links = []
+    platforms = get_mdbe_platforms
+    full_url = "#{repo_url}?prefix=#{branch_dir}/&delimiter=/"
+    doc = Nokogiri.XML(URI.open(full_url))
+    doc_array = doc.at_css("ListBucketResult").children
+    elements = doc_array.count
+    doc_array.each do |file|
+      file_link = file.to_s.match(/<Prefix>.*<\/Prefix>/).to_s[8..-10]
+      links.append(file_link)
+    end
+    
+    links.compact!
+    links.map! { |link| link.match(/(?<=(#{branch_dir})\/)[0-9]+/).to_s }
+    links = links.reject { |element| element.empty? }
+
+    releases = []
+
+    links.each do |link|
+      platforms.keys.map do |platform|
+        releases << (platforms[platform].merge({
+                                                  repo: "#{repo_url}#{branch_dir}/#{link}/#{repo_product_ver}/amd64/#{platform}/",
+                                                  version: "columnstore/#{branch_dir}/#{link}/#{repo_product_ver}",
+                                                  product: 'mdbe_ci',
+                                                  architecture: 'amd64',
+                                                  repo_key: yum_key,
+                                                  disable_gpgcheck: true
+                                              }))
+        releases << (platforms[platform].merge({
+                                                  repo: "#{repo_url}#{branch_dir}/#{link}/#{repo_product_ver}/arm64/#{platform}/",
+                                                  version: "columnstore/#{branch_dir}/#{link}/#{repo_product_ver}",
+                                                  product: 'mdbe_ci',
+                                                  architecture: 'aarch64',
+                                                  repo_key: yum_key,
+                                                  disable_gpgcheck: true
+                                              }))
+      end
     end
     releases
   end
