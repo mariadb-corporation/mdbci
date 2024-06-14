@@ -5,7 +5,7 @@ cp -r mdbci "$APP_DIR"
 
 echo "--> installing MDBCI dependencies"
 pushd "$APP_DIR/mdbci"
-gem install bundler --force --no-document
+gem install bundler --force --no-document --version 2.5.11
 bundle config --local without 'development'
 bundle install --jobs=4 --retry=3
 popd
