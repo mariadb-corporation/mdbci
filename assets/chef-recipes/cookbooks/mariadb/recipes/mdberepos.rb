@@ -84,12 +84,16 @@ when 'debian', 'ubuntu'
   end
   mariadb_repo = node['mariadb']['repo']
   pref_repo = mariadb_repo.split("https://").last.split("/").first
-  %w[mariadb-server mariadb-client mariadb-server-10.5 libmariadb3].each do |pkg|
-    apt_preference pkg do
-      pin "origin #{pref_repo}"
-      pin_priority '700'
-    end
+  apt_preference 'mariadb' do
+    glob '*'
+    pin "origin #{pref_repo}"
+    pin_priority '1000'
   end
+  apt_preference 'distro-packages' do
+    glob '*'
+    pin 'release o=Ubuntu,Debian'
+    pin_priority '100'
+  end 
   apt_update do
     action :update
   end
