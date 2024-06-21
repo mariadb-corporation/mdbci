@@ -15,30 +15,15 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
   if node['mariadb']['disable_gpgcheck']
-    apt_repository repo_file_name do
-      arch 'amd64,arm64'
-      distribution node[:platform_version]
-      repo_name 'MariaDB Enterprise Server'
-      trusted true
-      uri node['mariadb']['repo']
-      sensitive true
-    end
-    apt_repository repo_file_name do
-      arch 'amd64,arm64'
-      distribution node[:platform_version]
-      repo_name 'MariaDB Enterprise Server Source'
-      trusted true
-      deb_src true
-      uri node['mariadb']['repo']
+    execute 'Setup MDBE deb repo' do
+      command "echo \"deb [trusted=yes] #{node['mariadb']['repo']}\" > /etc/apt/sources.list.d/mariadb.list"
+      action :run
       sensitive true
     end
     if node['mariadb'].key?('unsupported_repo')
-      apt_repository "#{repo_file_name}_unsupported" do
-        arch 'amd64,arm64'
-        distribution node[:platform_version]
-        repo_name 'MariaDB Enterprise Server Unsupported'
-        trusted true
-        uri node['mariadb']['unsupported_repo']
+      execute 'Setup unsupported MDBE deb repo' do
+        command "echo \"deb [trusted=yes] #{node['mariadb']['unsupported_repo']}\" > /etc/apt/sources.list.d/mariadb-unsupported.list"
+        action :run
         sensitive true
       end
     end
