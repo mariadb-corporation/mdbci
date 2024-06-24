@@ -524,10 +524,6 @@ module RepositoryParserCore
   end
 
   PLATFORMS = {
-    'ubuntu24.04' => {
-      platform: 'ubuntu',
-      platform_version: 'noble'
-    },
     'ubuntu22.04' => {
       platform: 'ubuntu',
       platform_version: 'jammy'
