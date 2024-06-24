@@ -15,15 +15,13 @@ case node[:platform_family]
 when 'debian', 'ubuntu'
   # Split MaxScale repository information into parts
   if node['mariadb']['disable_gpgcheck']
-    execute 'Setup MDBE deb repo' do
-      command "echo \"deb [trusted=yes] #{node['mariadb']['repo']}\" > /etc/apt/sources.list.d/mariadb.list"
-      action :run
+    file '/etc/apt/sources.list.d/mariadb.list' do
+      content "deb [trusted=yes] #{node['mariadb']['repo']}"
       sensitive true
     end
     if node['mariadb'].key?('unsupported_repo')
-      execute 'Setup unsupported MDBE deb repo' do
-        command "echo \"deb [trusted=yes] #{node['mariadb']['unsupported_repo']}\" > /etc/apt/sources.list.d/mariadb-unsupported.list"
-        action :run
+      file '/etc/apt/sources.list.d/mariadb-unsupported.list' do
+        content "deb [trusted=yes] #{node['mariadb']['unsupported_repo']}"
         sensitive true
       end
     end
