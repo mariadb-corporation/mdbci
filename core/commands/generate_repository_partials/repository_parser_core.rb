@@ -108,7 +108,8 @@ module RepositoryParserCore
     '1604' => 'xenial',
     '1804' => 'bionic',
     '2004' => 'focal',
-    '2204' => 'jammy'
+    '2204' => 'jammy',
+    '2404' => 'noble'
   }.freeze
   def add_platform_and_version(platform)
     lambda do |release, links|
@@ -176,6 +177,7 @@ module RepositoryParserCore
   end
 
   DEB_PLATFORMS = {
+    'noble' => 'ubuntu',
     'jammy' => 'ubuntu',
     'bionic' => 'ubuntu',
     'buster' => 'debian',
