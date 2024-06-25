@@ -145,7 +145,7 @@ module MdbeCiParser
       ARCHITECTURE_DIRECTORIES.each do |architecture,directory|
         base_repo_link = "#{repo_url}#{branch}/#{version}/#{repo_product_ver}/#{directory}"
         repo = if DEB_PLATFORMS.include?(platform_info[:platform])
-          "#{base_repo_link} #{platform}"
+          "#{base_repo_link} #{platform}/"
         else
           "#{base_repo_link}/#{platform}"
         end
