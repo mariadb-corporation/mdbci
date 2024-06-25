@@ -137,7 +137,7 @@ module MdbeCiParser
     platforms = get_mdbe_platforms
     platforms.keys.map do |platform|
       releases << (platforms[platform].merge({
-                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/amd64/#{platform}/",
+                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/amd64/ #{platform}",
                                                 version: "columnstore/#{branch}/latest/#{repo_product_ver}",
                                                 product: 'mdbe_ci',
                                                 architecture: 'amd64',
@@ -145,7 +145,7 @@ module MdbeCiParser
                                                 disable_gpgcheck: true
                                             }))
       releases << (platforms[platform].merge({
-                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/arm64/#{platform}/",
+                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/arm64/ #{platform}",
                                                 version: "columnstore/#{branch}/latest/#{repo_product_ver}",
                                                 product: 'mdbe_ci',
                                                 architecture: 'aarch64',
@@ -167,7 +167,7 @@ module MdbeCiParser
       file_link = file.to_s.match(/<Prefix>.*<\/Prefix>/).to_s[8..-10]
       links.append(file_link)
     end
-    
+
     links.compact!
     links.map! { |link| link.match(/(?<=(#{branch_dir})\/)[0-9]+/).to_s }
     links = links.reject { |element| element.empty? }
