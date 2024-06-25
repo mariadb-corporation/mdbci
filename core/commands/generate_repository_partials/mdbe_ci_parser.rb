@@ -124,39 +124,47 @@ module MdbeCiParser
   def self.parse_cs_repos(url, yum_key, branches, latest_branches)
     releases = []
     branches.each do |branch_dir|
-      releases.concat(parse_s3_dirs(url, yum_key, branch_dir, '10.6-enterprise'))
+      releases.concat(parse_s3_dirs(url, branch_dir, '10.6-enterprise', yum_key))
     end
     latest_branches.each do |branch_dir|
-      releases.concat(parse_s3_latest(url, yum_key, branch_dir, '10.6-enterprise'))
+      releases.concat(generate_s3_repositories(url, branch_dir, 'latest', yum_key, '10.6-enterprise'))
     end
     releases
   end
 
-  def self.parse_s3_latest(repo_url, yum_key, branch, repo_product_ver)
+  ARCHITECTURE_DIRECTORIES = {
+    "amd64" => "amd64",
+    "aarch64" => "arm64",
+  }.freeze
+  DEB_PLATFORMS = ["debian", "ubuntu"].freeze
+
+  def self.generate_s3_repositories(repo_url, branch, version, repo_product_ver, yum_key)
     releases = []
     platforms = get_mdbe_platforms
-    platforms.keys.map do |platform|
-      releases << (platforms[platform].merge({
-                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/amd64/ #{platform}",
-                                                version: "columnstore/#{branch}/latest/#{repo_product_ver}",
-                                                product: 'mdbe_ci',
-                                                architecture: 'amd64',
-                                                repo_key: yum_key,
-                                                disable_gpgcheck: true
-                                            }))
-      releases << (platforms[platform].merge({
-                                                repo: "#{repo_url}#{branch}/latest/#{repo_product_ver}/arm64/ #{platform}",
-                                                version: "columnstore/#{branch}/latest/#{repo_product_ver}",
-                                                product: 'mdbe_ci',
-                                                architecture: 'aarch64',
-                                                repo_key: yum_key,
-                                                disable_gpgcheck: true
-                                            }))
+    platforms.each do |platform, platform_info|
+      ARCHITECTURE_DIRECTORIES.each do |architecture,directory|
+        base_repo_link = "#{repo_url}#{branch}/#{version}/#{repo_product_ver}/#{directory}"
+        repo = if DEB_PLATFORMS.include?(platform_info[:platform])
+          "#{base_repo_link} #{platform}"
+        else
+          "#{base_repo_link}/#{platform}"
+        end
+
+        releases.append(
+          platform_info.merge({
+            repo: repo,
+            version: "columnstore/#{branch}/#{version}/#{repo_product_ver}",
+            product: "mdbe_ci",
+            architecture: architecture,
+            repo_key: yum_key,
+            disable_gpgcheck: true
+        }))
+      end
     end
     releases
   end
 
-  def self.parse_s3_dirs(repo_url, yum_key, branch_dir, repo_product_ver)
+  def self.parse_s3_dirs(repo_url, branch_dir, repo_product_ver, yum_key)
     links = []
     platforms = get_mdbe_platforms
     full_url = "#{repo_url}?prefix=#{branch_dir}/&delimiter=/"
@@ -173,26 +181,10 @@ module MdbeCiParser
     links = links.reject { |element| element.empty? }
 
     releases = []
-
-    links.each do |link|
-      platforms.keys.map do |platform|
-        releases << (platforms[platform].merge({
-                                                  repo: "#{repo_url}#{branch_dir}/#{link}/#{repo_product_ver}/amd64/#{platform}/",
-                                                  version: "columnstore/#{branch_dir}/#{link}/#{repo_product_ver}",
-                                                  product: 'mdbe_ci',
-                                                  architecture: 'amd64',
-                                                  repo_key: yum_key,
-                                                  disable_gpgcheck: true
-                                              }))
-        releases << (platforms[platform].merge({
-                                                  repo: "#{repo_url}#{branch_dir}/#{link}/#{repo_product_ver}/arm64/#{platform}/",
-                                                  version: "columnstore/#{branch_dir}/#{link}/#{repo_product_ver}",
-                                                  product: 'mdbe_ci',
-                                                  architecture: 'aarch64',
-                                                  repo_key: yum_key,
-                                                  disable_gpgcheck: true
-                                              }))
-      end
+    links.each do |version|
+      releases.concat(
+        generate_s3_repositories(repo_url, branch_dir, version, repo_product_ver, yum_key)
+      )
     end
     releases
   end
