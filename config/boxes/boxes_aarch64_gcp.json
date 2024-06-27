@@ -32,6 +32,17 @@
     "default_memory_size": "4096",
     "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
   },
+  "aarch64_rocky_8_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "rocky-linux-cloud/rocky-linux-8-optimized-gcp-arm64",
+    "platform": "rocky",
+    "platform_version": "8",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
   "aarch64_ubuntu_focal_gcp": {
     "provider": "gcp",
     "architecture": "aarch64",
