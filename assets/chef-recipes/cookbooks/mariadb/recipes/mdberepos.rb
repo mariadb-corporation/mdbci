@@ -25,6 +25,17 @@ when 'debian', 'ubuntu'
         sensitive true
       end
     end
+    if node['mariadb']['repo'].include?('es-repo.mariadb.net')
+      remote_file "/tmp/#{repo_file_name}.public" do
+        source node['mariadb']['repo_key']
+      end
+      execute 'install key' do
+        command "apt-key add /tmp/#{repo_file_name}.public"
+      end
+      file "/tmp/#{repo_file_name}.public" do
+        action :delete
+      end
+    end
   else
     repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
     apt_repository repo_file_name do
@@ -54,15 +65,6 @@ when 'debian', 'ubuntu'
         key node['mariadb']['repo_key']
         sensitive true
       end
-    end
-    remote_file "/tmp/#{repo_file_name}.public" do
-      source node['mariadb']['repo_key']
-    end
-    execute 'install key' do
-      command "apt-key add /tmp/#{repo_file_name}.public"
-    end
-    file "/tmp/#{repo_file_name}.public" do
-      action :delete
     end
   end
   mariadb_repo = node['mariadb']['repo']
