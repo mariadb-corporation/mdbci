@@ -370,10 +370,8 @@ when 'debian'
   apt_update 'update apt cache' do
     action :update
   end
-  if node['mariadb']['disable_gpgcheck'] == false || node['mariadb']['disable_gpgcheck'].nil?
-    execute 'install dependencies mariadb-server' do
-      command 'apt-get -y build-dep -q mariadb-server'
-    end
+  execute 'install dependencies mariadb-server' do
+    command "apt-get -y build-dep -q mariadb-server -t #{node.attributes['lsb']['codename']}"
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -409,11 +407,9 @@ when 'ubuntu'
   apt_update 'update apt cache' do
     action :update
   end
-  if node['mariadb']['disable_gpgcheck'] == false || node['mariadb']['disable_gpgcheck'].nil?
     execute 'install dependencies mariadb-server' do
-      command 'apt-get -y build-dep -q mariadb-server'
+      command "apt-get -y build-dep -q mariadb-server -t #{node.attributes['lsb']['codename']}"
     end
-  end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
   when 7 # CentOS 7

@@ -19,7 +19,7 @@ end
 case node[:platform_family]
   when "debian", "ubuntu"
     execute "Install iptables-persistent" do
-      command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
+      command "DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=\"--force-confdef\" install iptables-persistent"
     end
   when 'rhel', 'centos', 'fedora', 'almalinux'
     if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
