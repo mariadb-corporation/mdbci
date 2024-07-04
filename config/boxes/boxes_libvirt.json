@@ -53,14 +53,6 @@
     "platform_version": "8",
     "disk_bus": "sata"
   },
-  "centos_7_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/centos7",
-    "platform": "centos",
-    "platform_version": "7",
-    "disk_bus": "sata"
-  },
   "suse_15_libvirt" : {
     "provider": "libvirt",
     "architecture": "amd64",
@@ -76,15 +68,6 @@
     "platform": "sles",
     "platform_version": "12",
     "configure_suse_connect": "true"
-  },
-  "rhel_7_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/rhel7",
-    "platform": "rhel",
-    "platform_version": "7",
-    "configure_subscription_manager": "true",
-    "disk_bus": "sata"
   },
   "rhel_8_libvirt": {
     "provider": "libvirt",
