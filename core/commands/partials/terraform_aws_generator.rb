@@ -14,6 +14,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 require 'date'
+require 'ostruct'
 require 'socket'
 require 'erb'
 require_relative '../../models/result'

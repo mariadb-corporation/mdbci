@@ -2,6 +2,7 @@
 
 require 'date'
 require 'erb'
+require 'ostruct'
 require 'socket'
 require_relative '../../models/result'
 require_relative '../../services/cloud_services'
