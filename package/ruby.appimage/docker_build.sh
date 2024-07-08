@@ -21,7 +21,7 @@ app=$1
 container_name=$app-appimage-build
 
 asked_ruby_version=$3
-ruby_version=${asked_ruby_version:-3.2.3}
+ruby_version=${asked_ruby_version:-3.3.3}
 docker_image=ruby-appimage:$ruby_version
 
 script_dir="${0%/*}"
