@@ -3,6 +3,7 @@
 require 'date'
 require 'fileutils'
 require 'json'
+require 'ostruct'
 require 'pathname'
 require 'securerandom'
 require 'socket'
