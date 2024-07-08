@@ -34,5 +34,5 @@ popd
 
 # Start the build using ruby.appimage
 pushd "$BUILD_DIR"
-"$CURRENT_DIR/../ruby.appimage/docker_build.sh" chef-solo "$BUILD_VERSION" 3.0.6
+"$CURRENT_DIR/../ruby.appimage/docker_build.sh" chef-solo "$BUILD_VERSION" 3.0.7
 popd
