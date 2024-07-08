@@ -41,7 +41,7 @@ class MachineConfigurator
   # @param extra_files [Array<Array<String>>] pairs of source and target paths.
   # @param logger [Out] logger to log information to
   # rubocop:disable Metrics/ParameterLists
-  def configure(machine, config_name, logger = @log, extra_files = [], chef_version = '18.4.2')
+  def configure(machine, config_name, logger = @log, extra_files = [], chef_version = '18.4.12')
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
     remote_dir = '/tmp/provision'
     install_chef_on_server(machine, chef_version, logger).and_then do
