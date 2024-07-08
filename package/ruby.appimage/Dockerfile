@@ -1,6 +1,7 @@
 # Beware: only meant for use to build ruby appimages
 
-FROM rockylinux:8 as ruby-appimage-builder
+# FROM rockylinux:8 as ruby-appimage-builder
+FROM rockylinux:9 as ruby-appimage-builder
 
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
@@ -16,9 +17,10 @@ ENV DOCKER_BUILD=1 \
   WORKSPACE=/build
 
 RUN dnf install -y 'dnf-command(config-manager)' && \
-    dnf config-manager --set-enabled powertools
+    dnf config-manager --set-enabled powertools || \
+    dnf config-manager --set-enabled crb
 
-RUN dnf install -y \
+RUN dnf install -y --allowerasing \
   bzip2 \
   ca-certificates \
   cmake \
