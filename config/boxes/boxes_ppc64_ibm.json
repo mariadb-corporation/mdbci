@@ -1,0 +1,12 @@
+{
+    "rhel_9_ibm": {
+      "provider": "ibm",
+      "architecture": "ppc64",
+      "image": "RHEL9-SP2",
+      "platform": "rhel",
+      "platform_version": "9",
+      "default_cpu_count": "1",
+      "default_memory_size": "2",
+      "default_machine_type": "s922"
+    }
+}
