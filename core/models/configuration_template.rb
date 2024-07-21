@@ -104,7 +104,7 @@ class ConfigurationTemplate
   TEMPLATE_TYPE_BY_PROVIDER = {
     dedicated: %w[dedicated],
     docker: %w[docker],
-    terraform: %w[aws digitalocean gcp],
+    terraform: %w[aws digitalocean gcp ibm],
     vagrant: %w[libvirt vbox]
   }.freeze
 end
