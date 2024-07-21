@@ -25,6 +25,7 @@ require_relative '../../services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_digitalocean_generator'
 require_relative 'terraform_gcp_generator'
+require_relative 'terraform_ibm_generator'
 require_relative '../../services/product_attributes'
 require_relative '../../services/product_and_subscription_registry'
 require_relative '../../services/ssh_user'
@@ -122,20 +123,6 @@ class TerraformConfigurationGenerator < BaseCommand
     if node[1].key?('box_parameters')
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
-    if box_params.key?('ami') && box_params['ami'].is_a?(Hash)
-      if node[1].key?('aws_region')
-        aws_region = node[1]['aws_region']
-        if box_params['ami'].key?(aws_region)
-          symbolic_box_params[:ami] = box_params['ami'][aws_region]
-        else
-          symbolic_box_params[:ami] = box_params['ami']['default']
-          @ui.info('Specified AWS region not found. Using default ami.')
-        end
-      else
-        symbolic_box_params[:ami] = box_params['ami']['default']
-        @ui.info('There is no region specified for this AWS machine. Using default ami.')
-      end
-    end
     symbolic_box_params.merge(
       {
           name: node[0].to_s,
@@ -194,6 +181,10 @@ class TerraformConfigurationGenerator < BaseCommand
       Result.ok(TerraformDigitaloceanGenerator.new(@configuration_id, @digitalocean_config, @ui,
                                                    @configuration_path, @ssh_keys,
                                                    @env.digitalocean_service))
+    when 'ibm'
+      Result.ok(TerraformIbmGenerator.new(@configuration_id, @ibm_config, @ui,
+                                          @configuration_path, @ssh_keys,
+                                          @env.ibm_service))
     else Result.error("Unknown provider #{@provider}")
     end
   end
@@ -274,6 +265,7 @@ class TerraformConfigurationGenerator < BaseCommand
     @aws_config = @env.tool_config['aws']
     @gcp_config = @env.tool_config['gcp']
     @digitalocean_config = @env.tool_config['digitalocean']
+    @ibm_config = @env.tool_config['ibm']
     @registry = ProductAndSubscriptionRegistry.new
     @ssh_users = {}
     generate_configuration_id
