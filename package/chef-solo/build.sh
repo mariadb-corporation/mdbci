@@ -32,7 +32,12 @@ do
 done
 popd
 
+result_file="$BUILD_DIR/result/chef-solo-$BUILD_VERSION-$(uname -m).tgz"
+
 # Start the build using ruby.appimage
 pushd "$BUILD_DIR"
-"$CURRENT_DIR/../ruby.appimage/docker_build.sh" chef-solo "$BUILD_VERSION" 3.0.7
+"$CURRENT_DIR/../ruby.appimage/docker_build.sh" chef-solo "$BUILD_VERSION" tgz 3.0.7
+cp result/chef-solo.tgz $result_file
 popd
+
+echo Chef archive is located at: $result_file
