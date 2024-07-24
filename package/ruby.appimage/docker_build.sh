@@ -8,11 +8,12 @@ if [ "$#" -lt 2 ]; then
     cat <<EOF
 Invalid number of parameters have been passed to the script.
 
-Usage: "$0" app version [ruby version]
+Usage: "$0" app version [build-type] [ruby-version]
 
 app - name of the application to package.
 verision - version to use during the packaging.
-ruby version - target ruby version to use during the bundle of the application
+build-type - type of the build to perform. Possible values: appimage or tgz.
+ruby-version - target ruby version to use during the bundle of the application
 EOF
     exit 1
 fi
@@ -20,8 +21,8 @@ fi
 app=$1
 container_name=$app-appimage-build
 
-asked_ruby_version=$3
-ruby_version=${asked_ruby_version:-3.3.3}
+asked_ruby_version=$4
+ruby_version=${asked_ruby_version:-3.3.4}
 docker_image=ruby-appimage:$ruby_version
 
 script_dir="${0%/*}"
@@ -54,6 +55,6 @@ docker container run \
        --volume "${app_dir}":/build/application \
        -w /build/application \
        --name "$container_name" \
-       $docker_image "$1" "$2"
+       $docker_image "$1" "$2" "$3"
 
 docker container rm -v "$container_name"

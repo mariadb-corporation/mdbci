@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
     cat <<EOF
 Invalid number of parameters have been passed to the script.
 
-Usage: "$0" app version
+Usage: "$0" app version [type]
 
-app - name of the application to package.
+app     - name of the application to package.
 version - version to use during the packaging.
+type    - appimage or relocatable tgz
 EOF
     exit 1
 fi
@@ -25,10 +26,16 @@ HEADER
 
 APP=$1
 VERSION=$2
+TYPE=$3
 
 # App arch, used by generate_appimage.
 if [ -z "$ARCH" ]; then
     export ARCH="$(arch)"
+fi
+
+# By default package into appimage
+if [ -z "$TYPE" ]; then
+  TYPE=appimage
 fi
 
 echo "--> creating AppDir directory"
@@ -108,16 +115,10 @@ sudo chown -R "$uid":"$gid" .
 cd ..
 
 ########################################################################
-# AppDir complete. Now package it as an AppImage.
+# AppDir complete.
 ########################################################################
 
-echo "--> generate AppImage"
-#   - Expects: $ARCH, $APP, $VERSION env vars
-#   - Expects: ./$APP.AppDir/ directory
-generate_type2_appimage
-
 echo "--> making results public"
-
 # Creating the directory for the AppImage to put
 result_dir="$ROOT_DIR/result"
 if [ ! -d "${result_dir}" ]; then
@@ -125,11 +126,37 @@ if [ ! -d "${result_dir}" ]; then
   sudo chown "${TARGET_USER}:${TARGET_GROUP}" "${result_dir}"
 fi
 
-for image in "$WORKSPACE/out/"*AppImage
-do
-  file_name=$(basename "$image")
-  sudo mv "$image" "${result_dir}"
-  sudo chown -R "${TARGET_USER}:${TARGET_GROUP}" "${result_dir}/$file_name"
-done
+if [ "$TYPE" = appimage ]; then
+  ########################################################################
+  # Now package it as an AppImage.
+  ########################################################################
+
+  echo "--> generate AppImage"
+  #   - Expects: $ARCH, $APP, $VERSION env vars
+  #   - Expects: ./$APP.AppDir/ directory
+  generate_type2_appimage
+
+  for image in "$WORKSPACE/out/"*AppImage
+  do
+    file_name=$(basename "$image")
+    sudo mv "$image" "${result_dir}"
+    sudo chown -R "${TARGET_USER}:${TARGET_GROUP}" "${result_dir}/$file_name"
+  done
+else
+  ########################################################################
+  # Now package it as into tar.gz archive
+  ########################################################################
+  set -x
+  echo "--> creating TGZ archive"
+  DISTRIB_DIRECTORY="$WORKSPACE/$APP"
+  mkdir -p "$DISTRIB_DIRECTORY"
+  cd "$APP_DIR"
+  cp -r * "$DISTRIB_DIRECTORY"/
+  cd "$WORKSPACE"
+  tar czf "$APP.tgz" $APP
+  sudo mv "$APP.tgz" "$result_dir"/
+fi
+echo "--> fixing permissions in result directory"
+sudo chown -R "${TARGET_USER}:${TARGET_GROUP}" "${result_dir}"
 
 echo '==> finished'
