@@ -5,6 +5,7 @@
 set -xe
 
 BUILD_VERSION=$1
+ROCKY_VERSION=${2:-8}
 
 if [ -z "$BUILD_VERSION" ]; then
   cat <<EOF
@@ -36,7 +37,7 @@ result_file="$BUILD_DIR/result/chef-solo-$BUILD_VERSION-$(uname -m).tgz"
 
 # Start the build using ruby.appimage
 pushd "$BUILD_DIR"
-"$CURRENT_DIR/../ruby.appimage/docker_build.sh" chef-solo "$BUILD_VERSION" tgz 3.0.7
+"$CURRENT_DIR/../ruby.appimage/docker_build.sh" chef-solo "$BUILD_VERSION" tgz 3.1.6 $ROCKY_VERSION
 cp result/chef-solo.tgz $result_file
 popd
 

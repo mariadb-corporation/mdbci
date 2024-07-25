@@ -1,7 +1,6 @@
 # Beware: only meant for use to build ruby appimages
-
-FROM rockylinux:8 as ruby-appimage-builder
-#FROM rockylinux:9 as ruby-appimage-builder
+ARG ROCKY_VERSION=8
+FROM rockylinux:${ROCKY_VERSION} as ruby-appimage-builder
 
 MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 
