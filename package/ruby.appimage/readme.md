@@ -47,4 +47,8 @@ In order to create the package you must go to the directory with the mentioned f
 
 The resulting AppImage will be in the result sub-directory of the current working directory.
 
-You may pass the third argument — the version of the ruby interpreter to use. If not directly specified the default version will be used.
+You may pass the third argument — the type of the build to produce. Either AppImage or TGZ.
+
+You may pass the fourth argument — the version of the ruby interpreter to use. If not directly specified the default version will be used.
+
+You may pass the fifth argument — the version of RockyLinux image to use during the build. Either 8 or 9.
