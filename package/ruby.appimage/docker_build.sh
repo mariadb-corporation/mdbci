@@ -8,12 +8,13 @@ if [ "$#" -lt 2 ]; then
     cat <<EOF
 Invalid number of parameters have been passed to the script.
 
-Usage: "$0" app version [build-type] [ruby-version]
+Usage: "$0" app version [build-type] [ruby-version] [rocky-linux-version]
 
 app - name of the application to package.
 verision - version to use during the packaging.
 build-type - type of the build to perform. Possible values: appimage or tgz.
 ruby-version - target ruby version to use during the bundle of the application
+rocky-linux-version - verison of the rocky linux to use during the build
 EOF
     exit 1
 fi
@@ -23,7 +24,8 @@ container_name=$app-appimage-build
 
 asked_ruby_version=$4
 ruby_version=${asked_ruby_version:-3.3.4}
-docker_image=ruby-appimage:$ruby_version
+rocky_linux_version=${5:-8}
+docker_image=ruby-appimage-${rocky_linux_version}:$ruby_version
 
 script_dir="${0%/*}"
 app_dir="$(pwd)"
@@ -35,9 +37,10 @@ if [ -z "${docker_image_id}" ]; then
     pushd $script_dir
 
     process_count=$(getconf _NPROCESSORS_ONLN)
-    docker image pull rockylinux:8
+    docker image pull rockylinux:${rocky_linux_version}
     export DOCKER_BUILDKIT=1
     docker image build \
+           --build-arg ROCKY_LINUX=${rocky_linux_version} \
            --build-arg BUILD_JOBS="$process_count" \
            --build-arg RUBY_VERSION=$ruby_version \
            -t $docker_image .
