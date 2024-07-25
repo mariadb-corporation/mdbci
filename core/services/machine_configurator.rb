@@ -41,7 +41,7 @@ class MachineConfigurator
   # @param extra_files [Array<Array<String>>] pairs of source and target paths.
   # @param logger [Out] logger to log information to
   # rubocop:disable Metrics/ParameterLists
-  def configure(machine, config_name, logger = @log, extra_files = [], chef_version = '18.4.12')
+  def configure(machine, config_name, logger = @log, extra_files = [], chef_version = '18.5.0')
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
     remote_dir = '/tmp/provision'
     install_chef_on_server(machine, chef_version, logger).and_then do
@@ -117,10 +117,35 @@ class MachineConfigurator
     architecture = determine_machine_architecture(machine, logger)
     return architecture if architecture.error?
 
-    result = install_appimage_chef(machine, chef_version, architecture.value, logger)
-    return result if result.success?
+    return install_tgz_chef(machine, chef_version, architecture.value, logger)
+  end
 
-    install_upstream_chef(machine, '14.13.11', logger)
+  def install_tgz_chef(machine, chef_version, architecture, logger)
+    download_command = prepare_tgz_download_command(machine, chef_version, architecture, logger)
+    CHEF_INSTALLATION_ATTEMPTS.times do
+      sudo_exec(machine, download_command, logger).and_then do
+        sudo_exec(machine, 'tar xf /tmp/chef-solo.tgz -C /tmp', logger)
+      end.and_then do
+        sudo_exec(machine, '/tmp/chef-solo/install.sh', logger)
+      end.and_then do
+        sudo_exec(machine, 'rm -rf /tmp/chef-solo /tmp/chef-solo.tgz', logger)
+      end
+      return Result.ok(:installed) if chef_installed?(machine, chef_version, logger)
+
+      sleep(rand(3))
+    end
+    Result.error('Unable to install appimage chef!')
+  end
+
+  # Determine the method to download Chef installation script: wget or curl
+  def prepare_tgz_download_command(machine, chef_version, architecture, logger)
+    appimage_url = "https://mdbe-ci-repo.mariadb.net/MDBCI/chef-solo-#{chef_version}-#{architecture}.tgz"
+    result = ssh_exec(machine, 'which wget', logger)
+    if result.success?
+      "wget -q #{appimage_url} --output-document /tmp/chef-solo.tgz"
+    else
+      "curl -sS -L #{appimage_url} --output /tmp/chef-solo.tgz"
+    end
   end
 
   def install_appimage_chef(machine, chef_version, architecture, logger)
