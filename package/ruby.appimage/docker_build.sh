@@ -40,7 +40,7 @@ if [ -z "${docker_image_id}" ]; then
     docker image pull rockylinux:${rocky_linux_version}
     export DOCKER_BUILDKIT=1
     docker image build \
-           --build-arg ROCKY_LINUX=${rocky_linux_version} \
+           --build-arg ROCKY_VERSION=${rocky_linux_version} \
            --build-arg BUILD_JOBS="$process_count" \
            --build-arg RUBY_VERSION=$ruby_version \
            -t $docker_image .
