@@ -26,3 +26,5 @@ group(:development) do
   gem 'rspec'
   gem 'rubocop'
 end
+
+gem "base64", "~> 0.2.0"
