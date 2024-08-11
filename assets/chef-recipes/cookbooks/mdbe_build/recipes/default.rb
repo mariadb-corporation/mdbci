@@ -403,6 +403,11 @@ when 'ubuntu'
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
+  when 24.04 # Ubuntu Noble
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages)
+    execute 'enable apt sources' do
+      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+    end
   end
   apt_update 'update apt cache' do
     action :update
