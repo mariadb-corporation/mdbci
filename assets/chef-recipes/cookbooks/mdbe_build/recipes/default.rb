@@ -371,7 +371,7 @@ when 'debian'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --yes build-dep --quiet mariadb-server"
+    command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -413,7 +413,7 @@ when 'ubuntu'
     action :update
   end
     execute 'install dependencies mariadb-server' do
-      command "apt-get --yes build-dep --quiet mariadb-server"
+      command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
     end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
