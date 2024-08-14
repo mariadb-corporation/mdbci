@@ -371,7 +371,7 @@ when 'debian'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    command "apt-get --yes build-dep --quiet mariadb-server"
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -403,12 +403,17 @@ when 'ubuntu'
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
+  when 24.04 # Ubuntu Noble
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages)
+    execute 'enable apt sources' do
+      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+    end
   end
   apt_update 'update apt cache' do
     action :update
   end
     execute 'install dependencies mariadb-server' do
-      command "apt-get --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+      command "apt-get --yes build-dep --quiet mariadb-server"
     end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
