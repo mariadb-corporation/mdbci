@@ -138,7 +138,6 @@ ubuntu_packages = %w[
   libjpeg-turbo8
   libpmem-dev
   dpatch
-  netcat
 ]
 
 ubuntu_bionic_packages = %w[
@@ -146,6 +145,7 @@ ubuntu_bionic_packages = %w[
   libasan2
   libjemalloc1
   python-dev
+  netcat
 ]
 
 ubuntu_focal_packages = %w[
@@ -166,6 +166,7 @@ ubuntu_focal_packages = %w[
   python2-dev
   python3-dev
   unixodbc
+  netcat
 ]
 
 ubuntu_jammy_packages = %w[
@@ -185,6 +186,26 @@ ubuntu_jammy_packages = %w[
  python2-dev
  python3-dev
  unixodbc
+ netcat
+]
+
+ubuntu_noble_packages = %w[
+  bison
+  chrpath
+  debhelper
+  default-jdk
+  dh-apparmor
+  gnutls-dev
+  libasan5
+  libcurl4-openssl-dev
+  libjemalloc2
+  libncurses-dev
+  libpcre3-dev
+  psmisc
+  python-dev-is-python3
+  python3-dev
+  unixodbc
+  netcat-openbsd
 ]
 
 centos_packages = %w[
@@ -404,17 +425,17 @@ when 'ubuntu'
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 24.04 # Ubuntu Noble
-    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages)
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_noble_packages) - ['dh-systemd', 'dpatch']
     execute 'enable apt sources' do
-      command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+      command "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
     end
   end
   apt_update 'update apt cache' do
     action :update
   end
-    execute 'install dependencies mariadb-server' do
-      command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
-    end
+  execute 'install dependencies mariadb-server' do
+    command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+  end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
   when 7 # CentOS 7
