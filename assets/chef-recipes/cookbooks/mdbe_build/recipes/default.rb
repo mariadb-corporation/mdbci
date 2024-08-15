@@ -364,6 +364,13 @@ sles_15_packages = %w[
   perl-Data-Dump
 ]
 
+deb_mariadb_dep = %w[
+  libkrb5support0=1.20.1-2+deb12u1
+  libkrb5-3=1.20.1-2+deb12u1
+  libk5crypto3=1.20.1-2+deb12u1
+  libgssapi-krb5-2=1.20.1-2+deb12u1
+]
+
 case node[:platform]
 when 'debian'
   case node[:platform_version].to_i
@@ -432,6 +439,13 @@ when 'ubuntu'
   end
   apt_update 'update apt cache' do
     action :update
+  end
+  if node.attributes['kernel']['machine'] == 'aarch64'
+    deb_mariadb_dep.each do |pkg|
+      execute 'install dependencies mariadb-server' do
+        command "apt-get --yes #{pkg} --target-release #{node.attributes['lsb']['codename']}"
+      end
+    end
   end
   execute 'install dependencies mariadb-server' do
     command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
