@@ -364,15 +364,13 @@ sles_15_packages = %w[
   perl-Data-Dump
 ]
 
-deb_mariadb_dep = %w[
-  libkrb5support0=1.20.1-2+deb12u1
-  libkrb5-3=1.20.1-2+deb12u1
-  libk5crypto3=1.20.1-2+deb12u1
-  libgssapi-krb5-2=1.20.1-2+deb12u1
-]
-
 case node[:platform]
 when 'debian'
+  apt_preference 'distro-packages' do
+    glob '*'
+    pin 'origin ""'
+    pin_priority '1001'
+  end
   case node[:platform_version].to_i
   when 9 # Debian Stretch
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_stretch_packages)
@@ -399,7 +397,7 @@ when 'debian'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    command "apt-get -f --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -439,13 +437,6 @@ when 'ubuntu'
   end
   apt_update 'update apt cache' do
     action :update
-  end
-  if node.attributes['kernel']['machine'] == 'aarch64'
-    deb_mariadb_dep.each do |pkg|
-      execute 'install dependencies mariadb-server' do
-        command "apt-get --yes #{pkg} --target-release #{node.attributes['lsb']['codename']}"
-      end
-    end
   end
   execute 'install dependencies mariadb-server' do
     command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
