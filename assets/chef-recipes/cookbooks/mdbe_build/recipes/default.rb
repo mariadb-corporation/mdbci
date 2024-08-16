@@ -366,11 +366,6 @@ sles_15_packages = %w[
 
 case node[:platform]
 when 'debian'
-  apt_preference 'distro-packages' do
-    glob '*'
-    pin 'origin ""'
-    pin_priority '1001'
-  end
   case node[:platform_version].to_i
   when 9 # Debian Stretch
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_stretch_packages)
@@ -385,8 +380,14 @@ when 'debian'
       command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
   when 11 # Debian Bullseye
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
   when 12 # Debian Bookworm
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     package 'ca-certificates-java' do
       action :install
       ignore_failure true
@@ -425,11 +426,17 @@ when 'ubuntu'
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 22.04 # Ubuntu Jammy
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages) - ['dh-systemd']
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 24.04 # Ubuntu Noble
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_noble_packages) - ['dh-systemd', 'dpatch']
     execute 'enable apt sources' do
       command "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
@@ -438,8 +445,9 @@ when 'ubuntu'
   apt_update 'update apt cache' do
     action :update
   end
+
   execute 'install dependencies mariadb-server' do
-    command "apt-get -f --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    command "apt-get -f --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
   end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
