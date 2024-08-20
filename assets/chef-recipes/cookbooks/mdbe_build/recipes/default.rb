@@ -189,6 +189,25 @@ ubuntu_jammy_packages = %w[
  netcat
 ]
 
+ubuntu_noble_packages = %w[
+  bison
+  chrpath
+  debhelper
+  default-jdk
+  dh-apparmor
+  gnutls-dev
+  libasan5
+  libcurl4-openssl-dev
+  libjemalloc2
+  libncurses-dev
+  libpcre3-dev
+  psmisc
+  python-dev-is-python3
+  python3-dev
+  unixodbc
+  netcat-openbsd
+]
+
 centos_packages = %w[
   bison
   boost-program-options
@@ -413,6 +432,14 @@ when 'ubuntu'
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages) - ['dh-systemd']
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
+    end
+  when 24.04 # Ubuntu Noble
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_noble_packages) - ['dh-systemd', 'dpatch']
+    execute 'enable apt sources' do
+      command "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
     end
   end
   apt_update 'update apt cache' do
