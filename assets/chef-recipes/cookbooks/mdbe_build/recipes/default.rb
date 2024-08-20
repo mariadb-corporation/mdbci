@@ -138,7 +138,6 @@ ubuntu_packages = %w[
   libjpeg-turbo8
   libpmem-dev
   dpatch
-  netcat
 ]
 
 ubuntu_bionic_packages = %w[
@@ -146,6 +145,7 @@ ubuntu_bionic_packages = %w[
   libasan2
   libjemalloc1
   python-dev
+  netcat
 ]
 
 ubuntu_focal_packages = %w[
@@ -166,6 +166,7 @@ ubuntu_focal_packages = %w[
   python2-dev
   python3-dev
   unixodbc
+  netcat
 ]
 
 ubuntu_jammy_packages = %w[
@@ -185,6 +186,7 @@ ubuntu_jammy_packages = %w[
  python2-dev
  python3-dev
  unixodbc
+ netcat
 ]
 
 centos_packages = %w[
@@ -359,8 +361,14 @@ when 'debian'
       command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
   when 11 # Debian Bullseye
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
   when 12 # Debian Bookworm
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     package 'ca-certificates-java' do
       action :install
       ignore_failure true
@@ -371,7 +379,7 @@ when 'debian'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    command "apt-get -f --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -399,6 +407,9 @@ when 'ubuntu'
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 22.04 # Ubuntu Jammy
+    package %w(krb5-multidev libkrb5-dev) do
+      action :install
+    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages) - ['dh-systemd']
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
@@ -407,9 +418,9 @@ when 'ubuntu'
   apt_update 'update apt cache' do
     action :update
   end
-    execute 'install dependencies mariadb-server' do
-      command "apt-get --yes build-dep --quiet mariadb-server --target-release #{node.attributes['lsb']['codename']}"
-    end
+  execute 'install dependencies mariadb-server' do
+    command "apt-get -f --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+  end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
   when 7 # CentOS 7
