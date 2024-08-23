@@ -5,7 +5,7 @@
 set -xe
 
 BUILD_VERSION=$1
-ROCKY_VERSION=${2:-8}
+ROCKY_VERSION=${2:-7}
 
 if [ -z "$BUILD_VERSION" ]; then
   cat <<EOF
