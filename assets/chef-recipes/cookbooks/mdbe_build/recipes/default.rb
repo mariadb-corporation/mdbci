@@ -133,11 +133,9 @@ debian_bookworm_packages = %w[
 ubuntu_packages = %w[
   autoconf
   automake
-  dh-systemd
   libjpeg8
   libjpeg-turbo8
   libpmem-dev
-  dpatch
 ]
 
 ubuntu_bionic_packages = %w[
@@ -146,6 +144,8 @@ ubuntu_bionic_packages = %w[
   libjemalloc1
   python-dev
   netcat
+  dpatch
+  dh-systemd
 ]
 
 ubuntu_focal_packages = %w[
@@ -167,6 +167,8 @@ ubuntu_focal_packages = %w[
   python3-dev
   unixodbc
   netcat
+  dpatch
+  dh-systemd
 ]
 
 ubuntu_jammy_packages = %w[
@@ -187,6 +189,7 @@ ubuntu_jammy_packages = %w[
  python3-dev
  unixodbc
  netcat
+ dpatch
 ]
 
 ubuntu_noble_packages = %w[
@@ -363,6 +366,7 @@ sles_15_packages = %w[
   ncurses-devel
   perl-Data-Dump
 ]
+debian_dep_build = %w(krb5-multidev libkrb5-dev)
 
 case node[:platform]
 when 'debian'
@@ -380,14 +384,8 @@ when 'debian'
       command "cat /etc/apt/sources.list | sed 's/^deb /deb-src /g' >> /etc/apt/sources.list"
     end
   when 11 # Debian Bullseye
-    package %w(krb5-multidev libkrb5-dev) do
-      action :install
-    end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bullseye_packages)
   when 12 # Debian Bookworm
-    package %w(krb5-multidev libkrb5-dev) do
-      action :install
-    end
     package 'ca-certificates-java' do
       action :install
       ignore_failure true
@@ -396,6 +394,11 @@ when 'debian'
   end
   apt_update 'update apt cache' do
     action :update
+  end
+  if node[:platform_version].to_f == 11 || node[:platform_version].to_f == 12 
+    package debian_dep_build do
+      action :install
+    end
   end
   execute 'install dependencies mariadb-server' do
     command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
@@ -426,24 +429,23 @@ when 'ubuntu'
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 22.04 # Ubuntu Jammy
-    package %w(krb5-multidev libkrb5-dev) do
-      action :install
-    end
-    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages) - ['dh-systemd']
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_jammy_packages)
     execute 'enable apt sources' do
       command "sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list"
     end
   when 24.04 # Ubuntu Noble
-    package %w(krb5-multidev libkrb5-dev) do
-      action :install
-    end
-    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_noble_packages) - ['dh-systemd', 'dpatch']
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_noble_packages)
     execute 'enable apt sources' do
       command "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
     end
   end
   apt_update 'update apt cache' do
     action :update
+  end
+  if node[:platform_version].to_f == 22.04 || node[:platform_version].to_f == 24.04 
+    package debian_dep_build do
+      action :install
+    end
   end
   execute 'install dependencies mariadb-server' do
     command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
