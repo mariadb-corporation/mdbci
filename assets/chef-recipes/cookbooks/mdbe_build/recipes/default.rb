@@ -395,7 +395,7 @@ when 'debian'
   apt_update 'update apt cache' do
     action :update
   end
-  if node[:platform_version].to_f == 11 || node[:platform_version].to_f == 12 
+  if node[:platform_version] == '11' || node[:platform_version] == '12'
     package debian_dep_build do
       action :install
     end
@@ -442,7 +442,7 @@ when 'ubuntu'
   apt_update 'update apt cache' do
     action :update
   end
-  if node[:platform_version].to_f == 22.04 || node[:platform_version].to_f == 24.04 
+  if node[:platform_version] == '22.04' || node[:platform_version] == '24.04'
     package debian_dep_build do
       action :install
     end
