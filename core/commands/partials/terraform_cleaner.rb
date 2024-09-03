@@ -4,6 +4,7 @@ require_relative '../../services/terraform_service'
 require_relative 'terraform_aws_generator'
 require_relative 'terraform_gcp_generator'
 require_relative 'terraform_digitalocean_generator'
+require_relative 'terraform_ibm_generator'
 
 # Class allows to clean up the machines that were created by Terraform
 class TerraformCleaner
@@ -11,11 +12,12 @@ class TerraformCleaner
   # you must wait for the destruction of all network-dependent resources
   GCP_WAITING_TIME = 100
 
-  def initialize(logger, aws_service, gcp_service, digitalocean_service)
+  def initialize(logger, aws_service, gcp_service, digitalocean_service, ibm_service)
     @ui = logger
     @aws_service = aws_service
     @gcp_service = gcp_service
     @digitalocean_service = digitalocean_service
+    @ibm_service = ibm_service
   end
 
   # Stop machines specified in the configuration or in a node
@@ -41,7 +43,11 @@ class TerraformCleaner
 
     @ui.info('Destroying the machines using terraform')
     result = TerraformService.resource_type(provider).and_then do |resource_type|
-      resources = TerraformService.nodes_to_resources(nodes, resource_type).values
+      if resource_type == "ibm_pi_instance"
+        resources = TerraformService.ibm_nodes_to_resources(nodes)
+      else
+        resources = TerraformService.nodes_to_resources(nodes, resource_type).values
+      end
       TerraformService.destroy(resources, @ui, path)
       cleanup_nodes(configuration_id, nodes, provider)
       unless TerraformService.has_running_resources_type?(resource_type, @ui, path)

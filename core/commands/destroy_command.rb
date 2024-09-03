@@ -178,7 +178,7 @@ Labels should be separated with commas, do not contain any whitespaces.
       docker_cleaner.destroy_stack(configuration)
       Result.ok('')
     elsif configuration.terraform_configuration?
-      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service)
+      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service, @env.ibm_service)
       result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
       return result unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
 
