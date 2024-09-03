@@ -127,7 +127,7 @@ module TerraformService
   # Includes instance and disk volume resources for each node.
   #
   # @param nodes [Array<String>] name of nodes
-  # @return [Hash] Hash in format { 'node1' => ["ibm_pi_instance.node1", "ibm_pi_key.node1_sshkey", "ibm_pi_volume.volume_node1"] }.
+  # @return [Hash] Hash in format { 'node1' => ["ibm_pi_instance.node1", "ibm_pi_volume.volume_node1"] }.
   def self.ibm_nodes_to_resources(nodes)
     nodes.map { |node| [node, ["ibm_pi_instance.#{node}", "ibm_pi_volume.volume_#{node}"]] }.to_h
   end
