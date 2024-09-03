@@ -106,6 +106,9 @@ module TerraformService
   end
 
   def self.make_targets(resources)
+    if resources.is_a?(Hash)
+      resources = resources.values.flatten(1)
+    end
     resources.map { |resource| "-target=#{resource}" }.join(' ')
   end
 
@@ -118,6 +121,15 @@ module TerraformService
   # @return [Hash] Hash in format { 'node_1' => 'aws_instance.node_1', 'node_2' => 'aws_instance.node_2' }.
   def self.nodes_to_resources(nodes, resource_type)
     nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
+  end
+
+  # Generate resource specs by node names for IBM Power Cloud instances.
+  # Includes instance and disk volume resources for each node.
+  #
+  # @param nodes [Array<String>] name of nodes
+  # @return [Hash] Hash in format { 'node1' => ["ibm_pi_instance.node1", "ibm_pi_key.node1_sshkey", "ibm_pi_volume.volume_node1"] }.
+  def self.ibm_nodes_to_resources(nodes)
+    nodes.map { |node| [node, ["ibm_pi_instance.#{node}", "ibm_pi_volume.volume_#{node}"]] }.to_h
   end
 
   # Select resource names from list by it type.
