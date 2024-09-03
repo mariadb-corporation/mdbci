@@ -53,8 +53,6 @@ class TerraformIbmGenerator
     file.puts(file_header)
     file.puts(provider_resource)
     file.puts(private_network_data)
-    # TODO: add correct ssh key resource 
-    # file.puts(ssh_data(instance_params))
     result = Result.ok('')
     node_params.each do |node|
       result = generate_instance_params(node).and_then do |instance_params|
@@ -83,7 +81,7 @@ class TerraformIbmGenerator
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
   def print_node_info(node_params)
-    @ui.info("IBM Cloud Platform definition for host: #{node_params[:host]}, "\
+    @ui.info("IBM Cloud definition for host: #{node_params[:host]}, "\
              "image:#{node_params[:image]}, machine_type:#{node_params[:machine_type]}")
   end
 
@@ -115,24 +113,6 @@ class TerraformIbmGenerator
     PROVIDER
   end
 
-  #TODO
-  # Generate fields for setting ssh in the metadata block of instance.
-  # @return [String] generated fields.
-  def ssh_data(instance_params)
-    <<-SSH_DATA
-    resource "ibm_pi_key" "<%= instance_name %>_sshkey" {
-      pi_key_name          = "<%= instance_name %>_key"
-      pi_ssh_key           = "#{@public_key_value}"
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-    }
-
-    data "ibm_pi_key" "data_source_<%= instance_name %>_sshkey" {
-      pi_key_name          = "<%= instance_name %>_key"
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-    }
-    SSH_DATA
-  end
-
   # Generate private network data source.
   def private_network_data
     <<-PRIVATE_NETWORK
@@ -148,8 +128,6 @@ class TerraformIbmGenerator
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(instance_params)
-    need_ssh_metadata = true
-    ssh_metadata = ssh_data(instance_params)
     template = ERB.new <<-INSTANCE_RESOURCES
     data "ibm_pi_image" "data_source_image_<%= name %>" {
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
