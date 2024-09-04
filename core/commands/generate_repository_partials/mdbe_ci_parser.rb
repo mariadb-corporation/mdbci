@@ -127,7 +127,7 @@ module MdbeCiParser
       releases.concat(parse_s3_dirs(url, branch_dir, '10.6-enterprise', yum_key))
     end
     latest_branches.each do |branch_dir|
-      releases.concat(generate_s3_repositories(url, branch_dir, 'latest', yum_key, '10.6-enterprise'))
+      releases.concat(generate_s3_repositories(url, branch_dir, 'latest', '10.6-enterprise', yum_key))
     end
     releases
   end
