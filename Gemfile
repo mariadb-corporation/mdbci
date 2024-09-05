@@ -28,3 +28,7 @@ group(:development) do
 end
 
 gem "base64", "~> 0.2.0"
+
+gem "ostruct", "~> 0.6.0"
+
+gem "logger", "~> 1.6"
