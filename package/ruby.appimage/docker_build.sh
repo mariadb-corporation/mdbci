@@ -24,12 +24,12 @@ container_name=$app-appimage-build
 
 asked_ruby_version=$4
 ruby_version=${asked_ruby_version:-3.3.4}
-linux_version=${5:-7}
+linux_version=${5:-8}
 if [[ $linux_version == "7" ]]; then
   base_image="centos:7"
   docker_file_name="Dockerfile-centos-7"
 else
-  base_image="rokylinux:${linux-version}"
+  base_image="rockylinux:${linux_version}"
   docker_file_name="Dockerfile"
 fi
 
