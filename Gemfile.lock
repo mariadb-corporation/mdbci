@@ -88,6 +88,7 @@ GEM
     jwt (2.3.0)
     kartograph (0.2.8)
     language_server-protocol (3.17.0.3)
+    logger (1.6.1)
     memoist (0.16.2)
     method_source (1.1.0)
     mini_mime (1.1.2)
@@ -99,6 +100,7 @@ GEM
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     os (1.1.4)
+    ostruct (0.6.0)
     parallel (1.25.1)
     parser (3.3.3.0)
       ast (~> 2.4.1)
@@ -203,8 +205,10 @@ DEPENDENCIES
   google-apis-compute_v1
   iniparse
   ipaddress
+  logger (~> 1.6)
   mutex_m
   nokogiri
+  ostruct (~> 0.6.0)
   pry
   pry-byebug
   pry-doc
