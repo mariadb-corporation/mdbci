@@ -7,7 +7,7 @@ MAINTAINER "Andrey Vasilyev <andrey.vasilyev@fruct.org>"
 ARG IMAGE_DATE=2021-07-23
 
 ARG BUILD_JOBS=1
-ARG RUBY_VERSION=3.3.4
+ARG RUBY_VERSION=3.1.6
 ARG RUBY_INSTALL_VERSION=0.9.3
 
 # Please update the ENTRYPOINT if changing the WORKSPACE variable
