@@ -23,7 +23,7 @@ app=$1
 container_name=$app-appimage-build
 
 asked_ruby_version=$4
-ruby_version=${asked_ruby_version:-3.3.4}
+ruby_version=${asked_ruby_version:-3.3.5}
 linux_version=${5:-8}
 if [[ $linux_version == "7" ]]; then
   base_image="centos:7"
