@@ -8,6 +8,10 @@ module VagrantService
     ShellCommands.run_command_in_dir(logger, "vagrant up --provider=#{provider} #{node}", path)
   end
 
+  def self.halt(provider, node, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant halt #{node}", path)
+  end
+
   def self.node_running?(node, logger, path = Dir.pwd)
     result = ShellCommands.run_command_in_dir(logger, "vagrant status #{node}", path, false)
     status_regex = /^#{node}\s+(.+)\s+(\(.+\))?\s$/

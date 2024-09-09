@@ -48,6 +48,13 @@ class VagrantConfigurator
   def bring_up_machine(provider, logger, node = '')
     logger.info("Bringing up #{(node.empty? ? 'configuration ' : 'node ')} #{@specification}")
     VagrantService.up(provider, node, logger, @config.path)
+    VagrantService.halt(provider, node, logger, @config.path)
+    ShellCommands.run_command_in_dir(
+        @ui,
+        "sudo qemu-img resize /var/lib/libvirt/images/#{@config.name}_#{node}.img 500G",
+        "/var/lib/libvirt/images/"
+      )
+    VagrantService.up(provider, node, logger, @config.path)
   end
 
   # Forcefully destroys given node
