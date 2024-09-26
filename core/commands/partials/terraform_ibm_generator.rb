@@ -52,7 +52,6 @@ class TerraformIbmGenerator
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
-    file.puts(private_network_data)
     result = Result.ok('')
     node_params.each do |node|
       result = generate_instance_params(node).and_then do |instance_params|
@@ -113,37 +112,31 @@ class TerraformIbmGenerator
     PROVIDER
   end
 
-  # Generate private network data source.
-  def private_network_data
-    <<-PRIVATE_NETWORK
-    data "ibm_pi_network" "private_network" {
-      pi_network_name = "private-network"
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-    }
-    PRIVATE_NETWORK
-  end
-
   # Generate instance resources.
   # @param instance_params [Hash] list of the instance parameters
   # @return [String] generated resources for instance.
   # rubocop:disable Metrics/MethodLength
   def instance_resources(instance_params)
     template = ERB.new <<-INSTANCE_RESOURCES
+    resource "ibm_pi_network" "public_network" {
+      pi_network_name      = "public_<%= instance_name %>"
+      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
+      pi_network_type      = "pub-vlan"
+    }
+
+    resource "ibm_pi_key" "ssh_key" {
+      pi_key_name          = "public_key_<%= instance_name %>"
+      pi_ssh_key           = "#{@public_key_value}"
+      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
+    }
+    data "ibm_pi_key" "data_source_ssh_key" {
+      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
+      pi_key_name          = "public_key_<%= instance_name %>"
+    }
+    
     data "ibm_pi_image" "data_source_image_<%= name %>" {
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
       pi_image_name = "<%= image %>"
-    }
-
-    resource "ibm_pi_volume" "volume_<%= name %>" {
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-      pi_volume_name = "volume_<%= instance_name %>"
-      pi_volume_type = "<%= volume_type %>"
-      pi_volume_size = "<%= volume_size %>"
-      pi_volume_shareable = true
-    }
-    data "ibm_pi_volume" "data_source_volume_<%= name %>" {
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-      pi_volume_name       = resource.ibm_pi_volume.volume_<%= name %>.pi_volume_name
     }
 
     resource "ibm_pi_instance" "<%= name %>" {
@@ -153,27 +146,19 @@ class TerraformIbmGenerator
       <% if cpu_count.nil? %> pi_processors = "<%= default_cpu_count %>" <% else %> pi_processors = "<%= cpu_count %>" <% end %>
       pi_proc_type = "shared"
       pi_storage_type = "tier3"
+      pi_key_pair_name = resource.ibm_pi_key.ssh_key.name
       pi_image_id = data.ibm_pi_image.data_source_image_<%= name %>.id
       pi_sys_type = "<%= machine_type %>"
       pi_network {
-        network_id = data.ibm_pi_network.private_network.id
+        network_id = resource.ibm_pi_network.public_network.network_id
       }
-      pi_volume_ids = [data.ibm_pi_volume.data_source_volume_<%= name %>.id]
-    }
-    data "ibm_pi_instance" "data_source_<%= name %>" {
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-      pi_instance_name = resource.ibm_pi_instance.<%= name %>.pi_instance_name
     }
       
     output "<%= name %>_network" {
       value = {
-        user = "<%= user %>"
-        private_ip = data.ibm_pi_instance.data_source_<%= name %>.networks.0.ip
-        <% if use_only_private_ip %>
-          public_ip = data.ibm_pi_instance.data_source_<%= name %>.networks.0.ip
-        <% else %>
-          public_ip = data.ibm_pi_instance.data_source_<%= name %>.networks.0.external_ip
-        <% end %>
+        user = "cloud-user"
+        private_ip = resource.ibm_pi_instance.<%= name %>.pi_network[0].ip_address
+        public_ip = resource.ibm_pi_instance.<%= name %>.pi_network[0].external_ip
         key_file = "<%= key_file %>"
         hostname = "<%= instance_name %>"
       }
@@ -222,7 +207,7 @@ class TerraformIbmGenerator
       user: user,
       key_file: private_key_file_path,
     )
-    Result.ok(node_params.merge(machine_type: "s922",
+    Result.ok(node_params.merge(machine_type: "s1022",
                                 volume_type: "tier3",
                                 volume_size: 1))
 
