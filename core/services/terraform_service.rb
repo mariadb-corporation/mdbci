@@ -129,7 +129,7 @@ module TerraformService
   # @param nodes [Array<String>] name of nodes
   # @return [Hash] Hash in format { 'node1' => ["ibm_pi_instance.node1", "ibm_pi_volume.volume_node1"] }.
   def self.ibm_nodes_to_resources(nodes)
-    nodes.map { |node| [node, ["ibm_pi_instance.#{node}", "ibm_pi_volume.volume_#{node}"]] }.to_h
+    nodes.map { |node| [node, ["ibm_pi_key.ssh_key_#{node}", "ibm_pi_network.public_#{node}", "ibm_pi_instance.#{node}"]] }.to_h
   end
 
   # Select resource names from list by it type.
