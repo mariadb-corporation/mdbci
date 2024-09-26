@@ -7,6 +7,6 @@
       "platform_version": "9",
       "default_cpu_count": "1",
       "default_memory_size": "2",
-      "default_machine_type": "s922"
+      "default_machine_type": "s1022"
     }
 }
