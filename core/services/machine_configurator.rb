@@ -181,7 +181,7 @@ class MachineConfigurator
   def determine_machine_architecture(machine, logger)
     ssh_exec(machine, 'uname -m', logger).and_then do |output|
       architecture = output.strip
-      if %w[x86_64 aarch64].include?(architecture)
+      if %w[x86_64 aarch64 ppc64le].include?(architecture)
         Result.ok(architecture)
       else
         Result.error("Unsupported server architecture: #{architecture}")
