@@ -118,20 +118,16 @@ class TerraformIbmGenerator
   # rubocop:disable Metrics/MethodLength
   def instance_resources(instance_params)
     template = ERB.new <<-INSTANCE_RESOURCES
-    resource "ibm_pi_network" "public_network" {
+    resource "ibm_pi_network" "public_network_<%= name %>" {
       pi_network_name      = "public_<%= instance_name %>"
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
       pi_network_type      = "pub-vlan"
     }
 
-    resource "ibm_pi_key" "ssh_key" {
+    resource "ibm_pi_key" "ssh_key_<%= name %>" {
       pi_key_name          = "public_key_<%= instance_name %>"
       pi_ssh_key           = "#{@public_key_value}"
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-    }
-    data "ibm_pi_key" "data_source_ssh_key" {
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
-      pi_key_name          = "public_key_<%= instance_name %>"
     }
     
     data "ibm_pi_image" "data_source_image_<%= name %>" {
@@ -146,11 +142,11 @@ class TerraformIbmGenerator
       <% if cpu_count.nil? %> pi_processors = "<%= default_cpu_count %>" <% else %> pi_processors = "<%= cpu_count %>" <% end %>
       pi_proc_type = "shared"
       pi_storage_type = "tier3"
-      pi_key_pair_name = resource.ibm_pi_key.ssh_key.name
+      pi_key_pair_name = resource.ibm_pi_key.ssh_key_<%= name %>.name
       pi_image_id = data.ibm_pi_image.data_source_image_<%= name %>.id
       pi_sys_type = "<%= machine_type %>"
       pi_network {
-        network_id = resource.ibm_pi_network.public_network.network_id
+        network_id = resource.ibm_pi_network.public_network_<%= name %>.network_id
       }
     }
       
