@@ -55,6 +55,9 @@ class TerraformIbmGenerator
     result = Result.ok('')
     node_params.each do |node|
       result = generate_instance_params(node).and_then do |instance_params|
+        if instance_params[:memory_size] != nil 
+          instance_params[:memory_size] = (instance_params[:memory_size].to_f / 1024).ceil
+        end
         print_node_info(instance_params)
         file.puts(instance_resources(instance_params))
         Result.ok('')
