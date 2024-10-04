@@ -39,15 +39,26 @@ Box description files are located in `~/.config/mdbci/boxes` folder or in `confi
     "box": "generic/debian11",
     "platform": "debian",
     "platform_version": "bullseye"
-  }
+  },
+
+  "rhel_9_ibm": {
+    "provider": "ibm",
+    "architecture": "ppc64le",
+    "image": "RHEL9-SP4",
+    "platform": "rhel",
+    "platform_version": "9",
+    "default_machine_type": "s1022",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+  },
 }
 ```
 Each box name usually consists of distribution name, version and box provider
 
 ## Common parameters
 
-* `provider` - box provider (aws, gcp, libvirt, digitalocean, docker)
-* `architecture` - processor arcitecture { amd64 | aarch64 }
+* `provider` - box provider (aws, gcp, ibm, libvirt, digitalocean, docker)
+* `architecture` - processor arcitecture { amd64 | aarch64 | ppc64le }
 * `platform` - distribution name
 * `platfrom_version` - distribution version
 * `skip_configuration` - boolean flag. If set, the machine will not be configured using Chef. None of products will be installed.
@@ -57,7 +68,7 @@ Each box name usually consists of distribution name, version and box provider
 * `default_memory_size` - node RAM size
 * `default_cpu_count` - node number of processors
 * `default_machine_type` - node machine type
-* `supported_instance_types` - list of machine types that can de run with this image
+* `supported_instance_types` - list of machine types that can be run with this image
 
 ## Provider-specific parameters:
 
@@ -66,6 +77,8 @@ Each box name usually consists of distribution name, version and box provider
   * `vpc` - boolean flag, indicates whether the machine will be lauched in an [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
 - GCP:
   * `image` - image or image family name
+- IBM Cloud:
+  * `image` - image name
 - Libvirt:
   * `box` - Vagrant box name
 

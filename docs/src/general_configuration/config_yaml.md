@@ -47,6 +47,11 @@ gcp:
   tags:
   - allow-all-traffic
   use_only_private_ip: false
+ibm:
+  api_key: # IBM Cloud API key
+  workspace_id: # IBM Cloud workspace ID 
+  region: us-south
+  zone: dal10
 digitalocean:
   region: FRA1
   token: # token
