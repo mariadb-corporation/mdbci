@@ -31,7 +31,7 @@ sudo addgroup fuse
 sudo usermod -a -G fuse $(whoami)
 ```
 
-Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#troubleshooting) section for additional help.
+Check [Troubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#troubleshooting) section for additional help.
 
 ## Install MDBCI and configure MDBCI
 

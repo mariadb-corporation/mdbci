@@ -10,6 +10,7 @@ MDBCI uses the [Terraform](https://www.terraform.io/) to create cloud virtual ma
 
 * [Amazon EC2](https://aws.amazon.com) virtual machines,
 * [Google Cloud Platform](https://cloud.google.com) virtual machines,
+* [IBM Cloud](https://www.ibm.com/cloud) POWER-based virtual machines,
 * [Digital Ocean](https://www.digitalocean.com/) virtual machines.
 
 MDBCI also supports:
@@ -20,10 +21,10 @@ MDBCI also supports:
 
 MDBCI currently provides support for the following distributions:
 
-* CentOS 7, 8;
-* Debian Buster, Bullseye;
-* RHEL 7, 8, 9;
+* CentOS 8, 9;
+* Debian 10 (Buster), 11 (Bullseye), 12 (Bookworm);
+* RHEL 8, 9;
 * Rocky Linux 8, 9;
 * SLES 12, 15;
-* Ubuntu 18.04, 20.04, 22.04;
+* Ubuntu 18.04 (Bionic Beaver), 20.04 (Focal Fossa), 22.04 (Jammy Jellyfish), 24.04 (Noble Numbat);
 * Windows Server 2019 via Google Cloud Platform. [Read more](using_windows_machines.md).
