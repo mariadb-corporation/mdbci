@@ -5,7 +5,6 @@ MDBCI supports using disks by multiple VM instances.
 To add a shared disk to the configuration template, add node with `type` attribute and `disk` value and specify its size and provider using `size` and `provider` attributes respectively. For each node add source disk `id` and specify disk properties such as:
 
 - `dev_name`: letter that will be used in the block device name. For example, `"dev_name": "b"` means that given GCP/AWS shared disk will be available on VM as `/dev/sdb`.
-- `mountpoint`: location on the VM you will access the shared disk from.
 
 Template configuration example:
 ```json
@@ -16,12 +15,10 @@ Template configuration example:
         "disks": [
            {
               "id": "extra-disk",
-              "mountpoint": "/some/path",
               "dev_name": "b"
            },
            {
             "id": "super-extra-disk",
-            "mountpoint": "/some/another/path",
             "dev_name": "c"
            }
         ]

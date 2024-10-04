@@ -161,3 +161,4 @@ See also:
 * [Machine template](machine_template.md)
 * [Connect to machines](connect_to_vms.md)
 * [MDBCI commands overview](../commands/commands_summary.md)
+* [Shared disks for libvirt machines](using_shared_disks.md)
