@@ -92,18 +92,7 @@ when "windows"
     installer_type :msi
     action :install
   end
-when "suse", "opensuse", nil # Enabling SLES 15 support
-  execute "Install MaxScale" do
-    command "zypper install -f -y maxscale"
-  end
 else
-  package 'maxscale' do
-    action :upgrade
-  end
-end
-
-# Install packages for Enterprise releases
-if node['maxscale']['repo_file_name'].include?('enterprise')
   package 'maxscale-enterprise' do
     action :install
   end
