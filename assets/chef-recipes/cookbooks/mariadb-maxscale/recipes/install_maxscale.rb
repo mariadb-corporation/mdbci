@@ -85,27 +85,21 @@ when "suse", "opensuse", nil # nil stands for SLES 15
 end
 
 # Install packages
-case node[:platform_family]
-when "windows"
+if node[:platform_family] == "windows"
   windows_package "maxscale" do
     source "#{Chef::Config[:file_cache_path]}/maxscale.msi"
     installer_type :msi
     action :install
   end
-when "suse", "opensuse", nil # Enabling SLES 15 support
-  execute "Install MaxScale" do
-    command "zypper install -f -y maxscale"
-  end
 else
-  package 'maxscale' do
-    action :upgrade
-  end
-end
-
-# Install packages for Enterprise releases
-if node['maxscale']['repo_file_name'].include?('enterprise')
-  package 'maxscale-enterprise' do
-    action :install
+  if node['maxscale']['repo_file_name'].include?('enterprise')
+    package 'maxscale-enterprise' do
+      action :install
+    end
+  else
+    package 'maxscale' do
+      action :install
+    end
   end
 end
 
