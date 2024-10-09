@@ -49,7 +49,7 @@ module MdbeCiParser
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
-      append_url(%w[x86_64 aarch64], :architecture),
+      append_url(%w[x86_64 aarch64 ppc64le], :architecture),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)
         release
@@ -135,6 +135,7 @@ module MdbeCiParser
   ARCHITECTURE_DIRECTORIES = {
     "amd64" => "amd64",
     "aarch64" => "arm64",
+    "ppc64le" => "ppc64le"
   }.freeze
   DEB_PLATFORMS = ["debian", "ubuntu"].freeze
 
