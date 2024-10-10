@@ -104,6 +104,9 @@ end
         <% if ssh_pty %>
           box.ssh.pty = <%= ssh_pty %>
         <% end %>
+        <% if bridge_name %>
+          box.vm.network :public_network, :dev => '<%= bridge_name %>', :type => 'bridge'
+        <% end %>
         <% if ipv6 %>
           box.vm.network :public_network, :dev => 'virbr0', :mode => 'bridge', :type => 'bridge'
         <% end %>
@@ -228,7 +231,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       name: node[0].to_s,
       host: node[1]['hostname'].to_s,
       vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
-      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s
+      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
+      bridge_name: node[1]['bridge_name'].nil? ? nil : node[1]['bridge_name'].to_s
     }.merge(symbolic_box_params)
   end
 
