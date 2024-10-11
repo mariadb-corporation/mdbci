@@ -151,8 +151,9 @@ class TerraformIbmGenerator
       pi_network {
         network_id = resource.ibm_pi_network.public_network_<%= name %>.network_id
       }
+      depends_on = [ibm_pi_network.public_network_<%= name %>, ibm_pi_key.ssh_key_<%= name %>]
     }
-      
+    
     output "<%= name %>_network" {
       value = {
         user = "cloud-user"
