@@ -43,11 +43,7 @@ class TerraformCleaner
 
     @ui.info('Destroying the machines using terraform')
     result = TerraformService.resource_type(provider).and_then do |resource_type|
-      if resource_type == "ibm_pi_instance"
-        resources = TerraformService.ibm_nodes_to_resources(nodes)
-      else
-        resources = TerraformService.nodes_to_resources(nodes, resource_type).values
-      end
+      resources = TerraformService.nodes_to_resources(nodes, resource_type).values
       TerraformService.destroy(resources, @ui, path)
       cleanup_nodes(configuration_id, nodes, provider)
       unless TerraformService.has_running_resources_type?(resource_type, @ui, path)
