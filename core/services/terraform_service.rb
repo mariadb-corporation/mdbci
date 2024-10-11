@@ -123,15 +123,6 @@ module TerraformService
     nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
   end
 
-  # Generate resource specs by node names for IBM Power Cloud instances.
-  # Includes instance and disk volume resources for each node.
-  #
-  # @param nodes [Array<String>] name of nodes
-  # @return [Hash] Hash in format { 'node1' => ["ibm_pi_instance.node1", "ibm_pi_volume.volume_node1"] }.
-  def self.ibm_nodes_to_resources(nodes)
-    nodes.map { |node| [node, ["ibm_pi_key.ssh_key_#{node}", "ibm_pi_network.public_#{node}", "ibm_pi_instance.#{node}"]] }.to_h
-  end
-
   # Select resource names from list by it type.
   # For example, for list ['aws_instance.node1', 'aws_instance.node2', 'aws_keypair.keypair_name']
   # and resource_type is 'aws_instance', result: ['node1', 'node2']
