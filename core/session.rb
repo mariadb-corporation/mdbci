@@ -32,6 +32,7 @@ require_relative 'services/repo_manager'
 require_relative 'services/aws_service'
 require_relative 'services/digitalocean_service'
 require_relative 'services/gcp_service'
+require_relative 'services/ibm_service'
 require_relative 'services/shell_commands'
 require_relative 'services/box_definitions'
 require_relative 'commands/remove_product_command'
@@ -78,6 +79,7 @@ class Session
   attr_reader :aws_service
   attr_reader :digitalocean_service
   attr_reader :gcp_service
+  attr_reader :ibm_service
   attr_reader :tool_config
   attr_reader :rhel_config
   attr_reader :suse_config
@@ -148,6 +150,7 @@ EOF
     @aws_service = AwsService.new(@tool_config['aws'], $out)
     @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
     @gcp_service = GcpService.new(@tool_config['gcp'], $out)
+    @ibm_service = IbmService.new(@tool_config['ibm'], $out)
     @rhel_config = @tool_config['rhel']
     @suse_config = @tool_config['suse']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)

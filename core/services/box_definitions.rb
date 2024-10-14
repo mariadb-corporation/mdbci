@@ -109,6 +109,7 @@ class BoxDefinitions
   DIGITALOCEAN_KEYS = %w[image user default_machine_type default_cpu_count default_memory_size].freeze
   DOCKER_KEYS = %w[box].freeze
   GCP_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
+  IBM_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
   LIBVIRT_KEYS = %w[box].freeze
 
   # @param box_definition [Hash] check that provided box description contains required keys

@@ -3,7 +3,8 @@
 MDBCI uses virtual machines from cloud providers such as
 * [AWS](https://aws.amazon.com/ru/ec2/),
 * [Google Cloud Platform](https://cloud.google.com/),
-* [DigitalOcean](https://www.digitalocean.com/).
+* [DigitalOcean](https://www.digitalocean.com/),
+* [IBM Cloud](https://www.ibm.com/cloud).
 
 Detailed topics
 * [Finding Amazon virtual machine images](finding_aws_virtual_machines.md)

@@ -6,48 +6,68 @@ Box description files are located in `~/.config/mdbci/boxes` folder or in `confi
 ## File format:
 
 ```json
-{
-  "debian_bullseye_gcp": {
-    "provider": "gcp",
-    "architecture": "amd64",
-    "image": "debian-cloud/debian-11",
-    "platform": "debian",
-    "platform_version": "bullseye",
-    "default_machine_type": "g1-small",
-    "default_cpu_count": "1",
-    "default_memory_size": "1024",
-    "supported_instance_types": ["a2-highgpu-1g", "a2-highgpu-2g"]
-  },
-
-  "debian_bullseye_aws" : {
-    "provider": "aws",
-    "architecture": "amd64",
-    "ami": "ami-05b99bc50bd882a41",
-    "user": "admin",
-    "default_machine_type": "t3.medium",
-    "default_cpu_count": "2",
-    "default_memory_size": "4096",
-    "platform": "debian",
-    "platform_version": "bullseye",
-    "vpc": "true",
-    "supported_instance_types": ["t2.nano","t2.micro"]
-  },
-
-  "debian_bullseye_libvirt": {
-    "provider": "libvirt",
-    "architecture": "amd64",
-    "box": "generic/debian11",
-    "platform": "debian",
-    "platform_version": "bullseye"
+  {
+    "debian_bullseye_gcp": {
+      "provider": "gcp",
+      "architecture": "amd64",
+      "image": "debian-cloud/debian-11",
+      "platform": "debian",
+      "platform_version": "bullseye",
+      "default_machine_type": "g1-small",
+      "default_cpu_count": "1",
+      "default_memory_size": "1024",
+      "supported_instance_types": ["a2-highgpu-1g", "a2-highgpu-2g"]
+    }
   }
-}
+```
+```json
+  {
+    "debian_bullseye_aws" : {
+      "provider": "aws",
+      "architecture": "amd64",
+      "ami": "ami-05b99bc50bd882a41",
+      "user": "admin",
+      "default_machine_type": "t3.medium",
+      "default_cpu_count": "2",
+      "default_memory_size": "4096",
+      "platform": "debian",
+      "platform_version": "bullseye",
+      "vpc": "true",
+      "supported_instance_types": ["t2.nano","t2.micro"]
+    }
+  }
+```
+```json
+  {
+    "debian_bullseye_libvirt": {
+      "provider": "libvirt",
+      "architecture": "amd64",
+      "box": "generic/debian11",
+      "platform": "debian",
+      "platform_version": "bullseye"
+    }
+  }
+```
+```json
+  {
+    "rhel_9_ibm": {
+      "provider": "ibm",
+      "architecture": "ppc64le",
+      "image": "RHEL9-SP4",
+      "platform": "rhel",
+      "platform_version": "9",
+      "default_machine_type": "s1022",
+      "default_cpu_count": "1",
+      "default_memory_size": "4096",
+    }
+  }
 ```
 Each box name usually consists of distribution name, version and box provider
 
 ## Common parameters
 
-* `provider` - box provider (aws, gcp, libvirt, digitalocean, docker)
-* `architecture` - processor arcitecture { amd64 | aarch64 }
+* `provider` - box provider (aws, gcp, ibm, libvirt, digitalocean, docker)
+* `architecture` - processor arcitecture { amd64 | aarch64 | ppc64le }
 * `platform` - distribution name
 * `platfrom_version` - distribution version
 * `skip_configuration` - boolean flag. If set, the machine will not be configured using Chef. None of products will be installed.
@@ -57,7 +77,7 @@ Each box name usually consists of distribution name, version and box provider
 * `default_memory_size` - node RAM size
 * `default_cpu_count` - node number of processors
 * `default_machine_type` - node machine type
-* `supported_instance_types` - list of machine types that can de run with this image
+* `supported_instance_types` - list of machine types that can be run with this image
 
 ## Provider-specific parameters:
 
@@ -66,6 +86,8 @@ Each box name usually consists of distribution name, version and box provider
   * `vpc` - boolean flag, indicates whether the machine will be lauched in an [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
 - GCP:
   * `image` - image or image family name
+- IBM Cloud:
+  * `image` - image name
 - Libvirt:
   * `box` - Vagrant box name
 

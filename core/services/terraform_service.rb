@@ -25,6 +25,7 @@ module TerraformService
     when 'aws' then Result.ok('aws_instance')
     when 'gcp' then Result.ok('google_compute_instance')
     when 'digitalocean' then Result.ok('digitalocean_droplet')
+    when 'ibm' then Result.ok('ibm_pi_instance')
     else Result.error('Unknown Terraform service provider')
     end
   end
@@ -105,6 +106,9 @@ module TerraformService
   end
 
   def self.make_targets(resources)
+    if resources.is_a?(Hash)
+      resources = resources.values.flatten(1)
+    end
     resources.map { |resource| "-target=#{resource}" }.join(' ')
   end
 
