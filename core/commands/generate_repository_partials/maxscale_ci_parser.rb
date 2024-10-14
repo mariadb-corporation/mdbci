@@ -63,7 +63,7 @@ module MaxscaleCiParser
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = split_url.join('/')
-    "#{url}/pool/main/m/maxscale/"
+    "#{url}/pool/main/m/maxscale-enterprise/"
   end
 
   def self.parse_maxscale_ci_rpm_repository_old(config, product_version, auth, maxscale_product, log, logger)
