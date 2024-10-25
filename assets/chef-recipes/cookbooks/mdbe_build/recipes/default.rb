@@ -407,9 +407,11 @@ when 'debian'
     apt_update 'update apt cache' do
       action :update
     end
-    execute 'install dependencies mariadb-server' do
-      command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
-    end
+  end
+  execute 'install dependencies mariadb-server' do
+    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server"
+  end
+  if File.file?('/etc/apt/sources.list.d/mariadb.list.save')
     execute 'enable MariaDB repo' do
       command "sudo mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list"
     end
@@ -468,9 +470,11 @@ when 'ubuntu'
     apt_update 'update apt cache' do
       action :update
     end
-    execute 'install dependencies mariadb-server' do
-      command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
-    end
+  end
+  execute 'install dependencies mariadb-server' do
+    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server"
+  end
+  if File.file?('/etc/apt/sources.list.d/mariadb.list.save')
     execute 'enable MariaDB repo' do
       command "sudo mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list"
     end
