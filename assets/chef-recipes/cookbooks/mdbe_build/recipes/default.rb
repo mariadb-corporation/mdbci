@@ -400,20 +400,22 @@ when 'debian'
       action :install
     end
   end
-  execute 'disable MariaDB repo' do
-    command "sudo mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save"
-  end
-  apt_update 'update apt cache' do
-    action :update
-  end
-  execute 'install dependencies mariadb-server' do
-    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
-  end
-  execute 'enable MariaDB repo' do
-    command "sudo mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list"
-  end
-  apt_update 'update apt cache' do
-    action :update
+  if File.file?('/etc/apt/sources.list.d/mariadb.list')
+    execute 'disable MariaDB repo' do
+      command "sudo mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save"
+    end
+    apt_update 'update apt cache' do
+      action :update
+    end
+    execute 'install dependencies mariadb-server' do
+      command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    end
+    execute 'enable MariaDB repo' do
+      command "sudo mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list"
+    end
+    apt_update 'update apt cache' do
+      action :update
+    end
   end
 when 'ubuntu'
   case node[:platform_version].to_f
@@ -459,20 +461,22 @@ when 'ubuntu'
       action :install
     end
   end
-  execute 'disable MariaDB repo' do
-    command "sudo mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save"
-  end
-  apt_update 'update apt cache' do
-    action :update
-  end
-  execute 'install dependencies mariadb-server' do
-    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
-  end
-  execute 'enable MariaDB repo' do
-    command "sudo mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list"
-  end
-  apt_update 'update apt cache' do
-    action :update
+  if File.file?('/etc/apt/sources.list.d/mariadb.list')
+    execute 'disable MariaDB repo' do
+      command "sudo mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save"
+    end
+    apt_update 'update apt cache' do
+      action :update
+    end
+    execute 'install dependencies mariadb-server' do
+      command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    end
+    execute 'enable MariaDB repo' do
+      command "sudo mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list"
+    end
+    apt_update 'update apt cache' do
+      action :update
+    end
   end
 when 'centos', 'redhat', 'rocky', 'almalinux'
   case node[:platform_version].to_i
