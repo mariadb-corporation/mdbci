@@ -75,13 +75,19 @@ module MdbeParser
     if platform == 'ubuntu'
       release_info[:components].append('main/debug')
     end
+    case product_name
+    when 'mdbe'
+      unsupported_repo_name = 'mariadb-enterprise-unsupported'
+    when 'mdbe_staging'
+      unsupported_repo_name = 'mariadb-enterprise-unsupported-staging'
+    end
     case platform
     when 'ubuntu', 'debian'
-      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/mariadb-enterprise-unsupported/#{version}/deb #{platform_version} main"
+      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/#{unsupported_repo_name}/#{version}/deb #{platform_version} main"
     when 'centos', 'rhel'
-      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/mariadb-enterprise-unsupported/#{version}/rpm/rhel/#{platform_version}/$basearch"
+      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/#{unsupported_repo_name}/#{version}/rpm/rhel/#{platform_version}/$basearch"
     when 'sles', 'suse', 'opensuse'
-      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/mariadb-enterprise-unsupported/#{version}/rpm/sles/#{platform_version}/$basearch"
+      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/#{unsupported_repo_name}/#{version}/rpm/sles/#{platform_version}/$basearch"
     end
     release_info
   end
