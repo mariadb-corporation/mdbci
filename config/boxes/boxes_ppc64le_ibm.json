@@ -13,7 +13,7 @@
       "provider": "ibm",
       "architecture": "ppc64le",
       "image": "CentOS-Stream-9",
-      "platform": "rhel",
+      "platform": "centos",
       "platform_version": "9",
       "default_cpu_count": "1",
       "default_memory_size": "2",
