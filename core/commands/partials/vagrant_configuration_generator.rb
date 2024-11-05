@@ -37,21 +37,12 @@ class VagrantConfigurationGenerator < BaseCommand
     HEADER
   end
 
-  def provider_config
-    <<-CONFIG
-### Default (VBox, Libvirt) Provider config ###
-#######################################################
-# Network autoconfiguration
-config.vm.network "private_network", type: "dhcp"
-config.vm.boot_timeout = 60
-    CONFIG
-  end
-
   def vagrant_config_header
     <<-HEADER
 ### Vagrant configuration block  ###
 ####################################
 Vagrant.configure(2) do |config|
+  config.vm.boot_timeout = 60
     HEADER
   end
 
@@ -104,8 +95,12 @@ end
         <% if ssh_pty %>
           box.ssh.pty = <%= ssh_pty %>
         <% end %>
-        <% if bridge_name %>
-          box.vm.network :public_network, :dev => '<%= bridge_name %>', :type => 'bridge'
+        <% unless private_ip.nil? or default_route.nil? %>
+          box.vm.network "private_network",
+            ip: "<%= private_ip %>",
+            libvirt__forward_mode: "route"
+          box.vm.provision "shell",
+            inline: "ip route del default && ip route add default via <%= default_route %>"
         <% end %>
         <% if ipv6 %>
           box.vm.network :public_network, :dev => 'virbr0', :mode => 'bridge', :type => 'bridge'
@@ -232,7 +227,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       host: node[1]['hostname'].to_s,
       vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
       vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
-      bridge_name: node[1]['bridge_name'].nil? ? nil : node[1]['bridge_name'].to_s
+      private_ip: node[1]['private_ip'].nil? ? nil : node[1]['private_ip'].to_s,
+      default_route: node[1]['default_route'].nil? ? nil : node[1]['default_route'].to_s
     }.merge(symbolic_box_params)
   end
 
@@ -259,7 +255,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     vagrant = File.open(File.join(path, 'Vagrantfile'), 'w')
     vagrant.puts vagrant_file_header, vagrant_config_header
     @ui.info('Generating libvirt/VirtualBox configuration')
-    vagrant.puts provider_config
     config.map do |node|
       @ui.info("Generating node definition for [#{node[0]}]")
       node_definition = node_definition(node, path, cookbook_path)
