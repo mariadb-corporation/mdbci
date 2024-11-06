@@ -194,8 +194,10 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # Further decomposition of the method will complicate the code.
   def node_definition(node, path, cookbook_path)
     box = node[1]['box'].to_s
-    node_params = make_node_params(node, @boxes.get_box(box))
-
+      node_params = make_node_params(node, @boxes.get_box(box)) 
+    if node_params.is_a?(Result::Error)
+      return node_params
+    end
     @configuration_generator.generate_node_info(node, node_params, @registry, @env.force_version).and_then do |info|
       unless info[:node_params][:skip_configuration]
         @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
@@ -210,7 +212,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   end
   # rubocop:enable Metrics/MethodLength
 
-
   # Make a hash list of node parameters by a node configuration and
   # information of the box parameters.
   #
@@ -222,14 +223,19 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     if node[1].key?('box_parameters')
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
-    {
-      name: node[0].to_s,
-      host: node[1]['hostname'].to_s,
-      vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
-      vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
-      private_ip: node[1]['private_ip'].nil? ? nil : node[1]['private_ip'].to_s,
-      default_route: node[1]['default_route'].nil? ? nil : node[1]['default_route'].to_s
-    }.merge(symbolic_box_params)
+
+    if (!node[1]['private_ip'].nil? && !node[1]['default_route'].nil?) || (node[1]['private_ip'].nil? && node[1]['default_route'].nil?)
+      {
+        name: node[0].to_s,
+        host: node[1]['hostname'].to_s,
+        vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
+        vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
+        private_ip: node[1]['private_ip'].nil? ? nil : node[1]['private_ip'].to_s,
+        default_route: node[1]['default_route'].nil? ? nil : node[1]['default_route'].to_s
+      }.merge(symbolic_box_params)
+    else
+      Result.error("'private_ip' or 'default_route' value is absent in template for node #{node[0]}.")
+    end
   end
 
   # Overrides the box parameters with the values specified in the 'box_parameters' section
