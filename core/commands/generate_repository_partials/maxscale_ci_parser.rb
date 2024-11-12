@@ -12,7 +12,9 @@ module MaxscaleCiParser
     releases = []
     releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger))
-    releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
+    releases.concat(parse_maxscale_ci_deb_repository(config['repo'], product_version, auth,
+                                                         maxscale_product, log, logger))
+    releases.concat(parse_maxscale_enterprise_ci_deb_repository(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger))
     releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger))
@@ -39,11 +41,11 @@ module MaxscaleCiParser
     )
   end
 
-  def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, maxscale_product, log, logger)
+  def self.parse_maxscale_ci_deb_repository(config, product_version, auth, maxscale_product, log, logger)
     parse_repository(
       config['path'], auth, nil, maxscale_product, product_version,
       %w[maxscale],
-      ->(url, _) { generate_maxscale_ci_deb_full_url(url) },
+      ->(url, _) { generate_maxscale_ci_deb_full_url(url, "maxscale") },
       ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
@@ -59,11 +61,31 @@ module MaxscaleCiParser
     )
   end
 
-  def self.generate_maxscale_ci_deb_full_url(incorrect_url)
+  def self.parse_maxscale_enterprise_ci_deb_repository(config, product_version, auth, maxscale_product, log, logger)
+    parse_repository(
+      config['path'], auth, nil, maxscale_product, product_version,
+      %w[maxscale],
+      ->(url, _) { generate_maxscale_ci_deb_full_url(url, "maxscale-enterprise") },
+      ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
+      save_as_field(:version),
+      save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
+      append_url(%w[apt], nil, true),
+      append_url(%w[dists]),
+      extract_deb_platforms,
+      set_deb_architecture(auth),
+      lambda do |release, _|
+        release[:repo] = add_auth_to_url(release[:repo_url], auth)
+        release[:components] = ['main']
+        release
+      end
+    )
+  end
+
+  def self.generate_maxscale_ci_deb_full_url(incorrect_url, release)
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = split_url.join('/')
-    "#{url}/pool/main/m/maxscale-enterprise/"
+    "#{url}/pool/main/m/#{release}/"
   end
 
   def self.parse_maxscale_ci_rpm_repository_old(config, product_version, auth, maxscale_product, log, logger)
