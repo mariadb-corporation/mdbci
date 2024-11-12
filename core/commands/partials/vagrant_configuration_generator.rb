@@ -212,6 +212,14 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   end
   # rubocop:enable Metrics/MethodLength
 
+  # Check whether both or none private network attributes are present in the configuration template.
+  # @param ip [String] IPv4 address of the private network
+  # @param route [String] default route IPv4 address of the private network
+  # @return [Boolean] true if configuration is correct
+  def correct_private_network?(ip, route)
+    ip.nil? == route.nil?
+  end
+
   # Make a hash list of node parameters by a node configuration and
   # information of the box parameters.
   #
@@ -224,7 +232,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
 
-    if (!node[1]['private_ip'].nil? && !node[1]['default_route'].nil?) || (node[1]['private_ip'].nil? && node[1]['default_route'].nil?)
+    if correct_private_network?(node[1]['private_ip'], node[1]['default_route'])
       {
         name: node[0].to_s,
         host: node[1]['hostname'].to_s,
