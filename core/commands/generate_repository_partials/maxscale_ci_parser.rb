@@ -10,16 +10,17 @@ module MaxscaleCiParser
     return [] if mdbe_ci_config.nil?
     auth = mdbe_ci_config['mdbe_ci_repo']
     releases = []
-    releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
+    releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger, "maxscale"))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger, "maxscale-enterprise"))
-    releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
+    releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_old(config['repo'], product_version, auth,
                                                          maxscale_product, log, logger))
+    releases.uniq! { |release| [release[:architecture], release[:platform], release[:platform_version], release[:product], release[:version]] }
     releases
   end
 
@@ -31,9 +32,10 @@ module MaxscaleCiParser
       ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
-      append_url(%w[yum]),
+      append_url(%w[yum packages]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
+      append_url(%w[x86_64 aarch64 ppc64le], :architecture),
       lambda do |release, _|
         release[:repo] = add_auth_to_url(release[:url], auth)
         release
