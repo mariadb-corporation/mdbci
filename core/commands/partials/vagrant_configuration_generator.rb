@@ -87,9 +87,7 @@ end
     template = ERB.new <<-LIBVIRT
       #  --> Begin definition for machine: <%= name %>
       <% if public_network %>
-        config.vm.network "public_network",<% public_network.each do |key, value| %>
-          <%= key %>: "<%= value %>"<% if(key != public_network.keys.last) %>,<% end %>
-        <% end %>
+        config.vm.network "public_network", <%= public_network %>
       <% end %>
       config.vm.define '<%= name %>' do |box|
         box.vm.box = '<%= box %>'
@@ -219,12 +217,15 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     if node[1].key?('box_parameters')
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
+    if node[1].key?('public_network')
+      public_network = node[1]['public_network'].to_a.map {|key, value| "%{key}:\"%{value}\"" % {key: key, value: value}}.join(", ")
+    end
     {
       name: node[0].to_s,
       host: node[1]['hostname'].to_s,
       vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
       vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
-      public_network: node[1]['public_network'].nil? ? nil : node[1]['public_network']
+      public_network: public_network.nil? ? nil : public_network,
     }.merge(symbolic_box_params)
   end
 
