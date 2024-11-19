@@ -87,7 +87,7 @@ end
     template = ERB.new <<-LIBVIRT
       #  --> Begin definition for machine: <%= name %>
       <% if public_network %>
-        config.vm.network "public_network", bridge: "<%= public_network[:interface] %>", dev: "<%= public_network[:interface] %>", ip: "<%= public_network[:ip] %>", mac:"<%= public_network[:mac_address] %>", netmask: "<%= public_network[:netmask] %>"
+        config.vm.network "public_network", bridge: "<%= public_network['interface'] %>", dev: "<%= public_network['interface'] %>", ip: "<%= public_network['ip'] %>", mac: "<%= public_network['mac_address'] %>", netmask: "<%= public_network['netmask'] %>"
       <% end %>
       config.vm.define '<%= name %>' do |box|
         box.vm.box = '<%= box %>'
@@ -205,23 +205,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   end
   # rubocop:enable Metrics/MethodLength
 
-  # Make a hash list of public network parameters by a node configuration.
-  #
-  # @param node [Hash] node parameters from configuration template
-  # @return [Hash] list of the network configuration parameters if exists
-  def fetch_public_network_config(node)
-    if node[1].key?('public_network')
-      config = node[1]['public_network']
-      {
-        ip: config['ip'].to_s,
-        netmask: config['netmask'].to_s,
-        interface: config['interface'].to_s,
-        mac_address: config['mac_address'].to_s
-      }
-    else
-      nil
-    end
-  end
 
   # Make a hash list of node parameters by a node configuration and
   # information of the box parameters.
@@ -234,13 +217,12 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     if node[1].key?('box_parameters')
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
-    public_network_config = fetch_public_network_config(node)
     {
       name: node[0].to_s,
       host: node[1]['hostname'].to_s,
       vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
       vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
-      public_network: public_network_config
+      public_network: node[1]['public_network'].nil? ? nil : node[1]['public_network']
     }.merge(symbolic_box_params)
   end
 
