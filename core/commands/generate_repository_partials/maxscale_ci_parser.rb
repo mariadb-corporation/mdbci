@@ -32,7 +32,7 @@ module MaxscaleCiParser
       ->(package, _) { /#{package}/ }, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
-      append_url(%w[yum packages]),
+      append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64 ppc64le], :architecture),
