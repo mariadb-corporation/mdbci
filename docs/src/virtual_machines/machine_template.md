@@ -46,13 +46,7 @@ Optional parameters are product, products, labels, cnf_template_path, box_parame
 * `box_parameters` is a description of the selected box parameters that are being overridden for a single node (e.g. disable RHEL system registration setting `configure_subscription_manager` flag to `false`). See [boxes configuration](../general_configuration/boxes.md) for more information.
 
 #### Libvirt nodes public network attributes
-All of the parameters are required in the case of configuring a public network on a virtual machine. Supported for libvirt machines only.
-* `ip` is a IPv4 address of the public network.
-* `netmask` is a netmask of the public network.
-* `interface` is a name of a physical network interface on the machine.
-* `mac_address` is a MAC address of a network device.
-
-Example:
+All parameters of a public network configuration are assigned in the `private_network` block. Example:
 ```json
 {
     "node1": {
