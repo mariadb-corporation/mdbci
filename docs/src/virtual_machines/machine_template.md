@@ -45,10 +45,23 @@ Optional parameters are product, products, labels, cnf_template_path, box_parame
 * `cnf_template_path` is the path to the configuration files to be passed to the machine. When installing a database you must also specify the name of the configuration file and the path to the folder where the file is stored. It is advised to use absolute path in `cnf_template_path` as the relative path is calculated from within the configuration directory.
 * `box_parameters` is a description of the selected box parameters that are being overridden for a single node (e.g. disable RHEL system registration setting `configure_subscription_manager` flag to `false`). See [boxes configuration](../general_configuration/boxes.md) for more information.
 
-### libvirt nodes private network attributes
-Both of the parameters are obligatory to be set in the case of configuring a private network on a virtual machine. Supported for libvirt machines only.
-* `private_ip` is a IPv4 address of the private network.
-* `default_route` is a default route IPv4 address of the private network. 
+#### Libvirt nodes public network attributes
+All parameters of a public network configuration are assigned in the `private_network` block. Example:
+```json
+{
+    "node1": {
+        "hostname": "host1",
+        "box": "ubuntu_jammy_libvirt",
+        "public_network": {
+            "bridge": "eth1",
+            "dev": "eth1",
+            "ip": "129.0.0.0",
+            "netmask": "255.255.255.0",
+            "mac": "XXXXXXXXXXXX"
+        }
+    }
+}
+```
 
 #### Cloud node attributes
 
