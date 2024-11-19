@@ -87,7 +87,9 @@ end
     template = ERB.new <<-LIBVIRT
       #  --> Begin definition for machine: <%= name %>
       <% if public_network %>
-        config.vm.network "public_network", bridge: "<%= public_network['interface'] %>", dev: "<%= public_network['interface'] %>", ip: "<%= public_network['ip'] %>", mac: "<%= public_network['mac_address'] %>", netmask: "<%= public_network['netmask'] %>"
+        config.vm.network "public_network",<% public_network.each do |key, value| %>
+          <%= key %>: "<%= value %>"<% if(key != public_network.keys.last) %>,<% end %>
+        <% end %>
       <% end %>
       config.vm.define '<%= name %>' do |box|
         box.vm.box = '<%= box %>'
