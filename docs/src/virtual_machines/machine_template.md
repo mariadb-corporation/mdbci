@@ -53,10 +53,11 @@ All parameters of a public network configuration are assigned in the `private_ne
         "hostname": "host1",
         "box": "ubuntu_jammy_libvirt",
         "public_network": {
+            "bridge": "eth1",
+            "dev": "eth1",
             "ip": "129.0.0.0",
             "netmask": "255.255.255.0",
-            "interface": "eth1",
-            "mac_address": "XXXXXXXXXXXX"
+            "mac": "XXXXXXXXXXXX"
         }
     }
 }
