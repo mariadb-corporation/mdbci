@@ -74,15 +74,19 @@ class VagrantConfigurator
   # Attach shared disks images to the given node and write /dev names to file on VM.
   def attach_images_to_vm(node, vm_name, network_settings)
     image_dir_path = "#{@config.path}/images"
+    disk_dev_name = 'a'
     @node_configurations[node]['disks'].each do |disk|
       if disk['dev_name'] != 'a'
+        disk_dev_name = disk_dev_name.succ
         @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
-          ShellCommands.run_command_in_dir(
+        image_path = disk['image'] ? "#{disk['image']}" : "#{image_dir_path}/#{disk['id']}.img"
+        ShellCommands.run_command_in_dir(
           @ui, 
-          "virsh attach-disk #{vm_name} #{image_dir_path}/#{disk['id']}.img vd#{disk['dev_name']} --shareable",
+          "virsh attach-disk #{vm_name} --source #{image_path} --target vd#{disk_dev_name} --cache none --driver qemu --subdriver raw --serial #{disk['id']} --shareable",
           image_dir_path
-          )
-        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk['dev_name']}\" >> shared-disks")
+        )
+        device_id = "/dev/disk/by-id/virtio-#{disk['id']}"
+        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id})\" >> shared-disks")
       else
         @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
       end
