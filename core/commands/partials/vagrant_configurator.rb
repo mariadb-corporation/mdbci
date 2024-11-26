@@ -85,7 +85,8 @@ class VagrantConfigurator
           "virsh attach-disk #{vm_name} --source #{image_path} --target vd#{disk_dev_name} --cache none --driver qemu --subdriver raw --serial #{disk['id']} --shareable",
           image_dir_path
         )
-        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> /dev/vd#{disk_dev_name}; /dev/disk/by-id/virtio-#{disk['id']}\" >> shared-disks")
+        device_id = "/dev/disk/by-id/virtio-#{disk['id']}"
+        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id}); #{device_id}\" >> shared-disks")
       else
         @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
       end
