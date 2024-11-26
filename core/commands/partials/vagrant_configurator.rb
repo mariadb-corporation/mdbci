@@ -74,10 +74,10 @@ class VagrantConfigurator
   # Attach shared disks images to the given node and write /dev names to file on VM.
   def attach_images_to_vm(node, vm_name, network_settings)
     image_dir_path = "#{@config.path}/images"
-    dev_letter = 98
-    @node_configurations[node]['disks'].each_with_index do |disk, i|
+    disk_dev_name = 'a'
+    @node_configurations[node]['disks'].each do |disk|
       if disk['dev_name'] != 'a'
-        disk_dev_name = (dev_letter + i).chr
+        disk_dev_name = disk_dev_name.succ
         @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
         image_path = disk['image'] ? "#{disk['image']}" : "#{image_dir_path}/#{disk['id']}.img"
         ShellCommands.run_command_in_dir(
