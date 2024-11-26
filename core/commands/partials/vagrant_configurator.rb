@@ -86,7 +86,7 @@ class VagrantConfigurator
           image_dir_path
         )
         device_id = "/dev/disk/by-id/virtio-#{disk['id']}"
-        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id}); #{device_id}\" >> shared-disks")
+        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id})\" >> shared-disks")
       else
         @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
       end
