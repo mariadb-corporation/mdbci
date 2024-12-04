@@ -53,6 +53,7 @@ class TerraformIbmGenerator
     file.puts(file_header)
     file.puts(provider_resource)
     file.puts(private_network_data_source)
+    file.puts(ssh_key_resource(@configuration_id))
     result = Result.ok('')
     node_params.each do |node|
       result = generate_instance_params(node).and_then do |instance_params|
@@ -126,6 +127,17 @@ class TerraformIbmGenerator
     PRIVATE_NETWORK
   end
 
+  # Generate ssh key resource.
+  def ssh_key_resource(configuration_id)
+    <<-SSH_KEY
+    resource "ibm_pi_key" "ssh_key_#{configuration_id}" {
+      pi_key_name          = "public_key_#{configuration_id}"
+      pi_ssh_key           = "#{@public_key_value}"
+      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
+    }
+    SSH_KEY
+  end
+
   # Generate instance resources.
   # @param instance_params [Hash] list of the instance parameters
   # @return [String] generated resources for instance.
@@ -136,12 +148,6 @@ class TerraformIbmGenerator
       pi_network_name      = "public_<%= instance_name %>"
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
       pi_network_type      = "pub-vlan"
-    }
-
-    resource "ibm_pi_key" "ssh_key_<%= name %>" {
-      pi_key_name          = "public_key_<%= instance_name %>"
-      pi_ssh_key           = "#{@public_key_value}"
-      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
     }
     
     data "ibm_pi_image" "data_source_image_<%= name %>" {
@@ -156,7 +162,7 @@ class TerraformIbmGenerator
       <% if cpu_count.nil? %> pi_processors = "<%= default_cpu_count %>" <% else %> pi_processors = "<%= cpu_count %>" <% end %>
       pi_proc_type = "shared"
       pi_storage_type = "tier3"
-      pi_key_pair_name = resource.ibm_pi_key.ssh_key_<%= name %>.name
+      pi_key_pair_name = resource.ibm_pi_key.ssh_key_#{@configuration_id}.name
       pi_image_id = data.ibm_pi_image.data_source_image_<%= name %>.id
       pi_sys_type = "<%= machine_type %>"
       pi_network {
@@ -165,14 +171,14 @@ class TerraformIbmGenerator
       pi_network {
         network_id = data.ibm_pi_network.private_network_data_source.id
       }
-      depends_on = [ibm_pi_network.public_network_<%= name %>, ibm_pi_key.ssh_key_<%= name %>]
+      depends_on = [ibm_pi_network.public_network_<%= name %>, ibm_pi_key.ssh_key_#{@configuration_id}]
     }
-    
+
     output "<%= name %>_network" {
       value = {
         user = "cloud-user"
-        private_ip = resource.ibm_pi_instance.<%= name %>.pi_network.1.ip_address
-        public_ip = resource.ibm_pi_instance.<%= name %>.pi_network.1.external_ip
+        private_ip = [for network in resource.ibm_pi_instance.<%= name %>.pi_network : network if network.external_ip == ""].0.ip_address
+        public_ip = [for network in resource.ibm_pi_instance.<%= name %>.pi_network : network if network.external_ip != ""].0.external_ip
         key_file = "<%= key_file %>"
         hostname = "<%= instance_name %>"
       }
