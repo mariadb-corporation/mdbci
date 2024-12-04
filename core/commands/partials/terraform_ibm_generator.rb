@@ -52,6 +52,7 @@ class TerraformIbmGenerator
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
+    file.puts(private_network_data_source)
     result = Result.ok('')
     node_params.each do |node|
       result = generate_instance_params(node).and_then do |instance_params|
@@ -115,6 +116,16 @@ class TerraformIbmGenerator
     PROVIDER
   end
 
+  # Generate private network data source.
+  def private_network_data_source
+    <<-PRIVATE_NETWORK
+    data "ibm_pi_network" "private_network_data_source" {
+      pi_network_name      = "#{@ibm_config['private_network']}"
+      pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
+    }
+    PRIVATE_NETWORK
+  end
+
   # Generate instance resources.
   # @param instance_params [Hash] list of the instance parameters
   # @return [String] generated resources for instance.
@@ -151,14 +162,17 @@ class TerraformIbmGenerator
       pi_network {
         network_id = resource.ibm_pi_network.public_network_<%= name %>.network_id
       }
+      pi_network {
+        network_id = data.ibm_pi_network.private_network_data_source.id
+      }
       depends_on = [ibm_pi_network.public_network_<%= name %>, ibm_pi_key.ssh_key_<%= name %>]
     }
     
     output "<%= name %>_network" {
       value = {
         user = "cloud-user"
-        private_ip = resource.ibm_pi_instance.<%= name %>.pi_network[0].ip_address
-        public_ip = resource.ibm_pi_instance.<%= name %>.pi_network[0].external_ip
+        private_ip = resource.ibm_pi_instance.<%= name %>.pi_network.1.ip_address
+        public_ip = resource.ibm_pi_instance.<%= name %>.pi_network.1.external_ip
         key_file = "<%= key_file %>"
         hostname = "<%= instance_name %>"
       }
