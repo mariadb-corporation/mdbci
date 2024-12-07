@@ -25,6 +25,11 @@ class ConfigurationGenerator
 
   def generate_node_info(node, node_params, registry, force_version)
     box = node[1]['box'].to_s
+    public_network = node[1]["public_network"]
+    if public_network
+      node_params[:public_network_gateway] = public_network["ip"]
+      node_params[:public_network_route_dev] = node[1]["public_network_route_dev"]
+    end
     products = ConfigurationGenerator.parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
     get_role_description(node_params, products, box, registry, force_version).and_then do |role|
@@ -155,6 +160,14 @@ class ConfigurationGenerator
     recipe_names = []
     provider = node_params[:provider]
     name = node_params[:name]
+
+    if node_params[:public_network_gateway]
+      recipe_names << 'public_network'
+      product_configs.merge!({
+        'public_network_gateway': node_params[:public_network_gateway],
+        'public_network_route_dev': node_params[:public_network_route_dev]
+      })
+    end
 
     if node_params[:configure_subscription_manager] == 'true'
       if @rhel_config.nil?
