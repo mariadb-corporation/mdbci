@@ -1,9 +1,6 @@
-file '/usr/bin/hetznerrouting.sh' do
-  content <<~EOU
-  sudo ip route del default
-  sudo ip route add default via #{node["public_network_gateway"]} dev #{node["public_network_route_dev"]}
-  EOU
-  action :create
+template "/usr/bin/hetznerrouting.sh" do
+  source "hetznerrouting.erb"
+  variables(:gateway => node["public_network_gateway"], :dev => node["public_network_route_dev"])
   mode '755'
 end
 
