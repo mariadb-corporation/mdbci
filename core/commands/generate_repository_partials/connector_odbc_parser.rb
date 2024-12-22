@@ -12,6 +12,7 @@ module ConnectorOdbcParser
       base_url,
       nil,
       product_version,
+      config['no_sublinks'],
       ui,
       logger,
       extract_field(:base_version, /(\d.+)/),

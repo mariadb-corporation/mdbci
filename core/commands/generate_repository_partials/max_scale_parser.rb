@@ -20,6 +20,7 @@ module MaxScaleParser
         'maxscale',
         product_version,
         method(:form_deb_repositories),
+        config['no_sublinks'],
         user_ui,
         logger
       ),
@@ -29,6 +30,7 @@ module MaxScaleParser
         'maxscale',
         product_version,
         MariaDBCommunityParser.method(:form_rpm_repositories),
+        config['no_sublinks'],
         user_ui,
         logger
       ),
