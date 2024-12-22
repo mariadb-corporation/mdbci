@@ -5,16 +5,19 @@ mariadb:
   deb:
     path: https://dlm.mariadb.com/browse/mariadb_server/
     key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+  no_sublinks: true
 maxscale_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/Maxscale/
     old_key: https://mdbe-ci-repo.mariadb.net/MariaDBManager-GPG-KEY.public
     new_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 maxscale_enterprise_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MaxscaleEnterprise/
     old_key: https://mdbe-ci-repo.mariadb.net/MariaDBManager-GPG-KEY.public
     new_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 maxscale:
   rpm:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
@@ -22,6 +25,7 @@ maxscale:
   deb:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
     key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+  no_sublinks: true
 mdbe:
   repo:
     rpm:
@@ -36,6 +40,7 @@ mdbe:
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal", "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]
+  no_sublinks: false
 mysql:
   repo:
     rpm:
@@ -44,12 +49,15 @@ mysql:
     deb:
       path: http://repo.mysql.com/apt/
       key: "5072E1F5"
+  no_sublinks: false
 clustrix:
   repo:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand/
+  no_sublinks: false
 clustrix_staging:
   repo:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/xpand_staging/
+  no_sublinks: false
 mdbe_ci:
   repo:
     mdbe_ci_repo:
@@ -65,26 +73,32 @@ mdbe_ci:
                  "develop-22.08/pull_request", "develop/cron", "develop/pull_request", 
                  "stable-23.10/cron", "stable-23.10/pull_request", "custom"]
       latest_branches: ["develop-23.02", "develop-22.08", "develop", "stable-23.10"]
+  no_sublinks: false
 galera_3_community:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera3/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 galera_4_community:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera4/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 galera_3_enterprise:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera3Enterprise/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 galera_4_enterprise:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBGalera4Enterprise/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 mariadb_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/MariaDBServerCommunity/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 mdbe_staging:
   repo:
     rpm:
@@ -99,6 +113,7 @@ mdbe_staging:
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-staging/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal",  "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]
+  no_sublinks: false
 mariadb_staging:
   repo:
     rpm:
@@ -107,24 +122,31 @@ mariadb_staging:
     deb:
       path: https://downloads.mariadb.com/mariadb-staging/
       key: "0xF1656F24C74CD1D8"
+  no_sublinks: false
 connector_c_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/ConnectorC/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 connector_cpp_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/ConnectorCpp/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 connector_odbc_ci:
   repo:
     path: https://mdbe-ci-repo.mariadb.net/ConnectorODBC/
     key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  no_sublinks: false
 connector_odbc:
   repo:
     path: https://dlm.mariadb.com/browse/odbc_connector/
+  no_sublinks: true
 connector_odbc_staging:
   repo:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/odbc_connector_staging/
+  no_sublinks: true
 kafka:
   repo:
     path: https://dlcdn.apache.org/kafka/
+  no_sublinks: false

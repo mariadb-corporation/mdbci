@@ -217,17 +217,17 @@ module RepositoryParserCore
     *steps
   )
     # Recursively go through the site and apply steps on each level
-    result = parse_web_directories(base_url, auth, product_version, log, logger, *steps)
+    result = parse_web_directories(base_url, auth, product_version, false, log, logger, *steps)
     result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
     add_key_and_product_to_releases(result, key, product)
   end
 
   # Parse web directories and apply step for each of directory level
-  def parse_web_directories(base_url, auth, product_version, log, logger, *steps)
+  def parse_web_directories(base_url, auth, product_version, no_sublinks, log, logger, *steps)
     steps.reduce([{ url: base_url }]) do |releases, step|
       next_releases = Workers.map(releases) do |release|
         begin
-          links = get_directory_links(release[:url], logger, auth)
+          links = get_directory_links(release[:url], no_sublinks, logger, auth)
         rescue StandardError => e
           error_and_log("Unable to get information from link '#{release[:url]}',"\
                         " message: '#{e.message}'", log, logger)
@@ -247,11 +247,16 @@ module RepositoryParserCore
 
   # Links that look like directories from the list of all links
   # @param url [String] path to the site to be checked
+  # @param no_sublinks [Boolean] true if repos URLs are sublinks of main repo URL 
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
-  def get_directory_links(url, logger, auth = nil)
+  def get_directory_links(url, no_sublinks, logger, auth = nil)
     get_links(url, logger, auth).select do |link|
-      dir_link?(link) && sub_link?(url, link)
+      if no_sublinks
+        dir_link?(link)
+      else
+        dir_link?(link) && sub_link?(url, link)
+      end
     end
   end
 
@@ -385,7 +390,7 @@ module RepositoryParserCore
       25.times do
         next_releases = Workers.map(processed_releases) do |release|
           begin
-            links = get_directory_links(release[:url], logger, auth)
+            links = get_directory_links(release[:url], false, logger, auth)
           rescue StandardError => e
             error_and_log("Unable to get information from link '#{release[:url]}',"\
                           " message: '#{e.message}'", log, logger)
@@ -484,7 +489,7 @@ module RepositoryParserCore
   def generate_mariadb_ci_deb_full_url(incorrect_url, logger, log, auth)
     url = go_up(incorrect_url, 2)
     pool_url = URI.join(url, 'pool/main/').to_s
-    pool_sub_links = get_directory_links(pool_url, logger, auth)
+    pool_sub_links = get_directory_links(pool_url, false, logger, auth)
     has_mariadb_dir = false
     pool_sub_links.map do |pool_dir|
       has_mariadb_dir = true if pool_dir[:href] == 'm/'
@@ -494,7 +499,7 @@ module RepositoryParserCore
     else
       error_and_log('MariaDB directory not found in repo. Skipped.', log, logger)
     end
-    package_list_url = get_directory_links(pool_url, logger, auth).first
+    package_list_url = get_directory_links(pool_url, false, logger, auth).first
     URI.join(pool_url, package_list_url[:href]).to_s
   end
 
@@ -511,7 +516,7 @@ module RepositoryParserCore
     lambda do |release, _links|
       additional_link = release[:url].sub(main_path, unsupported_path)
       begin
-        get_directory_links(additional_link, logger, auth)
+        get_directory_links(additional_link, false, logger, auth)
         release[:unsupported_repo] = release[:repo].sub(
           add_auth_to_url(main_path, auth), add_auth_to_url(unsupported_path, auth)
         )

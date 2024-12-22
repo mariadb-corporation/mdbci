@@ -16,6 +16,7 @@ module ConnectorOdbcCiParser
       config['repo']['path'],
       auth,
       product_version,
+      config['no_sublinks'],
       ui,
       logger,
       save_as_field(:version),

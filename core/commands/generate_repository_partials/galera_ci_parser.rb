@@ -40,7 +40,7 @@ module GaleraCiParser
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
       %w[galera],
-      ->(url, _) { generate_galera_ci_deb_full_url(url, logger, auth) },
+      ->(url, _) { generate_galera_ci_deb_full_url(url, config['no_sublinks'], logger, auth) },
       ->(package, _) { /#{package}.*/ },
       log, logger,
       save_as_field(:version),
@@ -56,15 +56,15 @@ module GaleraCiParser
     )
   end
 
-  def self.generate_galera_ci_deb_full_url(incorrect_url, logger, auth)
+  def self.generate_galera_ci_deb_full_url(incorrect_url, no_sublinks, logger, auth)
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = "#{split_url.join('/')}/pool/main/g/"
-    generate_pool_link(url, logger, auth)
+    generate_pool_link(url, no_sublinks, logger, auth)
   end
 
-  def self.generate_pool_link(url, logger, auth)
-    dir = get_directory_links(url.to_s, logger, auth)[0][:href]
+  def self.generate_pool_link(url, no_sublinks, logger, auth)
+    dir = get_directory_links(url.to_s, no_sublinks, logger, auth)[0][:href]
     "#{url}/#{dir}"
   rescue OpenURI::HTTPError => e
     url
