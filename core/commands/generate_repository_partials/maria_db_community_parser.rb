@@ -24,7 +24,7 @@ module MariaDBCommunityParser
         'mariadb',
         product_version,
         method(:form_deb_repositories),
-        config['no_sublinks'],
+        config['scan_mode'],
         user_ui,
         logger
       ),
@@ -34,7 +34,7 @@ module MariaDBCommunityParser
         'mariadb',
         product_version,
         method(:form_rpm_repositories),
-        config['no_sublinks'],
+        config['scan_mode'],
         user_ui,
         logger
       ),
@@ -43,14 +43,14 @@ module MariaDBCommunityParser
   end
 
   def self.parse_releases(
-    repo_config, product_config, product_name, product_version, link_parser, no_sublinks, user_ui, logger
+    repo_config, product_config, product_name, product_version, link_parser, scan_mode, user_ui, logger
   )
     auth = nil
     releases = parse_web_directories(
       repo_config['path'],
       auth,
       product_version,
-      no_sublinks,
+      scan_mode,
       user_ui,
       logger,
       extract_field(:base_version, %r{^#{product_config[:label]} (.*)$}),

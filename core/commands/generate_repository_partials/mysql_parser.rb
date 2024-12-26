@@ -8,17 +8,17 @@ module MysqlParser
 
   def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], product_version, log, logger))
-    releases.concat(parse_mysql_deb_repository(config['repo']['deb'], product_version, log, logger))
+    releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], product_version, config['scan_mode'], log, logger))
+    releases.concat(parse_mysql_deb_repository(config['repo']['deb'], product_version, config['scan_mode'], log, logger))
     releases
   end
 
-  def self.parse_mysql_deb_repository(config, product_version, log, logger)
+  def self.parse_mysql_deb_repository(config, product_version, scan_mode, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mysql', product_version, %w[mysql],
       ->(url, _) { generate_mysql_url(url) },
       ->(package, _) { /#{package}/ },
-      log, logger,
+      scan_mode, log, logger,
       append_url(%w[debian ubuntu], :platform, true),
       append_url(%w[dists]),
       save_as_field(:platform_version),
@@ -35,12 +35,12 @@ module MysqlParser
 
   # Method parses MySQL repositories that correspond to the following scheme:
   # http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
-  def self.parse_mysql_rpm_repository(config, product_version, log, logger)
+  def self.parse_mysql_rpm_repository(config, product_version, scan_mode, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mysql', product_version, %w[mysql],
       ->(url, _) { url },
       ->(package, _) { /#{package}/ },
-      log, logger,
+      scan_mode, log, logger,
       extract_field(:version, %r{^mysql-(\d+\.?\d+)-community(/?)$}),
       split_rpm_platforms,
       save_as_field(:platform_version),

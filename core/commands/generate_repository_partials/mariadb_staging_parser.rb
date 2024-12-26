@@ -9,19 +9,19 @@ module MariadbStagingParser
   def self.parse(config, product_version, log, logger)
     releases = []
     releases.concat(
-      parse_mariadb_staging_rpm_repository(config['repo']['rpm'], product_version, log, logger)
+      parse_mariadb_staging_rpm_repository(config['repo']['rpm'], product_version, config['scan_mode'], log, logger)
     )
     releases.concat(
-      parse_mariadb_staging_deb_repository(config['repo']['deb'], product_version, log, logger)
+      parse_mariadb_staging_deb_repository(config['repo']['deb'], product_version, config['scan_mode'], log, logger)
     )
     releases
   end
 
-  def self.parse_mariadb_staging_rpm_repository(config, product_version, log, logger)
+  def self.parse_mariadb_staging_rpm_repository(config, product_version, scan_mode, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mariadb_staging', product_version,
       %w[MariaDB-client MariaDB-server],
-      ->(url, _) { "#{url}rpms/" }, ->(package, _) { /#{package}/ }, log, logger,
+      ->(url, _) { "#{url}rpms/" }, ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
       append_url(%w[yum]),
       split_rpm_platforms,
@@ -35,11 +35,11 @@ module MariadbStagingParser
     )
   end
 
-  def self.parse_mariadb_staging_deb_repository(config, product_version, log, logger)
+  def self.parse_mariadb_staging_deb_repository(config, product_version, scan_mode, log, logger)
     parse_repository(
       config['path'], nil, config['key'], 'mariadb_staging', product_version,
       %w[mariadb-client mariadb-server], ->(url, _) { generate_mariadb_deb_full_url(url) },
-      ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
+      ->(package, platform) { /#{package}.*#{platform}/ }, scan_mode, log, logger,
       save_as_field(:version),
       append_url(%w[repo]),
       append_url(%w[debian ubuntu], :platform, true),
