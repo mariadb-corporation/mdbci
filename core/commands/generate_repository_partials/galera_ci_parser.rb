@@ -12,19 +12,19 @@ module GaleraCiParser
     auth_mdbe_ci_repo = mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(parse_galera_ci_rpm_repository(config['repo'], product_version,
-                                                   auth_mdbe_ci_repo, galera_version, log, logger))
+                                                   auth_mdbe_ci_repo, galera_version, config['scan_mode'], log, logger))
     releases.concat(parse_galera_ci_deb_repository(config['repo'], product_version,
-                                                   auth_mdbe_ci_repo, galera_version, log, logger))
+                                                   auth_mdbe_ci_repo, galera_version, config['scan_mode'], log, logger))
     releases
   end
 
-  def self.parse_galera_ci_rpm_repository(config, product_version, auth, galera_version, log, logger)
+  def self.parse_galera_ci_rpm_repository(config, product_version, auth, galera_version, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
       %w[galera],
       ->(url, _) { url },
       ->(package, _) { /#{package}/ },
-      log, logger,
+      scan_mode, log, logger,
       save_as_field(:version),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
@@ -36,13 +36,13 @@ module GaleraCiParser
     )
   end
 
-  def self.parse_galera_ci_deb_repository(config, product_version, auth, galera_version, log, logger)
+  def self.parse_galera_ci_deb_repository(config, product_version, auth, galera_version, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), galera_version, product_version,
       %w[galera],
-      ->(url, _) { generate_galera_ci_deb_full_url(url, config['no_sublinks'], logger, auth) },
+      ->(url, _) { generate_galera_ci_deb_full_url(url, scan_mode, logger, auth) },
       ->(package, _) { /#{package}.*/ },
-      log, logger,
+      scan_mode, log, logger,
       save_as_field(:version),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
@@ -56,15 +56,15 @@ module GaleraCiParser
     )
   end
 
-  def self.generate_galera_ci_deb_full_url(incorrect_url, no_sublinks, logger, auth)
+  def self.generate_galera_ci_deb_full_url(incorrect_url, scan_mode, logger, auth)
     split_url = incorrect_url.split('/')
     split_url.pop(2)
     url = "#{split_url.join('/')}/pool/main/g/"
-    generate_pool_link(url, no_sublinks, logger, auth)
+    generate_pool_link(url, scan_mode, logger, auth)
   end
 
-  def self.generate_pool_link(url, no_sublinks, logger, auth)
-    dir = get_directory_links(url.to_s, no_sublinks, logger, auth)[0][:href]
+  def self.generate_pool_link(url, scan_mode, logger, auth)
+    dir = get_directory_links(url.to_s, scan_mode, logger, auth)[0][:href]
     "#{url}/#{dir}"
   rescue OpenURI::HTTPError => e
     url

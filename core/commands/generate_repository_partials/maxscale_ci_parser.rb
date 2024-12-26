@@ -11,25 +11,25 @@ module MaxscaleCiParser
     auth = mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
-                                                         maxscale_product, log, logger))
+                                                         maxscale_product, config['scan_mode'], log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
-                                                         maxscale_product, log, logger, "maxscale"))
+                                                         maxscale_product, config['scan_mode'], log, logger, "maxscale"))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
-                                                         maxscale_product, log, logger, "maxscale-enterprise"))
+                                                         maxscale_product, config['scan_mode'], log, logger, "maxscale-enterprise"))
     releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
-                                                         maxscale_product, log, logger))
+                                                         maxscale_product, config['scan_mode'], log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_old(config['repo'], product_version, auth,
-                                                         maxscale_product, log, logger))
+                                                         maxscale_product, config['scan_mode'], log, logger))
     releases.uniq! { |release| [release[:architecture], release[:platform], release[:platform_version], release[:product], release[:version]] }
     releases
   end
 
-  def self.parse_maxscale_ci_rpm_repository_new(config, product_version, auth, maxscale_product, log, logger)
+  def self.parse_maxscale_ci_rpm_repository_new(config, product_version, auth, maxscale_product, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, nil, maxscale_product, product_version,
       %w[maxscale],
       ->(url, _) { url },
-      ->(package, _) { /#{package}/ }, log, logger,
+      ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
       append_url(%w[yum]),
@@ -43,12 +43,12 @@ module MaxscaleCiParser
     )
   end
 
-  def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, maxscale_product, log, logger, maxscale_release)
+  def self.parse_maxscale_ci_deb_repository_new(config, product_version, auth, maxscale_product, scan_mode, log, logger, maxscale_release)
     parse_repository(
       config['path'], auth, nil, maxscale_product, product_version,
       %w[maxscale],
       ->(url, _) { generate_maxscale_ci_deb_full_url(url, maxscale_release) },
-      ->(package, platform) { /#{package}.*#{platform}/ }, log, logger,
+      ->(package, platform) { /#{package}.*#{platform}/ }, scan_mode, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
       append_url(%w[apt], nil, true),
@@ -70,12 +70,12 @@ module MaxscaleCiParser
     "#{url}/pool/main/m/#{release}/"
   end
 
-  def self.parse_maxscale_ci_rpm_repository_old(config, product_version, auth, maxscale_product, log, logger)
+  def self.parse_maxscale_ci_rpm_repository_old(config, product_version, auth, maxscale_product, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, nil, maxscale_product, product_version,
       %w[maxscale],
       ->(url, _) { url },
-      ->(package, _) { /#{package}/ }, log, logger,
+      ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['old_key'], auth)),
       split_rpm_platforms,
@@ -88,11 +88,11 @@ module MaxscaleCiParser
     )
   end
 
-  def self.parse_maxscale_ci_deb_repository_old(config, product_version, auth, maxscale_product, log, logger)
+  def self.parse_maxscale_ci_deb_repository_old(config, product_version, auth, maxscale_product, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, nil, maxscale_product, product_version,
       %w[maxscale], ->(url, _) { "#{url}main/binary-amd64/" },
-      ->(package, _) { /#{package}/ }, log, logger,
+      ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['old_key'], auth)),
       append_url(%w[debian ubuntu], :platform, true),

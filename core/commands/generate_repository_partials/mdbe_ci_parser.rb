@@ -15,19 +15,19 @@ module MdbeCiParser
     releases = []
     releases.concat(
       parse_mdbe_ci_rpm_repository(config['repo']['mdbe_ci_repo'], product_version,
-                                   auth_mdbe_ci_repo, log, logger)
+                                   config['scan_mode'], auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
       parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], product_version,
-                                   auth_mdbe_ci_repo, log, logger)
+                                   config['scan_mode'], auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
       parse_mdbe_ci_es_repo_rpm_repository(config['repo']['es_repo'], product_version,
-                                           auth_es_repo, log, logger)
+                                   config['scan_mode'], auth_es_repo, log, logger)
     )
     releases.concat(
       parse_mdbe_ci_es_repo_deb_repository(config['repo']['es_repo'], product_version,
-                                           auth_es_repo, log, logger)
+                                   config['scan_mode'], auth_es_repo, log, logger)
     )
     releases.concat(parse_cs_repos(config['repo']['cs_repo']['path'],
                                    config['repo']['cs_repo']['yum_key'],
@@ -38,12 +38,13 @@ module MdbeCiParser
     releases
   end
 
-  def self.parse_mdbe_ci_rpm_repository(config, product_version, auth, log, logger)
+  def self.parse_mdbe_ci_rpm_repository(config, product_version, scan_mode, auth, log, logger)
     parse_repository(
       config['path'], auth, nil, 'mdbe_ci', product_version,
       %w[MariaDB-client MariaDB-server],
       ->(url, _) { url },
       ->(package, _) { /#{package}/ },
+      scan_mode,
       log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
@@ -57,12 +58,12 @@ module MdbeCiParser
     )
   end
 
-  def self.parse_mdbe_ci_deb_repository(config, product_version, auth, log, logger)
+  def self.parse_mdbe_ci_deb_repository(config, product_version, scan_mode, auth, log, logger)
     parse_repository(
       config['path'], auth, nil, 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
-      ->(url, _) { generate_mariadb_ci_deb_full_url(url, logger, log, auth) },
-      ->(package, _) { /#{package}/ }, log, logger,
+      ->(url, _) { generate_mariadb_ci_deb_full_url(url, scan_mode, logger, log, auth) },
+      ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       append_url(%w[apt], nil, true),
@@ -77,11 +78,11 @@ module MdbeCiParser
     )
   end
 
-  def self.parse_mdbe_ci_es_repo_rpm_repository(config, product_version, auth, log, logger)
+  def self.parse_mdbe_ci_es_repo_rpm_repository(config, product_version, scan_mode, auth, log, logger)
     parse_repository_recursive(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[MariaDB-client MariaDB-server], ->(url, _) { url },
-      ->(package, _) { /#{package}/ }, log, logger,
+      ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       { lambda: append_to_field(:version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
       { lambda: append_url(%w[RPMS]) },
@@ -94,12 +95,12 @@ module MdbeCiParser
     )
   end
 
-  def self.parse_mdbe_ci_es_repo_deb_repository(config, product_version, auth, log, logger)
+  def self.parse_mdbe_ci_es_repo_deb_repository(config, product_version, scan_mode, auth, log, logger)
     parse_repository_recursive(
       config['path'], auth, add_auth_to_url(config['key'], auth), 'mdbe_ci', product_version,
       %w[mariadb-client mariadb-server],
       ->(url, _) { url },
-      ->(package, _) { /#{package}/ }, log, logger,
+      ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       { lambda: append_to_field(:version),
         complete_condition: dirs?(%w[apt yum bintar sourcetar DEB RPMS]) },
       { lambda: append_url(%w[DEB]) },

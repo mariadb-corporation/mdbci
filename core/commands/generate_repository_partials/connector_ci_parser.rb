@@ -14,21 +14,21 @@ module ConnectorCiParser
     releases = []
     releases.concat(parse_connector_ci_rpm_repository(config['repo'], connector_version,
                                                       auth_mdbe_ci_repo, connector_name,
-                                                      rpm_package_name, log, logger))
+                                                      rpm_package_name, config['scan_mode'], log, logger))
     releases.concat(parse_connector_ci_deb_repository(config['repo'], connector_version,
                                                       auth_mdbe_ci_repo, connector_name,
-                                                      deb_package_name, log, logger))
+                                                      deb_package_name, config['scan_mode'], log, logger))
     releases
   end
 
   def self.parse_connector_ci_rpm_repository(config, connector_version, auth,
-                                             connector_name, package_name, log, logger)
+                                             connector_name, package_name, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), connector_name, connector_version,
       [package_name],
       ->(url, _) { url },
       ->(package, _) { /#{package}/ },
-      log, logger,
+      scan_mode, log, logger,
       save_as_field(:version),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
@@ -41,13 +41,13 @@ module ConnectorCiParser
   end
 
   def self.parse_connector_ci_deb_repository(config, connector_version, auth,
-                                             connector_name, package_name, log, logger)
+                                             connector_name, package_name, scan_mode, log, logger)
     parse_repository(
       config['path'], auth, add_auth_to_url(config['key'], auth), connector_name, connector_version,
       [package_name],
       ->(url, _) { generate_connector_ci_deb_full_url(url, package_name) },
       ->(package, platform) { /#{package}.*#{platform}/ },
-      log, logger,
+      scan_mode, log, logger,
       save_as_field(:version),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
