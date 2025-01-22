@@ -45,7 +45,7 @@ class TerraformCleaner
     result = TerraformService.resource_type(provider).and_then do |resource_type|
       resources = TerraformService.nodes_to_resources(nodes, resource_type).values
       TerraformService.destroy(resources, @ui, path)
-      cleanup_nodes(configuration_id, nodes, provider)
+      cleanup_nodes(configuration_id, path, nodes, provider)
       unless TerraformService.has_running_resources_type?(resource_type, @ui, path)
         TerraformService.destroy_all(@ui, path)
         cleanup_additional_resources(path, configuration_id, provider)
@@ -58,9 +58,9 @@ class TerraformCleaner
 
   private
 
-  def cleanup_nodes(configuration_id, nodes, provider)
+  def cleanup_nodes(configuration_id, configuration_path, nodes, provider)
     nodes.each do |node|
-      destroy_machine(configuration_id, node, provider)
+      destroy_machine(configuration_id, configuration_path, node, provider)
     end
   end
 
@@ -88,7 +88,7 @@ class TerraformCleaner
     end
   end
 
-  def destroy_machine(configuration_id, node, provider)
+  def destroy_machine(configuration_id, configuration_path, node, provider)
     case provider
     when 'aws'
       @ui.info("Cleaning-up leftover machine using AWS EC2 #{node}")
@@ -101,6 +101,12 @@ class TerraformCleaner
       @ui.info("Cleaning-up leftover machine using Digital Ocean #{node}")
       instance_name = TerraformDigitaloceanGenerator.generate_instance_name(configuration_id, node)
       @digitalocean_service.delete_instance(instance_name)
+    when 'ibm'
+      pvm_instance_resource = TerraformIbmGenerator.generate_instance_resource(node)
+      public_network_resource = TerraformIbmGenerator.generate_public_network_resource(node)
+
+      @ui.info("Cleaning-up leftover machine & public network using IBM Cloud #{node}")
+      TerraformService.destroy([pvm_instance_resource, public_network_resource], @ui, configuration_path)
     else
       @ui.error("Unknown provider #{provider}. Can not manually destroy virtual machines.")
     end
