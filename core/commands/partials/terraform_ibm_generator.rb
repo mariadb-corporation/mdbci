@@ -149,7 +149,7 @@ class TerraformIbmGenerator
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
       pi_network_type      = "pub-vlan"
     }
-    
+
     data "ibm_pi_image" "data_source_image_<%= name %>" {
       pi_cloud_instance_id = "#{@ibm_config['workspace_id']}"
       pi_image_name = "<%= image %>"
@@ -173,7 +173,7 @@ class TerraformIbmGenerator
       }
       depends_on = [ibm_pi_network.public_network_<%= name %>, ibm_pi_key.ssh_key_#{@configuration_id}]
     }
-
+    
     output "<%= name %>_network" {
       value = {
         user = "cloud-user"
@@ -187,6 +187,14 @@ class TerraformIbmGenerator
     template.result(OpenStruct.new(instance_params).instance_eval { binding })
   end
   # rubocop:enable Metrics/MethodLength
+
+  def self.generate_instance_resource(node)
+    "ibm_pi_instance.#{node}"
+  end
+
+  def self.generate_public_network_resource(node)
+    "ibm_pi_network.public_network_#{node}"
+  end
 
   # Generate a labels block.
   # @param labels [Hash] list of labels in format { label_name: label_value }
