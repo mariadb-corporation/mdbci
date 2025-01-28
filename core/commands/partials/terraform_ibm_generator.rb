@@ -188,12 +188,16 @@ class TerraformIbmGenerator
   end
   # rubocop:enable Metrics/MethodLength
 
-  def self.generate_instance_resource(node)
-    "ibm_pi_instance.#{node}"
+  def self.generate_key_pair_name(configuration_id)
+    "public_key_#{configuration_id}"
+  end
+
+  def self.generate_public_network_name(instance_name)
+    "public_#{instance_name}"
   end
 
   def self.generate_public_network_resource(node)
-    "ibm_pi_network.public_network_#{node}"
+    "public_network_#{node}"
   end
 
   # Generate a labels block.

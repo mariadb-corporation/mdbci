@@ -112,6 +112,13 @@ module TerraformService
     resources.map { |resource| "-target=#{resource}" }.join(' ')
   end
 
+  def self.state_rm(resource_type, resource, logger, path = Dir.pwd)
+    result = ShellCommands.run_command_in_dir(logger, "terraform state rm '#{resource_type}.#{resource}'", path)
+    return Result.error(result[:output]) unless result[:value].success?
+
+    Result.ok('')
+  end
+
   # Generate resource specs by node names and it resource type.
   # For example, for nodes ['node1', 'node2'] and resource type 'aws_instance'
   # result: ['aws_instance.node1', 'aws_instance.node2'].

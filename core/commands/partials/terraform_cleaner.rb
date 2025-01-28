@@ -83,6 +83,10 @@ class TerraformCleaner
       @ui.info('Cleaning-up leftover additional resources using Digital Ocean')
       key_pair_name = TerraformDigitaloceanGenerator.generate_key_pair_name(configuration_id, configuration_path)
       @digitalocean_service.delete_ssh_key(key_pair_name)
+    when 'ibm'
+      @ui.info('Cleaning-up leftover additional resources using IBM Cloud')
+      key_pair_name = TerraformIbmGenerator.generate_key_pair_name(configuration_id)
+      @ibm_service.delete_ssh_key(key_pair_name)
     else
       @ui.error("Skipping of destroying additional resources for provider: #{provider}.")
     end
@@ -102,11 +106,23 @@ class TerraformCleaner
       instance_name = TerraformDigitaloceanGenerator.generate_instance_name(configuration_id, node)
       @digitalocean_service.delete_instance(instance_name)
     when 'ibm'
-      pvm_instance_resource = TerraformIbmGenerator.generate_instance_resource(node)
-      public_network_resource = TerraformIbmGenerator.generate_public_network_resource(node)
+      @ui.info("Cleaning-up leftover machine using IBM Cloud #{node}")
+      instance_name = TerraformIbmGenerator.generate_instance_name(configuration_id, node)
+      network_name = TerraformIbmGenerator.generate_public_network_name(instance_name)
 
-      @ui.info("Cleaning-up leftover machine & public network using IBM Cloud #{node}")
-      TerraformService.destroy([pvm_instance_resource, public_network_resource], @ui, configuration_path)
+      @ibm_service.delete_instance(instance_name)
+      @ibm_service.delete_public_network(network_name)
+
+      if File.file?("#{configuration_path}/terraform.tfstate")
+        @ui.info('Terraform state file is OK')
+        public_network_resource = TerraformIbmGenerator.generate_public_network_resource(node)
+
+        @ui.info('Removing absent IBM resources from Terraform state file')
+        TerraformService.state_rm('ibm_pi_instance', node, @ui, configuration_path)
+        TerraformService.state_rm('ibm_pi_network', public_network_resource, @ui, configuration_path)
+      else
+        @ui.info('Terraform state file not found')
+      end
     else
       @ui.error("Unknown provider #{provider}. Can not manually destroy virtual machines.")
     end
