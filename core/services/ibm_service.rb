@@ -21,6 +21,10 @@ class IbmService
       @ibm_iam_token = retrieve_iam_token
     end
 
+    def configured?
+      @configured
+    end
+
     def instance_exists?(instance_name)
       instance_data = fetch_pvm_instance_data(instance_name)
       !instance_data.nil?
@@ -30,6 +34,24 @@ class IbmService
       public_network_data = fetch_public_network_data(instance_name)
       !public_network_data.nil?
     end
+
+    def instances_list_with_time
+      return [] unless configured?
+    
+      list_instances['pvmInstances']
+        .map { |instance| generate_instance_info(instance) }
+        .sort_by { |vm| DateTime.parse(vm[:launch_time]) }
+        .reverse
+    end
+    
+    def generate_instance_info(instance)
+      {
+        launch_time: instance['creationDate'],
+        node_name: instance['serverName'],
+        instance_id: instance['pvmInstanceID']
+      }
+    end
+    
 
     def delete_ssh_key(key_pair_name)
       uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/tenants/#{@ibm_tenant_id}/sshkeys/#{key_pair_name}")

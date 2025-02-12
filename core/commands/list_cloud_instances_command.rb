@@ -8,6 +8,7 @@ require 'date'
 require_relative 'base_command'
 require_relative '../services/aws_service'
 require_relative '../services/gcp_service'
+require_relative '../services/ibm_service'
 require_relative '../services/configuration_reader'
 
 # Command shows list all active instances on Cloud Providers
@@ -20,7 +21,7 @@ class ListCloudInstancesCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-List cloud instances command shows a list of active machines on GCP and AWS providers and the time they were created.
+List cloud instances command shows a list of active machines on GCP, AWS and IBM Cloud providers and the time they were created.
 
 Add the --json flag for the list_cloud_instances command to show the machine readable text.
 Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this hours.
@@ -45,7 +46,7 @@ The command ends with an error if instances are present, no otherwise
   def show_list
     @hidden_instances = read_hidden_instances
     @number_instances = 0
-    print_lists(generate_aws_list, generate_gcp_list)
+    print_lists(generate_aws_list, generate_gcp_list, generate_ibm_list)
   end
 
   def generate_aws_list
@@ -90,6 +91,21 @@ The command ends with an error if instances are present, no otherwise
     Result.ok(all_instances)
   end
 
+  def generate_ibm_list
+    return Result.error('IBM Cloud service is not configured') unless @env.ibm_service.configured?
+
+    all_instances = @env.ibm_service.instances_list_with_time
+    return Result.error('No instances were found in IBM Cloud services') if all_instances.empty?
+
+    all_instances.each do |instance|
+      instance[:launch_time] = DateTime.parse(instance[:launch_time]).new_offset(0.0 / 24)
+    end
+    all_instances = select_by_time(all_instances) unless @env.hours.nil?
+    all_instances = time_to_string(all_instances)
+    @number_instances += all_instances.size
+    Result.ok(all_instances)
+  end
+
   def select_by_time(instances)
     new_instances = instances
     if @env.hours.to_i <= 0
@@ -108,26 +124,32 @@ The command ends with an error if instances are present, no otherwise
     end
   end
 
-  def print_lists(aws_list, gcp_list)
+  def print_lists(aws_list, gcp_list, ibm_list)
     if @env.json
-      @ui.out(in_json_format(aws_list, gcp_list))
+      @ui.out(in_json_format(aws_list, gcp_list, ibm_list))
     else
       if aws_list.success?
         @ui.info('List all active instances on AWS:')
-        @ui.info("\n" + in_table_format(aws_list.value, false))
+        @ui.info("\n" + in_table_format(aws_list.value, false, 'aws'))
       else
         @ui.info(aws_list.error)
       end
       if gcp_list.success?
         @ui.info('List all active instances on GCP:')
-        @ui.info("\n" + in_table_format(gcp_list.value, true))
+        @ui.info("\n" + in_table_format(gcp_list.value, true, 'gcp'))
       else
         @ui.info(gcp_list.error)
+      end
+      if ibm_list.success?
+        @ui.info('List all active instances on IBM Cloud:')
+        @ui.info("\n" + in_table_format(ibm_list.value, false, 'ibm'))
+      else
+        @ui.info(ibm_list.error)
       end
     end
   end
 
-  def in_json_format(aws_list, gcp_list)
+  def in_json_format(aws_list, gcp_list, ibm_list)
     aws_list_json = if aws_list.error?
                       { aws: aws_list.error }
                     else
@@ -138,18 +160,25 @@ The command ends with an error if instances are present, no otherwise
                     else
                       { gcp: gcp_list.value }
                     end
-    JSON.generate(aws_list_json.merge(gcp_list_json))
+    ibm_list_json = if ibm_list.error?
+                      { ibm: ibm_list.error }
+                    else
+                      { ibm: ibm_list.value }
+                    end
+    JSON.generate(aws_list_json.merge(gcp_list_json, ibm_list_json))
   end
 
-  def in_table_format(list, with_user_info)
+  def in_table_format(list, with_user_info, provider)
     return 'List empty' if list.empty?
 
     header = ['Launch time', 'Node name']
+    header.concat(['PVM Instance ID']) if provider == 'ibm'
     header.concat(['Zone' ,'Path', 'User']) if with_user_info
     table = TTY::Table.new(header: header)
     list.each do |instance|
       info = [instance[:launch_time], instance[:node_name]]
       info.concat([instance[:zone] ,instance[:path], instance[:username]]) if with_user_info
+      info.concat([instance[:instance_id]]) if provider == 'ibm'
       table << info
     end
     table.render(:unicode)
