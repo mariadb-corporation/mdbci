@@ -52,6 +52,34 @@ class IbmService
       }
     end
     
+    def public_networks_list
+      return [] unless configured?
+    
+      list_networks['networks'].map { |network| generate_public_network_info(network) }
+    end
+
+    def generate_public_network_info(network)
+      {
+        name: network['name'],
+        network_id: network['networkID']
+      }
+    end
+
+    def ssh_keys_list
+      return [] unless configured?
+    
+      list_ssh_keys['sshKeys']
+      .map { |key_pair| generate_key_pair_info(key_pair) }
+      .sort_by { |key_pair| DateTime.parse(key_pair[:launch_time]) }
+      .reverse
+    end
+
+    def generate_key_pair_info(key_pair)
+      {
+        name: key_pair['name'],
+        launch_time: key_pair['creationDate']
+      }
+    end
 
     def delete_ssh_key(key_pair_name)
       uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/tenants/#{@ibm_tenant_id}/sshkeys/#{key_pair_name}")
@@ -85,6 +113,11 @@ class IbmService
 
     def list_networks
       uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/cloud-instances/#{@cloud_instance_id}/networks")
+      send_get_request(uri)
+    end
+
+    def list_ssh_keys
+      uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/tenants/#{@ibm_tenant_id}/sshkeys")
       send_get_request(uri)
     end
 

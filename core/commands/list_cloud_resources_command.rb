@@ -15,7 +15,7 @@ class ListCloudResourcesCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-The command shows a list of active resources: instances, disks (volumes), security groups and key pairs on GCP and AWS providers and the time they were created.
+The command shows a list of active resources: instances, disks (volumes), security groups, public networks and key pairs on GCP, AWS and IBM Cloud providers and the time they were created.
 
 Add the --json flag to show the machine readable text.
 Add the --hours NUMBER_OF_HOURS flag to display the resources older than this hours.
@@ -60,24 +60,31 @@ The command ends with an error if any resource is present, no otherwise
 
   # Outputs the resources in a table format
   def show_in_table_format(resources)
-    @ui.info("AWS Instances:\n#{instances_table(resources[:instances][:aws])}")
-    @ui.info("GCP Instances:\n#{instances_table(resources[:instances][:gcp])}")
+    @ui.info("AWS Instances:\n#{instances_table(resources[:instances][:aws], 'aws')}")
+    @ui.info("GCP Instances:\n#{instances_table(resources[:instances][:gcp], 'gcp')}")
+    @ui.info("IBM Cloud Instances:\n#{instances_table(resources[:instances][:ibm], 'ibm')}")
     @ui.info("Disks (volumes):\n#{disks_table(resources[:disks])}")
-    @ui.info("AWS key pairs:\n#{key_pairs_table(resources[:key_pairs])}")
+    @ui.info("AWS key pairs:\n#{key_pairs_table(resources[:aws_key_pairs], 'aws')}")
     @ui.info("AWS security groups:\n#{security_groups_table(resources[:security_groups])}")
+    @ui.info("IBM Cloud public networks:\n#{public_network_table(resources[:ibm_public_networks])}")
+    @ui.info("IBM Cloud key pairs:\n#{key_pairs_table(resources[:ibm_key_pairs], 'ibm')}")
   end
 
   # Fetches the list of resources and generates their description in format
   # { instances: { gcp: Array, aws: Array }, disks: { gcp: Array, aws: Array }, key_pairs: Array, security_groups: Array }
   def list_resources
-    key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
+    aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
+    ibm_key_pairs = list_ibm_ssh_keys
     security_groups = @filter_unused ? @env.aws_service.list_unused_security_groups(@resource_expiration_threshold) : @env.aws_service.security_group_list
-    @resources_count += key_pairs.length + security_groups.length
+    ibm_public_networks = @env.ibm_service.public_networks_list
+    @resources_count += aws_key_pairs.length + ibm_key_pairs.length + security_groups.length + ibm_public_networks.length
     {
       instances: list_instances,
       disks: list_disks,
-      key_pairs: key_pairs,
-      security_groups: security_groups
+      aws_key_pairs: aws_key_pairs,
+      ibm_key_pairs: ibm_key_pairs,
+      security_groups: security_groups,
+      ibm_public_networks: ibm_public_networks
     }
   end
 
@@ -85,7 +92,8 @@ The command ends with an error if any resource is present, no otherwise
     @hidden_instances = read_hidden_instances
     {
       aws: list_aws_instances,
-      gcp: list_gcp_instances
+      gcp: list_gcp_instances,
+      ibm: list_ibm_instances
     }
   end
 
@@ -96,6 +104,16 @@ The command ends with an error if any resource is present, no otherwise
       aws: aws_disks,
       gcp: gcp_disks
     }
+  end
+
+  def list_ibm_ssh_keys
+    all_key_pairs = @env.ibm_service.ssh_keys_list
+    all_key_pairs.each do |key_pair|
+      key_pair[:launch_time] = DateTime.parse(key_pair[:launch_time]).new_offset(0.0 / 24)
+    end
+    all_key_pairs = select_by_time(all_key_pairs) unless @env.hours.nil?
+    all_key_pairs = time_to_string(all_key_pairs)
+    all_key_pairs
   end
 
   # Renders a table with the disks that are not attached to any instance
@@ -112,14 +130,31 @@ The command ends with an error if any resource is present, no otherwise
     table.render(:unicode)
   end
 
-  # Renders a table with the key pairs that are not used by any instance
-  def key_pairs_table(key_pairs)
+  # Renders a table with the key pairs that are not used by any instance (all for IBM PVM instances)
+  def key_pairs_table(key_pairs, provider)
     header = ['Key name', 'Creation time']
     table = TTY::Table.new(header: header)
     key_pairs.each do |key_pair|
-      table << [key_pair[:name], key_pair[:creation_date]]
+      case provider
+      when 'ibm'
+        table << [key_pair[:name], key_pair[:launch_time]]
+      when 'aws'
+        table << [key_pair[:name], key_pair[:creation_date]]
+      end
     end
     return 'No key pairs found' if table.empty?
+
+    table.render(:unicode)
+  end
+
+  # Renders a table with the public networks
+  def public_network_table(networks)
+    header = ['Public network name', 'Network ID']
+    table = TTY::Table.new(header: header)
+    networks.each do |network|
+      table << [network[:name], network[:network_id]]
+    end
+    return 'No public networks found' if table.empty?
 
     table.render(:unicode)
   end
@@ -194,6 +229,17 @@ The command ends with an error if any resource is present, no otherwise
     all_instances
   end
 
+  def list_ibm_instances
+    all_instances = @env.ibm_service.instances_list_with_time
+    all_instances.each do |instance|
+      instance[:launch_time] = DateTime.parse(instance[:launch_time]).new_offset(0.0 / 24)
+    end
+    all_instances = select_by_time(all_instances) unless @env.hours.nil?
+    all_instances = time_to_string(all_instances)
+    @resources_count += all_instances.length
+    all_instances
+  end
+
   def select_by_time(instances)
     instances.select do |instance|
       instance[:launch_time] < DateTime.now.new_offset(0.0 / 24) - (@env.hours.to_i / 24.0)
@@ -209,19 +255,35 @@ The command ends with an error if any resource is present, no otherwise
 
   # Renders the table with list of instances
   # @param list {Array} list of instances
-  def instances_table(list)
+  # @param provider {String} cloud provider
+  def instances_table(list, provider)
     return 'No instances found' if list.empty?
 
-    header = ['Launch time', 'Node name', 'Zone', 'Path', 'User']
+    header = ['Launch time', 'Node name']
+    case provider
+    when 'ibm'
+      header.concat(['PVM Instance ID'])
+    when 'gcp', 'aws'
+      header.concat(['Zone', 'Path', 'User'])
+    end
     table = TTY::Table.new(header: header)
     list.each do |instance|
-      info = [
-        instance[:launch_time],
-        instance[:node_name],
-        instance[:zone],
-        instance[:path],
-        instance[:username]
-      ]
+      case provider
+      when 'ibm'
+        info = [
+          instance[:launch_time],
+          instance[:node_name],
+          instance[:instance_id]
+        ]
+      when 'gcp', 'aws'
+        info = [
+          instance[:launch_time],
+          instance[:node_name],
+          instance[:zone],
+          instance[:path],
+          instance[:username]
+        ]
+      end
       table << info
     end
     table.render(:unicode)
