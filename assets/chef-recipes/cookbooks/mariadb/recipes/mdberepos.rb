@@ -71,11 +71,6 @@ when 'debian', 'ubuntu'
     glob '*'
     pin 'release o=MariaDB Enterprise'
     pin_priority '1000'
-  end
-  apt_preference "#{node['platform_family']}" do
-    glob '*'
-    pin "release o=#{node['platform_family']}"
-    pin_priority '100'
   end 
   apt_update do
     action :update
