@@ -67,16 +67,14 @@ when 'debian', 'ubuntu'
       end
     end
   end
-  mariadb_repo = node['mariadb']['repo']
-  pref_repo = mariadb_repo.split("https://").last.split("/").first
   apt_preference 'mariadb' do
     glob '*'
-    pin "origin #{pref_repo}"
+    pin 'release o=MariaDB Enterprise'
     pin_priority '1000'
   end
-  apt_preference 'distro-packages' do
+  apt_preference "#{node['platform_family']}" do
     glob '*'
-    pin 'release o=Ubuntu,Debian'
+    pin "release o=#{node['platform_family']}"
     pin_priority '100'
   end 
   apt_update do
