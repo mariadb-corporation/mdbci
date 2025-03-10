@@ -4,7 +4,6 @@ require_relative '../../models/command_result.rb'
 require_relative '../../models/configuration'
 require_relative '../../models/return_codes'
 require_relative '../../services/vagrant_service'
-require 'fileutils'
 
 # The class allows you to create a Vagrant box
 class VagrantBoxManager
@@ -17,22 +16,24 @@ class VagrantBoxManager
     @config = config
   end
 
-  def create_box(node, name_box, time)
-    if name_box.nil?
-      name_box = "new-box"
+  def create_box(node, box_name, time)
+    if box_name.nil?
+      box_name = "new-box"
     end
     
-    VagrantService.package(node, name_box, @ui, @config.path)
-    VagrantService.box_add(time, name_box, @ui, @config.path)
+    VagrantService.package(node, box_name, @ui, @config.path)
+    VagrantService.box_add(time, box_name, @ui, @config.path)
+
     SUCCESS_RESULT
   end
 
-  def destroy_box(name_box)
-    if name_box.nil?
-      name_box = "new-box"
+  def destroy_box(box_name)
+    if box_name.nil?
+      box_name = "new-box"
     end
 
-    VagrantService.box_remove(name_box, @ui, @config.path)
+    VagrantService.box_remove(box_name, @ui, @config.path)
+
     SUCCESS_RESULT
   end
 end

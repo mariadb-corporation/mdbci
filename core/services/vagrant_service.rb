@@ -8,6 +8,18 @@ module VagrantService
     ShellCommands.run_command_in_dir(logger, "vagrant up --provider=#{provider} #{node}", path)
   end
 
+  def self.package(node, box_name, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant package #{node} --output #{box_name} --info info.json", path)
+  end
+
+  def self.box_add(time, box_name, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant box add #{box_name} --name #{box_name}--#{time}", path)
+  end
+
+  def self.box_remove(box_name, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant box remove #{box_name}", path)
+  end
+
   def self.node_running?(node, logger, path = Dir.pwd)
     result = ShellCommands.run_command_in_dir(logger, "vagrant status #{node}", path, false)
     status_regex = /^#{node}\s+(.+)\s+(\(.+\))?\s$/
