@@ -18,24 +18,36 @@
 # rubocop:disable Metrics/ModuleLength
 module ShellCommands
   PREFIX = 'OS_ENV_'
+  RUBY_PREFIXES = %w(GEM_ BUNDLE_ BUNDLER_ RUBY )
 
-  @env = if ENV['APPIMAGE'] != 'true'
-           ENV
-         else
-           {}
-         end
-
-  # Get the environment for external service to run in
-  def self.environment
-    return @env unless @env.empty?
-
+  # Extract host variables from APPIMAGE prefixed ones
+  def self.host_environment
+    env = {}
     ENV.each_pair do |key, value|
       next unless key.include?(PREFIX)
 
       correct_key = key.sub(/^#{PREFIX}/, '')
-      @env[correct_key] = value
+      env[correct_key] = value
     end
-    @env['LIBVIRT_DEFAULT_URI'] ||= 'qemu:///system'
+    env['LIBVIRT_DEFAULT_URI'] ||= 'qemu:///system'
+    env
+  end
+
+  # Remove GEM environment variables
+  def self.gem_free_environment
+    ENV.to_h.delete_if do |key, value|
+      RUBY_PREFIXES.any? { |prefix| key.start_with?(prefix) }
+    end
+  end
+
+  @env = if ENV['APPIMAGE'] != 'true'
+    self.gem_free_environment
+  else
+    self.host_environment
+  end
+
+  # Get the environment for external service to run in
+  def self.environment
     @env
   end
 

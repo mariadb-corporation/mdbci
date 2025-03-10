@@ -24,6 +24,7 @@ require_relative 'commands/update_configuration_command'
 require_relative 'commands/show_command'
 require_relative 'commands/clean_unused_resources_command'
 require_relative 'commands/list_cloud_resources_command'
+require_relative 'commands/create_box_command'
 require_relative 'constants'
 require_relative 'models/configuration'
 require_relative 'models/tool_configuration'
@@ -226,6 +227,9 @@ EOF
       exit_code = command.execute
     when 'configure'
       command = ConfigureCommand.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'create-box'
+      command = CreateBoxCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'create_user'
       command = CreateUserCommand.new(ARGV, self, $out)
