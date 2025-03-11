@@ -8,8 +8,8 @@ module VagrantService
     ShellCommands.run_command_in_dir(logger, "vagrant up --provider=#{provider} #{node}", path)
   end
 
-  def self.package(node, box_name, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "vagrant package #{node} --output #{box_name} --info info.json", path)
+  def self.package(node_name, box_name, logger, path = Dir.pwd)
+    ShellCommands.run_command_in_dir(logger, "vagrant package #{node_name} --output #{box_name} --info info.json", path)
   end
 
   def self.box_add(time, box_name, logger, path = Dir.pwd)
