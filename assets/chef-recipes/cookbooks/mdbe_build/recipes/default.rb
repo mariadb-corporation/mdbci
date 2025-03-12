@@ -402,7 +402,6 @@ when 'debian'
   end
   execute 'disable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save'
-    user 'root'
     only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list') }
   end
   apt_update 'update apt cache' do
@@ -413,7 +412,6 @@ when 'debian'
   end
   execute 'enable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list'
-    user 'root'
     only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list.save') }
   end
   apt_update 'update apt cache' do
@@ -465,7 +463,6 @@ when 'ubuntu'
   end
   execute 'disable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save'
-    user 'root'
     only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list') }
   end
   apt_update 'update apt cache' do
@@ -476,7 +473,6 @@ when 'ubuntu'
   end
   execute 'enable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list'
-    user 'root'
     only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list.save') }
   end
   apt_update 'update apt cache' do
