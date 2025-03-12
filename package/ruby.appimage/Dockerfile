@@ -42,7 +42,7 @@ RUN dnf install -y --allowerasing \
 # Install and configure the Rust compilation toolchain
 ENV RUSTUP_HOME=/opt/rustup \
   PATH="/opt/cargo/bin:${PATH}" \
-  WRAPPER_BUILD_DIR="${WORPSPACE}/ruby-exec-wrapper"
+  WRAPPER_BUILD_DIR="${WORKPSPACE}/ruby-exec-wrapper"
 
 RUN wget https://sh.rustup.rs -O /tmp/install-rust.sh && \
   sh /tmp/install-rust.sh -y --no-modify-path && \
