@@ -119,7 +119,7 @@ Create a configuration file for MDBCI
 
 ### create-box
 
-Creates a Vagrant Box based on the template machine.
+Creates a new box based on the template machine.
 
 ### create_user
 

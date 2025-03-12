@@ -10,8 +10,7 @@ class CreateBoxCommand < BaseCommand
   # rubocop:disable Metrics/MethodLength
   def show_help
     info = <<-HELP
-
-
+#{'    '}
 "create-box" creates a new box based on the template machine.#{' '}
 
 OPTIONS:
@@ -19,10 +18,12 @@ OPTIONS:
   Uses [configuration file] for running instance. By default instance.json will be used as configuration template.
 --box-name:
   Uses [box name] for creating the name of the new box.
-If any of the labels passed to the command match any label in the machine description,
-then this machine will be brought up and configured according to its configuration.
-Labels should be separated with commas and should not contain any whitespaces.
-
+REMARK:
+This command creates a configuration directory in the directory in which it was started and deletes it at the end of its work.
+Example:
+Generate a new box named "custom-box" based on the "template.json":  
+./mdbci create-box --template template.json --box-name custom-box
+#{'  '}
     HELP
     @ui.info(info)
   end
@@ -43,6 +44,7 @@ Labels should be separated with commas and should not contain any whitespaces.
 
   # Сalls the command destroy
   def destroy_command
+    @env.keep_template = true
     command = DestroyCommand.new([CONFIG_DIR], @env, @ui)
     command.execute
   end
@@ -76,15 +78,13 @@ Labels should be separated with commas and should not contain any whitespaces.
     ConfigurationTemplate.from_path(template_file).and_then do |template|
       ConfigurationTemplate.determine_template_type(template, @env.box_definitions)
     end.and_then do |template_type|
-      @template_type = template_type
-      Result.ok('Template read')
+      template_type
     end
   end
 
   def execute
     if @env.show_help
       show_help
-      puts "#{}"
       return SUCCESS_RESULT
     end
 
@@ -99,8 +99,7 @@ Labels should be separated with commas and should not contain any whitespaces.
       return Result.error('Wrong box name')
     end
 
-    read_template_type
-    if @template_type != :vagrant
+    if read_template_type != :vagrant
       return Result.error('Wrong configuration type')
     end
 
