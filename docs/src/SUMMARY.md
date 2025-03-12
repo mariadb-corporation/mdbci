@@ -15,6 +15,7 @@
     - [Using dedicated servers](virtual_machines/using_dedicated_servers.md)
     - [Using shared disks](virtual_machines/using_shared_disks.md)
 - [Commands](commands/commands_summary.md)
+  - [create-box](commands/create-box.md)
   - [generate-product-repositories](commands/generate-product-repositories.md)
   - [help](commands/help_command.md)
   - [install_product](commands/install_product.md)
