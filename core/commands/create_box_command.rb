@@ -12,13 +12,13 @@ class CreateBoxCommand < BaseCommand
     info = <<-HELP
 
 
-"create-box" creates a Vagrant Box based on the template machine.#{' '}
+"create-box" creates a new box based on the template machine.#{' '}
 
 OPTIONS:
 --template:
   Uses [configuration file] for running instance. By default instance.json will be used as configuration template.
 --box-name:
-  Uses [box name] for creating the name of the new Vagrant Box.
+  Uses [box name] for creating the name of the new box.
 If any of the labels passed to the command match any label in the machine description,
 then this machine will be brought up and configured according to its configuration.
 Labels should be separated with commas and should not contain any whitespaces.
@@ -89,7 +89,8 @@ Labels should be separated with commas and should not contain any whitespaces.
     end
 
     if @env.boxName.nil?
-      return Result.error('Empty box name')
+      @ui.info('Empty box name')
+      return SUCCESS_RESULT
     end
 
     @boxes = @env.box_definitions

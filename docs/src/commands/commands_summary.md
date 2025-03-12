@@ -117,6 +117,10 @@ More about [clean-unused-resources command](./lost_resources_management_commands
 
 Create a configuration file for MDBCI
 
+### create-box
+
+Creates a Vagrant Box based on the template machine.
+
 ### create_user
 
 Creates a new user on the VM.
