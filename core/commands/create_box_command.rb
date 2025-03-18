@@ -10,8 +10,8 @@ class CreateBoxCommand < BaseCommand
   # rubocop:disable Metrics/MethodLength
   def show_help
     info = <<-HELP
-#{'    '}
-"create-box" creates a new box based on the template machine.#{' '}
+
+"create-box" creates a new box based on the template machine.
 
 OPTIONS:
 --template:
@@ -23,7 +23,6 @@ This command creates a configuration directory in the directory in which it was 
 Example:
 Generate a new box named "custom-box" based on the "template.json":  
 ./mdbci create-box --template template.json --box-name custom-box
-#{'  '}
     HELP
     @ui.info(info)
   end
@@ -31,19 +30,19 @@ Generate a new box named "custom-box" based on the "template.json":
   CONFIG_DIR = "conf"
 
   # Сalls the command generate
-  def generate_command
+  def run_generate_command
     command = GenerateCommand.new([CONFIG_DIR], @env, @ui)
     command.execute
   end
 
   # Сalls the command up
-  def up_command
+  def run_up_command
     command = UpCommand.new([CONFIG_DIR], @env, @ui)
     command.execute
   end
 
   # Сalls the command destroy
-  def destroy_command
+  def run_destroy_command
     @env.keep_template = true
     command = DestroyCommand.new([CONFIG_DIR], @env, @ui)
     command.execute
@@ -51,7 +50,7 @@ Generate a new box named "custom-box" based on the "template.json":
 
   # Create Vagrant box and adds it to Vagrant
   def create_box
-    node_name = @config.node_names[0]
+    node_name = @config.node_names.first
     parent_box_name = @config.node_configurations[node_name]["box"]
     parent_box_param = @boxes.get_box(parent_box_name)
     products = @config.node_configurations[node_name]["products"]
@@ -103,24 +102,21 @@ Generate a new box named "custom-box" based on the "template.json":
       return Result.error('Wrong configuration type')
     end
 
-    exit_code = generate_command
+    exit_code = run_generate_command
     return exit_code unless exit_code.success?
 
     @config = Configuration.new(CONFIG_DIR, @env.labels)
     if @config.node_names.size != 1
-      exit_code = destroy_command
-      return exit_code unless exit_code.success?
-
+      run_destroy_command
       return Result.error('Incorrect number of nodes in the configuration')
     end
 
-    destroy_old_box
-
-    exit_code = up_command
+    exit_code = run_up_command
     return exit_code unless exit_code.success?
 
+    destroy_old_box
     create_box
 
-    destroy_command
+    run_destroy_command
   end
 end
