@@ -332,7 +332,7 @@ class CentosDependencyManager < DependencyManager
   def required_packages
     %w[ceph-common gcc git libvirt libvirt-client libvirt-devel
        qemu-img qemu-kvm rsync wget yum-utils
-       device-mapper-persistent-data lvm2 zip]
+       device-mapper-persistent-data lvm2 zip libguestfs-tools]
   end
 
   def install_dependencies
@@ -426,7 +426,7 @@ class DebianDependencyManager < DependencyManager
     %w[build-essential cmake git libvirt-daemon-system libvirt-dev
        libxml2-dev libxslt-dev qemu qemu-kvm rsync wget
        apt-transport-https ca-certificates curl gnupg2 software-properties-common
-       zip]
+       zip libguestfs-tools]
   end
 
   def install_dependencies
@@ -490,7 +490,7 @@ class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
     packages = %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
                   qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
-                  software-properties-common zip]
+                  software-properties-common zip libguestfs-tools]
     if get_linux_distro_version_codename == 'focal'
       packages.concat(%w[libvirt-daemon-system bridge-utils libvirt-clients])
     else
