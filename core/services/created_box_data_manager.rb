@@ -10,8 +10,9 @@ require_relative '../models/result'
 class CreatedBoxDataManager
   def initialize(configuration_path)
     dir_path = File.join(configuration_path, "boxes")
-    @json_path = File.join(dir_path, "created-by-create-box-command.json")
     FileUtils.mkpath(dir_path)
+    @json_path = File.join(dir_path, "created-by-create-box-command.json")
+    
     if File.size?(@json_path).nil?
       File.open(@json_path, "w") do |file|
         file.puts "{"
@@ -21,7 +22,7 @@ class CreatedBoxDataManager
     @crafted_boxes_information = JSON.parse(File.read(@json_path))
   end
 
-  def generate_info_for_vagrant(start_time, parent_box_name, parent_box_parameters, products,
+  def generate_info_for_vagrant(parent_box_parameters, products, start_time, parent_box_name, 
                                 path_to_node)
     inf = { Time: start_time.gsub('--', ' '), Parent_box: parent_box_name,
             Provider: parent_box_parameters["provider"], Products: products }

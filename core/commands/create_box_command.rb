@@ -21,13 +21,13 @@ OPTIONS:
 REMARK:
 This command creates a configuration directory in the directory in which it was started and deletes it at the end of its work.
 Example:
-Generate a new box named "custom-box" based on the "template.json":  
+Generate a new box named "custom-box" based on the "template.json":
 ./mdbci create-box --template template.json --box-name custom-box
     HELP
     @ui.info(info)
   end
 
-  CONFIG_DIR = "conf"
+  CONFIG_DIR = 'conf'
 
   # Сalls the command generate
   def run_generate_command
@@ -51,12 +51,13 @@ Generate a new box named "custom-box" based on the "template.json":
   # Create Vagrant box and adds it to Vagrant
   def create_box
     node_name = @config.node_names.first
-    parent_box_name = @config.node_configurations[node_name]["box"]
+    parent_box_name = @config.node_configurations[node_name]['box']
     parent_box_param = @boxes.get_box(parent_box_name)
-    products = @config.node_configurations[node_name]["products"]
-    time_start_create = Time.now.strftime("%Y-%m-%d--%H:%M:%S")
-    @created_box_data_manager.generate_info_for_vagrant(time_start_create, parent_box_name,
-                                                        parent_box_param, products, CONFIG_DIR)
+    products = @config.node_configurations[node_name]['products']
+    time_start_create = Time.now.strftime('%Y-%m-%d--%H:%M:%S')
+    @created_box_data_manager.generate_info_for_vagrant(parent_box_param, products,
+                                                        time_start_create, parent_box_name,
+                                                        CONFIG_DIR)
 
     VagrantService.package(node_name, @env.boxName, @ui, @config.path)
     VagrantService.box_add(time_start_create, @env.boxName, @ui, @config.path)
@@ -66,10 +67,10 @@ Generate a new box named "custom-box" based on the "template.json":
   end
 
   def destroy_old_box
-    if @boxes.box_exists?(@env.boxName)
-      VagrantService.box_remove(@env.boxName, @ui, @config.path)
-      @created_box_data_manager.delete_box(@env.boxName)
-    end
+    return unless @boxes.box_exists?(@env.boxName)
+
+    VagrantService.box_remove(@env.boxName, @ui, @config.path)
+    @created_box_data_manager.delete_box(@env.boxName)
   end
 
   def read_template_type
@@ -102,14 +103,14 @@ Generate a new box named "custom-box" based on the "template.json":
       return Result.error('Wrong configuration type')
     end
 
+    if ConfigurationTemplate.new(@env.template_file).node_count != 1
+      return Result.error('Incorrect number of nodes in the configuration')
+    end
+
     exit_code = run_generate_command
     return exit_code unless exit_code.success?
 
     @config = Configuration.new(CONFIG_DIR, @env.labels)
-    if @config.node_names.size != 1
-      run_destroy_command
-      return Result.error('Incorrect number of nodes in the configuration')
-    end
 
     exit_code = run_up_command
     return exit_code unless exit_code.success?
