@@ -37,6 +37,10 @@ class ConfigurationTemplate
     Result.error("Unable to read template file. Error: #{e.message}")
   end
 
+  def node_count()
+    @node_configurations.size
+  end
+
   def initialize(template_path)
     @template_path = template_path
     @template = read_template_file

@@ -332,7 +332,7 @@ class CentosDependencyManager < DependencyManager
   def required_packages
     %w[ceph-common gcc git libvirt libvirt-client libvirt-devel
        qemu-img qemu-kvm rsync wget yum-utils
-       device-mapper-persistent-data lvm2 zip libguestfs-tools]
+       device-mapper-persistent-data lvm2 zip guestfs-tools]
   end
 
   def install_dependencies
