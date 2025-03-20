@@ -13,7 +13,7 @@ module VagrantService
   end
 
   def self.box_add(time, box_name, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "vagrant box add #{box_name} --name #{box_name}--#{time}", path)
+    ShellCommands.run_command_in_dir(logger, "vagrant box add #{box_name} --name #{box_name}--#{time.strftime('%Y-%m-%d--%H:%M:%S')}", path)
   end
 
   def self.box_remove(box_name, logger, path = Dir.pwd)

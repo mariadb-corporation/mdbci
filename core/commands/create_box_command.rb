@@ -54,22 +54,22 @@ Generate a new box named "custom-box" based on the "template.json":
     parent_box_name = @config.node_configurations[node_name]['box']
     parent_box_param = @boxes.get_box(parent_box_name)
     products = @config.node_configurations[node_name]['products']
-    time_start_create = Time.now.strftime('%Y-%m-%d--%H:%M:%S')
+    start_time_create = Time.now
     @created_box_data_manager.generate_info_for_vagrant(parent_box_param, products,
-                                                        time_start_create, parent_box_name,
+                                                        start_time_create, parent_box_name,
                                                         CONFIG_DIR)
 
     VagrantService.package(node_name, @env.boxName, @ui, @config.path)
-    VagrantService.box_add(time_start_create, @env.boxName, @ui, @config.path)
+    VagrantService.box_add(start_time_create, @env.boxName, @ui, @config.path)
 
-    @created_box_data_manager.generate_box_info(parent_box_name, @env.boxName, time_start_create,
+    @created_box_data_manager.generate_box_info(parent_box_name, @env.boxName, start_time_create,
                                                 @boxes)
   end
 
   def destroy_old_box
     return unless @boxes.box_exists?(@env.boxName)
 
-    VagrantService.box_remove(@env.boxName, @ui, @config.path)
+    VagrantService.box_remove(@boxes.get_box(@env.boxName)["box"], @ui, @config.path)
     @created_box_data_manager.delete_box(@env.boxName)
   end
 
