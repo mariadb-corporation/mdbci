@@ -14,17 +14,15 @@ class CreatedBoxDataManager
     @json_path = File.join(dir_path, "created-by-create-box-command.json")
     
     if File.size?(@json_path).nil?
-      File.open(@json_path, "w") do |file|
-        file.puts "{"
-        file.puts "}"
-      end
+      @crafted_boxes_information = Hash.new
+    else
+      @crafted_boxes_information = JSON.parse(File.read(@json_path))
     end
-    @crafted_boxes_information = JSON.parse(File.read(@json_path))
   end
 
-  def generate_info_for_vagrant(parent_box_parameters, products, start_time, parent_box_name, 
+  def generate_info_for_vagrant(parent_box_parameters, products, start_time_create, parent_box_name, 
                                 path_to_node)
-    inf = { Time: start_time.gsub('--', ' '), Parent_box: parent_box_name,
+    inf = { Time: start_time_create.strftime('%Y-%m-%d %H:%M:%S'), Parent_box: parent_box_name,
             Provider: parent_box_parameters["provider"], Products: products }
     File.open(File.join(path_to_node, "info.json"), "w") do |file|
       file.puts JSON.generate(inf)
@@ -45,7 +43,7 @@ class CreatedBoxDataManager
           "The specified box definition can not be found: #{box_name}" unless @crafted_boxes_information.key?(box_name)
   end
 
-  def generate_box_info(parent_box_name, new_box_name, start_time, boxes)
+  def generate_box_info(parent_box_name, new_box_name, start_time_create, boxes)
     opts = {
       array_nl: "\n",
       object_nl: "\n",
@@ -55,7 +53,7 @@ class CreatedBoxDataManager
     }
 
     box_parameters = boxes.get_box(parent_box_name)
-    box_parameters["box"] = "#{new_box_name}--#{start_time}"
+    box_parameters["box"] = "#{new_box_name}--#{start_time_create.strftime('%Y-%m-%d--%H:%M:%S')}"
     if box_parameters.key?("box_version")
       box_parameters["box_version"] = "0"
     end
