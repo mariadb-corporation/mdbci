@@ -12,12 +12,24 @@ module MaxScaleParser
     server: 'https://dlm.mariadb.com/repo/maxscale',
   }.freeze
 
-  def self.parse(config, product_version, user_ui, logger)
+  def self.parse(config, product_version, mdbe_private_key, product_name, user_ui, logger)
+    deb_config = config['deb']
+    rpm_config = config['rpm']
+    if product_name.include? "maxscale_enterprise"
+      deb_config['path'] = setup_private_key(deb_config['path'], mdbe_private_key)
+      rpm_config['path'] = setup_private_key(rpm_config['path'], mdbe_private_key)
+      maxscale_config = {
+        label: 'MariaDB MaxScale Enterprise',
+        server: "https://dlm.mariadb.com/repo/#{mdbe_private_key}/mariadb_maxscale_enterprise"
+      }
+    else
+      maxscale_config = MAX_SCALE_SERVER
+    end
     repos = [].concat(
       MariaDBCommunityParser.parse_releases(
-        config['deb'],
-        MAX_SCALE_SERVER,
-        'maxscale',
+        deb_config,
+        maxscale_config,
+        product_name,
         product_version,
         method(:form_deb_repositories),
         config['scan_mode'],
@@ -25,9 +37,9 @@ module MaxScaleParser
         logger
       ),
       MariaDBCommunityParser.parse_releases(
-        config['rpm'],
-        MAX_SCALE_SERVER,
-        'maxscale',
+        rpm_config,
+        maxscale_config,
+        product_name,
         product_version,
         MariaDBCommunityParser.method(:form_rpm_repositories),
         config['scan_mode'],

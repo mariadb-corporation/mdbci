@@ -26,6 +26,14 @@ maxscale:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
     key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
   scan_mode: use-all-links
+maxscale_enterprise:
+  rpm:
+    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_maxscale_enterprise/
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+  deb:
+    path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_maxscale_enterprise/
+    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+  scan_mode: use-all-links
 mdbe:
   repo:
     rpm:

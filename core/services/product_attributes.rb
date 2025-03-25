@@ -105,6 +105,14 @@ module ProductAttributes
       reverse_product: 'maxscale_remove',
       exclude_pre_release_latest: true
     },
+    'maxscale_enterprise' => {
+      recipe: 'mariadb-maxscale::install_maxscale',
+      repo_recipe: 'mariadb-maxscale::maxscale_repos',
+      name: 'maxscale_enterprise',
+      repository: 'maxscale_enterprise',
+      reverse_product: 'maxscale_remove',
+      exclude_pre_release_latest: true
+    },
     'maxscale_remove' => {
       recipe: 'mariadb-maxscale::purge_maxscale',
       name: 'maxscale',
