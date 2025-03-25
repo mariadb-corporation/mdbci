@@ -36,6 +36,7 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'mariadb' => 'mariadb',
     'maxscale_ci' => 'maxscale_ci',
     'maxscale_enterprise_ci' => 'maxscale_enterprise_ci',
+    'maxscale_enterprise' => 'maxscale_enterprise',
     'maxscale' => 'maxscale',
     'mdbe' => 'mdbe',
     'mysql' => 'mysql',
@@ -309,7 +310,9 @@ In order to specify the number of retries for repository configuration use --att
     when 'maxscale_ci_docker'
       MaxscaleCiDockerParser.parse(@ui, @env.tool_config)
     when 'maxscale'
-      MaxScaleParser.parse(product_config, @product_version, @ui, @logger)
+      MaxScaleParser.parse(product_config, @product_version, @env.mdbe_private_key, 'maxscale', @ui, @logger)
+    when 'maxscale_enterprise'
+      MaxScaleParser.parse(product_config, @product_version, @env.mdbe_private_key, 'maxscale_enterprise', @ui, @logger)
     when 'mdbe'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
