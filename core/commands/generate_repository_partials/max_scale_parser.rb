@@ -20,7 +20,7 @@ module MaxScaleParser
       rpm_config['path'] = setup_private_key(rpm_config['path'], mdbe_private_key)
       maxscale_config = {
         label: 'MariaDB MaxScale Enterprise',
-        server: "https://dlm.mariadb.com/repo/#{mdbe_private_key}/mariadb_maxscale_enterprise"
+        server: "https://dlm.mariadb.com/repo/#{mdbe_private_key}/maxscale-enterprise"
       }
     else
       maxscale_config = MAX_SCALE_SERVER

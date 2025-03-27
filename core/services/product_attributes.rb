@@ -108,8 +108,9 @@ module ProductAttributes
     'maxscale_enterprise' => {
       recipe: 'mariadb-maxscale::install_maxscale',
       repo_recipe: 'mariadb-maxscale::maxscale_repos',
-      name: 'maxscale_enterprise',
+      name: 'maxscale',
       repository: 'maxscale_enterprise',
+      repo_file_name: 'maxscale_enterprise',
       reverse_product: 'maxscale_remove',
       exclude_pre_release_latest: true
     },
