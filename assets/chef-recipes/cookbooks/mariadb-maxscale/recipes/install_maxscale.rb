@@ -86,20 +86,20 @@ end
 
 # Install packages
 if node[:platform_family] == "windows"
-  windows_package "maxscale" do
+  maxscale_package = 'maxscale'
+  windows_package maxscale_package do
     source "#{Chef::Config[:file_cache_path]}/maxscale.msi"
     installer_type :msi
     action :install
   end
 else
   if node['maxscale']['repo_file_name'].include?('enterprise')
-    package 'maxscale-enterprise' do
-      action :install
-    end
+    maxscale_package = 'maxscale-enterprise'
   else
-    package 'maxscale' do
-      action :install
-    end
+    maxscale_package = 'maxscale'
+  end
+  package maxscale_package do
+    action :install
   end
 end
 
@@ -122,9 +122,9 @@ end
 
 check_version 'Check the installed version of the MaxScale server' do
   version node['maxscale']['version']
-  deb_package_name 'maxscale'
-  rhel_package_name 'maxscale'
-  suse_package_name 'maxscale'
+  deb_package_name maxscale_package
+  rhel_package_name maxscale_package
+  suse_package_name maxscale_package
 
   not_if { node['maxscale']['ci_product'] }
 end
