@@ -27,6 +27,7 @@ class VagrantConfigurator
     @config = config
     @provider = config.provider
     @node_configurations = config.node_configurations
+    @disk_configurations = config.disk_configurations
     @env = env
     @repos = env.repos
     @ui = logger
@@ -78,15 +79,24 @@ class VagrantConfigurator
     @node_configurations[node]['disks'].each do |disk|
       if disk['dev_name'] != 'a'
         disk_dev_name = disk_dev_name.succ
-        @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
-        image_path = disk['image'] ? "#{disk['image']}" : "#{image_dir_path}/#{disk['id']}.img"
-        ShellCommands.run_command_in_dir(
-          @ui, 
-          "virsh attach-disk #{vm_name} --source #{image_path} --target vd#{disk_dev_name} --cache none --driver qemu --subdriver raw --serial #{disk['id']} --shareable",
-          image_dir_path
-        )
-        device_id = "/dev/disk/by-id/virtio-#{disk['id']}"
-        @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id})\" >> shared-disks")
+        selected_disk = @disk_configurations.find { |id, _| id == disk['id'] }&.last
+        if selected_disk
+          @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
+          if selected_disk['image_path']
+            image_path = selected_disk['image_path']
+          else
+            image_path = "#{image_dir_path}/#{disk['id']}.img"
+          end
+          ShellCommands.run_command_in_dir(
+            @ui, 
+            "virsh attach-disk #{vm_name} --source #{image_path} --target vd#{disk_dev_name} --cache none --driver qemu --subdriver raw --serial #{disk['id']} --shareable",
+            image_dir_path
+          )
+          device_id = "/dev/disk/by-id/virtio-#{disk['id']}"
+          @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id})\" >> shared-disks")
+        else
+          @ui.warning("Disk defined in node parameters was not found in the configuration. Skipped [#{disk['id']}].")
+        end
       else
         @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
       end
