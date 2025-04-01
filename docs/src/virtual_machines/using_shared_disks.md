@@ -54,8 +54,11 @@ Template configuration example:
 }
 ```
 
-## libvirt
+## Notes
 
-- Images will be deleted on the whole configuration destroy. This does not apply to destruction of individual nodes.
+- Disk image files automatically created by MDBCI (i.e., those stored in the `images/` subdirectory of the configuration directory) will be deleted when the entire configuration is destroyed.
+This does not apply to images specified via `image_path`, nor to partial destruction (e.g., removing individual nodes).
 
-- You can find shared disks block device names in the `shared-disks` file in the home directory.
+- You can find the block device names of shared disks in the `shared-disks` file located in the home directory on the virtual machine.
+
+- At the moment, this functionality is supported only for virtual machines using libvirt.
