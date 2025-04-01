@@ -404,7 +404,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     setup_command(name).and_then do |config|
       begin
         libvirt_disks = fetch_libvirt_disks
-        create_disks_images(libvirt_disks, @configuration_path)
+        disks_to_create = libvirt_disks.select { |disk| disk[1]['image_path'].nil? && !disk[1]['size'].nil? }
+        create_disks_images(disks_to_create, @configuration_path)
       rescue Exception => e
         @ui.error("Failed to create libvirt disks images: #{e.message}")
       end
