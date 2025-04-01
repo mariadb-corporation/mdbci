@@ -173,7 +173,7 @@ Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
   # @returns [Array] commands
   def allow_others_recursively_commands(images_dir)
     all_commands = []
-    current_command = 'sudo chmod o+r ' + images_dir
+    current_command = 'sudo chmod +x ' + images_dir
     images_dir.count('/').times do
       all_commands << current_command
       current_command += '/..'
@@ -352,6 +352,7 @@ class CentosDependencyManager < DependencyManager
       return ERROR_RESULT unless run_command('sudo systemctl start libvirtd')[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
+      return ERROR_RESULT unless add_user_to_usergroup('kvm')
     end
     SUCCESS_RESULT
   end
@@ -424,7 +425,7 @@ class DebianDependencyManager < DependencyManager
 
   def required_packages
     %w[build-essential cmake git libvirt-daemon-system libvirt-dev
-       libxml2-dev libxslt-dev qemu qemu-kvm rsync wget
+       libxml2-dev libxslt-dev qemu-kvm rsync wget
        apt-transport-https ca-certificates curl gnupg2 software-properties-common
        zip libguestfs-tools]
   end
@@ -444,6 +445,7 @@ class DebianDependencyManager < DependencyManager
       return result[:value].exitstatus unless result[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
+      return ERROR_RESULT unless add_user_to_usergroup('kvm')
     end
     SUCCESS_RESULT
   end
@@ -488,15 +490,30 @@ end
 # Class that manages Ubuntu specific packages
 class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
-    packages = %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
-                  qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
-                  software-properties-common zip libguestfs-tools]
-    if get_linux_distro_version_codename == 'focal'
-      packages.concat(%w[libvirt-daemon-system bridge-utils libvirt-clients])
-    else
-      packages << 'libvirt-bin'
+    %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
+      qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
+      software-properties-common zip libguestfs-tools libvirt-daemon-system bridge-utils libvirt-clients]
+  end
+
+  def install_dependencies
+    if should_install?('docker')
+      return ERROR_RESULT unless install_docker
+      return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
-    packages
+    return ERROR_RESULT unless install_ssh
+    if should_install?('libvirt')
+      run_command('sudo apt-get update')
+      result = run_sequence([
+        "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
+        'sudo systemctl restart libvirtd.service',
+        'sudo chmod 0644 /boot/vmlinuz*'
+      ])
+      return result[:value].exitstatus unless result[:value].success?
+      return ERROR_RESULT unless install_vagrant
+      return ERROR_RESULT unless add_user_to_usergroup('libvirt')
+      return ERROR_RESULT unless add_user_to_usergroup('kvm')
+    end
+    SUCCESS_RESULT
   end
 
   def install_docker
