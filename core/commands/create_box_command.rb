@@ -8,6 +8,10 @@ require_relative '../services/vagrant_service'
 # The command create new vagrant box .
 class CreateBoxCommand < BaseCommand
   # rubocop:disable Metrics/MethodLength
+  def self.synopsis
+    'Creates new box based on the template'
+  end
+
   def show_help
     info = <<-HELP
 

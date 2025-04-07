@@ -14,16 +14,16 @@ You must provide the following parameters to the command:
 
 ## Options
 
-* `--template` 
+* `--template [configuration file]` 
   Uses [configuration file] for running instance. By default instance.json will be used as configuration template.
-* `--box-name` 
+* `--box-name [box name]` 
   Uses [box name] for creating the name of the new box.
 
 ### Example
 
 Generate a new box named `custom-box` based on the `template.json`:  
 ```
-./mdbci create-box --template template.json --box-name custom-box
+ mdbci create-box --template template.json --box-name custom-box
 ```
 ### Details of working with Vagrant
 

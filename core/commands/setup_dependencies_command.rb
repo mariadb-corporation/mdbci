@@ -24,27 +24,20 @@ class SetupDependenciesCommand < BaseCommand
     info = <<-HELP
 'setup-dependencies' command prepares environment for starting virtual machines using MDBCI.
 
-First it installs Vagrant and suited libvirt development library using native distribution package manager.
-
-Then it installs 'vagrant-libvirt' plugin for Vagrant.
-
-After that 'default' VM pool created for libvirt and the current user added to the libvirt user group.
-
-Then it installs Docker Engine and current user added to the docker user group.
-
-Then it installs Terraform to /usr/local/bin path.
-
-Or you can installs only libvirt, only Docker Engine or only Terraform (for example libvirt):
+By default, the command installs `Terraform` at the path /usr/local/bin. 
+Additionally, Libvirt or Docker engine can be installed by specifying the `--product` parameter.(for example libvirt):
   mdbci setup-dependencies --product libvirt
 
-Use 'libvirt' as product option for libvirt, 'docker' for Docker Engine, and 'terraform' for Terraform.
+Use 'libvirt' as product option for libvirt and 'docker' from Docker Engine.
 
 OPTIONS:
   --reinstall:
 Delete previously installed dependencies and VM pools
   --force-distro [Distro name]:
 Force to use installation method implemented for specific linux distribution.
-Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
+Currently supports installation for Debian, Ubuntu, CentOS, RHEL
+  --product [Product name]
+Installing a product with name
     HELP
     @ui.info(info)
   end
