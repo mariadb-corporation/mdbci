@@ -19,6 +19,7 @@
   - [generate-product-repositories](commands/generate-product-repositories.md)
   - [help](commands/help_command.md)
   - [install_product](commands/install_product.md)
+  - [setup-dependencies](commands/setup_dependencies.md)
   - [setup_repo](commands/setup_repo.md)
   - [show repository](commands/show_repository.md)
   - [Lost resources management commands](commands/lost_resources_management_commands.md)

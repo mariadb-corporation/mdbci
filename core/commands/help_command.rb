@@ -16,6 +16,7 @@ require_relative 'remove_product_command'
 require_relative 'provide_files'
 require_relative 'check_relevance_command'
 require_relative 'list_cloud_instances_command'
+require_relative 'create_box_command'
 require_relative 'create_user_command'
 require_relative 'self_upgrade_command'
 require_relative 'clean_unused_resources_command'
@@ -33,6 +34,7 @@ class HelpCommand < BaseCommand
     'check_relevance' => CheckRelevanceCommand.synopsis,
     'clean-unused-resources' => CleanUnusedResourcesCommand.synopsis,
     'configure' => ConfigureCommand.synopsis,
+    'create-box' => CreateBoxCommand.synopsis,
     'create_user' => CreateUserCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
     'destroy' => DestroyCommand.synopsis,
