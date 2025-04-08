@@ -499,7 +499,7 @@ class UbuntuDependencyManager < DebianDependencyManager
       result = run_sequence([
         "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
         'sudo systemctl restart libvirtd.service',
-        'sudo chmod 0644 /boot/vmlinuz*'
+        'sudo chmod o+r /boot/vmlinuz-*'
       ])
       return result[:value].exitstatus unless result[:value].success?
       return ERROR_RESULT unless install_vagrant
