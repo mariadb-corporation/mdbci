@@ -18,7 +18,14 @@ class IbmService
       @ibm_api_key = ibm_config['api_key']
       @ibm_tenant_id = ibm_config['tenant_id']
       @ibm_region = ibm_config['region']
+      @ibm_zone = ibm_config['zone']
+      @ibm_private_network = ibm_config['private_network']
       @ibm_iam_token = retrieve_iam_token
+      unless [@cloud_instance_id, @ibm_crn, @ibm_api_key, @ibm_tenant_id, @ibm_region, @ibm_zone, @ibm_private_network].all?
+        @configured = false
+        logger.warning("Missing IBM Cloud configuration: credentials or required parameters are absent in MDBCI config")
+        return
+      end
     end
 
     def configured?
