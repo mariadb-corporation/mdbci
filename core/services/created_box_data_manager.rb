@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# require 'fileutils'
-# require 'json'
-
 require_relative '../out'
 require_relative '../models/result'
 
