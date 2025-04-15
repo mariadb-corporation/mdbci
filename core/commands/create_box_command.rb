@@ -87,14 +87,13 @@ Generate a new box named "custom-box" based on the "template.json":
   end
 
   def chek_vmlinuz_access_rights
-    flag = false
     Dir.glob("/boot/vmlinuz-*").each do |file|
       stat = File.stat(file)
       if (stat.mode & 0o004) == 0
-        flag = true
+        return true
       end
     end
-    return flag
+    return false
   end
 
   def chek_distro_is_ubuntu_or_mint
