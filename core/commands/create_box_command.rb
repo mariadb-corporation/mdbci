@@ -89,31 +89,19 @@ Generate a new box named "custom-box" based on the "template.json":
   def chek_vmlinuz_access_rights
     flag = false
     Dir.glob("/boot/vmlinuz-*").each do |file|
-      symbol = {
-        '0' => '---',
-        '1' => '--x',
-        '2' => '-w-',
-        '3' => '-wx',
-        '4' => 'r--',
-        '5' => 'r-x',
-        '6' => 'rw-',
-        '7' => 'rwx'
-      }
-      inf = File.stat(file)
-      access_rights = inf.mode.to_s(8)[-3..-1] || mode.to_s(8)
-      access_rights_symbol = access_rights.chars.map { |c| symbol[c] }.join
-      if !access_rights_symbol.match(/^*r..$/)
+      stat = File.stat(file)
+      if !stat.mode.to_s(8)[-3..-1].match(/^..[4567]$/)
         flag = true
       end
     end
     return flag
   end
 
-  def chek_distro
+  def chek_distro_is_ubuntu_or_mint
     distribution_regex = /^ID=\W*(\w+)\W*/
     File.open('/etc/os-release') do |release_file|
       release_file.each do |line|
-        return ['ubuntu', 'mint', 'debian'].include?(line.match(distribution_regex)[1].downcase) if line =~ distribution_regex
+        return ['ubuntu', 'mint'].include?(line.match(distribution_regex)[1].downcase) if line =~ distribution_regex
       end
     end
   end
@@ -124,7 +112,7 @@ Generate a new box named "custom-box" based on the "template.json":
       return SUCCESS_RESULT
     end
   
-    if chek_distro && chek_vmlinuz_access_rights
+    if chek_distro_is_ubuntu_or_mint && chek_vmlinuz_access_rights
       @ui.info('Incorrect permissions for vmlinuz. Please run setup-dependencies')
       return SUCCESS_RESULT
     end
