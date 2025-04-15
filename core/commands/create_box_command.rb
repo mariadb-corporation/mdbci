@@ -90,10 +90,10 @@ Generate a new box named "custom-box" based on the "template.json":
     Dir.glob("/boot/vmlinuz-*").each do |file|
       stat = File.stat(file)
       if (stat.mode & 0o004) == 0
-        return true
+        return false
       end
     end
-    return false
+    return true
   end
 
   def chek_distro_is_ubuntu_or_mint
@@ -111,7 +111,7 @@ Generate a new box named "custom-box" based on the "template.json":
       return SUCCESS_RESULT
     end
 
-    if chek_distro_is_ubuntu_or_mint && chek_vmlinuz_access_rights
+    if chek_distro_is_ubuntu_or_mint && !chek_vmlinuz_access_rights
       @ui.info('Incorrect permissions for vmlinuz. Please run setup-dependencies')
       return SUCCESS_RESULT
     end
