@@ -36,7 +36,13 @@ class AwsService
       @configured = false
       return
     end
-
+    unless [aws_config['region'], aws_config['availability_zone'], aws_config['use_existing_vpc'],
+            aws_config['role_arn'], aws_config['authorization_type'], aws_config['vpc_id'],
+            aws_config['subnet_id']].all?
+      @configured = false
+      logger.warning("Missing AWS configuration: credentials or required parameters are absent in MDBCI config")
+      return
+    end
     @aws_config = aws_config
     begin
       case @aws_config['authorization_type']
