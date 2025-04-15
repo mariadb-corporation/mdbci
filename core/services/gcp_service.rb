@@ -15,7 +15,14 @@ class GcpService
       @configured = false
       return
     end
-
+    unless [gcp_config['credentials_file'], gcp_config['project'], gcp_config['region'], 
+            gcp_config['zone'], gcp_config['use_existing_network'], gcp_config['network'], 
+            gcp_config['tags'], gcp_config['use_only_private_ip'], gcp_config['default_region'], 
+            gcp_config['regions']].all?
+      @configured = false
+      logger.warning("Missing GCP configuration: credentials or required parameters are absent in MDBCI config")
+      return
+    end
     @gcp_config = gcp_config
     @service = Google::Apis::ComputeV1::ComputeService.new
     @service.authorization = Google::Auth::ServiceAccountCredentials.make_creds(
