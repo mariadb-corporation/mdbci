@@ -41,6 +41,7 @@ require_relative 'commands/check_relevance_command'
 require_relative 'commands/list_cloud_instances_command'
 require_relative 'commands/create_user_command'
 require_relative 'commands/self_upgrade_command'
+require_relative 'commands/scan_box'
 
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
@@ -266,6 +267,9 @@ EOF
       exit_code = command.execute
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)
+      exit_code = command.execute
+    when 'scan-box'
+      command = ScanBoxCommand.new([ARGV.shift], self, $out)
       exit_code = command.execute
     when 'self-upgrade'
       command = SelfUpgradeCommand.new(ARGV, self, $out)

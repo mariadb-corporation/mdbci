@@ -1,9 +1,9 @@
 require_relative 'base_command'
+require_relative 'partials/vagrant_box_manager.rb'
 require_relative '../models/result'
 require_relative '../models/configuration'
 require_relative '../services/created_box_data_manager'
 require_relative '../services/box_definitions'
-require_relative '../services/vagrant_service'
 
 # The command create new vagrant box .
 class CreateBoxCommand < BaseCommand
@@ -50,31 +50,6 @@ Generate a new box named "custom-box" based on the "template.json":
     @env.keep_template = true
     command = DestroyCommand.new([CONFIG_DIR], @env, @ui)
     command.execute
-  end
-
-  # Create Vagrant box and adds it to Vagrant
-  def create_box
-    node_name = @config.node_names.first
-    parent_box_name = @config.node_configurations[node_name]['box']
-    parent_box_param = @boxes.get_box(parent_box_name)
-    products = @config.node_configurations[node_name]['products']
-    start_time_create = Time.now
-    @created_box_data_manager.generate_info_for_vagrant(parent_box_param, products,
-                                                        start_time_create, parent_box_name,
-                                                        CONFIG_DIR)
-
-    VagrantService.package(node_name, @env.boxName, @ui, @config.path)
-    VagrantService.box_add(start_time_create, @env.boxName, @ui, @config.path)
-
-    @created_box_data_manager.generate_box_info(parent_box_name, @env.boxName, start_time_create,
-                                                @boxes)
-  end
-
-  def destroy_old_box
-    return unless @boxes.box_exists?(@env.boxName)
-
-    VagrantService.box_remove(@boxes.get_box(@env.boxName)["box"], @ui, @config.path)
-    @created_box_data_manager.delete_box(@env.boxName)
   end
 
   def read_template_type
@@ -143,8 +118,10 @@ Generate a new box named "custom-box" based on the "template.json":
     exit_code = run_up_command
     return exit_code unless exit_code.success?
 
-    destroy_old_box
-    create_box
+    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
+
+    vagrant_box_manager.create_box(@config.node_names.first)
+    vagrant_box_manager.destroy_box()
 
     run_destroy_command
   end
