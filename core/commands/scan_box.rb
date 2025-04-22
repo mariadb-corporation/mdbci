@@ -5,6 +5,8 @@ require_relative '../models/configuration'
 require_relative '../services/created_box_data_manager'
 require_relative '../services/box_definitions'
 require_relative '../services/shell_commands'
+require_relative '../services/vagrant_service'
+
 
 # The command create new vagrant box .
 class ScanBoxCommand < BaseCommand
@@ -49,7 +51,7 @@ class ScanBoxCommand < BaseCommand
     end
   end
 
-  def chek_node_status
+  def chek_node_run
     if run_command("virsh list")[:output].split("\n").grep(/#{@env.node_name}\s+работает$/)
       return true
     end
@@ -90,18 +92,19 @@ class ScanBoxCommand < BaseCommand
       return Result.error('Wrong configuration type')
     end
 
-    if !@config.all_node_names.include?(@env.node_name)
-      return Result.error('Wrong node name')
+    if @config.node_names.length != 1 
+      return Result.error('Wrong path to node. Count nodes over 1')
     end
 
-    status_vms = chek_node_status
+    status_vms = chek_node_run
 
-    # return SUCCESS_RESULT
+    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
 
-    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config,@ui)
-
-    vagrant_box_manager.create_box(@env.node_name)
+    vagrant_box_manager.create_box(@config.node_names.first)
     vagrant_box_manager.destroy_box()
+
+    if status_vms
+      VagrantService.up(@config.provider, @config.node_names.first, @ui, @config.path)
 
     return SUCCESS_RESULT
   end

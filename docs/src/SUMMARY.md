@@ -19,6 +19,7 @@
   - [generate-product-repositories](commands/generate-product-repositories.md)
   - [help](commands/help_command.md)
   - [install_product](commands/install_product.md)
+  - [scan-box](commands/scan-box.md)
   - [setup-dependencies](commands/setup_dependencies.md)
   - [setup_repo](commands/setup_repo.md)
   - [show repository](commands/show_repository.md)

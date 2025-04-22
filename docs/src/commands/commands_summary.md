@@ -120,6 +120,7 @@ Create a configuration file for MDBCI
 ### create-box
 
 Creates a new box based on the template machine.
+More about [create-box command](create-box.md)
 
 ### create_user
 
@@ -171,6 +172,11 @@ Provide files from the local computer to the Node.
 ### public_keys
 
 Copy ssh keys to configured nodes.
+
+### scan-box
+
+Creates new box based on the node.
+More about [scan-box command](scan-box.md)
 
 ### setup-dependencies
 
