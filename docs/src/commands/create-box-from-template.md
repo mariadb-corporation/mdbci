@@ -1,4 +1,4 @@
-# create-box
+# create-box-from-template
 
 This command creates a new box based on the machine template.
 
@@ -24,7 +24,7 @@ You must provide the following parameters to the command:
 
 Generate a new box named `custom-box` based on the `template.json`:  
 ```
- mdbci create-box --template template.json --box-name custom-box
+ mdbci create-box-from-template --template template.json --box-name custom-box
 ```
 ### Details of working with Vagrant
 

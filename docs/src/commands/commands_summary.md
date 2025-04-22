@@ -117,10 +117,15 @@ More about [clean-unused-resources command](./lost_resources_management_commands
 
 Create a configuration file for MDBCI
 
-### create-box
+### create-box-from-node
+
+Creates new box based on the node.
+More about [create-box-from-node command](create-box-from-node.md)
+
+### create-box-from-template
 
 Creates a new box based on the template machine.
-More about [create-box command](create-box.md)
+More about [create-box-from-template command](create-box-from-template.md)
 
 ### create_user
 
@@ -172,11 +177,6 @@ Provide files from the local computer to the Node.
 ### public_keys
 
 Copy ssh keys to configured nodes.
-
-### scan-box
-
-Creates new box based on the node.
-More about [scan-box command](scan-box.md)
 
 ### setup-dependencies
 

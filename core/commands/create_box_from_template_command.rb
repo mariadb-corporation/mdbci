@@ -6,7 +6,7 @@ require_relative '../services/created_box_data_manager'
 require_relative '../services/box_definitions'
 
 # The command create new vagrant box .
-class CreateBoxCommand < BaseCommand
+class CreateBoxFromTemplateCommand < BaseCommand
   # rubocop:disable Metrics/MethodLength
   def self.synopsis
     'Creates new box based on the template'
@@ -15,7 +15,7 @@ class CreateBoxCommand < BaseCommand
   def show_help
     info = <<-HELP
 
-"create-box" creates a new box based on the template machine.
+"create-box-from-template" creates a new box based on the template machine.
 
 OPTIONS:
 --template:
@@ -26,7 +26,7 @@ REMARK:
 This command creates a configuration directory in the directory in which it was started and deletes it at the end of its work.
 Example:
 Generate a new box named "custom-box" based on the "template.json":
-./mdbci create-box --template template.json --box-name custom-box
+./mdbci create-box-from-template --template template.json --box-name custom-box
     HELP
     @ui.info(info)
   end

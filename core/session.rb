@@ -24,7 +24,7 @@ require_relative 'commands/update_configuration_command'
 require_relative 'commands/show_command'
 require_relative 'commands/clean_unused_resources_command'
 require_relative 'commands/list_cloud_resources_command'
-require_relative 'commands/create_box_command'
+require_relative 'commands/create_box_from_template_command'
 require_relative 'constants'
 require_relative 'models/configuration'
 require_relative 'models/tool_configuration'
@@ -41,7 +41,7 @@ require_relative 'commands/check_relevance_command'
 require_relative 'commands/list_cloud_instances_command'
 require_relative 'commands/create_user_command'
 require_relative 'commands/self_upgrade_command'
-require_relative 'commands/scan_box'
+require_relative 'commands/create_box_from_node_command'
 
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
@@ -229,8 +229,11 @@ EOF
     when 'configure'
       command = ConfigureCommand.new(ARGV, self, $out)
       exit_code = command.execute
-    when 'create-box'
-      command = CreateBoxCommand.new(ARGV, self, $out)
+    when 'create-box-from-node'
+      command = CreateBoxFromNodeCommand.new([ARGV.shift], self, $out)
+      exit_code = command.execute
+    when 'create-box-from-template'
+      command = CreateBoxFromTemplateCommand.new(ARGV, self, $out)
       exit_code = command.execute
     when 'create_user'
       command = CreateUserCommand.new(ARGV, self, $out)
@@ -267,9 +270,6 @@ EOF
       exit_code = command.execute
     when 'public_keys'
       command = PublicKeysCommand.new(ARGV, self, $out)
-      exit_code = command.execute
-    when 'scan-box'
-      command = ScanBoxCommand.new([ARGV.shift], self, $out)
       exit_code = command.execute
     when 'self-upgrade'
       command = SelfUpgradeCommand.new(ARGV, self, $out)
