@@ -9,7 +9,7 @@ require_relative '../services/vagrant_service'
 
 
 # The command create new vagrant box .
-class ScanBoxCommand < BaseCommand
+class CreateBoxFromNodeCommand < BaseCommand
   include ShellCommands
   # rubocop:disable Metrics/MethodLength
   def self.synopsis
@@ -18,7 +18,17 @@ class ScanBoxCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-    --------
+    "create-box-from-node" creates a new box based on the node.
+
+    OPTIONS:
+    --box-name:
+      Uses [box name] for creating the name of the new box.
+    REMARK:
+    This command turns off the node for the duration of its operation.
+    Example:
+    Generate a new box named "custom-box" based on the "conf/node1":  
+    mdbci create-box-from-node conf/node1 --box-name custom-box 
+
     HELP
     @ui.info(info)
   end
@@ -105,6 +115,7 @@ class ScanBoxCommand < BaseCommand
 
     if status_vms
       VagrantService.up(@config.provider, @config.node_names.first, @ui, @config.path)
+    end
 
     return SUCCESS_RESULT
   end

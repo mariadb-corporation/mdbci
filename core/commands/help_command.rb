@@ -16,12 +16,12 @@ require_relative 'remove_product_command'
 require_relative 'provide_files'
 require_relative 'check_relevance_command'
 require_relative 'list_cloud_instances_command'
-require_relative 'create_box_command'
+require_relative 'create_box_from_node_command'
+require_relative 'create_box_from_template_command'
 require_relative 'create_user_command'
 require_relative 'self_upgrade_command'
 require_relative 'clean_unused_resources_command'
 require_relative 'list_cloud_resources_command'
-require_relative 'scan_box'
 
 # Command provides a documentation to the user on how to use the mdbci tool.
 class HelpCommand < BaseCommand
@@ -35,7 +35,8 @@ class HelpCommand < BaseCommand
     'check_relevance' => CheckRelevanceCommand.synopsis,
     'clean-unused-resources' => CleanUnusedResourcesCommand.synopsis,
     'configure' => ConfigureCommand.synopsis,
-    'create-box' => CreateBoxCommand.synopsis,
+    'create-box-from-node' => CreateBoxFromNodeCommand.synopsis,
+    'create-box-from-template' => CreateBoxFromTemplateCommand.synopsis,
     'create_user' => CreateUserCommand.synopsis,
     'deploy-examples' => DeployCommand.synopsis,
     'destroy' => DestroyCommand.synopsis,
@@ -48,7 +49,6 @@ class HelpCommand < BaseCommand
     'remove_product' => RemoveProductCommand.synopsis,
     'provide-files' => ProvideFiles.synopsis,
     'public_keys' => 'Copy ssh keys to configured nodes.',
-    'scan-box' => ScanBoxCommand.synopsis,
     'self-upgrade' => SelfUpgradeCommand.synopsis,
     'setup-dependencies' => SetupDependenciesCommand.synopsis,
     'setup_repo' => SetupRepoCommand.synopsis,
