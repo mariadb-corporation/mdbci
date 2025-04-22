@@ -72,7 +72,7 @@ class AwsService
       web_identity_token_file: @identity_token_file.path,
       role_session_name: 'mdbci_session'
     )
-    Aws::EC2::Client.new(credentials: credentials)
+    Aws::EC2::Client.new(credentials: credentials, region: @aws_config['region'])
   end
 
   # Retrieve AWS web identity token via GCloud Auth and write it to a given file
