@@ -1,17 +1,16 @@
-# create-box
+# scan-box
 
-This command creates a new box based on the machine template.
+This command creates a new box based on the node.
 
 You must provide the following parameters to the command:
 
 * Name the new box with `--box-name`
-* The template file from which the box will be made `--template`
 
 #### Details of the command behavior 
 
 * The names of the new boxes must not match the names of the base boxes for MDBCI.
 * Information about created boxes is saved on the path "boxes/created-by-create-box-command.json" in the MDBCI catalog.
-* The command creates a configuration directory in the directory in which it was started and deletes it at the end of its work. The template file is not deleted.
+* The command turns off the node for the duration of its operation.
 
 ## Options
 
@@ -22,9 +21,9 @@ You must provide the following parameters to the command:
 
 ### Example
 
-Generate a new box named `custom-box` based on the `template.json`:  
+Generate a new box named `custom-box` based on the `conf/node1`:  
 ```
- mdbci create-box --template template.json --box-name custom-box
+ mdbci scan-box conf/node1 --box-name custom-box 
 ```
 ### Details of working with Vagrant
 
