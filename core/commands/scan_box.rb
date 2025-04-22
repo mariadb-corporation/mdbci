@@ -52,7 +52,7 @@ class ScanBoxCommand < BaseCommand
   end
 
   def chek_node_run
-    if run_command("virsh list")[:output].split("\n").grep(/#{@env.node_name}\s+работает$/)
+    if run_command("virsh list")[:output].split("\n").grep(/#{@env.node_name}\s+работает|running$/)
       return true
     end
     return false
