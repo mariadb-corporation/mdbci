@@ -63,8 +63,10 @@ class CreateBoxFromNodeCommand < BaseCommand
 
   def chek_node_run
     if run_command("virsh list")[:output].split("\n").grep(/#{@env.node_name}\s+работает|running$/)
+      @ui.info('Node is running')
       return true
     end
+    @ui.info('Node is not running')
     return false
   end
 
@@ -106,14 +108,14 @@ class CreateBoxFromNodeCommand < BaseCommand
       return Result.error('Wrong path to node. Count nodes over 1')
     end
 
-    status_vms = chek_node_run
+    node_running = chek_node_run
 
     vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
 
     vagrant_box_manager.create_box(@config.node_names.first)
     vagrant_box_manager.destroy_box()
 
-    if status_vms
+    if node_running
       VagrantService.up(@config.provider, @config.node_names.first, @ui, @config.path)
     end
 
