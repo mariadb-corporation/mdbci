@@ -20,6 +20,7 @@ The command shows a list of active resources: instances, disks (volumes), securi
 Add the --json flag to show the machine readable text.
 Add the --hours NUMBER_OF_HOURS flag to display the resources older than this hours.
 Add the --output-file FILENAME flag to generate a report as a JSON with the specified name.
+Add the --all-regions flag to show instances in all of the available regions (AWS only).
 
 If --hours flag is not specified, all runnung resources will be shown.
 The command ends with an error if any resource is present, no otherwise
@@ -195,8 +196,14 @@ The command ends with an error if any resource is present, no otherwise
   end
 
   def list_aws_instances
-    all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
-      first[:launch_time] <=> second[:launch_time]
+    if @env.all_regions
+      all_instances = @env.aws_service.instances_list_in_all_regions.sort do |first, second|
+        first[:launch_time] <=> second[:launch_time]
+      end
+    else
+      all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
+        first[:launch_time] <=> second[:launch_time]
+      end
     end
     unless @hidden_instances['aws'].nil?
       all_instances.reject! do |instance|

@@ -47,7 +47,7 @@ class AwsService
     begin
       case @aws_config['authorization_type']
       when AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
-        @client = create_authorized_client_web_identity
+        @client = create_authorized_client_web_identity(@aws_config['region'])
       else
         @client = Aws::EC2::Client.new(
           access_key_id: @aws_config['access_key_id'],
@@ -63,8 +63,9 @@ class AwsService
   end
 
   # Create authorized AWS client via web identity token
+  # @param [String] aws_region AWS region
   # @return [Aws::EC2::Client] AWS client
-  def create_authorized_client_web_identity
+  def create_authorized_client_web_identity(aws_region)
     @identity_token_file = Tempfile.new('identity-token')
     write_identity_token_file(@identity_token_file)
     credentials = Aws::AssumeRoleWebIdentityCredentials.new(
@@ -72,7 +73,7 @@ class AwsService
       web_identity_token_file: @identity_token_file.path,
       role_session_name: 'mdbci_session'
     )
-    Aws::EC2::Client.new(credentials: credentials, region: @aws_config['region'])
+    Aws::EC2::Client.new(credentials: credentials, region: aws_region)
   end
 
   # Retrieve AWS web identity token via GCloud Auth and write it to a given file
@@ -92,10 +93,9 @@ class AwsService
 
   # Get information about instances
   # @return [Hash] instances information
-  def describe_instances
+  def describe_instances(client)
     return { reservations: [] } unless configured?
-
-    @client.describe_instances.to_h
+    client.describe_instances.to_h
   end
 
   # Get user's account parameters
@@ -109,7 +109,8 @@ class AwsService
   def instances_list
     return [] unless configured?
 
-    describe_instances[:reservations].map do |reservation|
+    instances = describe_instances(@client)
+    instances[:reservations].map do |reservation|
       reservation[:instances].map do |instance|
         next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
 
@@ -129,14 +130,33 @@ class AwsService
 
   def instances_list_with_time_and_name
     return [] unless configured?
-
-    describe_instances[:reservations].map do |reservation|
+    
+    instances = describe_instances(@client)
+    instances[:reservations].map do |reservation|
       reservation[:instances].map do |instance|
         next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
 
         generate_instance_info(instance)
       end
     end.flatten.compact
+  end
+
+  def instances_list_in_all_regions
+    return [] unless configured?
+    all_instances = []
+    @aws_config['available_regions'].each do |region|
+      client = create_authorized_client_web_identity(region)
+      instances = describe_instances(client)
+      region_active_instances = instances[:reservations].map do |reservation|
+        reservation[:instances].map do |instance|
+          next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
+
+          generate_instance_info(instance)
+        end
+      end.flatten.compact
+      all_instances.append(region_active_instances)
+    end
+    all_instances.flatten
   end
 
   # Delete the temporary file with the web identity token

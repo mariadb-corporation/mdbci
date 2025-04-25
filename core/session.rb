@@ -95,6 +95,7 @@ class Session
   attr_accessor :cpu_count
   attr_accessor :threads_count
   attr_accessor :all
+  attr_accessor :all_regions
   attr_accessor :isForce
   attr_accessor :force_version
   attr_accessor :architecture

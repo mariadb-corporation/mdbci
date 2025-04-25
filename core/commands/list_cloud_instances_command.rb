@@ -25,6 +25,7 @@ List cloud instances command shows a list of active machines on GCP, AWS and IBM
 
 Add the --json flag for the list_cloud_instances command to show the machine readable text.
 Add the --hours NUMBER_OF_HOURS flag for displaying the machine older than this hours.
+Add the --all-regions flag to show instances in all of the available regions (AWS only).
 The command ends with an error if instances are present, no otherwise
     HELP
     @ui.info(info)
@@ -52,8 +53,14 @@ The command ends with an error if instances are present, no otherwise
   def generate_aws_list
     return Result.error('AWS-service is not configured') unless @env.aws_service.configured?
 
-    all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
-      first[:launch_time] <=> second[:launch_time]
+    if @env.all_regions
+      all_instances = @env.aws_service.instances_list_in_all_regions.sort do |first, second|
+        first[:launch_time] <=> second[:launch_time]
+      end
+    else
+      all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
+        first[:launch_time] <=> second[:launch_time]
+      end
     end
     unless @hidden_instances['aws'].nil?
       all_instances.reject! do |instance|
