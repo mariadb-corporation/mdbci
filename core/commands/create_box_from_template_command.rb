@@ -61,33 +61,9 @@ Generate a new box named "custom-box" based on the "template.json":
     end
   end
 
-  def chek_vmlinuz_access_rights
-    Dir.glob("/boot/vmlinuz-*").each do |file|
-      stat = File.stat(file)
-      if (stat.mode & 0o004) == 0
-        return false
-      end
-    end
-    return true
-  end
-
-  def chek_distro_is_ubuntu_or_mint
-    distribution_regex = /^ID=\W*(\w+)\W*/
-    File.open('/etc/os-release') do |release_file|
-      release_file.each do |line|
-        return ['ubuntu', 'mint'].include?(line.match(distribution_regex)[1].downcase) if line =~ distribution_regex
-      end
-    end
-  end
-
   def execute
     if @env.show_help
       show_help
-      return SUCCESS_RESULT
-    end
-
-    if chek_distro_is_ubuntu_or_mint && !chek_vmlinuz_access_rights
-      @ui.info('Incorrect permissions for vmlinuz. Please run setup-dependencies')
       return SUCCESS_RESULT
     end
 
@@ -120,8 +96,8 @@ Generate a new box named "custom-box" based on the "template.json":
 
     vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
 
-    vagrant_box_manager.create_box(@config.node_names.first)
-    vagrant_box_manager.destroy_box()
+    exit_code = vagrant_box_manager.create_box(@config.node_names.first)
+    return exit_code unless exit_code.success?
 
     run_destroy_command
   end

@@ -26,9 +26,23 @@ class CreatedBoxDataManager
     end
   end
 
+  def write_to_file
+    opts = {
+      array_nl: "\n",
+      object_nl: "\n",
+      indent: '  ',
+      space_before: ' ',
+      space: ' '
+    }
+    File.open(@json_path, "w") do |file|
+      file.puts JSON.generate(@crafted_boxes_information, opts)
+    end
+  end
+
   def delete_box(box_name)
     check_box(box_name)
     @crafted_boxes_information.delete(box_name)
+    write_to_file
   end
 
   def box_exists?(box_name)
@@ -41,14 +55,6 @@ class CreatedBoxDataManager
   end
 
   def generate_box_info(parent_box_name, new_box_name, start_time_create, boxes)
-    opts = {
-      array_nl: "\n",
-      object_nl: "\n",
-      indent: '  ',
-      space_before: ' ',
-      space: ' '
-    }
-
     box_parameters = boxes.get_box(parent_box_name)
     box_parameters["box"] = "#{new_box_name}--#{start_time_create.strftime('%Y-%m-%d--%H:%M:%S')}"
     if box_parameters.key?("box_version")
@@ -57,8 +63,7 @@ class CreatedBoxDataManager
 
     box_record = { "#{new_box_name}": box_parameters }
 
-    File.open(@json_path, "w") do |file|
-      file.puts JSON.generate(@crafted_boxes_information.merge(box_record), opts)
-    end
+    @crafted_boxes_information = @crafted_boxes_information.merge(box_record)
+    write_to_file
   end
 end
