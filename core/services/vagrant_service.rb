@@ -1,19 +1,50 @@
 # frozen_string_literal: true
 
 require_relative 'shell_commands'
+require_relative '../models/return_codes'
 
 # This class allows to execute commands of Terraform-cli
 module VagrantService
+  include ReturnCodes
+
+  def self.chek_vmlinuz_access_rights
+    Dir.glob("/boot/vmlinuz-*").each do |file|
+      stat = File.stat(file)
+      if (stat.mode & 0o004) == 0
+        return false
+      end
+    end
+    return true
+  end
+
+  def self.chek_distro_is_ubuntu_or_mint
+    distribution_regex = /^ID=\W*(\w+)\W*/
+    File.open('/etc/os-release') do |release_file|
+      release_file.each do |line|
+        return ['ubuntu',
+                'mint'].include?(line.match(distribution_regex)[1].downcase) if line =~ distribution_regex
+      end
+    end
+  end
+
   def self.up(provider, node, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, "vagrant up --provider=#{provider} #{node}", path)
   end
 
   def self.package(node_name, box_name, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "vagrant package #{node_name} --output #{box_name} --info info.json", path)
+    if self.chek_distro_is_ubuntu_or_mint && !self.chek_vmlinuz_access_rights
+      return Result.error('Incorrect permissions for vmlinuz. Please run setup-dependencies')
+    end
+
+    ShellCommands.run_command_in_dir(logger,
+                                     "vagrant package #{node_name} --output #{box_name} --info info.json", path)
+
+    SUCCESS_RESULT
   end
 
   def self.box_add(time, box_name, logger, path = Dir.pwd)
-    ShellCommands.run_command_in_dir(logger, "vagrant box add #{box_name} --name #{box_name}--#{time.strftime('%Y-%m-%d--%H:%M:%S')}", path)
+    ShellCommands.run_command_in_dir(logger,
+                                     "vagrant box add #{box_name} --name #{box_name}--#{time.strftime('%Y-%m-%d--%H:%M:%S')}", path)
   end
 
   def self.box_remove(box_name, logger, path = Dir.pwd)
@@ -58,7 +89,6 @@ module VagrantService
                   'whoami' => ssh_config['User'],
                   'hostname' => config.node_configurations[name]['hostname'] })
     end
-
   end
 
   # Runs 'vagrant ssh-config' command for node and collects configuration
