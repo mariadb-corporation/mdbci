@@ -7,7 +7,6 @@ require_relative '../services/box_definitions'
 require_relative '../services/shell_commands'
 require_relative '../services/vagrant_service'
 
-
 # The command create new vagrant box .
 class CreateBoxFromNodeCommand < BaseCommand
   include ShellCommands
@@ -26,8 +25,8 @@ class CreateBoxFromNodeCommand < BaseCommand
     REMARK:
     This command turns off the node for the duration of its operation.
     Example:
-    Generate a new box named "custom-box" based on the "conf/node1":  
-    mdbci create-box-from-node conf/node1 --box-name custom-box 
+    Generate a new box named "custom-box" based on the "conf/node1":
+    mdbci create-box-from-node conf/node1 --box-name custom-box
 
     HELP
     @ui.info(info)
@@ -43,7 +42,7 @@ class CreateBoxFromNodeCommand < BaseCommand
   end
 
   def chek_node_run
-    if !run_command("LC_ALL=C virsh list")[:output].split("\n").grep(/#{@env.node_name}\s+running$/).empty?
+    if !run_command("LC_ALL=C virsh list")[:output].split("\n").grep(/#{@config.node_names.first}\s+running$/).empty?
       @ui.info('Node is running')
       return true
     end
@@ -80,13 +79,14 @@ class CreateBoxFromNodeCommand < BaseCommand
       return Result.error('Wrong configuration type')
     end
 
-    if @config.node_names.length != 1 
+    if @config.node_names.length != 1
       return Result.error('Wrong path to node. Count nodes over 1')
     end
 
     node_running = chek_node_run
 
-    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
+    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config,
+                                                @ui)
 
     exit_code = vagrant_box_manager.create_box(@config.node_names.first)
     return exit_code unless exit_code.success?
