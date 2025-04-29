@@ -85,9 +85,7 @@ class CreateBoxFromNodeCommand < BaseCommand
 
     node_running = chek_node_run
 
-    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config,
-                                                @ui)
-
+    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
     exit_code = vagrant_box_manager.create_box(@config.node_names.first)
     return exit_code unless exit_code.success?
 

@@ -31,9 +31,7 @@ class VagrantBoxManager
     return exit_code unless exit_code.success?
 
     VagrantService.box_add(start_time_create, @env.boxName, @ui, @config.path)
-
     FileUtils.rm(File.join(@config.path, @env.boxName), force: true)
-
     destroy_box(@env.boxName)
 
     @created_box_data_manager.generate_box_info(parent_box_name, @env.boxName, start_time_create,
