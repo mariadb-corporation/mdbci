@@ -106,10 +106,10 @@ class AwsService
 
   # Get the instances list
   # @return [Array] instances list in format [{ instance_id, node_name, configuration_id, launch_time, key_name, security_groups }]
-  def instances_list
+  def instances_list(client)
     return [] unless configured?
 
-    instances = describe_instances(@client)
+    instances = describe_instances(client)
     instances[:reservations].map do |reservation|
       reservation[:instances].map do |instance|
         next nil if !%w[running pending].include?(instance[:state][:name]) || instance[:tags].nil?
@@ -268,10 +268,10 @@ class AwsService
     return [] unless configured?
 
     response = if tags.empty?
-                 @client.describe_security_groups
-               else
-                 @client.describe_security_groups(filters: tags_to_filters(tags))
-               end
+                @client.describe_security_groups
+              else
+                @client.describe_security_groups(filters: tags_to_filters(tags))
+              end
     security_groups = response.to_h[:security_groups]
     security_groups.map do |security_group|
       tags = security_group.fetch(:tags, {})
@@ -285,13 +285,35 @@ class AwsService
     end
   end
 
+  def security_group_list_all_regions
+    return [] unless configured?
+    all_regions_sg = []
+    @aws_config['available_regions'].each do |region|
+      client = create_authorized_client_web_identity(region)
+      response = client.describe_security_groups
+      security_groups = response.to_h[:security_groups]
+      sg = security_groups.map do |security_group|
+        tags = security_group.fetch(:tags, {})
+        configuration_id = extract_tag_value(tags, 'configuration_id')
+        creation_date = extract_tag_value(tags, 'generated_at')
+        {
+          group_id: security_group[:group_id],
+          configuration_id: configuration_id,
+          creation_date: creation_date.nil? ? nil : DateTime.parse(creation_date)
+        }
+      end
+      all_regions_sg.append(sg)
+    end
+    all_regions_sg.flatten
+  end
+
   # Get the security groups specified by the configuration id
   # @param [String] configuration_id configuration id
   # @return [Array] security_group list in format [{ group_id, configuration_id }]
   def get_security_groups_by_config_id(configuration_id)
     return [] unless configured?
 
-    security_group_list(configuration_id: configuration_id)
+      security_group_list(configuration_id: configuration_id)
   end
 
   # Delete security group specified by the group id
@@ -314,11 +336,25 @@ class AwsService
 
   # List IDs of all security groups that are used by the running instances
   def list_active_security_groups
-    instances_list.map do |instance|
+    instances_list(@client).map do |instance|
       instance[:security_groups].map do |security_group|
         security_group[:group_id]
       end
     end.flatten
+  end
+
+  def list_active_sg_all_regions
+    all_sg = []
+    @aws_config['available_regions'].each do |region|
+      client = create_authorized_client_web_identity(region)
+      sg = instances_list(client).map do |instance|
+        instance[:security_groups].map do |security_group|
+          security_group[:group_id]
+        end
+      end.flatten
+      all_regions_sg.append(sg)
+    end
+    all_regions_sg.flatten
   end
 
   # List security groups that are older than `expiration_threshold_days` days and aren't used by any VM
@@ -327,6 +363,16 @@ class AwsService
     hostname = Socket.gethostname
     active_security_groups = list_active_security_groups
     security_group_list({}).select do |security_group|
+      !active_security_groups.include?(security_group[:group_id]) &&
+        !security_group[:creation_date].nil? &&
+        resource_expired?(security_group[:creation_date], expiration_threshold_days)
+    end
+  end
+
+  def list_unused_sg_all_regions(expiration_threshold_days)
+    hostname = Socket.gethostname
+    active_security_groups = list_active_sg_all_regions
+    security_group_list_all_regions({}).select do |security_group|
       !active_security_groups.include?(security_group[:group_id]) &&
         !security_group[:creation_date].nil? &&
         resource_expired?(security_group[:creation_date], expiration_threshold_days)
@@ -360,7 +406,7 @@ class AwsService
   # @param expiration_threshold_days [Integer] time (in days) after which the unattached resource is considered unused
   def list_unused_key_pairs(expiration_threshold_days)
     hostname = Socket.gethostname
-    instances = instances_list
+    instances = instances_list(@client)
     key_pairs_list.select do |key_pair|
       key_pair[:name].end_with?(hostname) &&
         instances.none? { |instance| key_pair[:name] == instance[:key_name] } &&
@@ -374,7 +420,7 @@ class AwsService
   def instances_names_list
     return [] unless configured?
 
-    aws_instances_ids = instances_list || []
+    aws_instances_ids = instances_list(@client) || []
     aws_instances_ids.map { |instance| instance[:node_name] }
   end
 
@@ -424,7 +470,7 @@ class AwsService
   def terminate_instances_by_name(node_name)
     return if !configured? || node_name.nil?
 
-    instances_list.select { |instance| instance[:node_name] == node_name }
+    instances_list(@client).select { |instance| instance[:node_name] == node_name }
                   .each { |instance| terminate_instance(instance[:instance_id]) }
   end
 
@@ -444,7 +490,7 @@ class AwsService
   def get_aws_instance_id_by_node_name(node_name)
     return nil unless configured?
 
-    found_instance = instances_list.find { |instance| instance[:node_name] == node_name }
+    found_instance = instances_list(@client).find { |instance| instance[:node_name] == node_name }
     found_instance.nil? ? nil : found_instance[:instance_id]
   end
 
@@ -456,7 +502,7 @@ class AwsService
   def get_aws_instance_id_by_config_id(configuration_id, node_name)
     return nil unless configured?
 
-    found_instance = instances_list.find do |instance|
+    found_instance = instances_list(@client).find do |instance|
       instance[:node_name] == node_name &&
         instance[:configuration_id] == configuration_id
     end

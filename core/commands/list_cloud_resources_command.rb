@@ -76,7 +76,11 @@ The command ends with an error if any resource is present, no otherwise
   def list_resources
     aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
     ibm_key_pairs = list_ibm_ssh_keys
-    security_groups = @filter_unused ? @env.aws_service.list_unused_security_groups(@resource_expiration_threshold) : @env.aws_service.security_group_list
+    if @env.all_regions
+      security_groups = @filter_unused ? @env.aws_service.list_unused_sg_all_regions(@resource_expiration_threshold) : @env.aws_service.security_group_list_all_regions
+    else
+      security_groups = @filter_unused ? @env.aws_service.list_unused_security_groups(@resource_expiration_threshold) : @env.aws_service.security_group_list
+    end
     ibm_public_networks = @env.ibm_service.public_networks_list
     @resources_count += aws_key_pairs.length + ibm_key_pairs.length + security_groups.length + ibm_public_networks.length
     {
