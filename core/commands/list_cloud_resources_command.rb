@@ -74,11 +74,12 @@ The command ends with an error if any resource is present, no otherwise
   # Fetches the list of resources and generates their description in format
   # { instances: { gcp: Array, aws: Array }, disks: { gcp: Array, aws: Array }, key_pairs: Array, security_groups: Array }
   def list_resources
-    aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
     ibm_key_pairs = list_ibm_ssh_keys
     if @env.all_regions
+      aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs_all_regions(@resource_expiration_threshold) : @env.aws_service.key_pairs_list_all_regions
       security_groups = @filter_unused ? @env.aws_service.list_unused_sg_all_regions(@resource_expiration_threshold) : @env.aws_service.security_group_list_all_regions
     else
+      aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
       security_groups = @filter_unused ? @env.aws_service.list_unused_security_groups(@resource_expiration_threshold) : @env.aws_service.security_group_list
     end
     ibm_public_networks = @env.ibm_service.public_networks_list
@@ -103,7 +104,11 @@ The command ends with an error if any resource is present, no otherwise
   end
 
   def list_disks
-    aws_disks = @filter_unused ? @env.aws_service.list_unused_volumes(@resource_expiration_threshold) : @env.aws_service.volumes_list
+    if @env.all_regions
+      aws_disks = @filter_unused ? @env.aws_service.list_unused_volumes_all_regions(@resource_expiration_threshold) : @env.aws_service.volumes_list_all_regions
+    else
+      aws_disks = @filter_unused ? @env.aws_service.list_unused_volumes(@resource_expiration_threshold) : @env.aws_service.volumes_list
+    end
     gcp_disks = @filter_unused ? @env.gcp_service.list_unused_disks(@resource_expiration_threshold) : @env.gcp_service.disks_list
     {
       aws: aws_disks,
