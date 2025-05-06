@@ -8,7 +8,7 @@ module VagrantService
   include ReturnCodes
 
   def self.chek_vmlinuz_access_rights
-    Dir.glob("/boot/vmlinuz-*").each do |file|
+    Dir.glob("/boot/vmlinuz*").each do |file|
       stat = File.stat(file)
       if (stat.mode & 0o004) == 0
         return false
