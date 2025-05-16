@@ -366,7 +366,15 @@ sles_15_packages = %w[
   ncurses-devel
   perl-Data-Dump
 ]
-debian_dep_build = %w(krb5-multidev libkrb5-dev)
+debian_dep_build = %w[
+  krb5-multidev
+  libkrb5-dev
+  libssl-dev
+  libsystemd-dev
+  libxml2-dev
+  perl
+  liblzma-dev
+]
 
 case node[:platform]
 when 'debian'
