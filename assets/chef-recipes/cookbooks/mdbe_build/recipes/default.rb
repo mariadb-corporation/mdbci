@@ -366,7 +366,6 @@ sles_15_packages = %w[
   ncurses-devel
   perl-Data-Dump
 ]
-debian_dep_build = %w(krb5-multidev libkrb5-dev)
 
 case node[:platform]
 when 'debian'
@@ -394,11 +393,6 @@ when 'debian'
   end
   apt_update 'update apt cache' do
     action :update
-  end
-  if node[:platform_version] == '11' || node[:platform_version] == '12'
-    package debian_dep_build do
-      action :install
-    end
   end
   execute 'disable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save'
@@ -455,11 +449,6 @@ when 'ubuntu'
   end
   apt_update 'update apt cache' do
     action :update
-  end
-  if node[:platform_version] == '22.04' || node[:platform_version] == '24.04'
-    package debian_dep_build do
-      action :install
-    end
   end
   execute 'disable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save'
