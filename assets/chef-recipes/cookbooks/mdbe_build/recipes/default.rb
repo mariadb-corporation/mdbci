@@ -408,7 +408,7 @@ when 'debian'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server"
   end
   execute 'enable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list'
@@ -469,7 +469,7 @@ when 'ubuntu'
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server --target-release #{node.attributes['lsb']['codename']}"
+    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server"
   end
   execute 'enable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list'
