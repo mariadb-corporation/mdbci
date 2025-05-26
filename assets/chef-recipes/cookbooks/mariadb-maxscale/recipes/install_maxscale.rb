@@ -93,8 +93,8 @@ if node[:platform_family] == "windows"
     action :install
   end
 else
-  if node['maxscale']['repo_file_name'].include?('enterprise')
-    maxscale_package = 'maxscale-enterprise'
+  if node['maxscale']['repo_file_name'].include?('trial')
+    maxscale_package = 'maxscale-trial'
   else
     maxscale_package = 'maxscale'
   end
