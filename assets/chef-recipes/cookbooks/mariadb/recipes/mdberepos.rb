@@ -1,5 +1,13 @@
 include_recipe 'clear_mariadb_repo_priorities::default'
 
+# Disable UnattendedUpgrades service
+service 'unattended-upgrades' do
+  action :stop
+end
+service 'unattended-upgrades' do
+  action :disable
+end
+
 # Install default packages
 %w[net-tools psmisc].each do |pkg|
   package pkg do
