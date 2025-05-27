@@ -607,5 +607,3 @@ if %w[centos redhat rocky almalinux].include?(node[:platform]) && [7, 8].include
     command "scl enable #{devtoolset_name} bash"
   end
 end
-
-user 'mysql'
