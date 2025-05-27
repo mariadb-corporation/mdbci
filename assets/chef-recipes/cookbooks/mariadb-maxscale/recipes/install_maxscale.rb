@@ -100,6 +100,7 @@ else
   if node['maxscale']['repo_file_name'].include?('enterprise')
     package 'maxscale-trial' do
       action :install
+      ignore_failure true
     end
   end
 end
