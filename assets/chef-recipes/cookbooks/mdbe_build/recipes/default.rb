@@ -122,6 +122,7 @@ debian_bullseye_packages = %w[
 
 debian_bookworm_packages = %w[
   debhelper
+  dh-package-notes
   libjemalloc2
   libpmem-dev
   liburing-dev
@@ -198,6 +199,7 @@ ubuntu_noble_packages = %w[
   debhelper
   default-jdk
   dh-apparmor
+  dh-package-notes
   gnutls-dev
   libasan5
   libcurl4-openssl-dev
