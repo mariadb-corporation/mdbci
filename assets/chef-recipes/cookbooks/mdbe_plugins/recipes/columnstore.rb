@@ -1,3 +1,5 @@
+include_recipe "iptables_config::default"
+
 PORTS = (8600..8630).to_a.append(8700, 8800)
 
 case node[:platform_family]
