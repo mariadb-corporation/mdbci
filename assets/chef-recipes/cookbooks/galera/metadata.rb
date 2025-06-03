@@ -10,6 +10,7 @@ recipe            'install_galera', 'Installs gallera'
 
 depends           'chrony'
 depends           'clear_mariadb_repo_priorities'
+depends           'iptables_config'
 
 supports          'redhat'
 supports          'centos'
