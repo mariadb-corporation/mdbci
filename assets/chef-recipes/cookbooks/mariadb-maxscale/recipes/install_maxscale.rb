@@ -1,5 +1,6 @@
 include_recipe "mariadb-maxscale::maxscale_repos"
 include_recipe "chrony::default"
+include_recipe "iptables_config::default"
 
 # check and install iptables
 case node[:platform_family]
