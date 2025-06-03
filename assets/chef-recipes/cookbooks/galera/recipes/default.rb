@@ -4,6 +4,7 @@ require 'shellwords'
 
 include_recipe 'galera::galera_repos'
 include_recipe 'chrony::default'
+include_recipe 'iptables_config::default'
 
 PACKAGE_NAMES = %w[
   MariaDB-Galera-server
