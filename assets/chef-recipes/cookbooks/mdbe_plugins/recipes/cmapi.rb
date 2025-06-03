@@ -1,5 +1,7 @@
 package 'mariadb-columnstore-cmapi'
 
+include_recipe 'iptables_config::default'
+
 execute 'Opening cmapi port' do
   command 'iptables -I INPUT -p tcp -m tcp --dport 8640 -j ACCEPT'
   command 'iptables -I INPUT -p tcp --dport 8640 -j ACCEPT -m state --state ESTABLISHED,NEW'
