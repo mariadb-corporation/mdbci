@@ -5,6 +5,14 @@ execute 'Opening cmapi port' do
   command 'iptables -I INPUT -p tcp --dport 8640 -j ACCEPT -m state --state ESTABLISHED,NEW'
 end
 
+directory '/etc/iptables' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  recursive true
+  action :create
+end
+
 case node[:platform_family]
 when 'debian', 'ubuntu'
   execute 'Save iptables rules' do

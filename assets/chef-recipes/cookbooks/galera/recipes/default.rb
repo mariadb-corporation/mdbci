@@ -77,6 +77,14 @@ when 'debian', 'ubuntu', 'rhel', 'fedora', 'centos', 'suse'
   end
 end
 
+directory '/etc/iptables' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  recursive true
+  action :create
+end
+
 # TODO: check saving iptables rules after reboot
 # save iptables rules
 case node[:platform_family]
