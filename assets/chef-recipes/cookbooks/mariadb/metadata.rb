@@ -12,6 +12,7 @@ recipe            'start', 'Creates new instance of service and starts it'
 depends           'chrony'
 depends           'version_checker'
 depends           'clear_mariadb_repo_priorities'
+depends           'iptables_config'
 
 supports          'redhat'
 supports          'centos'
