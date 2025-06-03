@@ -1,3 +1,5 @@
+include_recipe 'iptables_config::default'
+
 if node.attribute?('galera_3_enterprise') || node.attribute?('galera_4_enterprise')
   include_recipe "galera_ci::galera_repository"
 end
