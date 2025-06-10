@@ -173,12 +173,17 @@ EOF
   end
   
   def ibm_service
-    if @ibm_service.nil?
+  if @ibm_service.nil?
+    begin
       @ibm_service = IbmService.new(@tool_config['ibm'], $out)
-    else
-      @ibm_service
+    rescue => e
+      $out.puts "IBM Cloud service init error: #{e.message}"
+      raise
     end
+  else
+    @ibm_service
   end
+end
 
     def digitalocean_service
     if @digitalocean_service.nil?
