@@ -177,7 +177,7 @@ EOF
     begin
       @ibm_service = IbmService.new(@tool_config['ibm'], $out)
     rescue => e
-      $out.puts "IBM Cloud service init error: #{e.message}"
+      $out.error("IBM Cloud service init error: #{e.message}")
       raise
     end
   else
