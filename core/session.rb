@@ -149,15 +149,43 @@ EOF
     end
     fill_paths
     $out.info('Loading repository configuration files')
-    @aws_service = AwsService.new(@tool_config['aws'], $out)
-    @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
-    @gcp_service = GcpService.new(@tool_config['gcp'], $out)
-    @ibm_service = IbmService.new(@tool_config['ibm'], $out)
     @rhel_config = @tool_config['rhel']
     @suse_config = @tool_config['suse']
     @mdbe_private_key = @tool_config['mdbe']&.fetch('key', nil)
     @mdbe_ci_config = @tool_config['mdbe_ci']
     @mdbci_image_address = @tool_config['mdbci']
+  end
+
+  def gcp_service
+    if @gcp_service.nil?
+      @gcp_service = GcpService.new(@tool_config['gcp'], $out)
+    else
+      @gcp_service
+    end
+  end
+
+  def aws_service
+    if @aws_service.nil?
+      @aws_service = AwsService.new(@tool_config['aws'], $out)
+    else
+      @aws_service
+    end
+  end
+  
+  def ibm_service
+    if @ibm_service.nil?
+      @ibm_service = IbmService.new(@tool_config['ibm'], $out)
+    else
+      @ibm_service
+    end
+  end
+
+    def digitalocean_service
+    if @digitalocean_service.nil?
+      @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
+    else
+      @digitalocean_service
+    end
   end
 
   def repos
