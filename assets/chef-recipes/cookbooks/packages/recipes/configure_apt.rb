@@ -7,6 +7,9 @@ if platform_family?('debian', 'ubuntu')
   service 'unattended-upgrades' do
     action :stop
   end
+  service 'unattended-upgrades' do
+    action :disable
+  end
 
   # Ensure that the machine is syncrhonized with the server
   apt_update 'update'
