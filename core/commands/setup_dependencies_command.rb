@@ -484,7 +484,7 @@ end
 class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
     %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
-      qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
+      qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
       software-properties-common zip libguestfs-tools libvirt-daemon-system bridge-utils libvirt-clients]
   end
 
