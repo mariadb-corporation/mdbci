@@ -565,6 +565,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
     end
+    execute 'Enable CodeReady Builder repository' do
+      command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
+    end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
