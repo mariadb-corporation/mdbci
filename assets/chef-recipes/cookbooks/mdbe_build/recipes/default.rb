@@ -129,6 +129,16 @@ debian_bookworm_packages = %w[
   netcat-traditional
   python-dev-is-python3
 ]
+
+debian_trixie_packages = %w[
+  debhelper
+  dh-package-notes
+  libjemalloc2
+  libpmem-dev
+  liburing-dev
+  netcat-traditional
+  python-dev-is-python3
+]
 #  dpatch - NOT found
 
 ubuntu_packages = %w[
@@ -305,6 +315,20 @@ rhel_9_packages = %w[
   python3-scons
 ]
 
+rhel_10_packages = %w[
+  Judy
+  Judy-devel
+  cracklib
+  kernel-headers
+  lz4-devel
+  perl-Getopt-Long
+  perl-Memoize.noarch
+  policycoreutils
+  python3-devel
+  python3-pip
+  python3-scons
+]
+
 suse_and_sles_packages = %w[
   autoconf
   automake
@@ -392,6 +416,12 @@ when 'debian'
       ignore_failure true
     end
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_bookworm_packages)
+  when 13 # Debian Trixie
+    package 'ca-certificates-java' do
+      action :install
+      ignore_failure true
+    end
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(debian_packages).concat(debian_trixie_packages)
   end
   apt_update 'update apt cache' do
     action :update
@@ -517,6 +547,19 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     packages = general_packages.concat(centos_packages).concat(rhel_9_packages)
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm'
+    end
+    execute 'install development tools' do
+      command "dnf -y groupinstall 'Development Tools'"
+    end
+    if %w[almalinux rocky].include? node[:platform]
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --set-enabled crb'
+      end
+    end
+  when 10 # RHEL 10 / AlmaLinux 10
+    packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
+    execute 'install epel-release' do
+      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
     end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
