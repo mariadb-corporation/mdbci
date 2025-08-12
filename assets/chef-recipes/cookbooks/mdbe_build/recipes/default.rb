@@ -78,7 +78,6 @@ debian_and_ubuntu_packages = %w[
   python3
   python3-pip
   scons
-  software-properties-common
   unixodbc-dev
   uuid-dev
 ]
@@ -98,6 +97,7 @@ debian_stretch_packages = %w[
   dpatch
   netcat
   python-dev
+  software-properties-common
 ]
 
 debian_buster_packages = %w[
@@ -107,6 +107,7 @@ debian_buster_packages = %w[
   dpatch
   netcat
   python-dev
+  software-properties-common
 ]
 
 
@@ -118,6 +119,7 @@ debian_bullseye_packages = %w[
   dpatch
   netcat
   python-dev
+  software-properties-common
 ]
 
 debian_bookworm_packages = %w[
@@ -128,6 +130,7 @@ debian_bookworm_packages = %w[
   liburing-dev
   netcat-traditional
   python-dev-is-python3
+  software-properties-common
 ]
 
 debian_trixie_packages = %w[
@@ -147,6 +150,7 @@ ubuntu_packages = %w[
   libjpeg8
   libjpeg-turbo8
   libpmem-dev
+  software-properties-common
 ]
 
 ubuntu_bionic_packages = %w[
@@ -564,9 +568,14 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if %w[almalinux rocky].include? node[:platform]
+    case node[:platform]
+    when 'almalinux', 'rocky'
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled crb'
+      end
+    when 'rhel'
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --enable codeready-builder-for-rhel-10-rhui-rpm'
       end
     end
   end
