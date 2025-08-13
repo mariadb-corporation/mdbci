@@ -571,6 +571,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
     end
+    execute 'Configure extras.getpagespeed.com' do
+      command 'sudo dnf -y install https://extras.getpagespeed.com/release-latest.rpm'
+    end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
