@@ -575,7 +575,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
       end
     when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpm'
+        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpms'
       end
     end
   end
