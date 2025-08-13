@@ -240,8 +240,6 @@ centos_packages = %w[
   curl-devel
   cracklib-devel
   gnutls-devel
-  java-1.8.0-openjdk
-  java-1.8.0-openjdk-devel
   jemalloc
   jemalloc-devel
   krb5-devel
@@ -289,6 +287,8 @@ centos_7_packages = %w[
   redhat-lsb-core
   scons
   subversion
+  java-1.8.0-openjdk
+  java-1.8.0-openjdk-devel
 ]
 
 centos_8_packages = %w[
@@ -304,6 +304,8 @@ centos_8_packages = %w[
   python3-pip
   python3-scons
   redhat-lsb-core
+  java-1.8.0-openjdk
+  java-1.8.0-openjdk-devel
 ]
 rhel_9_packages = %w[
   Judy
@@ -317,6 +319,8 @@ rhel_9_packages = %w[
   python3-devel
   python3-pip
   python3-scons
+  java-1.8.0-openjdk
+  java-1.8.0-openjdk-devel
 ]
 
 rhel_10_packages = %w[
@@ -331,6 +335,8 @@ rhel_10_packages = %w[
   python3-devel
   python3-pip
   python3-scons
+  java-21-openjdk
+  java-21-openjdk-devel
 ]
 
 suse_and_sles_packages = %w[
