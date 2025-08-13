@@ -573,7 +573,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled crb'
       end
-    when 'rhel'
+    when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpm'
       end
