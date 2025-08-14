@@ -568,15 +568,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     end
   when 10 # RHEL 10 / AlmaLinux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
-    execute 'install epel-release' do
-      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
-    end
-    execute 'Configure extras.getpagespeed.com' do
-      command 'sudo dnf -y install https://extras.getpagespeed.com/release-latest.rpm'
-    end
-    execute 'install development tools' do
-      command "dnf -y groupinstall 'Development Tools'"
-    end
     case node[:platform]
     when 'almalinux', 'rocky'
       execute 'Enable CodeReady Builder repository' do
@@ -587,6 +578,13 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
         command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpms'
       end
     end
+    execute 'install epel-release' do
+      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
+    end
+    execute 'install development tools' do
+      command "dnf -y groupinstall 'Development Tools'"
+    end
+
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
