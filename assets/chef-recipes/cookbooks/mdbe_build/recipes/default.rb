@@ -251,7 +251,6 @@ centos_packages = %w[
   libpmem-devel
   libxml2-devel
   lzo-devel
-  mhash-devel
   ncurses-devel
   openssl-devel
   unixODBC-devel
@@ -289,6 +288,7 @@ centos_7_packages = %w[
   java-1.8.0-openjdk-devel
   jemalloc
   jemalloc-devel
+  mhash-devel
 ]
 
 centos_8_packages = %w[
@@ -308,6 +308,7 @@ centos_8_packages = %w[
   java-1.8.0-openjdk-devel
   jemalloc
   jemalloc-devel  
+  mhash-devel
 ]
 rhel_9_packages = %w[
   Judy
@@ -325,6 +326,7 @@ rhel_9_packages = %w[
   java-1.8.0-openjdk-devel
   jemalloc
   jemalloc-devel  
+  mhash-devel
 ]
 
 rhel_10_packages = %w[
