@@ -216,6 +216,18 @@ module ProductAttributes
       recipe: 'mdbe_plugins::columnstore',
       name: 'columnstore'
     },
+    'mdbe_plugin_columnstore_cs' => {
+      recipe: 'mdbe_plugins::columnstore_cs',
+      name: 'columnstore'
+    },
+    'mdbe_plugin_columnstore_with_cmapi' => {
+      recipe: 'mdbe_plugins::columnstore_with_cmapi',
+      name: 'columnstore_with_cmapi'
+    },
+    'mdbe_plugin_columnstore_without_cmapi' => {
+      recipe: 'mdbe_plugins::columnstore_without_cmapi',
+      name: 'columnstore_without_cmapi'
+    },
     'mdbe_plugin_connect' => {
       recipe: 'mdbe_plugins::connect',
       name: 'connect'
@@ -518,6 +530,9 @@ module ProductAttributes
     'mdbe_plugin_backup' => 'mdbe_ci',
     'mdbe_plugin_cmapi' => 'mdbe_ci',
     'mdbe_plugin_columnstore' => 'mdbe_ci',
+    'mdbe_plugin_columnstore_cs' => 'mdbe_ci',
+    'mdbe_plugin_columnstore_with_cmapi' => 'mdbe_ci',
+    'mdbe_plugin_columnstore_without_cmapi' => 'mdbe_ci',
     'mdbe_plugin_connect' => 'mdbe_ci',
     'mdbe_plugin_cracklib_password_check' => 'mdbe_ci',
     'mdbe_plugin_gssapi_client' => 'mdbe_ci',
