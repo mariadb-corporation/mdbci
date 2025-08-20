@@ -7,11 +7,13 @@ require_relative '../models/return_codes'
 module VagrantService
   include ReturnCodes
 
-  def self.chek_vmlinuz_access_rights
-    Dir.glob("/boot/vmlinuz*").each do |file|
-      stat = File.stat(file)
-      if (stat.mode & 0o004) == 0
-        return false
+  def self.set_access_rights_for_ubuntu_or_mint(logger)
+    if self.chek_distro_is_ubuntu_or_mint
+      Dir.glob("/boot/vmlinuz*").each do |file|
+        stat = File.stat(file)
+        if (stat.mode & 0o004) == 0
+          ShellCommands.run_command(logger, "sudo chmod o+r /boot/vmlinuz*")[:value].success?
+        end
       end
     end
     return true
@@ -32,14 +34,12 @@ module VagrantService
   end
 
   def self.package(node_name, box_name, logger, path = Dir.pwd)
-    if self.chek_distro_is_ubuntu_or_mint && !self.chek_vmlinuz_access_rights
-      return Result.error('Incorrect permissions for vmlinuz. Please run setup-dependencies')
-    end
+    return Result.error('Error in setting rights') unless self.set_access_rights_for_ubuntu_or_mint(logger)
 
     ShellCommands.run_command_in_dir(logger,
                                      "vagrant package #{node_name} --output #{box_name} --info info.json", path)
 
-    SUCCESS_RESULT
+    return SUCCESS_RESULT
   end
 
   def self.box_add(time, box_name, logger, path = Dir.pwd)
