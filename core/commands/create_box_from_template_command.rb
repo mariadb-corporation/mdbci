@@ -4,6 +4,7 @@ require_relative '../models/result'
 require_relative '../models/configuration'
 require_relative '../services/created_box_data_manager'
 require_relative '../services/box_definitions'
+require_relative '../services/vagrant_service'
 
 # The command create new vagrant box .
 class CreateBoxFromTemplateCommand < BaseCommand
@@ -86,6 +87,10 @@ Generate a new box named "custom-box" based on the "template.json":
       return Result.error('Incorrect number of nodes in the configuration')
     end
 
+    if !VagrantService.set_access_rights_for_ubuntu_or_mint(@ui)
+      return Result.error('Error in setting rights for vmlinuz') 
+    end
+
     exit_code = run_generate_command
     return exit_code unless exit_code.success?
 
@@ -94,7 +99,8 @@ Generate a new box named "custom-box" based on the "template.json":
     exit_code = run_up_command
     return exit_code unless exit_code.success?
 
-    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
+    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config,
+                                                @ui)
 
     exit_code = vagrant_box_manager.create_box(@config.node_names.first)
     return exit_code unless exit_code.success?
