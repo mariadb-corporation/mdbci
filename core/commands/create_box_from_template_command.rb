@@ -87,8 +87,9 @@ Generate a new box named "custom-box" based on the "template.json":
       return Result.error('Incorrect number of nodes in the configuration')
     end
 
-    if !VagrantService.set_access_rights_for_ubuntu_or_mint(@ui)
-      return Result.error('Error in setting rights for vmlinuz') 
+    unless VagrantService.set_access_rights_for_ubuntu_or_mint(@ui)
+      return Result.error('Error when trying to configure permissions for vmlinuz. Further box creation is not possible.
+      Please run command setup-dependencies with the --product libvirt arg.')
     end
 
     exit_code = run_generate_command
