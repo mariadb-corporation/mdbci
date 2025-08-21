@@ -8,39 +8,41 @@ module VagrantService
   include ReturnCodes
 
   def self.set_access_rights_for_ubuntu_or_mint(logger)
-    if self.chek_distro_is_ubuntu_or_mint
-      Dir.glob("/boot/vmlinuz*").each do |file|
-        stat = File.stat(file)
-        if (stat.mode & 0o004) == 0
-          if self.chek_need_pass_for_sudo(logger)
-            if $stdin.tty?
-              logger.info('To create box, you need to add the ability to read /boot/vmlinuz* files using the sudo chmod o+r /boot/vmlinuz* command. To continue, enter the password.')
-              if !self.choose_continue
-                return false
-              end
-            else
-              logger.info('It is impossible to continue the process of creating the box due to the lack of necessary access rights for /boot/vmlinuz*.')
-              return false
-            end
-          end
-          ShellCommands.run_command(logger, "sudo chmod o+r /boot/vmlinuz*")[:value].success?
-        end
+    return true unless self.chek_distro_is_ubuntu_or_mint
+    return true if self.chek_right_vmlinuz
+
+    if self.chek_need_pass_for_sudo(logger)
+      if $stdin.tty?
+        logger.info('To create box, you need to add the ability to read /boot/vmlinuz* files using the sudo chmod o+r /boot/vmlinuz* command. To continue, enter the password.')
+        return false unless self.choose_continue
+      else
+        logger.info('It is impossible to continue the process of creating the box due to the lack of necessary access rights for /boot/vmlinuz*.')
+        return false
       end
     end
+    ShellCommands.run_command(logger, "sudo chmod o+r /boot/vmlinuz*")[:value].success?
+
     return true
   end
 
   def self.choose_continue
     $stdout.print("Are you sure you want to continue? [yes/no]: ")
     while (input = gets.strip)
-      return true if input == 'yes'
-      return false if input == 'no'
+      return true if ['yes', 'y', ''].include?(input.downcase)
+      return false if ['no', 'n'].include?(input.downcase)
       $stdout.print('Please enter [yes/no]: ')
     end
   end
 
   def self.chek_need_pass_for_sudo(logger)
     !ShellCommands.run_command(logger, "sudo -n true 2>/dev/null")[:value].success?
+  end
+
+  def self.chek_right_vmlinuz
+    Dir.glob("/boot/vmlinuz*").each do |file|
+      stat = File.stat(file)
+      return (stat.mode & 0o004) != 0
+    end
   end
 
   def self.chek_distro_is_ubuntu_or_mint
@@ -58,12 +60,14 @@ module VagrantService
   end
 
   def self.package(node_name, box_name, logger, path = Dir.pwd)
-    return Result.error('Error in setting rights') unless self.set_access_rights_for_ubuntu_or_mint(logger)
-
+    unless self.set_access_rights_for_ubuntu_or_mint(logger)
+      return Result.error('Error when trying to configure permissions for vmlinuz. Further box creation is not possible.
+      Please run command setup-dependencies with the --product libvirt arg.')
+    end
     ShellCommands.run_command_in_dir(logger,
                                      "vagrant package #{node_name} --output #{box_name} --info info.json", path)
 
-    return SUCCESS_RESULT
+    SUCCESS_RESULT
   end
 
   def self.box_add(time, box_name, logger, path = Dir.pwd)
