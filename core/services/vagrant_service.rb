@@ -12,11 +12,35 @@ module VagrantService
       Dir.glob("/boot/vmlinuz*").each do |file|
         stat = File.stat(file)
         if (stat.mode & 0o004) == 0
+          if self.chek_need_pass_for_sudo(logger)
+            if $stdin.tty?
+              logger.info('To create box, you need to add the ability to read /boot/vmlinuz* files using the sudo chmod o+r /boot/vmlinuz* command. To continue, enter the password.')
+              if !self.choose_continue
+                return false
+              end
+            else
+              logger.info('It is impossible to continue the process of creating the box due to the lack of necessary access rights for /boot/vmlinuz*.')
+              return false
+            end
+          end
           ShellCommands.run_command(logger, "sudo chmod o+r /boot/vmlinuz*")[:value].success?
         end
       end
     end
     return true
+  end
+
+  def self.choose_continue
+    $stdout.print("Are you sure you want to continue? [yes/no]: ")
+    while (input = gets.strip)
+      return true if input == 'yes'
+      return false if input == 'no'
+      $stdout.print('Please enter [yes/no]: ')
+    end
+  end
+
+  def self.chek_need_pass_for_sudo(logger)
+    !ShellCommands.run_command(logger, "sudo -n true 2>/dev/null")[:value].success?
   end
 
   def self.chek_distro_is_ubuntu_or_mint
