@@ -189,8 +189,6 @@ class ConfigurationGenerator
       })
     end
 
-
-
     recipe_names << 'grow-root-fs' if %w[aws gcp].include?(provider)
     Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
   end
