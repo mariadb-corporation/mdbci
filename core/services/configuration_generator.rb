@@ -161,16 +161,6 @@ class ConfigurationGenerator
     provider = node_params[:provider]
     name = node_params[:name]
 
-    recipe_names << 'packages'
-
-    if node_params[:public_network_gateway]
-      recipe_names << 'public_network'
-      product_configs.merge!({
-        'public_network_gateway': node_params[:public_network_gateway],
-        'public_network_route_dev': node_params[:public_network_route_dev]
-      })
-    end
-
     if node_params[:configure_subscription_manager] == 'true'
       if @rhel_config.nil?
         return Result.error('Credentials for Red Hat Subscription-Manager are not configured')
@@ -188,6 +178,18 @@ class ConfigurationGenerator
       registry.add_subscription(name, 'suse-connect')
       product_configs.merge!('suse-connect': @suse_config.merge({ provider: provider }))
     end
+
+    recipe_names << 'packages'
+
+    if node_params[:public_network_gateway]
+      recipe_names << 'public_network'
+      product_configs.merge!({
+        'public_network_gateway': node_params[:public_network_gateway],
+        'public_network_route_dev': node_params[:public_network_route_dev]
+      })
+    end
+
+
 
     recipe_names << 'grow-root-fs' if %w[aws gcp].include?(provider)
     Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
