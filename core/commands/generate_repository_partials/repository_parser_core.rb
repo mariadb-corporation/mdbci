@@ -79,6 +79,7 @@ module RepositoryParserCore
     'sles' => %w[sles],
     'centos' => %w[centos],
     'rhel' => %w[rhel],
+    'rocky' => %w[rocky],
     'opensuse' => %w[opensuse]
   }.freeze
   def split_rpm_platforms
