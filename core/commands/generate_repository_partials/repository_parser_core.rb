@@ -220,7 +220,9 @@ module RepositoryParserCore
   )
     # Recursively go through the site and apply steps on each level
     result = parse_web_directories(base_url, auth, product_version, scan_mode, log, logger, *steps)
+    # puts result
     result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
+    # puts result
     add_key_and_product_to_releases(result, key, product)
   end
 
@@ -586,6 +588,10 @@ module RepositoryParserCore
       platform: 'centos',
       platform_version: '9'
     },
+    'centos10' => {
+      platform: 'centos',
+      platform_version: '10'
+    },
     'ubuntu16.04' => {
       platform: 'ubuntu',
       platform_version: 'xenial'
@@ -605,6 +611,10 @@ module RepositoryParserCore
     'rockylinux9' => {
       platform: 'rhel',
       platform_version: '9'
+    },
+    'rockylinux10' => {
+      platform: 'rhel',
+      platform_version: '10'
     }
   }.freeze
 

@@ -18,6 +18,10 @@ module MdbeCiParser
                                    config['scan_mode'], auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
+      parse_mdbe_ci_rpm_repository_yum(config['repo']['mdbe_ci_repo'], product_version,
+                                   config['scan_mode'], auth_mdbe_ci_repo, log, logger)
+    )
+    releases.concat(
       parse_mdbe_ci_deb_repository(config['repo']['mdbe_ci_repo'], product_version,
                                    config['scan_mode'], auth_mdbe_ci_repo, log, logger)
     )
@@ -34,7 +38,7 @@ module MdbeCiParser
                                    config['repo']['cs_repo']['branches'],
                                    config['repo']['cs_repo']['latest_branches'],
                                    ))
-
+    releases.uniq! { |release| [release[:architecture], release[:platform], release[:platform_version], release[:product], release[:version]] }
     releases
   end
 
@@ -48,6 +52,27 @@ module MdbeCiParser
       log, logger,
       save_as_field(:version),
       save_key(logger, auth, add_auth_to_url(config['key'], auth)),
+      split_rpm_platforms,
+      extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
+      append_url(%w[x86_64 aarch64 ppc64le], :architecture),
+      lambda do |release, _|
+        release[:repo] = add_auth_to_url(release[:url], auth)
+        release
+      end
+    )
+  end
+
+  def self.parse_mdbe_ci_rpm_repository_yum(config, product_version, scan_mode, auth, log, logger)
+    parse_repository(
+      config['path'], auth, nil, 'mdbe_ci', product_version,
+      %w[MariaDB-client MariaDB-server],
+      ->(url, _) { url },
+      ->(package, _) { /#{package}/ },
+      scan_mode,
+      log, logger,
+      save_as_field(:version),
+      save_key(logger, auth, add_auth_to_url(config['key'], auth)),
+      append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64 ppc64le], :architecture),
