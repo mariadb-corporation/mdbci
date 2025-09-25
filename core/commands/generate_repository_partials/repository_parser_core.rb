@@ -79,7 +79,7 @@ module RepositoryParserCore
     'sles' => %w[sles],
     'centos' => %w[centos],
     'rhel' => %w[rhel],
-    'rocky' => %w[rocky],
+    'rocky' => %w[rhel],
     'opensuse' => %w[opensuse]
   }.freeze
   def split_rpm_platforms
@@ -220,9 +220,7 @@ module RepositoryParserCore
   )
     # Recursively go through the site and apply steps on each level
     result = parse_web_directories(base_url, auth, product_version, scan_mode, log, logger, *steps)
-    # puts result
     result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
-    # puts result
     add_key_and_product_to_releases(result, key, product)
   end
 
