@@ -6,6 +6,7 @@ require_relative 'repository_parser_core'
 module MdbeCiParser
   extend RepositoryParserCore
   DEFAULT_MDBE_VERSION = '10.5'
+  S3_VERS = ['10.6-enterprise','11.4-enterprise','11.8-enterprise']
 
   def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
@@ -150,10 +151,12 @@ module MdbeCiParser
   def self.parse_cs_repos(url, yum_key, branches, latest_branches)
     releases = []
     branches.each do |branch_dir|
-      releases.concat(parse_s3_dirs(url, branch_dir, '10.6-enterprise', yum_key))
+      releases.concat(parse_s3_dirs(url, branch_dir, S3_VERS, yum_key))
     end
     latest_branches.each do |branch_dir|
-      releases.concat(generate_s3_repositories(url, branch_dir, 'latest', '10.6-enterprise', yum_key))
+      S3_VERS.each do |version|
+        releases.concat(generate_s3_repositories(url, branch_dir, 'latest', version, yum_key))
+      end
     end
     releases
   end
@@ -191,12 +194,17 @@ module MdbeCiParser
     releases
   end
 
-  def self.parse_s3_dirs(repo_url, branch_dir, repo_product_ver, yum_key)
+  def self.parse_s3_dirs(repo_url, branch_dir, repo_product_vers, yum_key)
     links = []
     platforms = get_mdbe_platforms
     full_url = "#{repo_url}?prefix=#{branch_dir}/&delimiter=/"
     doc = Nokogiri.XML(URI.open(full_url))
     doc_array = doc.at_css("ListBucketResult").children
+    full_url += "&marker="
+    while doc.at_css("IsTruncated").children.to_s == "true"
+      doc = Nokogiri.XML(URI.open(full_url + doc.at_css("NextMarker").children.to_s))
+      doc_array += doc.at_css("ListBucketResult").children
+    end
     elements = doc_array.count
     doc_array.each do |file|
       file_link = file.to_s.match(/<Prefix>.*<\/Prefix>/).to_s[8..-10]
@@ -209,9 +217,11 @@ module MdbeCiParser
 
     releases = []
     links.each do |version|
-      releases.concat(
-        generate_s3_repositories(repo_url, branch_dir, version, repo_product_ver, yum_key)
-      )
+      repo_product_vers.each do |repo_product_ver|
+        releases.concat(
+          generate_s3_repositories(repo_url, branch_dir, version, repo_product_ver, yum_key)
+        )
+      end
     end
     releases
   end
