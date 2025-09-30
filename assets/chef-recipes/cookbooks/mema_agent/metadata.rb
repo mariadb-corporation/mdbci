@@ -1,0 +1,6 @@
+name             'mema_agent'
+maintainer       'Yaroslavl FRUCT Laboratory'
+maintainer_email 'yarfruct@gmail.com'
+license          'All rights reserved'
+description      'MemaAgent'
+version          '0.1.0'

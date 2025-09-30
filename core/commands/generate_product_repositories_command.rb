@@ -27,6 +27,7 @@ require_relative 'generate_repository_partials/mysql_parser'
 require_relative 'generate_repository_partials/connector_odbc_parser'
 require_relative 'generate_repository_partials/connector_odbc_ci_parser'
 require_relative 'generate_repository_partials/kafka_parser'
+require_relative 'generate_repository_partials/mema_agent_parser'
 
 # The command generates the repository configuration
 # rubocop:disable Metrics/ClassLength
@@ -56,7 +57,8 @@ class GenerateProductRepositoriesCommand < BaseCommand
     'connector_odbc_ci' => 'connector_odbc_ci',
     'connector_odbc' => 'connector_odbc',
     'connector_odbc_staging' => 'connector_odbc_staging',
-    'kafka' => 'kafka'
+    'kafka' => 'kafka',
+    'mema_agent' => 'mema_agent'
   }.freeze
   COMMAND_NAME = 'generate-product-repositories'
 
@@ -351,6 +353,8 @@ In order to specify the number of retries for repository configuration use --att
       ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger, 'connector_odbc_staging', @env.mdbe_private_key)
     when 'kafka'
       KafkaParser.parse(product_config, @product_version, @ui, @logger)
+    when 'mema_agent'
+      MemaAgentParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     end
   end
 

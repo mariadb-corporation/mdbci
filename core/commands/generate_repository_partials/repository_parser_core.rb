@@ -106,6 +106,7 @@ module RepositoryParserCore
     '10' => 'buster',
     '11' => 'bullseye',
     '12' => 'bookworm',
+    '13' => 'trixie',
     '1604' => 'xenial',
     '1804' => 'bionic',
     '2004' => 'focal',
@@ -184,6 +185,7 @@ module RepositoryParserCore
     'buster' => 'debian',
     'bullseye' => 'debian',
     'bookworm' => 'debian',
+    'trixie' => 'debian',
     'focal' => 'ubuntu',
     'jessie' => 'debian',
     'stretch' => 'debian',
@@ -569,6 +571,10 @@ module RepositoryParserCore
     'debian12' => {
       platform: 'debian',
       platform_version: 'bookworm'
+    },
+    'debian13' => {
+      platform: 'debian',
+      platform_version: 'trixie'
     },
     'centos6' => {
       platform: 'centos',
