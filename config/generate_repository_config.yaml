@@ -158,3 +158,8 @@ kafka:
   repo:
     path: https://dlcdn.apache.org/kafka/
   scan_mode: follow-only-sublinks
+mema_agent:
+  repo:
+    path: https://mdbe-ci-repo.mariadb.net/MemaAgent/
+    key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+  scan_mode: follow-only-sublinks

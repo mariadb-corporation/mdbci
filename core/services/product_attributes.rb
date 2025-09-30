@@ -523,7 +523,12 @@ module ProductAttributes
       recipe: 'kafka',
       name: 'kafka',
       repository: 'kafka'
-    }
+    },
+    'mema_agent' => {
+      recipe: 'mema_agent',
+      name: 'mema_agent',
+      repository: 'mema_agent'
+    },
   }.freeze
 
   DEPENDENCE = {
