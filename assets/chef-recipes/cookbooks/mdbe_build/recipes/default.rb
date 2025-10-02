@@ -293,7 +293,6 @@ centos_7_packages = %w[
 
 centos_8_packages = %w[
   gcc-toolset-10-gcc*
-  Judy
   Judy-devel
   cracklib
   kernel-headers
@@ -312,7 +311,6 @@ centos_8_packages = %w[
   mhash-devel
 ]
 rhel_9_packages = %w[
-  Judy
   Judy-devel
   cracklib
   kernel-headers
@@ -331,7 +329,6 @@ rhel_9_packages = %w[
 ]
 
 rhel_10_packages = %w[
-  Judy
   Judy-devel
   cracklib
   kernel-headers
