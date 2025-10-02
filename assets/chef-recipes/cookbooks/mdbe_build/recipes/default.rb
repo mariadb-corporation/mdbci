@@ -294,6 +294,7 @@ centos_7_packages = %w[
 centos_8_packages = %w[
   gcc-toolset-10-gcc*
   Judy
+  Judy-devel
   cracklib
   kernel-headers
   lz4-devel
@@ -545,6 +546,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
       when 'redhat'
         execute 'Enable CodeReady Builder repository' do
           command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
+        end
+        execute 'Enable mariadb-devel module' do
+          command 'yum module enable mariadb-devel'
         end
       end
     end
