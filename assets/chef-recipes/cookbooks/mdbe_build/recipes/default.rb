@@ -559,7 +559,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     end
     if node[:platform] == 'redhat'
       execute 'Enable mariadb-devel module' do
-        command 'yum module enable mariadb-devel'
+        command 'dnf -y module enable mariadb-devel'
       end
     end
   when 9 # RHEL 9 / AlmaLinux 9
