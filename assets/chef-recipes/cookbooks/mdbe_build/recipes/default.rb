@@ -544,9 +544,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
         execute 'Enable CodeReady Builder repository' do
           command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
         end
-        execute 'Enable mariadb-devel module' do
-          command 'yum module enable mariadb-devel'
-        end
       end
     end
     execute 'install epel-release' do
@@ -558,6 +555,11 @@ when 'centos', 'redhat', 'rocky', 'almalinux'
     if %w[almalinux rocky centos].include? node[:platform]
       execute 'Enable PowerTools repository' do
         command 'dnf config-manager --set-enabled powertools'
+      end
+    end
+    if node[:platform] == 'redhat'
+      execute 'Enable mariadb-devel module' do
+        command 'yum module enable mariadb-devel'
       end
     end
   when 9 # RHEL 9 / AlmaLinux 9
