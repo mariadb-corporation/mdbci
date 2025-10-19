@@ -8,7 +8,7 @@ when "debian", "ubuntu"
   execute "Install iptables-persistent" do
     command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
   end
-when "rhel", "fedora", "centos", "almalinux"
+when "rhel", "fedora", "centos", "almalinux", "oracle"
   if node[:platform_version].to_f >= 7.0
     bash 'Install and configure iptables' do
       code <<-EOF
@@ -47,7 +47,7 @@ when "debian", "ubuntu"
   execute "Save iptables rules" do
     command "iptables-save > /etc/iptables/rules.v4"
   end
-when "rhel", "centos", "fedora", "almalinux"
+when "rhel", "centos", "fedora", "almalinux", "oracle"
   if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
     bash 'Save iptables rules on CentOS 7' do
       code <<-EOF
@@ -71,7 +71,7 @@ end # save iptables rules
 
 # Install bind-utils/dnsutils for nslookup
 case node[:platform_family]
-when "rhel", "centos", "almalinux"
+when "rhel", "centos", "almalinux", "oracle"
   execute "install bind-utils" do
     command "yum -y install bind-utils"
   end
@@ -108,7 +108,7 @@ end
 
 # Allow read access for the maxscale user to /etc/shadow
 shadow_group = case node[:platform_family]
-               when "rhel", "centos", "almalinux"
+               when "rhel", "centos", "almalinux", "oracle"
                  "root"
                when "debian", "ubuntu", "suse", "opensuse", nil # Enabling SLES support
                  "shadow"

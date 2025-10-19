@@ -32,7 +32,7 @@ when 'debian'
     ignore_failure true
   end
 
-when 'rhel', 'centos', 'almalinux'
+when 'rhel', 'centos', 'almalinux', 'oracle'
   package 'MariaDB-common' do
     action :remove
   end
