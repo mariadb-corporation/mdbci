@@ -6,7 +6,7 @@ when "debian", "ubuntu"
     components node['mema_agent']['components']
     sensitive true
   end
-when "rhel", "centos", "almalinux"
+when "rhel", "centos", "almalinux", "oracle"
   yum_repository 'mema_agent' do
     baseurl node['mema_agent']['repo']
     gpgkey node['mema_agent']['repo_key']

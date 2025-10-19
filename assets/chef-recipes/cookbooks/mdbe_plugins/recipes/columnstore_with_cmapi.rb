@@ -10,7 +10,7 @@ when 'debian', 'ubuntu'
     end
   end
 
-when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux'
+when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux', 'oracle'
   ['MariaDB-columnstore-engine','MariaDB-columnstore-cmapi'].each do |cmpackage|
     package cmpackage do
       action :install
@@ -31,7 +31,7 @@ when 'debian', 'ubuntu'
   execute 'Save iptables rules' do
     command 'iptables-save > /etc/iptables/rules.v4'
   end
-when 'rhel', 'centos', 'suse', 'almalinux'
+when 'rhel', 'centos', 'suse', 'almalinux', 'oracle'
   bash 'Save iptables rules' do
     code <<-EOF
       iptables-save > /etc/sysconfig/iptables

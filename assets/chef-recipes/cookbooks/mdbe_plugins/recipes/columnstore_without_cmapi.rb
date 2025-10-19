@@ -6,7 +6,7 @@ when 'debian', 'ubuntu'
       action :install
   end
 
-when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux'
+when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux', 'oracle'
   package 'MariaDB-columnstore-engine' do
       action :install
   end

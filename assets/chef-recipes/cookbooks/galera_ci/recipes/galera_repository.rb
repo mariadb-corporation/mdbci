@@ -17,7 +17,7 @@ when 'debian', 'ubuntu'
     sensitive true
   end
   apt_update
-when 'rhel'
+when 'rhel', 'almalinux', 'oracle'
   yum_repository 'galera' do
     baseurl repo
     gpgkey repo_key

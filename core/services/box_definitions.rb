@@ -125,7 +125,8 @@ class BoxDefinitions
 
   PLATFORM_ALIASES = {
     'rocky' => 'rhel',
-    'alma' => 'rhel'
+    'alma' => 'rhel',
+    'oracle' => 'rhel'
   }.freeze
 
   # Determines platform for the specified box
