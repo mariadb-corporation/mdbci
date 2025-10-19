@@ -116,6 +116,7 @@ module MdbeCiParser
       { lambda: lambda do |release, _|
         release[:version] = release[:version].join('/')
         release[:repo] = add_auth_to_url(release[:url], auth)
+        release[:disable_gpgcheck] = true
         release
       end }
     )
