@@ -1,15 +1,29 @@
 include_recipe 'clear_mariadb_repo_priorities::default'
-
+platform_version = node[:platform_version].to_i
+platform_family = node[:platform_family]
 #
 # MariaDB MaxScale repos
 #
-case node[:platform_family]
+case platform_family
 when "debian", "ubuntu"
-  apt_repository 'maxscale' do
-    key node['maxscale']['repo_key']
-    uri node['maxscale']['repo']
-    components node['maxscale']['components']
-    sensitive true
+  if platform_family == 'debian' && platform_version <= 11
+    apt_repository 'maxscale' do
+      key node['maxscale']['repo_key']
+      uri node['maxscale']['repo']
+      components node['maxscale']['components']
+      sensitive true
+    end
+  else
+    remote_file "/etc/apt/keyrings/maxscale.public" do
+      source node['maxscale']['repo_key']
+      action :create
+    end
+    apt_repository 'maxscale' do
+      uri node['maxscale']['repo']
+      components node['maxscale']['components']
+      options ["signed-by=\"/etc/apt/keyrings/maxscale.public\""]
+      sensitive true
+    end
   end
 when "rhel", "fedora", "centos", "almalinux", "oracle"
   yum_repository node['maxscale']['repo_file_name'] do
