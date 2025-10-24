@@ -1,10 +1,26 @@
-case node[:platform_family]
+platform_version = node[:platform_version].to_i
+platform_family = node[:platform_family]
+
+case platform_family
 when "debian", "ubuntu"
-  apt_repository 'mema_agent' do
-    key node['mema_agent']['repo_key']
-    uri node['mema_agent']['repo']
-    components node['mema_agent']['components']
-    sensitive true
+  if platform_family == 'debian' && platform_version <= 11
+    apt_repository 'mema_agent' do
+      key node['mema_agent']['repo_key']
+      uri node['mema_agent']['repo']
+      components node['mema_agent']['components']
+      sensitive true
+    end
+  else
+    remote_file "/etc/apt/keyrings/mema_agent.public" do
+      source node['mema_agent']['repo_key']
+      action :create
+    end
+    apt_repository 'mema_agent' do
+      uri node['mema_agent']['repo']
+      components node['mema_agent']['components']
+      options ["signed-by=\"/etc/apt/keyrings/mema_agent.public\""]
+      sensitive true
+    end
   end
 when "rhel", "centos", "almalinux", "oracle"
   yum_repository 'mema_agent' do
