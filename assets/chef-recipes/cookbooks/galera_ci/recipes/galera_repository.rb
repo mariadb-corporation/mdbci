@@ -10,29 +10,18 @@ repo_key = node[current_version]['repo_key']
 case platform_family
 when 'debian', 'ubuntu'
   repo_uri, repo_distribution = repo.split(/\s+/)
-  if platform_family == 'debian' && platform_version <= 11
-    apt_repository 'galera' do
-      uri repo_uri
-      distribution repo_distribution
-      keyserver 'keyserver.ubuntu.com'
-      components node['galera_ci']['components']
-      key repo_key
-      sensitive true
-    end
-  else
-    remote_file "/etc/apt/keyrings/galera.public" do
-      source repo_key
-      sensitive true
-      action :create
-    end
-    apt_repository 'galera' do
-      uri repo_uri
-      distribution repo_distribution
-      keyserver 'keyserver.ubuntu.com'
-      components node['galera_ci']['components']
-      options ["signed-by=\"/etc/apt/keyrings/galera.public\""]
-      sensitive true
-    end
+  remote_file "/etc/apt/keyrings/galera.public" do
+    source repo_key
+    sensitive true
+    action :create
+  end
+  apt_repository 'galera' do
+    uri repo_uri
+    distribution repo_distribution
+    keyserver 'keyserver.ubuntu.com'
+    components node['galera_ci']['components']
+    options ["signed-by=\"/etc/apt/keyrings/galera.public\""]
+    sensitive true
   end
   apt_update
 when 'rhel', 'almalinux', 'oracle'

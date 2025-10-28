@@ -29,35 +29,23 @@ when 'debian', 'ubuntu'
     end
   else
     repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
-    unless platform_family == 'debian' && platform_version <= 11
-      remote_file "/etc/apt/keyrings/mariadb.public" do
-        source node['mariadb']['repo_key']
-        sensitive true
-        action :create
-      end
+    remote_file "/etc/apt/keyrings/mariadb.public" do
+      source node['mariadb']['repo_key']
+      sensitive true
+      action :create
     end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      if platform_family == 'debian' && platform_version <= 11
-        keyserver 'keyserver.ubuntu.com'
-        key node['mariadb']['repo_key']
-      else
-        options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
-      end
+      options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
       sensitive true
     end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      if platform_family == 'debian' && platform_version <= 11
-        keyserver 'keyserver.ubuntu.com'
-        key node['mariadb']['repo_key']
-      else
-        options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
-      end
+      options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
       deb_src true
       sensitive true
     end
@@ -67,12 +55,7 @@ when 'debian', 'ubuntu'
         uri unsupported_repo_uri
         distribution repo_distribution
         components node['mariadb']['components']
-        if platform_family == 'debian' && platform_version <= 11
-          keyserver 'keyserver.ubuntu.com'
-          key node['mariadb']['repo_key']
-        else
-          options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
-        end
+        options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
         sensitive true
       end
     end
