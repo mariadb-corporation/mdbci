@@ -1,4 +1,6 @@
 include_recipe 'clear_mariadb_repo_priorities::default'
+platform_version = node[:platform_version].to_i
+platform_family = node[:platform_family]
 
 # Install default packages
 %w[net-tools psmisc].each do |pkg|
@@ -25,33 +27,37 @@ when 'debian', 'ubuntu'
         sensitive true
       end
     end
-    if node['mariadb']['repo'].include?('es-repo.mariadb.net')
-      remote_file "/tmp/#{repo_file_name}.public" do
-        source node['mariadb']['repo_key']
-      end
-      execute 'install key' do
-        command "apt-key add /tmp/#{repo_file_name}.public"
-      end
-      file "/tmp/#{repo_file_name}.public" do
-        action :delete
-      end
-    end
   else
     repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
+    unless platform_family == 'debian' && platform_version <= 11
+      remote_file "/etc/apt/keyrings/mariadb.public" do
+        source node['mariadb']['repo_key']
+        sensitive true
+        action :create
+      end
+    end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      keyserver 'keyserver.ubuntu.com'
-      key node['mariadb']['repo_key']
+      if platform_family == 'debian' && platform_version <= 11
+        keyserver 'keyserver.ubuntu.com'
+        key node['mariadb']['repo_key']
+      else
+        options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
+      end
       sensitive true
     end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      keyserver 'keyserver.ubuntu.com'
-      key node['mariadb']['repo_key']
+      if platform_family == 'debian' && platform_version <= 11
+        keyserver 'keyserver.ubuntu.com'
+        key node['mariadb']['repo_key']
+      else
+        options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
+      end
       deb_src true
       sensitive true
     end
@@ -61,8 +67,12 @@ when 'debian', 'ubuntu'
         uri unsupported_repo_uri
         distribution repo_distribution
         components node['mariadb']['components']
-        keyserver 'keyserver.ubuntu.com'
-        key node['mariadb']['repo_key']
+        if platform_family == 'debian' && platform_version <= 11
+          keyserver 'keyserver.ubuntu.com'
+          key node['mariadb']['repo_key']
+        else
+          options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
+        end
         sensitive true
       end
     end
