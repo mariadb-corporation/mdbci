@@ -13,6 +13,7 @@ when "debian", "ubuntu"
   else
     remote_file "/etc/apt/keyrings/mema_agent.public" do
       source node['mema_agent']['repo_key']
+      sensitive true
       action :create
     end
     apt_repository 'mema_agent' do

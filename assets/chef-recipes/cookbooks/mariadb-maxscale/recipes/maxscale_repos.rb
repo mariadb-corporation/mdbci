@@ -16,6 +16,7 @@ when "debian", "ubuntu"
   else
     remote_file "/etc/apt/keyrings/maxscale.public" do
       source node['maxscale']['repo_key']
+      sensitive true
       action :create
     end
     apt_repository 'maxscale' do
