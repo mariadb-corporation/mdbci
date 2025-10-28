@@ -5,12 +5,16 @@ repo_key = node[connector]['repo_key']
 case node[:platform_family]
 when 'debian', 'ubuntu'
   repo_uri, repo_distribution = repo.split(/\s+/)
+  remote_file "/etc/apt/keyrings/connector.public" do
+    source repo_key
+    sensitive true
+    action :create
+  end
   apt_repository connector do
     uri repo_uri
     distribution repo_distribution
-    keyserver 'keyserver.ubuntu.com'
     components ['main']
-    key repo_key
+    options ["signed-by=\"/etc/apt/keyrings/connector.public\""]
     sensitive true
   end
   apt_update
