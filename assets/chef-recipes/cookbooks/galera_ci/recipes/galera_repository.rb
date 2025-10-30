@@ -1,13 +1,11 @@
 include_recipe 'clear_mariadb_repo_priorities::default'
-platform_version = node[:platform_version].to_i
-platform_family = node[:platform_family]
 
 all_versions = %w[galera_3_community galera_4_community galera_3_enterprise galera_4_enterprise]
 current_version = all_versions.find { |version| node.attribute?(version) }
 repo = node[current_version]['repo']
 repo_key = node[current_version]['repo_key']
 
-case platform_family
+case node[:platform_family]
 when 'debian', 'ubuntu'
   repo_uri, repo_distribution = repo.split(/\s+/)
   remote_file "/etc/apt/keyrings/galera.public" do
@@ -18,9 +16,8 @@ when 'debian', 'ubuntu'
   apt_repository 'galera' do
     uri repo_uri
     distribution repo_distribution
-    keyserver 'keyserver.ubuntu.com'
     components node['galera_ci']['components']
-    options ["signed-by=\"/etc/apt/keyrings/galera.public\""]
+    options ["signed-by=/etc/apt/keyrings/galera.public"]
     sensitive true
   end
   apt_update
@@ -30,7 +27,7 @@ when 'rhel', 'almalinux', 'oracle'
     gpgkey repo_key
     sensitive true
   end
-  if platform_version == 8
+  if node[:platform_version].to_i == 8
     execute 'add hotfixes attribute to yum repo file' do
       command 'echo module_hotfixes=true >> /etc/yum.repos.d/galera.repo'
     end

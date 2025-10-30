@@ -1,6 +1,4 @@
 include_recipe 'clear_mariadb_repo_priorities::default'
-platform_version = node[:platform_version].to_i
-platform_family = node[:platform_family]
 
 # Install default packages
 %w[net-tools psmisc].each do |pkg|
@@ -38,14 +36,14 @@ when 'debian', 'ubuntu'
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
+      options ["signed-by=/etc/apt/keyrings/mariadb.public"]
       sensitive true
     end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
+      options ["signed-by=/etc/apt/keyrings/mariadb.public"]
       deb_src true
       sensitive true
     end
@@ -55,7 +53,7 @@ when 'debian', 'ubuntu'
         uri unsupported_repo_uri
         distribution repo_distribution
         components node['mariadb']['components']
-        options ["signed-by=\"/etc/apt/keyrings/mariadb.public\""]
+        options ["signed-by=/etc/apt/keyrings/mariadb.public"]
         sensitive true
       end
     end

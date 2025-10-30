@@ -14,7 +14,7 @@ when 'debian', 'ubuntu'
     uri repo_uri
     distribution repo_distribution
     components ['main']
-    options ["signed-by=\"/etc/apt/keyrings/connector.public\""]
+    options ["signed-by=/etc/apt/keyrings/connector.public"]
     sensitive true
   end
   apt_update
