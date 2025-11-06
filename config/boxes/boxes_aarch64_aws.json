@@ -95,7 +95,7 @@
   "aarch64_debian_bullseye_aws": {
     "provider": "aws",
     "architecture": "aarch64",
-    "ami": "ami-0cb99f150f869801d",
+    "ami": "ami-03139167dd72ba968",
     "user": "admin",
     "platform": "debian",
     "platform_version": "bullseye",
