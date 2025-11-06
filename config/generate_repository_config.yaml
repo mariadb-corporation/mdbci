@@ -4,7 +4,7 @@ mariadb:
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
   deb:
     path: https://dlm.mariadb.com/browse/mariadb_server/
-    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
   scan_mode: use-all-links
 maxscale_ci:
   repo:
@@ -24,7 +24,7 @@ maxscale:
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
   deb:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
-    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
   scan_mode: use-all-links
 maxscale_enterprise:
   rpm:
@@ -32,7 +32,7 @@ maxscale_enterprise:
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
   deb:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_maxscale_enterprise/
-    key: ["0x8167EE24", "0xE3C94F49", "0xcbcb082a1bb943db", "0xf1656f24c74cd1d8", "0x135659e928c12247"]
+    key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
   scan_mode: use-all-links
 mdbe:
   repo:
@@ -44,7 +44,7 @@ mdbe:
       architectures: ["amd64", "aarch64", "ppc64le"]
     deb:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
-      key: ["0x70E4618A8167EE24", "0xCE1A3DD5E3C94f49", "0xCBCB082A1BB943DB", "0xF1656F24C74CD1D8", "0x135659E928C12247"]
+      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal", "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]
@@ -56,7 +56,7 @@ mysql:
       key: http://repo.mysql.com/RPM-GPG-KEY-mysql
     deb:
       path: http://repo.mysql.com/apt/
-      key: "5072E1F5"
+      key: http://repo.mysql.com/RPM-GPG-KEY-mysql
   scan_mode: follow-only-sublinks
 clustrix:
   repo:
@@ -117,7 +117,7 @@ mdbe_staging:
       architectures: ["amd64", "aarch64"]
     deb:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server_staging/
-      key: ["0x70E4618A8167EE24", "0xCE1A3DD5E3C94f49", "0xCBCB082A1BB943DB", "0xF1656F24C74CD1D8", "0x135659E928C12247"]
+      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-staging/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal",  "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]
@@ -129,7 +129,7 @@ mariadb_staging:
       key: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
     deb:
       path: https://downloads.mariadb.com/mariadb-staging/
-      key: "0xF1656F24C74CD1D8"
+      key: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
   scan_mode: follow-only-sublinks
 connector_c_ci:
   repo:
