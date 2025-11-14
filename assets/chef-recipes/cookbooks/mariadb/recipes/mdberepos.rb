@@ -27,6 +27,13 @@ when 'debian', 'ubuntu'
     end
   else
     repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
+    directory '/etc/apt/keyrings' do
+      owner 'root'
+      group 'root'
+      mode '0755'
+      recursive true
+      action :create
+    end
     remote_file "/etc/apt/keyrings/mariadb.public" do
       source node['mariadb']['repo_key']
       sensitive true

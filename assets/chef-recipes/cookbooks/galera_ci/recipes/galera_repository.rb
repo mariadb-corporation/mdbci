@@ -8,6 +8,13 @@ repo_key = node[current_version]['repo_key']
 case node[:platform_family]
 when 'debian', 'ubuntu'
   repo_uri, repo_distribution = repo.split(/\s+/)
+  directory '/etc/apt/keyrings' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
   remote_file "/etc/apt/keyrings/galera.public" do
     source repo_key
     sensitive true

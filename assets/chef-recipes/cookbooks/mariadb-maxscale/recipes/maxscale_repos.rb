@@ -4,6 +4,13 @@ include_recipe 'clear_mariadb_repo_priorities::default'
 #
 case node[:platform_family]
 when "debian", "ubuntu"
+  directory '/etc/apt/keyrings' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
   remote_file "/etc/apt/keyrings/maxscale.public" do
     source node['maxscale']['repo_key']
     sensitive true
