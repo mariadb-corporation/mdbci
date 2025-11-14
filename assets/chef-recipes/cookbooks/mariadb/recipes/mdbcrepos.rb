@@ -4,6 +4,13 @@ include_recipe 'clear_mariadb_repo_priorities::default'
 # Configure repository
 case node[:platform_family]
 when 'debian', 'ubuntu', 'mint'
+  directory '/etc/apt/keyrings' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
   remote_file "/etc/apt/keyrings/mariadb.public" do
     source node['mariadb']['repo_key']
     sensitive true
