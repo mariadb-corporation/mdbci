@@ -102,6 +102,13 @@
     "platform": "alma",
     "platform_version": "9"
   },
+  "alma_10_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "almalinux/10",
+    "platform": "alma",
+    "platform_version": "10"
+  },
   "rocky_8_libvirt": {
     "provider": "libvirt",
     "architecture": "amd64",
