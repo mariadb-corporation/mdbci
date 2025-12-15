@@ -340,8 +340,9 @@ rhel_10_packages = %w[
   python3-scons
   java-21-openjdk
   java-21-openjdk-devel
-  oracle-epel-release-el10
 ]
+
+oracle_10_packages = rhel_10_packages + ['oracle-epel-release-el10']
 
 suse_and_sles_packages = %w[
   autoconf
@@ -593,11 +594,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'sudo dnf config-manager --set-enabled crb'
       end
     when 'oracle'
+      packages = general_packages.concat(centos_packages).concat(oracle_10_packages)
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled ol10_codeready_builder'
-      end
-      execute 'Enable EPEL developer repository' do
-        command 'sudo dnf config-manager --set-enabled ol10_developer_EPEL'
       end
     when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
@@ -610,7 +609,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
