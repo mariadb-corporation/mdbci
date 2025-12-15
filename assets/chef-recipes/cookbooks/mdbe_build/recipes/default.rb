@@ -578,12 +578,12 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     end
     if %w[almalinux rocky].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled crb'
+        command 'dnf config-manager --set-enabled crb'
       end
     end
     if node[:platform] == 'oracle'
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --enable ol9_codeready_builder'
+        command 'dnf config-manager --enable ol9_codeready_builder'
       end
     end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
@@ -591,16 +591,16 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     case node[:platform]
     when 'almalinux', 'rocky'
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled crb'
+        command 'dnf config-manager --set-enabled crb'
       end
     when 'oracle'
       packages = general_packages.concat(centos_packages).concat(oracle_10_packages)
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled ol10_codeready_builder'
+        command 'dnf config-manager --set-enabled ol10_codeready_builder'
       end
     when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpms'
+        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpms'
       end
     end
     execute 'install epel-release' do
