@@ -124,6 +124,8 @@ class MachineConfigurator
     download_command = prepare_tgz_download_command(machine, chef_version, architecture, logger)
     CHEF_INSTALLATION_ATTEMPTS.times do
       sudo_exec(machine, download_command, logger).and_then do
+        check_and_install_tar(machine, logger)
+      end.and_then do
         sudo_exec(machine, 'tar xf /tmp/chef-solo.tgz -C /tmp', logger)
       end.and_then do
         sudo_exec(machine, '/tmp/chef-solo/install.sh', logger)
@@ -135,6 +137,16 @@ class MachineConfigurator
       sleep(rand(3))
     end
     Result.error('Unable to install appimage chef!')
+  end
+
+  def check_and_install_tar(machine, logger)
+    result = sudo_exec(machine, 'which tar', logger)
+    if result.success?
+      result
+    else
+      logger.info('Tar is not found. Downloading...')
+      sudo_exec(machine, 'yum install -y tar', logger)
+    end
   end
 
   # Determine the method to download Chef installation script: wget or curl

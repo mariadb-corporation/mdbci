@@ -110,7 +110,6 @@ debian_buster_packages = %w[
   software-properties-common
 ]
 
-
 debian_bullseye_packages = %w[
   debhelper
   libjemalloc2
@@ -187,24 +186,24 @@ ubuntu_focal_packages = %w[
 ]
 
 ubuntu_jammy_packages = %w[
- bison
- chrpath
- debhelper
- default-jdk
- dh-apparmor
- gnutls-dev
- libasan5
- libcurl4-openssl-dev
- libjemalloc2
- libncurses5-dev
- libpcre3-dev
- psmisc
- python-dev-is-python3
- python2-dev
- python3-dev
- unixodbc
- netcat
- dpatch
+  bison
+  chrpath
+  debhelper
+  default-jdk
+  dh-apparmor
+  gnutls-dev
+  libasan5
+  libcurl4-openssl-dev
+  libjemalloc2
+  libncurses5-dev
+  libpcre3-dev
+  psmisc
+  python-dev-is-python3
+  python2-dev
+  python3-dev
+  unixodbc
+  netcat
+  dpatch
 ]
 
 ubuntu_noble_packages = %w[
@@ -307,7 +306,7 @@ centos_8_packages = %w[
   java-1.8.0-openjdk
   java-1.8.0-openjdk-devel
   jemalloc
-  jemalloc-devel  
+  jemalloc-devel
   mhash-devel
 ]
 rhel_9_packages = %w[
@@ -324,7 +323,7 @@ rhel_9_packages = %w[
   java-1.8.0-openjdk
   java-1.8.0-openjdk-devel
   jemalloc
-  jemalloc-devel  
+  jemalloc-devel
   mhash-devel
 ]
 
@@ -341,6 +340,7 @@ rhel_10_packages = %w[
   python3-scons
   java-21-openjdk
   java-21-openjdk-devel
+  oracle-epel-release-el10
 ]
 
 suse_and_sles_packages = %w[
@@ -442,17 +442,17 @@ when 'debian'
   end
   execute 'disable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save'
-    only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list') }
+    only_if { File.exist?('/etc/apt/sources.list.d/mariadb.list') }
   end
   apt_update 'update apt cache' do
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server"
+    command 'apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server'
   end
   execute 'enable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list'
-    only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list.save') }
+    only_if { File.exist?('/etc/apt/sources.list.d/mariadb.list.save') }
   end
   apt_update 'update apt cache' do
     action :update
@@ -498,17 +498,17 @@ when 'ubuntu'
   end
   execute 'disable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list /etc/apt/sources.list.d/mariadb.list.save'
-    only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list') }
+    only_if { File.exist?('/etc/apt/sources.list.d/mariadb.list') }
   end
   apt_update 'update apt cache' do
     action :update
   end
   execute 'install dependencies mariadb-server' do
-    command "apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server"
+    command 'apt-get --fix-broken --yes build-dep --quiet --allow-downgrades mariadb-server'
   end
   execute 'enable MariaDB repo' do
     command 'mv /etc/apt/sources.list.d/mariadb.list.save /etc/apt/sources.list.d/mariadb.list'
-    only_if { ::File.exist?('/etc/apt/sources.list.d/mariadb.list.save') }
+    only_if { File.exist?('/etc/apt/sources.list.d/mariadb.list.save') }
   end
   apt_update 'update apt cache' do
     action :update
@@ -552,9 +552,14 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if %w[almalinux rocky centos oracle].include? node[:platform]
+    if %w[almalinux rocky centos].include? node[:platform]
       execute 'Enable PowerTools repository' do
         command 'dnf config-manager --set-enabled powertools'
+      end
+    end
+    if node[:platform] == 'oracle'
+      execute 'Enable PowerTools repository' do
+        command 'dnf config-manager --set-enabled ol8_codeready_builder'
       end
     end
     if node[:platform] == 'redhat'
@@ -570,17 +575,29 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
-    if %w[almalinux rocky oracle].include? node[:platform]
+    if %w[almalinux rocky].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled crb'
+      end
+    end
+    if node[:platform] == 'oracle'
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --enable ol9_codeready_builder'
       end
     end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
     case node[:platform]
-    when 'almalinux', 'rocky', 'oracle'
+    when 'almalinux', 'rocky'
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled crb'
+      end
+    when 'oracle'
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --set-enabled ol10_codeready_builder'
+      end
+      execute 'Enable EPEL developer repository' do
+        command 'sudo dnf config-manager --set-enabled ol10_developer_EPEL'
       end
     when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
@@ -671,7 +688,8 @@ rm cmake-#{cmake_path}.tar.gz"
   only_if { node.run_state['cmake_flag'] }
 end
 
-if %w[centos redhat rocky almalinux oracle].include?(node[:platform]) && [7, 8].include?(node[:platform_version].to_i)
+if %w[centos redhat rocky almalinux
+      oracle].include?(node[:platform]) && [7, 8].include?(node[:platform_version].to_i)
   devtoolset_name = node[:platform_version].to_i == 7 ? 'devtoolset-10' : 'gcc-toolset-10'
   execute 'Enable devtoolset-10' do
     command "scl enable #{devtoolset_name} bash"
