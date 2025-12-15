@@ -40,7 +40,6 @@ class MachineConfigurator
   # extra files into the provision directory making runtime configuration of Chef scripts possible.
   # @param extra_files [Array<Array<String>>] pairs of source and target paths.
   # @param logger [Out] logger to log information to
-  # rubocop:disable Metrics/ParameterLists
   def configure(machine, config_name, logger = @log, extra_files = [], chef_version = '18.5.0')
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
     remote_dir = '/tmp/provision'
@@ -54,7 +53,6 @@ class MachineConfigurator
   rescue StandardError => e
     Result.error(e.message)
   end
-  # rubocop:enable Metrics/ParameterLists
 
   # Connect to the specified machine and execute command with the root privileges
   # @param machine [Hash] information about machine to connect
@@ -117,7 +115,7 @@ class MachineConfigurator
     architecture = determine_machine_architecture(machine, logger)
     return architecture if architecture.error?
 
-    return install_tgz_chef(machine, chef_version, architecture.value, logger)
+    install_tgz_chef(machine, chef_version, architecture.value, logger)
   end
 
   def install_tgz_chef(machine, chef_version, architecture, logger)
@@ -145,7 +143,14 @@ class MachineConfigurator
       result
     else
       logger.info('Tar is not found. Downloading...')
-      sudo_exec(machine, 'yum install -y tar', logger)
+      ssh_exec(machine, 'cat /etc/os-release', logger).and_then do |result|
+        sys_info = result.scan(/^ID_LIKE=(.+)$/).flatten.first
+        if sys_info.include?('rhel') || sys_info.include?('fedora') || sys_info.include?('centos')
+          sudo_exec(machine, 'yum install -y tar', logger)
+        elsif sys_info.include?('debian')
+          sudo_exec(machine, 'apt-get update && apt-get install -y tar', logger)
+        end
+      end
     end
   end
 
@@ -161,7 +166,8 @@ class MachineConfigurator
   end
 
   def install_appimage_chef(machine, chef_version, architecture, logger)
-    download_command = prepare_appimage_download_command(machine, chef_version, architecture, logger)
+    download_command = prepare_appimage_download_command(machine, chef_version, architecture,
+                                                         logger)
     CHEF_INSTALLATION_ATTEMPTS.times do
       sudo_exec(machine, download_command, logger).and_then do
         sudo_exec(machine, 'chmod 0755 /tmp/chef-solo', logger)
@@ -232,8 +238,8 @@ class MachineConfigurator
     if result.error?
       "bash install.sh -v #{chef_version}"
     else
-      'bash install.sh -l '\
-      'https://packages.chef.io/files/stable/chef/14.13.11/sles/12/chef-14.13.11-1.sles12.x86_64.rpm'
+      'bash install.sh -l ' \
+        'https://packages.chef.io/files/stable/chef/14.13.11/sles/12/chef-14.13.11-1.sles12.x86_64.rpm'
     end
   end
 
