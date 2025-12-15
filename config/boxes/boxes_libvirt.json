@@ -122,5 +122,26 @@
     "box": "generic/rocky9",
     "platform": "rocky",
     "platform_version": "9"
+  },
+  "oracle_linux_8_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "oraclelinux/8",
+    "platform": "oracle",
+    "platform_version": "8"
+  },
+  "oracle_linux_9_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "oraclelinux/9",
+    "platform": "oracle",
+    "platform_version": "9"
+  },
+  "oracle_linux_10_libvirt": {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "box": "oraclelinux/10",
+    "platform": "oracle",
+    "platform_version": "10"
   }
 }
