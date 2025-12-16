@@ -586,6 +586,11 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --enable ol9_codeready_builder'
       end
     end
+    if %w[rhel redhat].include? node[:platform]
+      execute 'Enable CodeReady Builder repository' do
+        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-9-rhui-rpms'
+      end
+    end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
     case node[:platform]
