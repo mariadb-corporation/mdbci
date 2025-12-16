@@ -541,10 +541,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         yum_repository 'PowerTools' do
           action :makecache
         end
-      when 'redhat'
-        execute 'Enable CodeReady Builder repository' do
-          command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
-        end
       end
     end
     execute 'install epel-release' do
@@ -564,6 +560,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
       end
     end
     if node[:platform] == 'redhat'
+      execute 'Enable CodeReady Builder repository' do
+        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
+      end
       execute 'Enable mariadb-devel module' do
         command 'dnf -y module enable mariadb-devel'
       end
