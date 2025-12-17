@@ -610,6 +610,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
     end
+    package 'openssl' do
+      action :upgrade
+    end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
