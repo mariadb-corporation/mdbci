@@ -1,3 +1,5 @@
+require 'uri'
+
 include_recipe 'clear_mariadb_repo_priorities::default'
 
 # Install default packages
@@ -34,7 +36,7 @@ when 'debian', 'ubuntu'
       recursive true
       action :create
     end
-    remote_file "/etc/apt/keyrings/mariadb.public" do
+    remote_file '/etc/apt/keyrings/mariadb.public' do
       source node['mariadb']['repo_key']
       sensitive true
       action :create
@@ -43,14 +45,14 @@ when 'debian', 'ubuntu'
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      options ["signed-by=/etc/apt/keyrings/mariadb.public"]
+      options ['signed-by=/etc/apt/keyrings/mariadb.public']
       sensitive true
     end
     apt_repository repo_file_name do
       uri repo_uri
       distribution repo_distribution
       components node['mariadb']['components']
-      options ["signed-by=/etc/apt/keyrings/mariadb.public"]
+      options ['signed-by=/etc/apt/keyrings/mariadb.public']
       deb_src true
       sensitive true
     end
@@ -60,16 +62,18 @@ when 'debian', 'ubuntu'
         uri unsupported_repo_uri
         distribution repo_distribution
         components node['mariadb']['components']
-        options ["signed-by=/etc/apt/keyrings/mariadb.public"]
+        options ['signed-by=/etc/apt/keyrings/mariadb.public']
         sensitive true
       end
     end
   end
+  repo_uri, repo_distribution = node['mariadb']['repo'].split(/\s+/)
+  repo_host = URI(repo_uri).host
   apt_preference 'mariadb' do
     glob '*'
-    pin 'release o=MariaDB Enterprise'
-    pin_priority '1000'
-  end 
+    pin "origin \"#{repo_host}\""
+    pin_priority '900'
+  end
   apt_update do
     action :update
   end
@@ -78,9 +82,7 @@ when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
     description 'MariaDB Enterprise Server'
     baseurl node['mariadb']['repo']
     gpgkey node['mariadb']['repo_key']
-    if node['mariadb']['disable_gpgcheck']
-      gpgcheck false
-    end
+    gpgcheck false if node['mariadb']['disable_gpgcheck']
     sensitive true
     options({ 'module_hotfixes' => '1' })
   end
