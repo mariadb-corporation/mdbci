@@ -8,16 +8,16 @@ module MariaDBCommunityParser
 
   MARIADB_COMMUNITY = {
     label: 'Community Server',
-    server: 'https://dlm.mariadb.com/repo/mariadb-server',
+    server: 'https://dlm.mariadb.com/repo/mariadb-server'
   }.freeze
 
   MAXSCALE_SERVER = {
     label: 'MariaDB MaxScale',
-    server: 'https://dlm.mariadb.com/repo/maxscale',
+    server: 'https://dlm.mariadb.com/repo/maxscale'
   }.freeze
 
   def self.parse(config, product_version, user_ui, logger)
-    repos = [].concat(
+    [].concat(
       parse_releases(
         config['deb'],
         MARIADB_COMMUNITY,
@@ -37,9 +37,8 @@ module MariaDBCommunityParser
         config['scan_mode'],
         user_ui,
         logger
-      ),
+      )
     )
-    repos
   end
 
   def self.parse_releases(
@@ -53,26 +52,25 @@ module MariaDBCommunityParser
       scan_mode,
       user_ui,
       logger,
-      extract_field(:base_version, %r{^#{product_config[:label]} (.*)$}),
-      extract_field(:version, %r{^#{product_config[:label]} (.*)$}),
+      extract_field(:base_version, /^#{product_config[:label]} (.*)$/),
+      extract_field(:version, /^#{product_config[:label]} (.*)$/)
     )
     releases = Workers.map(releases) do |release|
       flat_url = URI.join(release[:url], '?flat=1').to_s
       all_links = get_links(flat_url, logger, auth).map do |link|
         link_parts = link[:content].split('/')
-        link.merge({parts: link_parts})
+        link.merge({ parts: link_parts })
       end
-      
+
       link_parser.call(all_links, release, product_config[:server])
     end.flatten
-    add_key_and_product_to_releases(releases, repo_config['key'], product_name)
+    add_key_and_product_to_releases(releases, repo_config['new_key'], product_name)
   end
-
 
   def self.form_deb_repositories(links, release, server_location)
     # Filter out debian releases based on the /repo/PROVIDER/dists/RELESASE/ content strings
     links.select do |link|
-      link[:parts].fetch(0, '') == 'repo'  &&
+      link[:parts].fetch(0, '') == 'repo' &&
         link[:parts].fetch(2, '') == 'dists' &&
         link[:parts].fetch(4, '') == 'main' &&
         link[:parts].fetch(5, '').start_with?('binary-')
@@ -86,7 +84,7 @@ module MariaDBCommunityParser
           platform_version: platform_version,
           architecture: architecture,
           repo: "#{server_location}/#{release[:version]}/repo/#{platform}",
-          components: ["main", "main/debug"]
+          components: ['main', 'main/debug']
         }
       )
     end
