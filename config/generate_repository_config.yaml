@@ -22,17 +22,21 @@ maxscale:
   rpm:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+    new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
   deb:
     path: https://dlm.mariadb.com/browse/mariadbmaxscale/
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+    new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
   scan_mode: use-all-links
 maxscale_enterprise:
   rpm:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_maxscale_enterprise/
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+    new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
   deb:
     path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_maxscale_enterprise/
     key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+    new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
   scan_mode: use-all-links
 mdbe:
   repo:
@@ -42,12 +46,14 @@ mdbe:
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/rpm/$PLATFORM$/$PLATFORM_VERSION$/$basearch
       platforms: ["centos_6", "centos_7", "centos_8", "rhel_6", "rhel_7", "rhel_8", "rhel_9", "rhel_10", "sles_12", "sles_15"]
       architectures: ["amd64", "aarch64", "ppc64le"]
+      new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
     deb:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
       key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "debian_trixie", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal", "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]
+      new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
   scan_mode: follow-only-sublinks
 mysql:
   repo:
@@ -77,8 +83,8 @@ mdbe_ci:
     cs_repo:
       path: https://cspkg.s3.amazonaws.com/
       yum_key: http://yum.mariadb.org/
-      branches: ["develop-23.02/cron", "develop-23.02/pull_request", "develop-22.08/cron", 
-                 "develop-22.08/pull_request", "develop/cron", "develop/pull_request", 
+      branches: ["develop-23.02/cron", "develop-23.02/pull_request", "develop-22.08/cron",
+                 "develop-22.08/pull_request", "develop/cron", "develop/pull_request",
                  "stable-23.10/cron", "stable-23.10/pull_request", "custom"]
       latest_branches: ["develop-23.02", "develop-22.08", "develop", "stable-23.10"]
   scan_mode: follow-only-sublinks
@@ -112,12 +118,14 @@ mdbe_staging:
     rpm:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server_staging/
       key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+      new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-staging/$MDBE_VERSION$/rpm/$PLATFORM$/$PLATFORM_VERSION$/$basearch
       platforms: ["centos_6", "centos_7", "centos_8", "rhel_6", "rhel_7", "rhel_8", "rhel_9", "rhel_10", "sles_12", "sles_15"]
       architectures: ["amd64", "aarch64"]
     deb:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server_staging/
       key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
+      new_key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-staging/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "debian_trixie", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal",  "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]

@@ -69,12 +69,8 @@ module MdbeParser
       version: version,
       architecture: architecture
     }
-    if deb_repo
-      release_info[:components] = ['main']
-    end
-    if platform == 'ubuntu'
-      release_info[:components].append('main/debug')
-    end
+    release_info[:components] = ['main'] if deb_repo
+    release_info[:components].append('main/debug') if platform == 'ubuntu'
     case product_name
     when 'mdbe'
       unsupported_repo_name = 'mariadb-enterprise-unsupported'
@@ -83,7 +79,8 @@ module MdbeParser
     end
     case platform
     when 'ubuntu', 'debian'
-      release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/#{unsupported_repo_name}/#{version}/deb #{platform_version} main"
+      release_info[:unsupported_repo] =
+        "https://dlm.mariadb.com/repo/#{mdbe_private_key}/#{unsupported_repo_name}/#{version}/deb #{platform_version} main"
     when 'centos', 'rhel'
       release_info[:unsupported_repo] = "https://dlm.mariadb.com/repo/#{mdbe_private_key}/#{unsupported_repo_name}/#{version}/rpm/rhel/#{platform_version}/$basearch"
     when 'sles', 'suse', 'opensuse'
@@ -97,7 +94,7 @@ module MdbeParser
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
         config['architectures'].map do |architecture|
-          generate_mdbe_release_info(config['baseurl'], config['key'], version, architecture,
+          generate_mdbe_release_info(config['baseurl'], config['new_key'], version, architecture,
                                      platform, platform_version, mdbe_private_key, product_name, deb_repo)
         end
       end
