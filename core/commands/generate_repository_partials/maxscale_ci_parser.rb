@@ -8,19 +8,23 @@ module MaxscaleCiParser
 
   def self.parse(config, product_version, mdbe_ci_config, maxscale_product, log, logger)
     return [] if mdbe_ci_config.nil?
+
     auth = mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(parse_maxscale_ci_rpm_repository_old(config['repo'], product_version, auth,
                                                          maxscale_product, config['scan_mode'], log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
-                                                         maxscale_product, config['scan_mode'], log, logger, "maxscale"))
+                                                         maxscale_product, config['scan_mode'], log, logger, 'maxscale'))
     releases.concat(parse_maxscale_ci_deb_repository_new(config['repo'], product_version, auth,
-                                                         maxscale_product, config['scan_mode'], log, logger, "maxscale-enterprise"))
+                                                         maxscale_product, config['scan_mode'], log, logger, 'maxscale-enterprise'))
     releases.concat(parse_maxscale_ci_rpm_repository_new(config['repo'], product_version, auth,
                                                          maxscale_product, config['scan_mode'], log, logger))
     releases.concat(parse_maxscale_ci_deb_repository_old(config['repo'], product_version, auth,
                                                          maxscale_product, config['scan_mode'], log, logger))
-    releases.uniq! { |release| [release[:architecture], release[:platform], release[:platform_version], release[:product], release[:version]] }
+    releases.uniq! do |release|
+      [release[:architecture], release[:platform], release[:platform_version], release[:product],
+       release[:version]]
+    end
     releases
   end
 
@@ -31,7 +35,7 @@ module MaxscaleCiParser
       ->(url, _) { url },
       ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
-      save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
+      save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
@@ -50,7 +54,7 @@ module MaxscaleCiParser
       ->(url, _) { generate_maxscale_ci_deb_full_url(url, maxscale_release) },
       ->(package, platform) { /#{package}.*#{platform}/ }, scan_mode, log, logger,
       save_as_field(:version),
-      save_key(logger, auth, add_auth_to_url(config['new_key'], auth)),
+      save_key(logger, auth, add_auth_to_url(config['key'], auth)),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
       extract_deb_platforms,

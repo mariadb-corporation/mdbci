@@ -1,6 +1,5 @@
 include_recipe 'clear_mariadb_repo_priorities::default'
 include_recipe 'iptables_config::default'
-include_recipe 'mariadb::install_repos_keys'
 
 require 'shellwords'
 
