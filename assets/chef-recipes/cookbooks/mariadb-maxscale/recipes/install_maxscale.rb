@@ -1,14 +1,15 @@
-include_recipe "mariadb-maxscale::maxscale_repos"
-include_recipe "chrony::default"
-include_recipe "iptables_config::default"
+include_recipe 'mariadb-maxscale::maxscale_repos'
+include_recipe 'chrony::default'
+include_recipe 'iptables_config::default'
+include_recipe 'mariadb::install_repos_keys'
 
 # check and install iptables
 case node[:platform_family]
-when "debian", "ubuntu"
-  execute "Install iptables-persistent" do
-    command "DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent"
+when 'debian', 'ubuntu'
+  execute 'Install iptables-persistent' do
+    command 'DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent'
   end
-when "rhel", "fedora", "centos", "almalinux", "oracle"
+when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
   if node[:platform_version].to_f >= 7.0
     bash 'Install and configure iptables' do
       code <<-EOF
@@ -25,17 +26,30 @@ when "rhel", "fedora", "centos", "almalinux", "oracle"
       EOF
     end
   end
-when "suse"
-  execute "Install iptables" do
-    command "zypper install -y iptables"
+when 'suse'
+  execute 'Install iptables' do
+    command 'zypper install -y iptables'
+  end
+end
+
+if node[:platform_family] == 'rhel' && (node[:platform_version].to_f >= 10.0)
+  execute 'Create nftables table' do
+    command 'nft add table inet filter'
+  end
+  execute 'Create nftables chain' do
+    command "nft add chain inet filter INPUT '{ type filter hook input priority 0; }'"
   end
 end
 
 # iptables rules
-[3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27017].each do |port|
+[3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27_017].each do |port|
   execute "Open port #{port}" do
-    command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
-    command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
+    if node[:platform_family] == 'rhel' && node[:platform_version].to_f >= 10.0
+      command "nft add rule inet filter INPUT tcp dport #{port} ct state { established, new } accept"
+    else
+      command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
+      command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
+    end
   end
 end
 # iptables rules
@@ -43,12 +57,12 @@ end
 # TODO: check saving iptables rules after reboot
 # save iptables rules
 case node[:platform_family]
-when "debian", "ubuntu"
-  execute "Save iptables rules" do
-    command "iptables-save > /etc/iptables/rules.v4"
+when 'debian', 'ubuntu'
+  execute 'Save iptables rules' do
+    command 'iptables-save > /etc/iptables/rules.v4'
   end
-when "rhel", "centos", "fedora", "almalinux", "oracle"
-  if node[:platform] == "centos" and node["platform_version"].to_f >= 7.0
+when 'centos', 'fedora', 'almalinux', 'oracle'
+  if node[:platform] == 'centos' and node['platform_version'].to_f >= 7.0
     bash 'Save iptables rules on CentOS 7' do
       code <<-EOF
         # TODO: use firewalld
@@ -62,31 +76,41 @@ when "rhel", "centos", "fedora", "almalinux", "oracle"
       EOF
     end
   end
+when 'rhel'
+  if node[:platform_version].to_f >= 10.0
+    execute 'Save nftables rules' do
+      command 'nft list ruleset > /etc/sysconfig/nftables.conf'
+    end
+  else
+    execute 'Save MariaDB iptables rules' do
+      command '/sbin/service iptables save'
+    end
+  end
 # service iptables restart
-when "suse", "opensuse", nil # nil stands for SLES 15
-  execute "Save iptables rules" do
-    command "iptables-save > /etc/sysconfig/iptables"
+when 'suse', 'opensuse', nil # nil stands for SLES 15
+  execute 'Save iptables rules' do
+    command 'iptables-save > /etc/sysconfig/iptables'
   end
 end # save iptables rules
 
 # Install bind-utils/dnsutils for nslookup
 case node[:platform_family]
-when "rhel", "centos", "almalinux", "oracle"
-  execute "install bind-utils" do
-    command "yum -y install bind-utils"
+when 'rhel', 'centos', 'almalinux', 'oracle'
+  execute 'install bind-utils' do
+    command 'yum -y install bind-utils'
   end
-when "debian", "ubuntu"
-  execute "install dnsutils" do
-    command "DEBIAN_FRONTEND=noninteractive apt-get -y install dnsutils"
+when 'debian', 'ubuntu'
+  execute 'install dnsutils' do
+    command 'DEBIAN_FRONTEND=noninteractive apt-get -y install dnsutils'
   end
-when "suse", "opensuse", nil # nil stands for SLES 15
-  execute "install bind-utils" do
-    command "zypper install -y bind-utils"
+when 'suse', 'opensuse', nil # nil stands for SLES 15
+  execute 'install bind-utils' do
+    command 'zypper install -y bind-utils'
   end
 end
 
 # Install packages
-if node[:platform_family] == "windows"
+if node[:platform_family] == 'windows'
   maxscale_package = 'maxscale'
   windows_package maxscale_package do
     source "#{Chef::Config[:file_cache_path]}/maxscale.msi"
@@ -108,19 +132,19 @@ end
 
 # Allow read access for the maxscale user to /etc/shadow
 shadow_group = case node[:platform_family]
-               when "rhel", "centos", "almalinux", "oracle"
-                 "root"
-               when "debian", "ubuntu", "suse", "opensuse", nil # Enabling SLES support
-                 "shadow"
+               when 'rhel', 'centos', 'almalinux', 'oracle'
+                 'root'
+               when 'debian', 'ubuntu', 'suse', 'opensuse', nil # Enabling SLES support
+                 'shadow'
                end
 
 group shadow_group do
   append true
-  members ["maxscale"]
+  members ['maxscale']
 end
 
-file "/etc/shadow" do
-  mode "640"
+file '/etc/shadow' do
+  mode '640'
 end
 
 check_version 'Check the installed version of the MaxScale server' do
