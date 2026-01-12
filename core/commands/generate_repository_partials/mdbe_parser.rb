@@ -94,7 +94,7 @@ module MdbeParser
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
         config['architectures'].map do |architecture|
-          generate_mdbe_release_info(config['baseurl'], config['new_key'], version, architecture,
+          generate_mdbe_release_info(config['baseurl'], config['key'], version, architecture,
                                      platform, platform_version, mdbe_private_key, product_name, deb_repo)
         end
       end

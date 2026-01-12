@@ -8,4 +8,3 @@ description      'Configures MariaDB plugins'
 version          '0.1.0'
 
 depends          'iptables_config'
-depends          'mariadb'

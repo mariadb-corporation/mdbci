@@ -1,5 +1,4 @@
 include_recipe 'iptables_config::default'
-include_recipe 'mariadb::install_repos_keys'
 
 PORTS = (8600..8630).to_a.append(8700, 8800)
 
