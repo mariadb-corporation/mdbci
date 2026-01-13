@@ -1,116 +1,88 @@
 include_recipe 'iptables_config::default'
 
 if node.attribute?('galera_3_enterprise') || node.attribute?('galera_4_enterprise')
-  include_recipe 'galera_ci::galera_repository'
+  include_recipe "galera_ci::galera_repository"
 end
-include_recipe 'mariadb::mdberepos'
-include_recipe 'chrony::default'
+include_recipe "mariadb::mdberepos"
+include_recipe "chrony::default"
 
 # Remove mysql-libs
 package 'mysql-libs' do
   action :remove
-  only_if { node['packages'].keys.include? 'mysql-libs' }
+  only_if { node['packages'].keys.include? "mysql-libs" }
 end
 
-system 'echo Platform family: ' + node[:platform_family]
+system 'echo Platform family: '+node[:platform_family]
 
 # check and install iptables
 case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Install iptables-persistent' do
-    command 'DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" install iptables-persistent'
-  end
-when 'rhel', 'fedora', 'centos'
-  if platform?('centos', 'redhat', 'rocky', 'almalinux',
-               'oracle') && node['platform_version'].to_f >= 7.0
-    bash 'Install and configure iptables' do
+  when "debian", "ubuntu"
+    execute "Install iptables-persistent" do
+      command "DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=\"--force-confdef\" install iptables-persistent"
+    end
+  when "rhel", "fedora", "centos"
+    if platform?('centos', 'redhat', 'rocky', 'almalinux', 'oracle') && node["platform_version"].to_f >= 7.0
+      bash 'Install and configure iptables' do
       code <<-EOF
         yum --assumeyes install iptables-services
         systemctl start iptables
         systemctl enable iptables
       EOF
-    end
-  else
-    bash 'Configure iptables' do
+      end
+    else
+      bash 'Configure iptables' do
       code <<-EOF
         /sbin/service start iptables
         chkconfig iptables on
       EOF
+      end
     end
-  end
-when 'suse'
-  package 'iptables'
+  when "suse"
+    package 'iptables'
 end
 
 # iptables rules
 case node[:platform_family]
-when 'debian', 'ubuntu', 'fedora', 'centos', 'suse', 'almalinux', 'oracle'
-  execute 'Opening MariaDB ports' do
-    command 'iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT'
-    command 'iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW'
-  end
-when 'rhel'
-  if node[:platform_version].to_f >= 10.0
-    execute 'Create nftables table' do
-      command 'nft add table inet filter'
+  when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "almalinux", "oracle"
+    execute "Opening MariaDB ports" do
+      command "iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT"
+      command "iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW"
     end
-    execute 'Create nftables chain' do
-      command "nft add chain inet filter INPUT '{ type filter hook input priority 0; }'"
-    end
-    execute 'Add MariaDB port rule to nftables' do
-      command 'nft add rule inet filter INPUT tcp dport 3306 ct state { established, new } accept'
-    end
-  else
-    execute 'Opening MariaDB ports' do
-      command 'iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT'
-      command 'iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW'
-    end
-  end
 end # iptables rules
 
 # TODO: check saving iptables rules after reboot
 # save iptables rules
 case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Save MariaDB iptables rules' do
-    command 'iptables-save > /etc/iptables/rules.v4'
-    # command "/usr/sbin/service iptables-persistent save"
-  end
-when 'centos', 'fedora', 'almalinux', 'oracle'
-  execute 'Save MariaDB iptables rules' do
-    command '/sbin/service iptables save'
-  end
-when 'rhel'
-  if node[:platform_version].to_f >= 10.0
-    execute 'Save nftables rules' do
-      command 'nft list ruleset > /etc/sysconfig/nftables.conf'
+  when "debian", "ubuntu"
+    execute "Save MariaDB iptables rules" do
+      command "iptables-save > /etc/iptables/rules.v4"
+      #command "/usr/sbin/service iptables-persistent save"
     end
-  else
-    execute 'Save MariaDB iptables rules' do
-      command '/sbin/service iptables save'
+  when "rhel", "centos", "fedora", "almalinux", "oracle"
+    execute "Save MariaDB iptables rules" do
+      command "/sbin/service iptables save"
     end
-  end
-# service iptables restart
-when 'suse'
-  execute 'Save MariaDB iptables rules' do
-    command 'iptables-save > /etc/sysconfig/iptables'
-  end
+    # service iptables restart
+  when "suse"
+    execute "Save MariaDB iptables rules" do
+      command "iptables-save > /etc/sysconfig/iptables"
+    end
 end # save iptables rules
 
 # Install packages
 case node[:platform_family]
-when 'suse'
-  execute 'install' do
-    command 'zypper -n install --from mariadb MariaDB-server MariaDB-client'
+when "suse"
+  execute "install" do
+    command "zypper -n install --from mariadb MariaDB-server MariaDB-client"
     notifies :start, 'service[mariadb]', :delayed
   end
-when 'debian'
+when "debian"
   package %w[mariadb-server mariadb-client] do
     action :upgrade
     notifies :start, 'service[mariadb]', :delayed
   end
-when 'windows'
-  windows_package 'MariaDB' do
+when "windows"
+  windows_package "MariaDB" do
     source "#{Chef::Config[:file_cache_path]}/mariadb.msi"
     installer_type :msi
     action :install
