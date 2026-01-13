@@ -1,7 +1,6 @@
 include_recipe 'mariadb-maxscale::maxscale_repos'
 include_recipe 'chrony::default'
 include_recipe 'iptables_config::default'
-
 # check and install iptables
 case node[:platform_family]
 when 'debian', 'ubuntu'
@@ -31,24 +30,11 @@ when 'suse'
   end
 end
 
-if node[:platform_family] == 'rhel' && (node[:platform_version].to_f >= 10.0)
-  execute 'Create nftables table' do
-    command 'nft add table inet filter'
-  end
-  execute 'Create nftables chain' do
-    command "nft add chain inet filter INPUT '{ type filter hook input priority 0; }'"
-  end
-end
-
 # iptables rules
 [3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27_017].each do |port|
   execute "Open port #{port}" do
-    if node[:platform_family] == 'rhel' && node[:platform_version].to_f >= 10.0
-      command "nft add rule inet filter INPUT tcp dport #{port} ct state { established, new } accept"
-    else
-      command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
-      command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
-    end
+    command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
+    command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
   end
 end
 # iptables rules
@@ -60,7 +46,7 @@ when 'debian', 'ubuntu'
   execute 'Save iptables rules' do
     command 'iptables-save > /etc/iptables/rules.v4'
   end
-when 'centos', 'fedora', 'almalinux', 'oracle'
+when 'rhel', 'centos', 'fedora', 'almalinux', 'oracle'
   if node[:platform] == 'centos' and node['platform_version'].to_f >= 7.0
     bash 'Save iptables rules on CentOS 7' do
       code <<-EOF
@@ -73,16 +59,6 @@ when 'centos', 'fedora', 'almalinux', 'oracle'
       code <<-EOF
         /sbin/service iptables save
       EOF
-    end
-  end
-when 'rhel'
-  if node[:platform_version].to_f >= 10.0
-    execute 'Save nftables rules' do
-      command 'nft list ruleset > /etc/sysconfig/nftables.conf'
-    end
-  else
-    execute 'Save MariaDB iptables rules' do
-      command '/sbin/service iptables save'
     end
   end
 # service iptables restart

@@ -340,6 +340,7 @@ rhel_10_packages = %w[
   python3-scons
   java-21-openjdk
   java-21-openjdk-devel
+  iptables-nft
 ]
 
 oracle_10_packages = rhel_10_packages + ['oracle-epel-release-el10']
