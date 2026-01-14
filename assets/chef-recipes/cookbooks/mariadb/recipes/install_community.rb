@@ -8,103 +8,40 @@ if node['mariadb']['repo'].include?('mdbe-ci-repo.mariadb.net')
 else
   include_recipe 'mariadb::mdbcrepos'
 end
-include_recipe "chrony::default"
+include_recipe 'chrony::default'
 
 # Remove mysql-libs
 package 'mysql-libs' do
   action :remove
-  only_if { node['packages'].keys.include? "mysql-libs" }
+  only_if { node['packages'].keys.include? 'mysql-libs' }
 end
 
-# check and install iptables
-case node[:platform_family]
-  when "debian", "ubuntu"
-    execute "Install iptables-persistent" do
-      command "DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=\"--force-confdef\" install iptables-persistent"
-    end
-  when 'rhel', 'centos', 'fedora', 'almalinux', 'oracle'
-    if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
-      bash 'Install and configure iptables' do
-      code <<-EOF
-        yum --assumeyes install iptables-services
-        systemctl start iptables
-        systemctl enable iptables
-      EOF
-      end
-    else
-      bash 'Configure iptables' do
-      code <<-EOF
-        /sbin/service start iptables
-        chkconfig iptables on
-      EOF
-      end
-    end
-  when "suse"
-    package 'iptables'
+install_iptables 'Install iptables' do
+  options '-o Dpkg::Options::=\"--force-confdef\"'
 end
 
-# iptables rules
-case node[:platform_family]
-  when "debian", "ubuntu", "rhel", "fedora", "centos", "suse", "almalinux", "oracle"
-    execute "Opening MariaDB ports" do
-      command "iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT"
-      command "iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state ESTABLISHED,NEW"
-    end
-end # iptables rules
-
-# TODO: check saving iptables rules after reboot
-# save iptables rules
-case node[:platform_family]
-  when "debian", "ubuntu"
-    execute "Save MariaDB iptables rules" do
-      command "iptables-save > /etc/iptables/rules.v4"
-      #command "/usr/sbin/service iptables-persistent save"
-    end
-  when 'rhel', 'centos', 'fedora', 'almalinux', 'oracle'
-    if node['platform_version'].to_f >= 7.0 and node[:platform_family] != 'fedora'
-      bash 'Save iptables rules' do
-        code <<-EOF
-          iptables-save > /etc/sysconfig/iptables
-        EOF
-        timeout 30
-        retries 5
-        retry_delay 30
-      end
-    else
-      bash 'Save iptables rules on' do
-      code <<-EOF
-        /sbin/service iptables save
-      EOF
-      end
-    end
-    # TODO: don't work centos7 docker
-    #execute "Save MariaDB iptables rules" do
-    #  command "service iptables save"
-    #end
-    # service iptables restart
-  when "suse"
-    execute "Save MariaDB iptables rules" do
-      command "iptables-save > /etc/sysconfig/iptables"
-    end
-end # save iptables rules
+configure_iptables 'Set iptables ports and save' do
+  ports [3306]
+  states %w[ESTABLISHED NEW]
+end
 
 # Install packages
 case node[:platform_family]
-when "suse"
-  execute "install" do
-    command "zypper -n install --from mariadb MariaDB-server MariaDB-client"
+when 'suse'
+  execute 'install' do
+    command 'zypper -n install --from mariadb MariaDB-server MariaDB-client'
   end
-when "debian"
+when 'debian'
   package %w[mariadb-server mariadb-client] do
     action :upgrade
   end
-when "windows"
-  windows_package "MariaDB" do
+when 'windows'
+  windows_package 'MariaDB' do
     source "#{Chef::Config[:file_cache_path]}/mariadb.msi"
     installer_type :msi
     action :install
   end
-when "rhel", "centos", "almalinux", "oracle"
+when 'rhel', 'centos', 'almalinux', 'oracle'
   package 'MariaDB-server' do
     flush_cache [:before]
     action :upgrade
@@ -147,7 +84,7 @@ if node['mariadb']['version'] == '5.1'
   execute 'Add my.cnf.d directory for old MySQL version' do
     command <<-COMMAND
     echo "\n[client-server]\n!includedir #{db_config_dir}" >> #{db_base_config}
-COMMAND
+    COMMAND
   end
 else
   execute 'Add my.cnf.d directory to the base mysql configuration file' do
