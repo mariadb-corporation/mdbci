@@ -1,72 +1,80 @@
 include_recipe 'mariadb-maxscale::maxscale_repos'
 include_recipe 'chrony::default'
 include_recipe 'iptables_config::default'
-# check and install iptables
-case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Install iptables-persistent' do
-    command 'DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent'
-  end
-when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
-  if node[:platform_version].to_f >= 7.0
-    bash 'Install and configure iptables' do
-      code <<-EOF
-        yum --assumeyes install iptables-services
-        systemctl start iptables
-        systemctl enable iptables
-      EOF
-    end
-  else
-    bash 'Configure iptables' do
-      code <<-EOF
-        /sbin/service start iptables
-        chkconfig iptables on
-      EOF
-    end
-  end
-when 'suse'
-  execute 'Install iptables' do
-    command 'zypper install -y iptables'
-  end
-end
+
+install_iptables 'install iptables'
+
+# # check and install iptables
+# case node[:platform_family]
+# when 'debian', 'ubuntu'
+#   execute 'Install iptables-persistent' do
+#     command 'DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent'
+#   end
+# when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
+#   if node[:platform_version].to_f >= 7.0
+#     bash 'Install and configure iptables' do
+#       code <<-EOF
+#         yum --assumeyes install iptables-services
+#         systemctl start iptables
+#         systemctl enable iptables
+#       EOF
+#     end
+#   else
+#     bash 'Configure iptables' do
+#       code <<-EOF
+#         /sbin/service start iptables
+#         chkconfig iptables on
+#       EOF
+#     end
+#   end
+# when 'suse'
+#   execute 'Install iptables' do
+#     command 'zypper install -y iptables'
+#   end
+# end
 
 # iptables rules
-[3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27_017].each do |port|
-  execute "Open port #{port}" do
-    command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
-    command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
-  end
-end
+# [3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27_017].each do |port|
+#   execute "Open port #{port}" do
+#     command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
+#     command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
+#   end
+# end
 # iptables rules
+
+configure_iptables 'Set iptables ports and save' do
+  ports [3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27_017]
+  states %w[NEW]
+end
 
 # TODO: check saving iptables rules after reboot
 # save iptables rules
-case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Save iptables rules' do
-    command 'iptables-save > /etc/iptables/rules.v4'
-  end
-when 'rhel', 'centos', 'fedora', 'almalinux', 'oracle'
-  if node[:platform] == 'centos' and node['platform_version'].to_f >= 7.0
-    bash 'Save iptables rules on CentOS 7' do
-      code <<-EOF
-        # TODO: use firewalld
-        bash -c "iptables-save > /etc/sysconfig/iptables"
-      EOF
-    end
-  else
-    bash 'Save iptables rules on CentOS >= 6.0' do
-      code <<-EOF
-        /sbin/service iptables save
-      EOF
-    end
-  end
-# service iptables restart
-when 'suse', 'opensuse', nil # nil stands for SLES 15
-  execute 'Save iptables rules' do
-    command 'iptables-save > /etc/sysconfig/iptables'
-  end
-end # save iptables rules
+# case node[:platform_family]
+# when 'debian', 'ubuntu'
+#   execute 'Save iptables rules' do
+#     command 'iptables-save > /etc/iptables/rules.v4'
+#   end
+# when 'rhel', 'centos', 'fedora', 'almalinux', 'oracle'
+#   if node[:platform] == 'centos' and node['platform_version'].to_f >= 7.0
+#     bash 'Save iptables rules on CentOS 7' do
+#       code <<-EOF
+#         # TODO: use firewalld
+#         bash -c "iptables-save > /etc/sysconfig/iptables"
+#       EOF
+#     end
+#   else
+#     bash 'Save iptables rules on CentOS >= 6.0' do
+#       code <<-EOF
+#         /sbin/service iptables save
+#       EOF
+#     end
+#   end
+# # service iptables restart
+# when 'suse', 'opensuse', nil # nil stands for SLES 15
+#   execute 'Save iptables rules' do
+#     command 'iptables-save > /etc/sysconfig/iptables'
+#   end
+# end # save iptables rules
 
 # Install bind-utils/dnsutils for nslookup
 case node[:platform_family]

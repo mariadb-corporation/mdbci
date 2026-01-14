@@ -2,28 +2,35 @@
 
 require 'shellwords'
 
-%w[4567 4568 4444 3306 4006 4008 4009 4442 6444].each do |port|
-  execute "Open port #{port}" do
-    command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
-    command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
-  end
+configure_iptables 'Set iptables ports and save' do
+  ports %w[4567 4568 4444 3306 4006 4008 4009 4442 6444]
+  states %w[NEW]
 end
 
-case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Save MariaDB iptables rules' do
-    command 'iptables-save > /etc/iptables/rules.v4'
-  end
-when 'rhel', 'centos', 'suse', 'almalinux', 'oracle'
-  bash 'Save iptables rules' do
-    code <<-EOF
-      iptables-save > /etc/sysconfig/iptables
-    EOF
-    timeout 30
-    retries 5
-    retry_delay 30
-  end
-end
+# %w[4567 4568 4444 3306 4006 4008 4009 4442 6444].each do |port|
+#   execute "Open port #{port}" do
+#     command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
+#     command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
+#   end
+# end
+
+# !!!! suse - ????
+#
+# case node[:platform_family]
+# when 'debian', 'ubuntu'
+#   execute 'Save MariaDB iptables rules' do
+#     command 'iptables-save > /etc/iptables/rules.v4'
+#   end
+# when 'rhel', 'centos', 'suse', 'almalinux', 'oracle'
+#   bash 'Save iptables rules' do
+#     code <<-EOF
+#       iptables-save > /etc/sysconfig/iptables
+#     EOF
+#     timeout 30
+#     retries 5
+#     retry_delay 30
+#   end
+# end
 
 unless node['galera_config']['cnf_template'].nil?
   # Copy server.cnf configuration file to configuration
@@ -74,7 +81,7 @@ unless node['galera_config']['cnf_template'].nil?
     end
   end
 
-  if node['galera_config']['provider']   == 'aws'
+  if node['galera_config']['provider'] == 'aws'
     bash 'Configure Galera server.cnf - Get AWS node IP address' do
       code <<-CODE
           node_address=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)

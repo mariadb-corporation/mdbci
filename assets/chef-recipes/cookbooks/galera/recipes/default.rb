@@ -37,74 +37,17 @@ if (node[:platform_family] == 'centos' || node[:platform_family] == 'rhel') &&
 end
 package 'socat'
 
-# check and install iptables
-case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Install iptables-persistent' do
-    command 'DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent'
-  end
-when 'rhel', 'fedora', 'centos'
-  if node['platform_version'].to_f >= 7.0
-    bash 'Install and configure iptables' do
-      code <<-CODE
-        yum --assumeyes install iptables-services
-        systemctl start iptables
-        systemctl enable iptables
-      CODE
-    end
-  else
-    bash 'Configure iptables' do
-      code <<-CODE
-        service iptables start
-        chkconfig iptables on
-      CODE
-    end
-  end
-when 'suse'
+install_iptables 'Install iptables'
+
+if node[:platform_family] == 'suse'
   execute 'Install iptables and SuSEfirewall2' do
-    command 'zypper install -y iptables'
     command 'zypper install -y SuSEfirewall2'
   end
 end
 
-# iptables ports
-case node[:platform_family]
-when 'debian', 'ubuntu', 'rhel', 'fedora', 'centos', 'suse'
-  %w[4567 4568 4444 3306 4006 4008 4009 4442 6444].each do |port|
-    execute "Open port #{port}" do
-      command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
-      command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state NEW"
-    end
-  end
-end
-
-# TODO: check saving iptables rules after reboot
-# save iptables rules
-case node[:platform_family]
-when 'debian', 'ubuntu'
-  execute 'Save iptables rules' do
-    command 'iptables-save > /etc/iptables/rules.v4'
-  end
-when 'rhel', 'centos', 'fedora'
-  if (node[:platform] == 'centos') && (node['platform_version'].to_f >= 7.0)
-    bash 'Save iptables rules on CentOS 7' do
-      code <<-CODE
-        # TODO: use firewalld
-        bash -c "iptables-save > /etc/sysconfig/iptables"
-      CODE
-    end
-  else
-    bash 'Save iptables rules on CentOS >= 6.0' do
-      code <<-CODE
-        /sbin/service iptables save
-      CODE
-    end
-  end
-  # service iptables restart
-when 'suse'
-  execute 'Save iptables rules' do
-    command 'iptables-save > /etc/sysconfig/iptables'
-  end
+configure_iptables 'Set iptables ports and save' do
+  ports %w[4567 4568 4444 3306 4006 4008 4009 4442 6444]
+  states %w[NEW]
 end
 
 # Install packages
@@ -117,7 +60,7 @@ when 'suse'
       lines = cmd.stdout.lines
       packages_start_line_index = lines.index { |line| line =~ /--+/ } + 1
       available_packages = lines[packages_start_line_index...lines.length].map do |line|
-        line.split(/\|/).map { |column| column.strip.chomp }[2]
+        line.split('|').map { |column| column.strip.chomp }[2]
       end
       node.run_state[:galera_package_name] = (PACKAGE_NAMES & available_packages).first
     end
@@ -148,9 +91,11 @@ when 'debian'
   end
 else
   node.run_state[:galera_package_name] = 'MariaDB-Galera-server'
+  pp '!!!', node.run_state[:galera_package_name]
 end
 
 package 'Install galera package' do
+  pp '!!!', node.run_state[:galera_package_name]
   package_name(lazy { node.run_state[:galera_package_name] })
   options '--force-yes' if platform?('debian') && node[:platform_version].to_i == 8
 end
@@ -181,9 +126,9 @@ unless node['galera']['cnf_template'].nil?
     mode '0644'
   end
 
-# configure galera server.cnf file
+  # configure galera server.cnf file
   case node[:platform_family]
-    when 'debian', 'ubuntu'
+  when 'debian', 'ubuntu'
     bash 'Configure Galera server.cnf - Get/Set Galera LIB_PATH' do
       code <<-CODE
         galera_library=$(ls /usr/lib/galera | grep so)
