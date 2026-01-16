@@ -5,21 +5,17 @@ property :ports, Array, default: []
 default_action :configure
 
 action :configure do
-  pp '!!! action :configure'
   open_ports
   save_rules
 end
 
 action_class do
   def open_ports
-    # execute 'Opening MariaDB ports' do
-    # if node[:platform_version].to_f >= 10.0 && platform_family?('rhel') #  fedora_based_system?
     if node[:platform_version].to_f >= 10.0 && fedora_based_system? #  platform_family?('rhel')
       open_nfl_ports
     else
       open_iptables_ports
     end
-    # end
   end
 
   def open_iptables_ports
@@ -64,7 +60,6 @@ action_class do
   end
 
   def save_for_fedora_based
-    # if node[:platform_version].to_f >= 10.0 && platform_family?('rhel') #  fedora_based_system?
     if node[:platform_version].to_f >= 10.0 && fedora_based_system? #  platform_family?('rhel')
       execute 'Save nftables rules' do
         command 'nft list ruleset > /etc/sysconfig/nftables.conf'

@@ -38,14 +38,12 @@ mdbe:
   repo:
     rpm:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
-      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/rpm/$PLATFORM$/$PLATFORM_VERSION$/$basearch
       platforms: ["centos_6", "centos_7", "centos_8", "rhel_6", "rhel_7", "rhel_8", "rhel_9", "rhel_10", "sles_12", "sles_15"]
       architectures: ["amd64", "aarch64", "ppc64le"]
       key: https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025
     deb:
       path: https://dlm.mariadb.com/browse/$PRIVATE_KEY$/mariadb_enterprise_server/
-      key: https://downloads.mariadb.com/MariaDB/MariaDB-Enterprise-GPG-KEY
       baseurl: https://dlm.mariadb.com/repo/$PRIVATE_KEY$/mariadb-enterprise-server/$MDBE_VERSION$/deb
       platforms: ["debian_jessie", "debian_stretch", "debian_buster", "debian_bullseye", "debian_bookworm", "debian_trixie", "ubuntu_xenial", "ubuntu_bionic", "ubuntu_focal", "ubuntu_jammy", "ubuntu_noble"]
       architectures: ["amd64", "aarch64"]

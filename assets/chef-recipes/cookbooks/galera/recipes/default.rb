@@ -90,11 +90,9 @@ when 'debian'
   end
 else
   node.run_state[:galera_package_name] = 'MariaDB-Galera-server'
-  pp '!!!', node.run_state[:galera_package_name]
 end
 
 package 'Install galera package' do
-  pp '!!!', node.run_state[:galera_package_name]
   package_name(lazy { node.run_state[:galera_package_name] })
   options '--force-yes' if platform?('debian') && node[:platform_version].to_i == 8
 end
