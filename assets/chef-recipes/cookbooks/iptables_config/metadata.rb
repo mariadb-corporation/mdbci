@@ -1,6 +1,6 @@
-name             'iptables_install'
+name             'iptables_config'
 maintainer       'Yaroslavl FRUCT Laboratory'
 maintainer_email 'yarfruct@gmail.com'
 license          'All rights reserved'
-description      'Allows to check the version of installed DEB, RHEL and SLES packages'
+description      'Installs and configures the iptables util depending on the system'
 version          '0.1.0'

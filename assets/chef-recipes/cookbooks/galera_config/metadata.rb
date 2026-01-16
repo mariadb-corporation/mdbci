@@ -1,3 +1,3 @@
 name              'galera_config'
 
-depends           'iptables_install'
+depends           'iptables_config'

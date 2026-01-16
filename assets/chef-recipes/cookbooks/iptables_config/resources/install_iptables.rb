@@ -5,11 +5,8 @@ property :options, String
 default_action :install
 
 action :install do
-  pp '!!! action :install'
   install_for_debian_based if debian_based_system?
-
   install_for_fedora_based if fedora_based_system?
-
   package 'iptables' if platform_family?('suse')
 end
 
