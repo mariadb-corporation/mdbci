@@ -22,7 +22,6 @@ end
 
 configure_iptables 'Set iptables ports and save' do
   ports [3306]
-  states %w[ESTABLISHED NEW]
 end
 
 # Install packages

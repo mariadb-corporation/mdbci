@@ -18,9 +18,10 @@ when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux', 'oracle'
   end
 end
 
+install_iptables 'Install iptables'
+
 configure_iptables 'Set iptables ports and save' do
   ports PORTS
-  states %w[ESTABLISHED NEW]
 end
 
 # PORTS.each do |port|
