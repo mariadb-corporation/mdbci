@@ -1,6 +1,5 @@
 provides :configure_iptables
 
-property :states, Array, default: []
 property :ports, Array, default: []
 
 default_action :configure
@@ -13,14 +12,39 @@ end
 
 action_class do
   def open_ports
-    execute 'Opening MariaDB ports' do
-      if %w[debian ubuntu rhel fedora centos suse almalinux oracle].any? do |platform|
-           platform_family?(platform)
-         end
+    # execute 'Opening MariaDB ports' do
+    # if node[:platform_version].to_f >= 10.0 && platform_family?('rhel') #  fedora_based_system?
+    if node[:platform_version].to_f >= 10.0 && fedora_based_system? #  platform_family?('rhel')
+      open_nfl_ports
+    else
+      open_iptables_ports
+    end
+    # end
+  end
+
+  def open_iptables_ports
+    if %w[debian ubuntu rhel fedora centos suse almalinux oracle].any? do |platform|
+         platform_family?(platform)
+       end
+      execute "Opening MariaDB port #{port}" do
         new_resource.ports.each do |port|
           command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
-          command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state #{new_resource.states.join(',')}"
+          command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state ESTABLISHED,NEW"
         end
+      end
+    end
+  end
+
+  def open_nfl_ports
+    execute 'Create nftables table' do
+      command 'nft add table inet filter'
+    end
+    execute 'Create nftables chain' do
+      command "nft add chain inet filter INPUT '{ type filter hook input priority 0; }'"
+    end
+    execute 'Open nft ports' do
+      new_resource.ports.each do |port|
+        command "nft add rule inet filter INPUT tcp dport #{port} ct state { established, new } accept"
       end
     end
   end
@@ -40,7 +64,12 @@ action_class do
   end
 
   def save_for_fedora_based
-    if node[:platform_version].to_f >= 7.0 && !platform_family?('fedora')
+    # if node[:platform_version].to_f >= 10.0 && platform_family?('rhel') #  fedora_based_system?
+    if node[:platform_version].to_f >= 10.0 && fedora_based_system? #  platform_family?('rhel')
+      execute 'Save nftables rules' do
+        command 'nft list ruleset > /etc/sysconfig/nftables.conf'
+      end
+    elsif node[:platform_version].to_f >= 7.0 && !platform_family?('fedora')
       bash 'Save iptables rules' do
         code <<-EOF
             iptables-save > /etc/sysconfig/iptables

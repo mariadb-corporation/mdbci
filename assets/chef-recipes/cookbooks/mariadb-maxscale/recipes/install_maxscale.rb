@@ -44,7 +44,6 @@ install_iptables 'install iptables'
 
 configure_iptables 'Set iptables ports and save' do
   ports [3306, 4006, 4008, 4009, 4016, 5306, 4442, 6444, 6603, 8989, 9092, 27_017]
-  states %w[NEW]
 end
 
 # TODO: check saving iptables rules after reboot
