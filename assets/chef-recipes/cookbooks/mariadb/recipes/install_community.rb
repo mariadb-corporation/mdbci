@@ -16,11 +16,9 @@ package 'mysql-libs' do
   only_if { node['packages'].keys.include? 'mysql-libs' }
 end
 
-install_iptables 'Install iptables' do
-  options '-o Dpkg::Options::=\"--force-confdef\"'
-end
+install_iptables 'Install iptables'
 
-configure_iptables 'Set iptables ports and save' do
+open_input_ports 'Set iptables ports and save' do
   ports [3306]
 end
 

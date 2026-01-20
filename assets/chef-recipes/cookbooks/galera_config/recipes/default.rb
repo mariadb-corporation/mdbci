@@ -4,7 +4,7 @@ require 'shellwords'
 
 install_iptables 'Install iptables'
 
-configure_iptables 'Set iptables ports and save' do
+open_input_ports 'Set iptables ports and save' do
   ports %w[4567 4568 4444 3306 4006 4008 4009 4442 6444]
 end
 

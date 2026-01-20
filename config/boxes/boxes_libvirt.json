@@ -61,6 +61,14 @@
     "platform_version": "15",
     "disk_bus": "sata"
   },
+  "suse_15_loc_libvirt" : {
+    "provider": "libvirt",
+    "architecture": "amd64",
+    "platform": "opensuse",
+    "box": "suse_15",
+    "platform_version": "15",
+    "disk_bus": "sata"
+  },
   "sles_12_libvirt" : {
     "provider": "libvirt",
     "architecture": "amd64",
