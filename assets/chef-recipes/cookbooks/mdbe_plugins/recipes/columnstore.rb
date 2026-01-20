@@ -20,6 +20,6 @@ end
 
 install_iptables 'Install iptables'
 
-configure_iptables 'Set iptables ports and save' do
+open_input_ports 'Set iptables ports and save' do
   ports PORTS
 end

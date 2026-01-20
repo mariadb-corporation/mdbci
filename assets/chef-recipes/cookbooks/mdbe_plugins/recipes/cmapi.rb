@@ -4,6 +4,6 @@ include_recipe 'iptables_config::default'
 
 install_iptables 'Install iptables'
 
-configure_iptables 'Set iptables ports and save' do
+open_input_ports 'Set iptables ports and save' do
   ports [8640]
 end

@@ -1,4 +1,4 @@
-provides :configure_iptables
+provides :open_input_ports
 
 property :ports, Array, default: []
 
@@ -11,7 +11,7 @@ end
 
 action_class do
   def open_ports
-    if node[:platform_version].to_f >= 10.0 && fedora_based_system? #  platform_family?('rhel')
+    if node[:platform_version].to_f >= 10.0 && fedora_based_system?
       open_nfl_ports
     else
       open_iptables_ports
@@ -22,7 +22,7 @@ action_class do
     if %w[debian ubuntu rhel fedora centos suse almalinux oracle].any? do |platform|
          platform_family?(platform)
        end
-      execute "Opening MariaDB port #{port}" do
+      execute 'Opening MariaDB ports' do
         new_resource.ports.each do |port|
           command "iptables -I INPUT -p tcp -m tcp --dport #{port} -j ACCEPT"
           command "iptables -I INPUT -p tcp --dport #{port} -j ACCEPT -m state --state ESTABLISHED,NEW"
@@ -60,7 +60,7 @@ action_class do
   end
 
   def save_for_fedora_based
-    if node[:platform_version].to_f >= 10.0 && fedora_based_system? #  platform_family?('rhel')
+    if node[:platform_version].to_f >= 10.0 && fedora_based_system?
       execute 'Save nftables rules' do
         command 'nft list ruleset > /etc/sysconfig/nftables.conf'
       end

@@ -1,23 +1,20 @@
 provides :install_iptables
 
-property :options, String
-
 default_action :install
 
 action :install do
   install_for_debian_based if debian_based_system?
   install_for_fedora_based if fedora_based_system?
-  package 'iptables' if platform_family?('suse')
+  if platform_family?('suse')
+    package 'iptables'
+    package 'SuSEfirewall2'
+  end
 end
 
 action_class do
   def install_for_debian_based
     execute 'Install iptables-persistent' do
-      if property_is_set?(:options)
-        command "DEBIAN_FRONTEND=noninteractive apt-get -y #{new_resource.options} install iptables-persistent"
-      else
-        command 'DEBIAN_FRONTEND=noninteractive apt-get -y install iptables-persistent'
-      end
+      command 'DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" install iptables-persistent'
     end
   end
 
