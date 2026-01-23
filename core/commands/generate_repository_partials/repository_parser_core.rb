@@ -135,23 +135,21 @@ module RepositoryParserCore
               platform_version: platform_version
             }
           end
+        elsif platform_and_version.include?('arm')
+          release_data = platform_and_version.split('-')
+          releases << {
+            url: "#{release[:url]}#{platform_and_version}/",
+            platform: release_data[0],
+            platform_version: release_data[1],
+            architecture: 'aarch64'
+          }
         else
-          if platform_and_version.include?('arm')
-            release_data = platform_and_version.split('-')
-            releases << {
-              url: "#{release[:url]}#{platform_and_version}/",
-              platform: release_data[0],
-              platform_version: release_data[1],
-              architecture: 'aarch64'
-            }
-          else
-            platform_version = platform_and_version.split('-').last
-            releases << {
-              url: "#{release[:url]}#{platform_and_version}/",
-              platform: platform_and_version.split('-').first,
-              platform_version: platform_version
-            }
-          end
+          platform_version = platform_and_version.split('-').last
+          releases << {
+            url: "#{release[:url]}#{platform_and_version}/",
+            platform: platform_and_version.split('-').first,
+            platform_version: platform_version
+          }
         end
       end
       releases
@@ -233,8 +231,8 @@ module RepositoryParserCore
         begin
           links = get_directory_links(release[:url], scan_mode, logger, auth)
         rescue StandardError => e
-          error_and_log("Unable to get information from link '#{release[:url]}',"\
-                        " message: '#{e.message}'", log, logger)
+          error_and_log("Unable to get information from link '#{release[:url]}', " \
+                        "message: '#{e.message}'", log, logger)
           next
         end
         apply_step_to_links(step, links, release)
@@ -272,7 +270,7 @@ module RepositoryParserCore
   # @param auth [Hash] basic auth data in format { username, password }
   # @return [Array] possible link locations
   def get_links(url, logger, auth = nil)
-    uri = url.gsub(%r{([^:])\/+}, '\1/')
+    uri = url.gsub(%r{([^:])/+}, '\1/')
     logger.info("Loading URLs '#{uri}'")
     options = {}
     options[:http_basic_authentication] = [auth['username'], auth['password']] unless auth.nil?
@@ -294,7 +292,7 @@ module RepositoryParserCore
   end
 
   def key_link?(link)
-    link[:href].match?(%r{.*public$})
+    link[:href].match?(/.*public$/)
   end
 
   # Check whether a passed link is a sub link for the base url
@@ -361,9 +359,10 @@ module RepositoryParserCore
   # @param releases [Array<Hash>] list of releases
   # @param key [String] text to put into key field
   # @param product [String] name of the product
-  def add_key_and_product_to_releases(releases, key, product)
+  def add_key_and_product_to_releases(releases, key, product, new_key = nil)
     releases.each do |release|
       release[:repo_key] ||= key unless key.nil?
+      release[:repo_new_key] ||= new_key unless new_key.nil?
       release[:product] = product
     end
   end
@@ -399,8 +398,8 @@ module RepositoryParserCore
           begin
             links = get_directory_links(release[:url], scan_mode, logger, auth)
           rescue StandardError => e
-            error_and_log("Unable to get information from link '#{release[:url]}',"\
-                          " message: '#{e.message}'", log, logger)
+            error_and_log("Unable to get information from link '#{release[:url]}', " \
+                          "message: '#{e.message}'", log, logger)
             next
           end
           release[:continue_step] = !step[:complete_condition].nil? &&
@@ -622,7 +621,6 @@ module RepositoryParserCore
     }
   }.freeze
 
-
   def self.append_releases_platforms(links)
     links.each_with_object([]) do |link, releases|
       PLATFORMS.keys.map do |platform|
@@ -634,16 +632,15 @@ module RepositoryParserCore
   def self.append_latest_version(latest_version, releases, product_name, architecture)
     PLATFORMS.keys.map do |platform|
       releases << (PLATFORMS[platform].merge({
-                                                repo: latest_version[:repo],
-                                                version: 'latest',
-                                                product: product_name,
-                                                architecture: architecture
-                                            }))
+                                               repo: latest_version[:repo],
+                                               version: 'latest',
+                                               product: product_name,
+                                               architecture: architecture
+                                             }))
     end
   end
 
   def get_mdbe_platforms
     PLATFORMS
   end
-
 end

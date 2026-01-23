@@ -20,8 +20,8 @@ class ProductAndSubscriptionRegistry
 
   def create_registry_node(node)
     @registry[node] = {
-        'products' => [],
-        'subscription' => nil
+      'products' => [],
+      'subscription' => nil
     }
   end
 
@@ -35,12 +35,14 @@ class ProductAndSubscriptionRegistry
 
   # Save the register to a file
   def save_registry(path)
-    File.open(path, 'w') { |f| f.write(YAML.dump(@registry)) }
+    File.write(path, YAML.dump(@registry))
   end
 
   # Read a register from file
   def self.from_file(path)
-    File.open(path, 'r') { |f| return Result.ok(ProductAndSubscriptionRegistry.new(YAML.safe_load(f))) }
+    File.open(path, 'r') do |f|
+      return Result.ok(ProductAndSubscriptionRegistry.new(YAML.safe_load(f)))
+    end
   rescue StandardError
     Result.error('Failed to read registry')
   end
@@ -56,6 +58,7 @@ class ProductAndSubscriptionRegistry
 
   def get_subscription(node)
     return Result.error('No subscriptions') if @registry[node]['subscription'].nil?
+
     Result.ok(@registry[node]['subscription'])
   end
 end

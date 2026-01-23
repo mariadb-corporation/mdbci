@@ -30,7 +30,6 @@ require_relative 'generate_repository_partials/kafka_parser'
 require_relative 'generate_repository_partials/mema_agent_parser'
 
 # The command generates the repository configuration
-# rubocop:disable Metrics/ClassLength
 class GenerateProductRepositoriesCommand < BaseCommand
   CONFIGURATION_FILE = 'generate_repository_config.yaml'
   PRODUCTS_DIR_NAMES = {
@@ -115,7 +114,7 @@ In order to specify the number of retries for repository configuration use --att
   # rubocop:enable Metrics/MethodLength
 
   def initialize(args, env, default_logger)
-    super(args, env, default_logger)
+    super
     path = @env.data_path('generate_product_repository.log')
     @ui.info("Writing log file to #{path}")
     @logger = Logger.new(File.new(path, 'w'), 'weekly')
@@ -161,7 +160,7 @@ In order to specify the number of retries for repository configuration use --att
     if @env.nodeProduct
       node_product = get_product_by_alias(@env.nodeProduct)
       unless PRODUCTS_DIR_NAMES.key?(node_product)
-        error_and_log("Unknown product #{node_product}.\n"\
+        error_and_log("Unknown product #{node_product}.\n" \
                       "Known products: #{PRODUCTS_DIR_NAMES.keys.join(', ')}")
         return false
       end
@@ -215,7 +214,7 @@ In order to specify the number of retries for repository configuration use --att
   end
 
   REQUIRED_KEYS = %i[repo platform platform_version product version architecture].freeze
-  OPTIONAL_KEYS = %i[components repo_key unsupported_repo disable_gpgcheck]
+  OPTIONAL_KEYS = %i[components repo_key repo_new_key unsupported_repo disable_gpgcheck]
   # Extract only required fields from the passed release before writing it to the file
   def extract_release_fields(release)
     updated_release = release.select do |key, _|
@@ -240,6 +239,7 @@ In order to specify the number of retries for repository configuration use --att
       releases_by_version = Hash.new { |hash, key| hash[key] = [] }
       releases.each do |release|
         next if release[:platform] != platform
+
         release[:architecture] = 'amd64' if [nil, 'x86_64'].include?(release[:architecture])
         releases_by_version[release[:version]] << extract_release_fields(release)
       end
@@ -276,7 +276,7 @@ In order to specify the number of retries for repository configuration use --att
         file_path = File.join(repository_path, file)
         FileUtils.rm_f(file_path) if start_time > File.mtime(file_path)
       end
-      FileUtils.rm_rf(repository_path, secure: true) if Dir.children(repository_path).empty?
+      FileUtils.rm_rf(repository_path, secure: true) if Dir.empty?(repository_path)
     end
   end
 
@@ -306,15 +306,19 @@ In order to specify the number of retries for repository configuration use --att
     when 'mdbe_ci'
       MdbeCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'maxscale_ci'
-      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'maxscale_ci', @ui, @logger)
+      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'maxscale_ci',
+                             @ui, @logger)
     when 'maxscale_enterprise_ci'
-      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'maxscale_enterprise_ci', @ui, @logger)
+      MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
+                             'maxscale_enterprise_ci', @ui, @logger)
     when 'maxscale_ci_docker'
       MaxscaleCiDockerParser.parse(@ui, @env.tool_config)
     when 'maxscale'
-      MaxScaleParser.parse(product_config, @product_version, @env.mdbe_private_key, 'maxscale', @ui, @logger)
+      MaxScaleParser.parse(product_config, @product_version, @env.mdbe_private_key, 'maxscale',
+                           @ui, @logger)
     when 'maxscale_enterprise'
-      MaxScaleParser.parse(product_config, @product_version, @env.mdbe_private_key, 'maxscale_enterprise', @ui, @logger)
+      MaxScaleParser.parse(product_config, @product_version, @env.mdbe_private_key,
+                           'maxscale_enterprise', @ui, @logger)
     when 'mdbe'
       MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server', 'mdbe')
     when 'mariadb'
@@ -324,19 +328,25 @@ In order to specify the number of retries for repository configuration use --att
     when 'clustrix', 'xpand'
       ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand', 'clustrix')
     when 'clustrix_staging', 'xpand_staging'
-      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging', 'clustrix_staging')
+      ClustrixParser.parse(product_config, @env.mdbe_private_key, 'Xpand Staging',
+                           'clustrix_staging')
     when 'galera_3_enterprise'
-      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_enterprise', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
+                           'galera_3_enterprise', @ui, @logger)
     when 'galera_4_enterprise'
-      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_4_enterprise', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
+                           'galera_4_enterprise', @ui, @logger)
     when 'galera_3_community'
-      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_3_community', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
+                           'galera_3_community', @ui, @logger)
     when 'galera_4_community'
-      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'galera_4_community', @ui, @logger)
+      GaleraCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
+                           'galera_4_community', @ui, @logger)
     when 'mariadb_ci'
       MariadbCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
     when 'mdbe_staging'
-      MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging', 'mdbe_staging')
+      MdbeParser.parse(product_config, @env.mdbe_private_key, 'MariaDB Enterprise Server Staging',
+                       'mdbe_staging')
     when 'mariadb_staging'
       MariadbStagingParser.parse(product_config, @product_version, @ui, @logger)
     when 'connector_c_ci'
@@ -346,11 +356,13 @@ In order to specify the number of retries for repository configuration use --att
       ConnectorCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'connector_cpp_ci',
                               'mariadb_connector_cpp', 'mariadbcpp', @ui, @logger)
     when 'connector_odbc_ci'
-      ConnectorOdbcCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui, @logger)
+      ConnectorOdbcCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, @ui,
+                                  @logger)
     when 'connector_odbc'
       ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger)
     when 'connector_odbc_staging'
-      ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger, 'connector_odbc_staging', @env.mdbe_private_key)
+      ConnectorOdbcParser.parse(product_config, @product_version, @ui, @logger,
+                                'connector_odbc_staging', @env.mdbe_private_key)
     when 'kafka'
       KafkaParser.parse(product_config, @product_version, @ui, @logger)
     when 'mema_agent'
@@ -388,4 +400,3 @@ In order to specify the number of retries for repository configuration use --att
     SUCCESS_RESULT
   end
 end
-# rubocop:enable Metrics/ClassLength

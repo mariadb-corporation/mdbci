@@ -5,10 +5,7 @@ default_action :install
 action :install do
   install_for_debian_based if debian_based_system?
   install_for_fedora_based if fedora_based_system?
-  if platform_family?('suse')
-    package 'iptables'
-    package 'SuSEfirewall2'
-  end
+  package 'iptables' if platform_family?('suse')
 end
 
 action_class do
