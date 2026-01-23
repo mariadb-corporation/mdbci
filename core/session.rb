@@ -18,7 +18,7 @@ require_relative 'commands/public_keys_command'
 require_relative 'commands/provide_files'
 require_relative 'commands/deploy_command'
 require_relative 'commands/setup_dependencies_command'
-require_relative 'commands/install_product_command.rb'
+require_relative 'commands/install_product_command'
 require_relative 'commands/setup_repo_command'
 require_relative 'commands/update_configuration_command'
 require_relative 'commands/show_command'
@@ -42,7 +42,6 @@ require_relative 'commands/list_cloud_instances_command'
 require_relative 'commands/create_user_command'
 require_relative 'commands/self_upgrade_command'
 require_relative 'commands/create_box_from_node_command'
-
 
 # Currently it is the GOD object that contains configuration and manages the commands that should be run.
 # These responsibilites should be split between several classes.
@@ -91,6 +90,7 @@ class Session
   attr_accessor :reinstall
   attr_accessor :recreate
   attr_accessor :repo_key
+  attr_accessor :repo_new_key
   attr_accessor :labels
   attr_accessor :force_distro
   attr_accessor :cpu_count
@@ -127,8 +127,8 @@ EOF
   # Fill in paths based on the provided configuration if they were
   # not setup via external configuration
   def fill_paths
-    @mdbci_dir = __dir__ unless @mdbci_dir
-    @working_dir = Dir.pwd unless @working_dir
+    @mdbci_dir ||= __dir__
+    @working_dir ||= Dir.pwd
     @configuration_directories = [
       File.join(XDG::Config.new.home, 'mdbci'),
       File.join(@mdbci_dir, 'config')
@@ -144,9 +144,8 @@ EOF
 
   # Method initializes services that depend on the parsed configuration
   def initialize_services
-    if @tool_config.nil?
-      raise 'Unable to read config file'
-    end
+    raise 'Unable to read config file' if @tool_config.nil?
+
     fill_paths
     $out.info('Loading repository configuration files')
     @rhel_config = @tool_config['rhel']
@@ -171,21 +170,21 @@ EOF
       @aws_service
     end
   end
-  
-  def ibm_service
-  if @ibm_service.nil?
-    begin
-      @ibm_service = IbmService.new(@tool_config['ibm'], $out)
-    rescue => e
-      $out.error("IBM Cloud service init error: #{e.message}")
-      raise
-    end
-  else
-    @ibm_service
-  end
-end
 
-    def digitalocean_service
+  def ibm_service
+    if @ibm_service.nil?
+      begin
+        @ibm_service = IbmService.new(@tool_config['ibm'], $out)
+      rescue StandardError => e
+        $out.error("IBM Cloud service init error: #{e.message}")
+        raise
+      end
+    else
+      @ibm_service
+    end
+  end
+
+  def digitalocean_service
     if @digitalocean_service.nil?
       @digitalocean_service = DigitaloceanService.new(@tool_config['digitalocean'], $out)
     else
@@ -241,7 +240,7 @@ end
 
   # Determine the number of cpus to assign to a VM by default
   def determine_cpu_count
-    Concurrent.processor_count / 4 + 1
+    (Concurrent.processor_count / 4) + 1
   end
 
   # Remove temporary files at exit
@@ -309,7 +308,7 @@ end
       exit_code = command.execute
     when 'setup-dependencies'
       command = SetupDependenciesCommand.new(ARGV, self, $out)
-      exit_code = command.execute()
+      exit_code = command.execute
     when 'setup_repo'
       command = SetupRepoCommand.new(ARGV, self, $out)
       exit_code = command.execute
@@ -336,6 +335,6 @@ end
       command = HelpCommand.new(ARGV, self, $out)
       command.execute
     end
-    return exit_code
+    exit_code
   end
 end

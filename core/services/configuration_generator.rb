@@ -25,10 +25,10 @@ class ConfigurationGenerator
 
   def generate_node_info(node, node_params, registry, force_version)
     box = node[1]['box'].to_s
-    public_network = node[1]["public_network"]
+    public_network = node[1]['public_network']
     if public_network
-      node_params[:public_network_gateway] = public_network["ip"]
-      node_params[:public_network_route_dev] = node[1]["public_network_route_dev"]
+      node_params[:public_network_gateway] = public_network['ip']
+      node_params[:public_network_route_dev] = node[1]['public_network_route_dev']
     end
     products = ConfigurationGenerator.parse_products_info(node)
     @ui.info("Machine #{node_params[:name]} is provisioned by #{products}")
@@ -66,9 +66,7 @@ class ConfigurationGenerator
       config['cnf_template'] = product['cnf_template']
       config['cnf_template_path'] = product['cnf_template_path']
     end
-    if product.key?('disable_gpgcheck')
-      config['disable_gpgcheck'] = product['disable_gpgcheck']
-    end
+    config['disable_gpgcheck'] = product['disable_gpgcheck'] if product.key?('disable_gpgcheck')
     repo_file_name = ProductAttributes.repo_file_name(product_name)
     config['repo_file_name'] = repo_file_name unless repo_file_name.nil?
     config['provider'] = provider
@@ -76,9 +74,7 @@ class ConfigurationGenerator
     if product['include_unsupported'] && repo.key?('unsupported_repo')
       config['unsupported_repo'] = repo['unsupported_repo']
     end
-    if ProductAttributes.ci_product?(product_name)
-      config['ci_product'] = true
-    end
+    config['ci_product'] = true if ProductAttributes.ci_product?(product_name)
     setup_product_license_if_need(config, product_name).and_then do |updated_config|
       attribute_name = ProductAttributes.attribute_name(product_name)
       return Result.ok("#{attribute_name}": updated_config)
@@ -129,7 +125,9 @@ class ConfigurationGenerator
   # rubocop:disable Metrics/MethodLength
   def make_product_config_and_recipe_name(product, box, force_version)
     repo = nil
-    if !product['repo'].nil?
+    if product['repo'].nil?
+      product_name = product['name']
+    else
       repo_name = product['repo']
       @ui.info("Repo name: #{repo_name}")
       unless @repository_manager.knownRepo?(repo_name)
@@ -139,11 +137,10 @@ class ConfigurationGenerator
       @ui.info("Repo specified [#{repo_name}] (CORRECT), other product params will be ignored")
       repo = @repository_manager.getRepo(repo_name)
       product_name = @repository_manager.productName(repo_name)
-    else
-      product_name = product['name']
     end
     recipe_name = ProductAttributes.recipe_name(product_name)
-    self.class.generate_product_config(@repository_manager, product_name, product, box, repo, provider_by_box(box), force_version)
+    self.class.generate_product_config(@repository_manager, product_name, product, box, repo,
+                                       provider_by_box(box), force_version)
         .and_then do |product_config|
       @ui.info("Recipe #{recipe_name}")
       Result.ok({ recipe: recipe_name, config: product_config })
@@ -184,9 +181,9 @@ class ConfigurationGenerator
     if node_params[:public_network_gateway]
       recipe_names << 'public_network'
       product_configs.merge!({
-        'public_network_gateway': node_params[:public_network_gateway],
-        'public_network_route_dev': node_params[:public_network_route_dev]
-      })
+                               public_network_gateway: node_params[:public_network_gateway],
+                               public_network_route_dev: node_params[:public_network_route_dev]
+                             })
     end
 
     recipe_names << 'grow-root-fs' if %w[aws gcp].include?(provider)
@@ -218,7 +215,8 @@ class ConfigurationGenerator
           recipe_names << recipe_and_config[:recipe]
         end
       end
-      role_description = self.class.generate_role_json_description(name, recipe_names, product_configs)
+      role_description = self.class.generate_role_json_description(name, recipe_names,
+                                                                   product_configs)
       Result.ok(role_description)
     end
   end
@@ -258,7 +256,9 @@ class ConfigurationGenerator
         products_in_queue.insert(index + 1, config)
         break
       end
-      return Result.error("Not exit any main product for #{config['name']}") unless main_product_include
+      unless main_product_include
+        return Result.error("Not exit any main product for #{config['name']}")
+      end
     end
     Result.ok(products_in_queue)
   end
@@ -286,7 +286,8 @@ class ConfigurationGenerator
     dependences = []
     products.each do |product|
       if ProductAttributes.need_dependence?(product['name'])
-        dependences << { 'name' => ProductAttributes.dependence_for_product(product['name']), 'version' => product['version'] }
+        dependences << { 'name' => ProductAttributes.dependence_for_product(product['name']),
+                         'version' => product['version'] }
       end
       if ProductAttributes.dependence?(product['name'])
         dependences << { 'name' => product['name'], 'version' => product['version'] }
@@ -302,7 +303,9 @@ class ConfigurationGenerator
   def create_main_products(products)
     main_products = []
     products.each do |product|
-      main_products << { 'name' => product['name'] } if ProductAttributes.need_dependence?(product['name'])
+      if ProductAttributes.need_dependence?(product['name'])
+        main_products << { 'name' => product['name'] }
+      end
     end
     main_products
   end
@@ -315,8 +318,7 @@ class ConfigurationGenerator
     @box_definitions.get_box(box)['provider']
   end
 
-
-  CHEF_REPO_PARAMETERS = %w[components repo repo_key version disable_gpgcheck]
+  CHEF_REPO_PARAMETERS = %w[components repo repo_key repo_new_key version disable_gpgcheck]
   # Make list of not-null product attributes
   # @param repo [Hash] repository info
   def self.make_product_attributes_hash(repo)

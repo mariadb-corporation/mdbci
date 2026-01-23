@@ -28,11 +28,12 @@ class InstallProduct < BaseCommand
     end
     recipe_name = ProductAttributes.recipe_name(@product)
     return Result.error('Failed to recognize the product') if recipe_name.nil?
+
     result = ChefConfigurationGenerator.install_product(@mdbci_config.node_names.first,
                                                         @mdbci_config, @ui, @network_settings,
                                                         @machine_configurator, @product, true,
                                                         @env.repos, @product_version, @repo_key, @force_version, recipe_name,
-                                                        @include_unsupported)
+                                                        @include_unsupported, @repo_new_key)
 
     if result.success?
       SUCCESS_RESULT
@@ -74,6 +75,7 @@ class InstallProduct < BaseCommand
     @product = @env.nodeProduct
     @product_version = @env.productVersion
     @repo_key = @env.repo_key
+    @repo_new_key = @env.repo_new_key
     @force_version = @env.force_version
     @include_unsupported = @env.include_unsupported
     if @product.nil? || (ProductAttributes.need_version?(@product) && @product_version.nil?)

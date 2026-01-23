@@ -9,13 +9,13 @@ module MaxScaleParser
 
   MAX_SCALE_SERVER = {
     label: 'MariaDB MaxScale',
-    server: 'https://dlm.mariadb.com/repo/maxscale',
+    server: 'https://dlm.mariadb.com/repo/maxscale'
   }.freeze
 
   def self.parse(config, product_version, mdbe_private_key, product_name, user_ui, logger)
     deb_config = config['deb']
     rpm_config = config['rpm']
-    if product_name.include? "maxscale_enterprise"
+    if product_name.include? 'maxscale_enterprise'
       deb_config['path'] = setup_private_key(deb_config['path'], mdbe_private_key)
       rpm_config['path'] = setup_private_key(rpm_config['path'], mdbe_private_key)
       maxscale_config = {
@@ -25,7 +25,7 @@ module MaxScaleParser
     else
       maxscale_config = MAX_SCALE_SERVER
     end
-    repos = [].concat(
+    [].concat(
       MariaDBCommunityParser.parse_releases(
         deb_config,
         maxscale_config,
@@ -45,11 +45,9 @@ module MaxScaleParser
         config['scan_mode'],
         user_ui,
         logger
-      ),
+      )
     )
-    repos
   end
-
 
   def self.form_deb_repositories(links, release, server_location)
     # Filter out debian releases based on the /PROVIDER/dists/RELESASE/ content strings
@@ -68,7 +66,7 @@ module MaxScaleParser
           platform_version: platform_version,
           architecture: architecture,
           repo: "#{server_location}/#{release[:version]}/apt",
-          components: ["main"]
+          components: ['main']
         }
       )
     end

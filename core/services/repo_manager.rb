@@ -63,7 +63,7 @@ class RepoManager
     if product.key?('version') && repo.nil? && !(force_version || product.dig('force_version'))
       repo = find_last_repository_by_major_version(product, repository_key)
       unless repo.nil?
-        @ui.warning("MDBCI could not find the specified version #{product['version']}, "\
+        @ui.warning("MDBCI could not find the specified version #{product['version']}, " \
                     "automatically using the closest version #{repo['version']}")
         repo_key = "#{repository_name}@#{repo['version']}+#{repository_key}"
       end
@@ -99,9 +99,9 @@ class RepoManager
   end
 
   def check_unsupported(repo, product)
-    if product.key?('include_unsupported') and !repo.nil?
-      @ui.warning('Unsupported repository was not found') unless repo.key?('unsupported_repo')
-    end
+    return unless product.key?('include_unsupported') and !repo.nil?
+
+    @ui.warning('Unsupported repository was not found') unless repo.key?('unsupported_repo')
   end
 
   def show
@@ -146,7 +146,8 @@ class RepoManager
     if repo.is_a?(Array)
       # in repo file arrays are allowed
       repo.each do |r|
-        @repos[makeKey(r['product'], r['version'], r['platform'], r['platform_version'], r['architecture'])] = r
+        @repos[makeKey(r['product'], r['version'], r['platform'], r['platform_version'], r['architecture'])] =
+          r
       end
     else
       @repos[makeKey(repo['product'], repo['version'], repo['platform'],
@@ -197,8 +198,13 @@ class RepoManager
     find_available_repo(product, repository_key).select do |repo|
       repo[1]['sem_version'] = SemVersionParser.parse_sem_version(repo[1]['version'])
       next false if repo[1]['sem_version'].nil?
-      next false if ProductAttributes.exclude_pre_release_latest?(repo[1]['product']) && repo[1]['sem_version'].count() > 3
-      version.each_with_index.all? { |version_part, index| version_part == repo[1]['sem_version'][index]  }
+      if ProductAttributes.exclude_pre_release_latest?(repo[1]['product']) && repo[1]['sem_version'].count > 3
+        next false
+      end
+
+      version.each_with_index.all? do |version_part, index|
+        version_part == repo[1]['sem_version'][index]
+      end
     end.max do |a, b|
       a[1]['sem_version'] <=> b[1]['sem_version']
     end&.fetch(1, nil)
