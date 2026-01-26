@@ -318,7 +318,7 @@ class ConfigurationGenerator
     @box_definitions.get_box(box)['provider']
   end
 
-  CHEF_REPO_PARAMETERS = %w[components repo repo_key repo_new_key version disable_gpgcheck]
+  CHEF_REPO_PARAMETERS = %w[components repo repo_key version disable_gpgcheck]
   # Make list of not-null product attributes
   # @param repo [Hash] repository info
   def self.make_product_attributes_hash(repo)

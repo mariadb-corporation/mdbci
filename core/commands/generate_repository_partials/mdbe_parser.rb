@@ -9,9 +9,9 @@ module MdbeParser
   def self.parse(config, mdbe_private_key, link_name, product_name)
     releases = []
     releases.concat(parse_mdbe_repository(config['repo']['rpm'], mdbe_private_key, link_name,
-                                          product_name, false, config['repo']['rpm']['key'], config['repo']['rpm']['new_key']))
+                                          product_name, false, config['repo']['rpm']['key']))
     releases.concat(parse_mdbe_repository(config['repo']['deb'], mdbe_private_key, link_name,
-                                          product_name, true, config['repo']['deb']['key'], config['repo']['deb']['new_key']))
+                                          product_name, true, config['repo']['deb']['key']))
     releases
   end
 
@@ -54,7 +54,7 @@ module MdbeParser
     end
   end
 
-  def self.generate_mdbe_release_info(baseurl, old_key, new_key, version, architecture, platform,
+  def self.generate_mdbe_release_info(baseurl, key, version, architecture, platform,
                                       platform_version, mdbe_private_key, product_name, deb_repo = false)
     repo_path = generate_mdbe_repo_path(
       baseurl, version, platform, platform_version, mdbe_private_key
@@ -62,8 +62,7 @@ module MdbeParser
     repo_path = "#{repo_path} #{platform_version}" if deb_repo
     release_info = {
       repo: repo_path,
-      repo_key: old_key,
-      repo_new_key: new_key,
+      repo_key: key,
       platform: platform,
       platform_version: platform_version,
       product: product_name,
@@ -90,12 +89,12 @@ module MdbeParser
     release_info
   end
 
-  def self.parse_mdbe_repository(config, mdbe_private_key, link_name, product_name, deb_repo, old_key, new_key)
+  def self.parse_mdbe_repository(config, mdbe_private_key, link_name, product_name, deb_repo, key)
     get_mdbe_release_versions(config, mdbe_private_key, link_name).map do |version|
       config['platforms'].map do |platform_and_version|
         platform, platform_version = platform_and_version.split('_')
         config['architectures'].map do |architecture|
-          generate_mdbe_release_info(config['baseurl'], old_key, new_key, version, architecture,
+          generate_mdbe_release_info(config['baseurl'], key, version, architecture,
                                      platform, platform_version, mdbe_private_key, product_name, deb_repo)
         end
       end

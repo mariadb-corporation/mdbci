@@ -4,7 +4,7 @@ default_action :install
 
 action :install do
   install_for_debian_based if debian_based_system?
-  install_for_fedora_based if fedora_based_system?
+  install_for_rhel_based if rhel_based_system?
   package 'iptables' if platform_family?('suse')
 end
 
@@ -15,22 +15,13 @@ action_class do
     end
   end
 
-  def install_for_fedora_based
-    if platform_family?('fedora') || node[:platform_version].to_f < 7.0
-      bash 'Configure iptables' do
-        code <<-EOF
-          /sbin/service start iptables
-          chkconfig iptables on
-        EOF
-      end
-    else
-      bash 'Install and configure iptables' do
-        code <<-EOF
-          yum --assumeyes install iptables-services
-          systemctl start iptables
-          systemctl enable iptables
-        EOF
-      end
+  def install_for_rhel_based
+    bash 'Install and configure iptables' do
+      code <<-EOF
+        yum --assumeyes install iptables-services
+        systemctl start iptables
+        systemctl enable iptables
+      EOF
     end
   end
 end

@@ -1,6 +1,6 @@
 module IptablesInstallHelper
-  def fedora_based_system?
-    %w[rhel centos fedora almalinux oracle rocky].any? do |platform|
+  def rhel_based_system?
+    %w[rhel centos almalinux oracle rocky].any? do |platform|
       node['platform_family'] == platform
     end
   end

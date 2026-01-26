@@ -11,7 +11,7 @@ end
 
 action_class do
   def open_ports
-    if node[:platform_version].to_f >= 10.0 && fedora_based_system?
+    if node[:platform_version].to_f >= 10.0 && rhel_based_system?
       open_nfl_ports
     else
       open_iptables_ports
@@ -19,7 +19,7 @@ action_class do
   end
 
   def open_iptables_ports
-    if %w[debian ubuntu rhel fedora centos suse almalinux oracle].any? do |platform|
+    if %w[debian ubuntu rhel centos suse almalinux oracle].any? do |platform|
          platform_family?(platform)
        end
       execute 'Opening MariaDB ports' do
@@ -50,8 +50,8 @@ action_class do
       execute 'Save iptables rules' do
         command 'iptables-save > /etc/iptables/rules.v4'
       end
-    elsif fedora_based_system?
-      save_for_fedora_based
+    elsif rhel_based_system?
+      save_for_rhel_based
     elsif platform_family?('suse')
       execute 'Save MariaDB iptables rules' do
         command 'iptables-save > /etc/sysconfig/iptables'
@@ -59,19 +59,10 @@ action_class do
     end
   end
 
-  def save_for_fedora_based
-    if node[:platform_version].to_f >= 10.0 && fedora_based_system?
+  def save_for_rhel_based
+    if node[:platform_version].to_f >= 10.0 && rhel_based_system?
       execute 'Save nftables rules' do
         command 'nft list ruleset > /etc/sysconfig/nftables.conf'
-      end
-    elsif node[:platform_version].to_f >= 7.0 && !platform_family?('fedora')
-      bash 'Save iptables rules' do
-        code <<-EOF
-            iptables-save > /etc/sysconfig/iptables
-        EOF
-        timeout 30
-        retries 5
-        retry_delay 30
       end
     else
       bash 'Save iptables rules on' do

@@ -2,8 +2,7 @@
 
 include_recipe 'clear_mariadb_repo_priorities::default'
 
-repo_keys = [node['mariadb']['repo_key']]
-repo_keys << node['mariadb']['repo_new_key'] if node['mariadb']['repo_new_key']
+repo_keys = [node['mariadb']['repo_key']].flatten
 
 # Configure repository
 case node[:platform_family]
@@ -26,7 +25,7 @@ when 'debian', 'ubuntu', 'mint'
     end
   end
 
-  key_files = repo_keys.each_with_index.map do |_, index|
+  key_files = repo_keys.map.with_index do |_, index|
     filename = "mariadb-#{index}.public"
     "/etc/apt/keyrings/#{filename}"
   end

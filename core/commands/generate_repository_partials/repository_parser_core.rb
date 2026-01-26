@@ -359,10 +359,9 @@ module RepositoryParserCore
   # @param releases [Array<Hash>] list of releases
   # @param key [String] text to put into key field
   # @param product [String] name of the product
-  def add_key_and_product_to_releases(releases, key, product, new_key = nil)
+  def add_key_and_product_to_releases(releases, key, product)
     releases.each do |release|
       release[:repo_key] ||= key unless key.nil?
-      release[:repo_new_key] ||= new_key unless new_key.nil?
       release[:product] = product
     end
   end
