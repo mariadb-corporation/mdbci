@@ -3,8 +3,7 @@ include_recipe 'clear_mariadb_repo_priorities::default'
 # MariaDB MaxScale repos
 #
 
-repo_keys = [node['maxscale']['repo_key']]
-repo_keys << node['maxscale']['repo_new_key'] if node['maxscale']['repo_new_key']
+repo_keys = [node['maxscale']['repo_key']].flatten
 
 case node[:platform_family]
 when 'debian', 'ubuntu'

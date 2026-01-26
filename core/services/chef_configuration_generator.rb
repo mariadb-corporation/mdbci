@@ -62,9 +62,9 @@ module ChefConfigurationGenerator
   # Install product on server
   # param node_name [String] name of the node
   def self.install_product(name, config, logger, network_settings, machine_configurator, product,
-                           need_rewrite, repos, product_version, repo_key, force_version, recipe_name, include_unsupported, repo_new_key)
+                           need_rewrite, repos, product_version, repo_key, force_version, recipe_name, include_unsupported)
     generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name,
-                       force_version, include_unsupported, repo_new_key).and_then do |role_file_path|
+                       force_version, include_unsupported).and_then do |role_file_path|
       target_path = "roles/#{name}.json"
       role_file_path_config = "#{config.path}/#{name}-config.json"
       target_path_config = "configs/#{name}-config.json"
@@ -95,7 +95,7 @@ module ChefConfigurationGenerator
 
   # Create a role file to install the product from the chef
   # @param name [String] node name
-  def self.generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name, force_version, include_unsupported, repo_new_key)
+  def self.generate_role_file(name, config, product, repos, product_version, repo_key, recipe_name, force_version, include_unsupported)
     node = config.node_configurations[name]
     box = node['box'].to_s
     recipes_names = []
@@ -104,7 +104,6 @@ module ChefConfigurationGenerator
     product_hash = { 'name' => product, 'version' => product_version.to_s,
                      'include_unsupported' => include_unsupported }
     product_hash['key'] = repo_key unless repo_key.nil?
-    product_hash['new_key'] = repo_new_key unless repo_new_key.nil?
     ConfigurationGenerator
       .generate_product_config(repos, product, product_hash, box, nil, config.provider, force_version)
       .and_then do |configs|

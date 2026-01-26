@@ -12,8 +12,7 @@ end
 
 repo_file_name = node['mariadb']['repo_file_name']
 
-repo_keys = [node['mariadb']['repo_key']]
-repo_keys << node['mariadb']['repo_new_key'] if node['mariadb']['repo_new_key']
+repo_keys = [node['mariadb']['repo_key']].flatten
 
 # MDBE repos
 case node[:platform_family]
@@ -50,7 +49,7 @@ when 'debian', 'ubuntu'
       end
     end
 
-    key_files = repo_keys.each_with_index.map do |_, index|
+    key_files = repo_keys.map.with_index do |_, index|
       filename = "mariadb-#{index}.public"
       "/etc/apt/keyrings/#{filename}"
     end

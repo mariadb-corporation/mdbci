@@ -64,8 +64,7 @@ module MariaDBCommunityParser
 
       link_parser.call(all_links, release, product_config[:server])
     end.flatten
-    add_key_and_product_to_releases(releases, repo_config['key'], product_name,
-                                    repo_config['new_key'])
+    add_key_and_product_to_releases(releases, repo_config['key'], product_name)
   end
 
   def self.form_deb_repositories(links, release, server_location)
