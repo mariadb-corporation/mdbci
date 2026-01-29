@@ -75,12 +75,9 @@ mdbe_ci:
       path: https://es-repo.mariadb.net/jenkins/
       key: https://es-repo.mariadb.net/jenkins/MDBE.public
     cs_repo:
-      path: https://cspkg.s3.amazonaws.com/
+      path: https://pergamon.columnstore.mariadb.net/viewer/cspkg/
       yum_key: http://yum.mariadb.org/
-      branches: ["develop-23.02/cron", "develop-23.02/pull_request", "develop-22.08/cron",
-                 "develop-22.08/pull_request", "develop/cron", "develop/pull_request",
-                 "stable-23.10/cron", "stable-23.10/pull_request", "custom"]
-      latest_branches: ["develop-23.02", "develop-22.08", "develop", "stable-23.10"]
+      latest_branches: ["stable-23.10"]
   scan_mode: follow-only-sublinks
 galera_3_community:
   repo:
