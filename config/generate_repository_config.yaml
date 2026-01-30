@@ -77,7 +77,6 @@ mdbe_ci:
     cs_repo:
       path: https://pergamon.columnstore.mariadb.net/viewer/cspkg/
       yum_key: http://yum.mariadb.org/
-      latest_branches: ["stable-23.10"]
   scan_mode: follow-only-sublinks
 galera_3_community:
   repo:

@@ -6,7 +6,6 @@ require_relative 'repository_parser_core'
 module MdbeCiParser
   extend RepositoryParserCore
   DEFAULT_MDBE_VERSION = '10.5'
-  S3_VERS = ['10.6-enterprise', '11.4-enterprise', '11.8-enterprise']
 
   def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
@@ -36,7 +35,6 @@ module MdbeCiParser
     )
     releases.concat(parse_cs_repos(config['repo']['cs_repo']['path'],
                                    config['repo']['cs_repo']['yum_key'],
-                                   config['repo']['cs_repo']['latest_branches'],
                                    auth_mdbe_ci_repo, logger))
     releases.uniq! do |release|
       [release[:architecture], release[:platform], release[:platform_version], release[:product],
@@ -150,15 +148,25 @@ module MdbeCiParser
     "#{add_auth_to_url(full_url, auth)}/ #{platform_and_version}/"
   end
 
-  def self.parse_cs_repos(url, yum_key, latest_branches, auth_mdbe_ci_repo, logger)
+  def self.parse_cs_repos(url, yum_key, auth_mdbe_ci_repo, logger)
     releases = []
-    latest_branches.each do |branch_dir|
-      S3_VERS.each do |version|
+    retrive_stable_branches(url, auth_mdbe_ci_repo).each do |branch_dir|
+      retrive_s3_versions(url, auth_mdbe_ci_repo, branch_dir).each do |version|
         releases.concat(generate_cspkg_latest_repositories(url, branch_dir, version,
                                                            yum_key, auth_mdbe_ci_repo, logger))
       end
     end
     releases
+  end
+
+  def self.retrive_stable_branches(url, auth)
+    perform_span_parsing(url, auth).filter do |release|
+      release.start_with?('stable-')
+    end
+  end
+
+  def self.retrive_s3_versions(url, auth, branch)
+    perform_span_parsing("#{url}/#{branch}/latest/", auth)
   end
 
   ARCHITECTURE_DIRECTORIES = {
