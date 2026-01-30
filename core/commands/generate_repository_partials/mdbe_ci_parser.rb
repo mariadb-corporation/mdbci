@@ -181,7 +181,7 @@ module MdbeCiParser
           next
         end
         releases.append(form_repo_info(platform_info, repo_url, branch, platform, platform_feature,
-                                       arch, s3_version, yum_key))
+                                       arch, s3_version, yum_key, auth))
       end
     end
     releases
@@ -202,7 +202,9 @@ module MdbeCiParser
     doc.css('span.name').map { |document| document.text.sub('/', '') }
   end
 
-  def self.form_repo_info(platform_info, repo_url, branch, platform, platform_feature, arch, s3_version, yum_key)
+  def self.form_repo_info(platform_info, repo_url, branch, platform, platform_feature, arch, s3_version, yum_key, auth)
+    url = URI(repo_url)
+    repo_url = "#{url.scheme}://#{auth['username']}:#{auth['password']}@#{url.host}#{url.path}"
     base_repo_link = "#{repo_url}#{branch}/latest/#{s3_version}/#{arch}"
     repo = if DEB_PLATFORMS.include?(platform_info[:platform])
              "#{base_repo_link}/ #{platform}/"
