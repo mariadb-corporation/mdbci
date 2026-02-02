@@ -7,6 +7,27 @@ repo_keys = [node['maxscale']['repo_key']].flatten
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
+  directory '/etc/crypto-policies/back-ends' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
+  ruby_block 'Modify the sha1 expiry politics' do
+    block do
+      config = File.read('/usr/share/apt/default-sequoia.config')
+      new_config = config.split("\n").map do |line|
+        if line.start_with?('sha1.second_preimage_resistance')
+          "sha1.second_preimage_resistance = #{Time.new.year + 1}-02-01"
+        else
+          line
+        end
+      end.join("\n")
+
+      File.write('/etc/crypto-policies/back-ends/apt-sequoia.config', new_config)
+    end
+  end
   directory '/etc/apt/keyrings' do
     owner 'root'
     group 'root'
