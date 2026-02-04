@@ -49,7 +49,7 @@ gcp:
   use_only_private_ip: false
 ibm:
   api_key: # IBM Cloud API key
-  workspace_id: # IBM Cloud workspace ID 
+  workspace_id: # IBM Cloud workspace ID
   region: us-south
   zone: dal10
 digitalocean:
@@ -60,10 +60,13 @@ suse:
   key: # Subscription registration code
   registration_proxy: # SUSE Registration Proxy Server address
 mdbe_ci:
-  mdbe_ci_repo:
+  mdbe_ci_repo: # credentials to get access to https://mdbe-ci-repo.mariadb.net
     username: # username
     password: # password
-  es_repo:
+  es_repo: # credentials to get access to https://es-repo.mariadb.net/jenkins
+    username: # username
+    password: # password
+  pergamon_repo: # credentials to get access to https://pergamon.columnstore.mariadb.net/viewer/cspkg
     username: # username
     password: # password
 force: # true or false
