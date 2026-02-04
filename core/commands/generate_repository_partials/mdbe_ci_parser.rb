@@ -11,6 +11,7 @@ module MdbeCiParser
     return [] if mdbe_ci_config.nil?
 
     auth_mdbe_ci_repo = mdbe_ci_config['mdbe_ci_repo']
+    auth_pergamon_repo = mdbe_ci_config['pergamon_repo']
     auth_es_repo = mdbe_ci_config['es_repo']
     releases = []
     releases.concat(
@@ -35,7 +36,7 @@ module MdbeCiParser
     )
     releases.concat(parse_cs_repos(config['repo']['cs_repo']['path'],
                                    config['repo']['cs_repo']['yum_key'],
-                                   auth_mdbe_ci_repo, logger))
+                                   auth_pergamon_repo, logger))
     releases.uniq! do |release|
       [release[:architecture], release[:platform], release[:platform_version], release[:product],
        release[:version]]
