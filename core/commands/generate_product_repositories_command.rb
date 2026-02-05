@@ -397,6 +397,10 @@ In order to specify the number of retries for repository configuration use --att
       break if remainning_products.empty?
     end
     print_summary(remainning_products)
-    SUCCESS_RESULT
+    if remainning_products.empty?
+      SUCCESS_RESULT
+    else
+      ERROR_RESULT
+    end
   end
 end
