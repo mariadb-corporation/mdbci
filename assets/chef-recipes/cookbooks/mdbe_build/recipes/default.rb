@@ -367,7 +367,6 @@ suse_and_sles_packages = %w[
   libgpg-error-devel
   libopenssl-devel
   libpmem-devel
-  libsepol1
   libtool
   libxml2-devel
   lsb-release
@@ -380,7 +379,6 @@ suse_and_sles_packages = %w[
   perl-XML-Simple
   policycoreutils
   rpm-build
-  scons
   snappy-devel
   systemd-devel
   tar
@@ -393,12 +391,16 @@ suse_and_sles_packages = %w[
 suse_packages = %w[
   jemalloc
   jemalloc-devel
+  libsepol1
+  scons
 ]
 
 sles_12_packages = %w[
   boost-devel
   cmake
   libopenssl-1_0_0-devel
+  libsepol1
+  scons
 ]
 
 sles_15_packages = %w[
@@ -407,6 +409,7 @@ sles_15_packages = %w[
   libxml2-devel
   ncurses-devel
   perl-Data-Dump
+  libsepol2
 ]
 
 case node[:platform]
@@ -564,6 +567,8 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
       execute 'Enable CodeReady Builder repository' do
         command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
       end
+    end
+    if %w[almalinux rocky redhat].include? node[:platform]
       execute 'Enable mariadb-devel module' do
         command 'dnf -y module enable mariadb-devel'
       end
@@ -626,16 +631,35 @@ when 'suse'
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_12_packages)
   when 15 # Sles 15
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_15_packages)
-    zypper_repository 'enable a repository for scons' do
-      action :add
-      gpgcheck false
-      if node.attributes['kernel']['machine'] == 'aarch64'
-        baseurl "https://download.opensuse.org/repositories/devel:/tools:/building/#{node[:platform_version]}/"
-      else
-        baseurl "https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/"
+    minor_platform_version = node[:platform_version].to_s.split('.').last
+    if minor_platform_version.to_f >= 7
+      execute 'Switch on the sle-module-legacy module' do
+        command "SUSEConnect -p sle-module-legacy/15.#{minor_platform_version}/#{node.attributes['kernel']['machine']}"
+      end
+      execute 'Switch on the sle-module-basesystem module' do
+        command "SUSEConnect -p sle-module-basesystem/15.#{minor_platform_version}/#{node.attributes['kernel']['machine']}"
+      end
+      execute 'Switch on the sle-module-development-tools module' do
+        command "SUSEConnect -p sle-module-development-tools/15.#{minor_platform_version}/#{node.attributes['kernel']['machine']}"
+      end
+      package 'python3-pip' do
+        action :install
+      end
+      execute 'install_scons_via_pip' do
+        command 'pip3 install scons==4.8.1'
+      end
+      packages.delete('libpmem-devel') if node.attributes['kernel']['machine'] == 'aarch64'
+    else
+      zypper_repository 'enable a repository for scons' do
+        action :add
+        gpgcheck false
+        if node.attributes['kernel']['machine'] == 'aarch64'
+          baseurl "https://download.opensuse.org/repositories/devel:/tools:/building/#{node[:platform_version]}/"
+        else
+          baseurl "https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/"
+        end
       end
     end
-    minor_platform_version = node[:platform_version].to_s.split('.').last
     execute 'install libboost-devel' do
       command "zypper -n install --force --repo SLE-Module-Basesystem15-SP#{minor_platform_version}-Pool libboost_*-devel"
     end
