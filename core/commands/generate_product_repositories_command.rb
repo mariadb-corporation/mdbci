@@ -28,12 +28,14 @@ require_relative 'generate_repository_partials/connector_odbc_parser'
 require_relative 'generate_repository_partials/connector_odbc_ci_parser'
 require_relative 'generate_repository_partials/kafka_parser'
 require_relative 'generate_repository_partials/mema_agent_parser'
+require_relative 'generate_repository_partials/cmapi_ci_parser'
 
 # The command generates the repository configuration
 class GenerateProductRepositoriesCommand < BaseCommand
   CONFIGURATION_FILE = 'generate_repository_config.yaml'
   PRODUCTS_DIR_NAMES = {
     'mariadb' => 'mariadb',
+    'cmapi_ci' => 'cmapi_ci',
     'maxscale_ci' => 'maxscale_ci',
     'maxscale_enterprise_ci' => 'maxscale_enterprise_ci',
     'maxscale_enterprise' => 'maxscale_enterprise',
@@ -308,6 +310,9 @@ In order to specify the number of retries for repository configuration use --att
     when 'maxscale_ci'
       MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config, 'maxscale_ci',
                              @ui, @logger)
+    when 'cmapi_ci'
+      CmapiCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
+                          'cmapi_ci', @ui, @logger)
     when 'maxscale_enterprise_ci'
       MaxscaleCiParser.parse(product_config, @product_version, @env.mdbe_ci_config,
                              'maxscale_enterprise_ci', @ui, @logger)
