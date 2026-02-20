@@ -203,6 +203,19 @@ module RepositoryParserCore
     end
   end
 
+  def platform_to_repo_name(platform)
+    case platform
+    when 'jammy' then 'ubu2204'
+    when 'focal' then 'ubu2004'
+    when 'bionic' then 'ubu1804'
+    when 'noble' then 'ubu2404'
+    when 'bullseye' then 'deb11'
+    when 'bookworm' then 'deb12'
+    when 'trixie' then 'deb13'
+    else platform
+    end
+  end
+
   # Parse the repository and provide required configurations
   def parse_repository(
     base_url,
@@ -219,7 +232,8 @@ module RepositoryParserCore
     *steps
   )
     # Recursively go through the site and apply steps on each level
-    result = parse_web_directories(base_url, auth, product_version, scan_mode, log, logger, *steps)
+    result = parse_web_directories(base_url, auth, product_version, scan_mode, log, logger,
+                                   *steps)
     result = remove_corrupted_releases(result, packages, full_url, auth, comparison_template)
     add_key_and_product_to_releases(result, key, product)
   end

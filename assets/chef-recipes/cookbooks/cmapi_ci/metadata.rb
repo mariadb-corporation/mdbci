@@ -1,0 +1,6 @@
+name 'cmapi_ci'
+maintainer 'Yaroslavl FRUCT Laboratory'
+maintainer_email 'yarfruct@gmail.com'
+license 'All rights reserved'
+version '0.0.1'
+description 'CMAPI coockbook'
