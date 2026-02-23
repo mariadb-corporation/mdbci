@@ -20,6 +20,7 @@ The command shows a list of active resources: instances, disks (volumes), securi
 Add the --json flag to show the machine readable text.
 Add the --hours NUMBER_OF_HOURS flag to display the resources older than this hours.
 Add the --output-file FILENAME flag to generate a report as a JSON with the specified name.
+Add the --all-regions flag to show resources in all of the available regions (AWS only).
 
 If --hours flag is not specified, all runnung resources will be shown.
 The command ends with an error if any resource is present, no otherwise
@@ -73,9 +74,14 @@ The command ends with an error if any resource is present, no otherwise
   # Fetches the list of resources and generates their description in format
   # { instances: { gcp: Array, aws: Array }, disks: { gcp: Array, aws: Array }, key_pairs: Array, security_groups: Array }
   def list_resources
-    aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
     ibm_key_pairs = list_ibm_ssh_keys
-    security_groups = @filter_unused ? @env.aws_service.list_unused_security_groups(@resource_expiration_threshold) : @env.aws_service.security_group_list
+    if @env.all_regions
+      aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs_all_regions(@resource_expiration_threshold) : @env.aws_service.key_pairs_list_all_regions
+      security_groups = @filter_unused ? @env.aws_service.list_unused_sg_all_regions(@resource_expiration_threshold) : @env.aws_service.security_group_list_all_regions
+    else
+      aws_key_pairs = @filter_unused ? @env.aws_service.list_unused_key_pairs(@resource_expiration_threshold) : @env.aws_service.key_pairs_list
+      security_groups = @filter_unused ? @env.aws_service.list_unused_security_groups(@resource_expiration_threshold) : @env.aws_service.security_group_list
+    end
     ibm_public_networks = @env.ibm_service.public_networks_list
     @resources_count += aws_key_pairs.length + ibm_key_pairs.length + security_groups.length + ibm_public_networks.length
     {
@@ -98,7 +104,11 @@ The command ends with an error if any resource is present, no otherwise
   end
 
   def list_disks
-    aws_disks = @filter_unused ? @env.aws_service.list_unused_volumes(@resource_expiration_threshold) : @env.aws_service.volumes_list
+    if @env.all_regions
+      aws_disks = @filter_unused ? @env.aws_service.list_unused_volumes_all_regions(@resource_expiration_threshold) : @env.aws_service.volumes_list_all_regions
+    else
+      aws_disks = @filter_unused ? @env.aws_service.list_unused_volumes(@resource_expiration_threshold) : @env.aws_service.volumes_list
+    end
     gcp_disks = @filter_unused ? @env.gcp_service.list_unused_disks(@resource_expiration_threshold) : @env.gcp_service.disks_list
     {
       aws: aws_disks,
@@ -195,8 +205,14 @@ The command ends with an error if any resource is present, no otherwise
   end
 
   def list_aws_instances
-    all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
-      first[:launch_time] <=> second[:launch_time]
+    if @env.all_regions
+      all_instances = @env.aws_service.instances_list_in_all_regions.sort do |first, second|
+        first[:launch_time] <=> second[:launch_time]
+      end
+    else
+      all_instances = @env.aws_service.instances_list_with_time_and_name.sort do |first, second|
+        first[:launch_time] <=> second[:launch_time]
+      end
     end
     unless @hidden_instances['aws'].nil?
       all_instances.reject! do |instance|

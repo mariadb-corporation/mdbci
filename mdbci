@@ -28,6 +28,7 @@ require 'getoptlong'
 # Reading options
 opts = GetoptLong.new(
   ['--all', GetoptLong::NO_ARGUMENT],
+  ['--all-regions', GetoptLong::NO_ARGUMENT],
   ['--attempts', '-a', GetoptLong::REQUIRED_ARGUMENT],
   ['--architecture', GetoptLong::REQUIRED_ARGUMENT],
   ['--box-name', '-n', GetoptLong::REQUIRED_ARGUMENT],
@@ -96,6 +97,9 @@ begin
     case opt
     when '--all'
       session.all = true
+
+    when '--all-regions'
+      session.all_regions = true
 
     when '--architecture'
       session.architecture = arg unless arg.empty?
