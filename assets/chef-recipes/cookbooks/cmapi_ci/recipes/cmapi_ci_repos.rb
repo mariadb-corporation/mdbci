@@ -36,7 +36,6 @@ when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
     sensitive true
   end
 when 'suse', 'opensuse', 'sles'
-
   repo_keys.each_with_index do |key_url, index|
     remote_file File.join('tmp', "rpm-#{index}.key") do
       source key_url
