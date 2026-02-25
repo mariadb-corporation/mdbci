@@ -15,12 +15,12 @@ class GcpService
       @configured = false
       return
     end
-    unless [gcp_config['credentials_file'], gcp_config['project'], gcp_config['region'], 
-            gcp_config['zone'], gcp_config['use_existing_network'], gcp_config['network'], 
-            gcp_config['tags'], gcp_config['use_only_private_ip'], gcp_config['default_region'], 
+    unless [gcp_config['credentials_file'], gcp_config['project'], gcp_config['region'],
+            gcp_config['zone'], gcp_config['use_existing_network'], gcp_config['network'],
+            gcp_config['tags'], gcp_config['use_only_private_ip'], gcp_config['default_region'],
             gcp_config['regions']].all?
       @configured = false
-      logger.warning("Missing GCP configuration: credentials or required parameters are absent in MDBCI config")
+      logger.warning('Missing GCP configuration: credentials or required parameters are absent in MDBCI config')
       return
     end
     @gcp_config = gcp_config
@@ -146,7 +146,8 @@ class GcpService
     disks = zones.map do |zone|
       @service.fetch_all do |token|
         @service.list_disks(
-          @gcp_config['project'], zone, page_token: token)
+          @gcp_config['project'], zone, page_token: token
+        )
       end.map do |disk|
         {
           name: disk.name,
@@ -162,7 +163,7 @@ class GcpService
   # @param disk_name [String] name of the disk
   # @param zone [String] GCP zone where the disk is located
   def delete_disk(disk_name, zone)
-    return unless (configured? && disk_exists?(disk_name, zone))
+    return unless configured? && disk_exists?(disk_name, zone)
 
     @service.delete_disk(@gcp_config['project'], zone, disk_name)
   rescue StandardError => e
@@ -215,7 +216,8 @@ class GcpService
       instance[:node_name] == instance_name
     end.first
 
-    @service.delete_instance(@gcp_config['project'], instance_to_delete[:zone], instance_to_delete[:node_name])
+    @service.delete_instance(@gcp_config['project'], instance_to_delete[:zone],
+                             instance_to_delete[:node_name])
   rescue StandardError => e
     @logger.error(e.message)
   end

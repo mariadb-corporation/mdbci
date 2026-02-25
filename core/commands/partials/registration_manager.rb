@@ -45,9 +45,10 @@ class RegistrationManager
       credentials[key] = value
     end
     credentials['url'] = read_registration_server_url(machine)
-    if !%w[username password].all? { |key| credentials.key?(key)} || credentials['url'].nil?
+    if !%w[username password].all? { |key| credentials.key?(key) } || credentials['url'].nil?
       return Result.error('Invalid system credentials files')
     end
+
     Result.ok(credentials)
   end
 
@@ -90,7 +91,9 @@ class RegistrationManager
   def withdraw_subscription(filename)
     file = File.open(filename)
     credentials = JSON.load(file)
-    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(credentials['url'], REGISTRATION_ENDPOINT)}"
+    command = "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(
+      credentials['url'], REGISTRATION_ENDPOINT
+    )}"
     ShellCommands.run_command(@logger, command)
   end
 end

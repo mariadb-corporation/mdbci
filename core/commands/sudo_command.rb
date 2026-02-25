@@ -59,8 +59,8 @@ Specifies the command.
     end
     begin
       setup_command
-    rescue ArgumentError => error
-      @ui.warning error.message
+    rescue ArgumentError => e
+      @ui.warning e.message
       return ARGUMENT_ERROR_RESULT
     end
     sudo

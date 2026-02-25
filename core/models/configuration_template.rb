@@ -37,7 +37,7 @@ class ConfigurationTemplate
     Result.error("Unable to read template file. Error: #{e.message}")
   end
 
-  def node_count()
+  def node_count
     @node_configurations.size
   end
 
@@ -68,8 +68,8 @@ class ConfigurationTemplate
     if invalid_names.empty?
       Result.ok('All nodes names are valid')
     else
-      Result.error("Invalid nodes names: #{invalid_names}. "\
-                    'Nodes names defined in the template to be valid Ruby object names.')
+      Result.error("Invalid nodes names: #{invalid_names}. " \
+                   'Nodes names defined in the template to be valid Ruby object names.')
     end
   end
 

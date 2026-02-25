@@ -6,7 +6,9 @@ module DockerCookbook
     provides :docker_installation_package
     provides :docker_installation, platform: 'amazon'
 
-    property :setup_docker_repo, [TrueClass, FalseClass], default: lazy { platform?('amazon') ? false : true }, desired_state: false
+    property :setup_docker_repo, [TrueClass, FalseClass], default: lazy {
+                                                                     platform?('amazon') ? false : true
+                                                                   }, desired_state: false
     property :repo_channel, String, default: 'stable'
     property :package_name, String, default: lazy { default_package_name }, desired_state: false
     property :version, String, default: 'latest', desired_state: false
@@ -61,46 +63,55 @@ module DockerCookbook
     # These are helpers for the properties so they are not in an action class
     def default_package_name
       return 'docker' if amazon?
+
       'docker-ce'
     end
 
     def el7?
       return true if node['platform_family'] == 'rhel' && node['platform_version'].to_i == 7
+
       false
     end
 
     def fedora?
       return true if node['platform'] == 'fedora'
+
       false
     end
 
     def debuntu?
       return true if node['platform_family'] == 'debian'
+
       false
     end
 
     def debian?
       return true if node['platform'] == 'debian'
+
       false
     end
 
     def ubuntu?
       return true if node['platform'] == 'ubuntu'
+
       false
     end
 
     def jessie?
       return true if node['platform'] == 'debian' && node['platform_version'].to_i == 8
+
       false
     end
 
     def stretch?
       return true if node['platform'] == 'debian' && node['platform_version'].to_i == 9
+
       false
     end
 
     def buster?
       return true if node['platform'] == 'debian' && node['platform_version'].to_i == 10
+
       false
     end
 
@@ -110,26 +121,31 @@ module DockerCookbook
 
     def trusty?
       return true if node['platform'] == 'ubuntu' && node['platform_version'] == '14.04'
+
       false
     end
 
     def xenial?
       return true if node['platform'] == 'ubuntu' && node['platform_version'] == '16.04'
+
       false
     end
 
     def artful?
       return true if node['platform'] == 'ubuntu' && node['platform_version'] == '17.10'
+
       false
     end
 
     def bionic?
       return true if node['platform'] == 'ubuntu' && node['platform_version'] == '18.04'
+
       false
     end
 
     def focal?
       return true if node['platform'] == 'ubuntu' && node['platform_version'] == '20.04'
+
       false
     end
 
@@ -139,6 +155,7 @@ module DockerCookbook
 
     def amazon?
       return true if node['platform'] == 'amazon'
+
       false
     end
 
@@ -149,11 +166,11 @@ module DockerCookbook
     def arch_alias(architecture)
       case architecture
       when 'aarch64'
-        return 'arm64'
+        'arm64'
       when 'x86_64'
-        return 'amd64'
+        'amd64'
       else
-        return architecture
+        architecture
       end
     end
 
@@ -190,28 +207,33 @@ module DockerCookbook
 
       if v.to_f < 17.06 && debuntu?
         return "#{v}~ce-0~debian-#{codename}" if debian?
-        return "#{v}~ce-0~ubuntu-#{codename}" if ubuntu?
+
+        "#{v}~ce-0~ubuntu-#{codename}" if ubuntu?
       elsif v == '17.03.3' && el7?
-        return "#{v}.ce-1.el7"
+        "#{v}.ce-1.el7"
       elsif v.to_f < 18.06 && !bionic?
         return "#{v}.ce-1.el7.centos" if el7?
         return "#{v}~ce-0~debian" if debian?
-        return "#{v}~ce-0~ubuntu" if ubuntu?
+
+        "#{v}~ce-0~ubuntu" if ubuntu?
       elsif v.to_f >= 18.09 && v.to_f < 23.0 && (debuntu? || el7?)
         return "#{v}-#{test_version}.el7" if el7?
         return "5:#{v}~#{test_version}-0~debian-#{codename}" if debian?
-        return "5:#{v}~#{test_version}-0~ubuntu-#{codename}" if ubuntu?
+
+        "5:#{v}~#{test_version}-0~ubuntu-#{codename}" if ubuntu?
       elsif v == '18.06.0' && el7? && arm?
-        return"#{v}.ce-3.el7.centos"
+        "#{v}.ce-3.el7.centos"
       elsif v.to_f >= 23.0
         return "5:#{v}-1~debian.#{node['platform_version'].to_i}~#{codename}" if debian?
         return "5:#{v}-1~ubuntu.#{node['platform_version']}~#{codename}" if ubuntu?
-        return "#{v}-1.el7" if el7?
+
+        "#{v}-1.el7" if el7?
       else
         return "#{v}.ce" if fedora?
         return "#{v}.ce-#{test_version}.el7" if el7?
         return "#{v}~ce~#{test_version}-0~debian" if debian?
         return "#{v}~ce~#{test_version}-0~ubuntu" if ubuntu?
+
         v
       end
     end

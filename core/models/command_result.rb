@@ -5,7 +5,9 @@ require 'open3'
 # Class captures the result of running the command with Open3.capture2e and
 # provides convenient access to the values.
 class CommandResult
-  attr_reader :command, :messages, :result
+  attr_reader :command
+  attr_reader :messages
+  attr_reader :result
 
   # Alternative form of constructing the result from the command.
   #

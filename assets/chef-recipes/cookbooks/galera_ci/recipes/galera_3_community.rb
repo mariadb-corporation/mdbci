@@ -1,4 +1,4 @@
-include_recipe "galera_ci::galera_repository"
+include_recipe 'galera_ci::galera_repository'
 
 case node[:platform_family]
 when 'debian', 'ubuntu'

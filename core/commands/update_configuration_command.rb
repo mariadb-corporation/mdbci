@@ -130,7 +130,9 @@ class UpdateConfigurationCommand < BaseCommand
       required_service_names = @configuration.node_names
     end
 
-    @new_partial_config['services'].keep_if { |service_name, _| required_service_names.include?(service_name) }
+    @new_partial_config['services'].keep_if do |service_name, _|
+      required_service_names.include?(service_name)
+    end
     File.write(@configuration.docker_partial_configuration_path, YAML.dump(@new_partial_config))
     File.write(@configuration.docker_configuration_path, YAML.dump(@new_docker_config))
   end

@@ -8,13 +8,17 @@ module MemaAgentParser
 
   def self.parse(config, product_version, mdbe_ci_config, log, logger)
     return [] if mdbe_ci_config.nil?
+
     auth = mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(parse_mema_agent_rpm_repository(config['repo'], product_version, auth,
                                                     config['scan_mode'], log, logger))
     releases.concat(parse_mema_agent_deb_repository(config['repo'], product_version, auth,
                                                     config['scan_mode'], log, logger))
-    releases.uniq! { |release| [release[:architecture], release[:platform], release[:platform_version], release[:product], release[:version]] }
+    releases.uniq! do |release|
+      [release[:architecture], release[:platform], release[:platform_version], release[:product],
+       release[:version]]
+    end
     releases
   end
 

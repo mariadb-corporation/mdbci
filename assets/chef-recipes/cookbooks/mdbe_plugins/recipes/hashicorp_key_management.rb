@@ -4,4 +4,3 @@ when 'debian', 'ubuntu'
 when 'rhel', 'centos', 'suse', 'opensuse', 'almalinux', 'oracle'
   package 'MariaDB-hashicorp-key-management'
 end
-

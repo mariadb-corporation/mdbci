@@ -24,7 +24,7 @@ class SetupDependenciesCommand < BaseCommand
     info = <<-HELP
 'setup-dependencies' command prepares environment for starting virtual machines using MDBCI.
 
-By default, the command installs `Terraform` at the path /usr/local/bin. 
+By default, the command installs `Terraform` at the path /usr/local/bin.#{' '}
 Additionally, Libvirt or Docker engine can be installed by specifying the `--product` parameter.(for example libvirt):
   mdbci setup-dependencies --product libvirt
 
@@ -43,7 +43,7 @@ Installing a product with name
   end
 
   def initialize(arg, env, logger)
-    super(arg, env, logger)
+    super
     distro = env.force_distro&.downcase || get_linux_distro
     case distro
     when 'centos', 'rhel'
@@ -67,9 +67,8 @@ Installing a product with name
       @ui.error('Currently supports installation for Debian, Ubuntu, CentOS, RHEL.')
       return ERROR_RESULT
     end
-    if @env.reinstall
-      return SUCCESS_RESULT unless delete_packages
-    end
+    return SUCCESS_RESULT if @env.reinstall && !delete_packages
+
     install
   end
 
@@ -113,7 +112,9 @@ Installing a product with name
     Dir.mktmpdir do |dir|
       zip_path = File.join(dir, 'terraform.zip')
       download_result = run_command("wget -O #{zip_path} #{TERRAFORM_ZIP_URL}")[:value]
-      return Result.error("Error of downloading Terraform from #{TERRAFORM_ZIP_URL}") unless download_result.success?
+      unless download_result.success?
+        return Result.error("Error of downloading Terraform from #{TERRAFORM_ZIP_URL}")
+      end
 
       delete_terraform
       unzip_result = run_command("sudo unzip #{zip_path} -d /usr/local/bin/")[:value]
@@ -133,9 +134,9 @@ Installing a product with name
     result = run_command(install_libvirt_plugin)[:value]
     unless result.success?
       @ui.error('Regular vagrant-libvirt installation failed. Retrying with additional options.')
-      result = run_command("CONFIGURE_ARGS='with-ldflags=-L/opt/vagrant/embedded/lib "\
-                           "with-libvirt-include=/usr/include/libvirt with-libvirt-lib=/usr/lib' "\
-                           'GEM_HOME=~/.vagrant.d/gems GEM_PATH=$GEM_HOME:/opt/vagrant/embedded/gems '\
+      result = run_command("CONFIGURE_ARGS='with-ldflags=-L/opt/vagrant/embedded/lib " \
+                           "with-libvirt-include=/usr/include/libvirt with-libvirt-lib=/usr/lib' " \
+                           'GEM_HOME=~/.vagrant.d/gems GEM_PATH=$GEM_HOME:/opt/vagrant/embedded/gems ' \
                            "PATH=/opt/vagrant/embedded/bin:$PATH #{install_libvirt_plugin}")[:value]
     end
     if result.success?
@@ -148,7 +149,7 @@ Installing a product with name
   # Created new libvirt pool with 'default' as name
   def create_libvirt_pool
     delete_libvirt_pool if run_command('sudo virsh pool-info default')[:value].success?
-    images_dir = "#{ENV['HOME']}/libvirt-images"
+    images_dir = "#{ENV.fetch('HOME', nil)}/libvirt-images"
     all_commands = [
       "sudo mkdir -p #{images_dir}",
       "sudo virsh pool-create-as default dir --target #{images_dir}"
@@ -196,6 +197,7 @@ Are you sure you want to continue? [y/N]: ")
     while (input = gets.strip)
       return true if input == 'y'
       return false if input == 'N'
+
       $stdout.print('Please enter one of the options [y/N]: ')
     end
   end
@@ -230,7 +232,7 @@ Are you sure you want to continue? [y/N]: ")
   # to the ~/.bashrc file of the current user
   def export_libvirt_default_uri
     export_line = 'export LIBVIRT_DEFAULT_URI=qemu:///system'
-    File.open("#{ENV['HOME']}/.bashrc", 'a+') do |file|
+    File.open("#{ENV.fetch('HOME', nil)}/.bashrc", 'a+') do |file|
       return SUCCESS_RESULT if file.find { |line| line.match(export_line) }
 
       file.puts(
@@ -334,6 +336,7 @@ class CentosDependencyManager < DependencyManager
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     return ERROR_RESULT unless install_ssh
+
     if should_install?('libvirt')
       install_qemu
       required_packages.each do |package|
@@ -368,17 +371,17 @@ class CentosDependencyManager < DependencyManager
 
   def install_docker
     remove_old_version_docker
-    run_command("sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
-    result = run_command("sudo yum install -y docker-ce docker-ce-cli containerd.io")
-    result = run_command("sudo systemctl start docker") if result[:value].success?
+    run_command('sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo')
+    result = run_command('sudo yum install -y docker-ce docker-ce-cli containerd.io')
+    result = run_command('sudo systemctl start docker') if result[:value].success?
     result[:value].success?
   end
 
   def delete_dependencies
-    run_command('sudo yum -y remove vagrant libvirt-client '\
+    run_command('sudo yum -y remove vagrant libvirt-client ' \
                 'libvirt-devel libvirt-daemon libvirt')[:value].exitstatus
-    run_command("sudo yum -y remove docker-ce")
-    run_command("sudo rm -rf /var/lib/docker")
+    run_command('sudo yum -y remove docker-ce')
+    run_command('sudo rm -rf /var/lib/docker')
   end
 
   # Installs or updates Vagrant if installed version older than VAGRANT_VERSION
@@ -429,12 +432,13 @@ class DebianDependencyManager < DependencyManager
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     return ERROR_RESULT unless install_ssh
+
     if should_install?('libvirt')
       run_command('sudo apt-get update')
       result = run_sequence([
-        "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
-        'sudo systemctl restart libvirtd.service'
-      ])
+                              "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
+                              'sudo systemctl restart libvirtd.service'
+                            ])
       return result[:value].exitstatus unless result[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
@@ -444,11 +448,11 @@ class DebianDependencyManager < DependencyManager
   end
 
   def install_docker
-    run_command("sudo apt-get remove docker docker-engine docker.io containerd runc")
-    run_command("curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -")
-    run_command("sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable\"")
-    run_command("sudo apt-get update")
-    result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
+    run_command('sudo apt-get remove docker docker-engine docker.io containerd runc')
+    run_command('curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -')
+    run_command('sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"')
+    run_command('sudo apt-get update')
+    result = run_command('sudo apt-get install -y docker-ce docker-ce-cli containerd.io')
     result[:value].success?
   end
 
@@ -462,8 +466,8 @@ class DebianDependencyManager < DependencyManager
 
   def delete_dependencies
     run_command('sudo apt purge vagrant libvirt-dev')
-    run_command("sudo apt-get purge docker-ce")
-    run_command("sudo rm -rf /var/lib/docker")
+    run_command('sudo apt-get purge docker-ce')
+    run_command('sudo rm -rf /var/lib/docker')
   end
 
   def install_vagrant
@@ -484,8 +488,8 @@ end
 class UbuntuDependencyManager < DebianDependencyManager
   def required_packages
     %w[build-essential cmake dnsmasq ebtables git libvirt-dev libxml2-dev libxslt-dev
-      qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
-      software-properties-common zip libguestfs-tools libvirt-daemon-system bridge-utils libvirt-clients]
+       qemu qemu-kvm rsync wget apt-transport-https ca-certificates curl gnupg-agent
+       software-properties-common zip libguestfs-tools libvirt-daemon-system bridge-utils libvirt-clients]
   end
 
   def install_dependencies
@@ -494,13 +498,14 @@ class UbuntuDependencyManager < DebianDependencyManager
       return ERROR_RESULT unless add_user_to_usergroup('docker')
     end
     return ERROR_RESULT unless install_ssh
+
     if should_install?('libvirt')
       run_command('sudo apt-get update')
       result = run_sequence([
-        "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
-        'sudo systemctl restart libvirtd.service',
-        'sudo chmod o+r /boot/vmlinuz*'
-      ])
+                              "sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install #{required_packages.join(' ')}",
+                              'sudo systemctl restart libvirtd.service',
+                              'sudo chmod o+r /boot/vmlinuz*'
+                            ])
       return result[:value].exitstatus unless result[:value].success?
       return ERROR_RESULT unless install_vagrant
       return ERROR_RESULT unless add_user_to_usergroup('libvirt')
@@ -510,10 +515,10 @@ class UbuntuDependencyManager < DebianDependencyManager
   end
 
   def install_docker
-    run_command("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
-    run_command("sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable\"")
-    run_command("sudo apt-get update")
-    result = run_command("sudo apt-get install -y docker-ce docker-ce-cli containerd.io")
+    run_command('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -')
+    run_command('sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"')
+    run_command('sudo apt-get update')
+    result = run_command('sudo apt-get install -y docker-ce docker-ce-cli containerd.io')
     result[:value].success?
   end
 end

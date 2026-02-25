@@ -33,7 +33,8 @@ class TerraformGcpGenerator
   # @param gcp_service [GcpService] Google Cloud Compute service
   # @param all_windows [Boolean] all machines on the Windows platform
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, gcp_config, logger, configuration_path, ssh_keys, gcp_service, all_windows)
+  def initialize(configuration_id, gcp_config, logger, configuration_path, ssh_keys, gcp_service,
+                 all_windows)
     @configuration_id = configuration_id
     @gcp_config = gcp_config
     @ui = logger
@@ -58,7 +59,8 @@ class TerraformGcpGenerator
     result = Result.ok('')
     result = create_instances_configuration(node_params).and_then do |instances_configuration|
       file.puts(file_header)
-      file.puts(provider_resource(instances_configuration.value[:region], instances_configuration.value[:zone]))
+      file.puts(provider_resource(instances_configuration.value[:region],
+                                  instances_configuration.value[:zone]))
       file.puts(vpc_resources) unless use_existing_network?
       instances_configuration.value[:instances].each do |instance_params|
         print_node_info(instance_params.value)
@@ -103,7 +105,8 @@ class TerraformGcpGenerator
   def select_zone_and_generate_config(region, node_params)
     zones = @gcp_service.list_region_zones(region)
     zones.each do |zone|
-      generate_instances_configuration_for_zone(zone, node_params).and_then do |instances_configuration|
+      generate_instances_configuration_for_zone(zone,
+                                                node_params).and_then do |instances_configuration|
         return Result.ok(
           { region: region,
             zone: zone,
@@ -156,7 +159,7 @@ class TerraformGcpGenerator
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
   def print_node_info(node_params)
-    @ui.info("Google Cloud Platform definition for host: #{node_params[:host]}, "\
+    @ui.info("Google Cloud Platform definition for host: #{node_params[:host]}, " \
              "image:#{node_params[:image]}, machine_type:#{node_params[:machine_type]}")
   end
 
@@ -397,8 +400,10 @@ class TerraformGcpGenerator
     machine_types = @gcp_service.machine_types_list(zone)
     supported_machine_types = @gcp_service.select_supported_machine_types(
       machine_types,
-      node_params[:supported_instance_types])
-    CloudServices.choose_instance_type(supported_machine_types, node_params).and_then do |machine_type|
+      node_params[:supported_instance_types]
+    )
+    CloudServices.choose_instance_type(supported_machine_types,
+                                       node_params).and_then do |machine_type|
       Result.ok(node_params.merge(machine_type: machine_type))
     end
   end

@@ -11,8 +11,8 @@ Dir.chdir(ENV['OLD_CWD']) if ENV.key?('OLD_CWD')
 # Removing the AppRun environment.
 PREFIX = 'OS_ENV_'
 external_env = ENV.select { |name, _| name.start_with?(PREFIX) }
-                 .map { |name, value| [name.sub(/^#{PREFIX}/, ''), value] }
-                 .to_h
+                  .map { |name, value| [name.sub(/^#{PREFIX}/, ''), value] }
+                  .to_h
 
 # Saving the important params
 REQUIRED_VALUES = %w[SSL_CERT_FILE]

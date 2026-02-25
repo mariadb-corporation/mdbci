@@ -4,7 +4,9 @@ module DockerCookbook
     # Requires docker API v1.25
     # Modify the default of read_timeout from 60 to 120
     property :read_timeout, default: 120, desired_state: false
-    property :host, [String, nil], default: lazy { ENV['DOCKER_HOST'] }, desired_state: false
+    property :host, [String, nil], default: lazy {
+                                              ENV.fetch('DOCKER_HOST', nil)
+                                            }, desired_state: false
 
     # https://docs.docker.com/engine/api/v1.35/#operation/ImagePrune
     property :dangling, [TrueClass, FalseClass], default: true
@@ -30,9 +32,15 @@ module DockerCookbook
 
     def generate_json(new_resource)
       opts = { filters: ["dangling=#{new_resource.dangling}"] }
-      opts[:filters].push("until=#{new_resource.prune_until}") if new_resource.property_is_set?(:prune_until)
-      opts[:filters].push("label=#{new_resource.with_label}") if new_resource.property_is_set?(:with_label)
-      opts[:filters].push("label!=#{new_resource.without_label}") if new_resource.property_is_set?(:without_label)
+      if new_resource.property_is_set?(:prune_until)
+        opts[:filters].push("until=#{new_resource.prune_until}")
+      end
+      if new_resource.property_is_set?(:with_label)
+        opts[:filters].push("label=#{new_resource.with_label}")
+      end
+      if new_resource.property_is_set?(:without_label)
+        opts[:filters].push("label!=#{new_resource.without_label}")
+      end
       opts.to_json
     end
   end

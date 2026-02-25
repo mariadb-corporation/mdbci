@@ -6,28 +6,19 @@ require 'fileutils'
 require 'json'
 
 describe Configuration do
-  # rubocop:disable Metrics/MethodLength
   def with_fake_config(provider = '', data = {})
     dir = Dir.mktmpdir
     begin
       real_template = "#{dir}/template-content"
-      File.open(real_template, 'w') do |file|
-        file.write(JSON.generate(data))
-      end
-      File.open("#{dir}/template", 'w') do |file|
-        file.write(real_template)
-      end
-      File.open("#{dir}/provider", 'w') do |file|
-        file.write(provider)
-      end
+      File.write(real_template, JSON.generate(data))
+      File.write("#{dir}/template", real_template)
+      File.write("#{dir}/provider", provider)
       FileUtils.touch("#{dir}/Vagrantfile")
       yield dir
     ensure
       FileUtils.remove_entry(dir)
     end
   end
-  # rubocop:enable Metrics/MethodLength
-
   describe '.config_directory?' do
     context 'when given non-exiting path' do
       [nil, '', 'unknown'].each do |incorrect_path|
@@ -75,9 +66,7 @@ describe Configuration do
     context 'when template file is broken' do
       it 'should raise error' do
         with_fake_config do |config_path|
-          File.open("#{config_path}/template", 'w') do |template_path|
-            template_path.write(config_path)
-          end
+          File.write("#{config_path}/template", config_path)
           expect { Configuration.new(config_path).to raise_error(ArgumentError) }
         end
       end
@@ -110,7 +99,7 @@ describe Configuration do
     context 'when nodes have same provider' do
       it 'should return only one provider name' do
         with_fake_config('aws', { 'test' => { 'box' => 'test' },
-                                  'info' => { 'box' => 'test' }}) do |config_path|
+                                  'info' => { 'box' => 'test' } }) do |config_path|
           config = Configuration.new(config_path)
           expect(config.box_names).to eq(['test'])
         end
@@ -120,7 +109,7 @@ describe Configuration do
     context 'when node name is passed' do
       it 'should return box name for the node' do
         with_fake_config('aws', { 'test' => { 'box' => 'test_box' },
-                                  'info' => { 'box' => 'info_box' }}) do |config_path|
+                                  'info' => { 'box' => 'info_box' } }) do |config_path|
           config = Configuration.new(config_path)
           expect(config.box_names('info')).to eq(['info_box'])
         end

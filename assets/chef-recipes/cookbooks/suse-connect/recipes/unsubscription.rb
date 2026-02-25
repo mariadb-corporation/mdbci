@@ -7,8 +7,11 @@ end
 
 execute 'Deregister the system' do
   not_if { node.run_state[:suse_credentials].empty? }
-  command lazy { RegistrationHelpers.deregister_node_command(
-    node.run_state[:suse_credentials])}
+  command(lazy do
+            RegistrationHelpers.deregister_node_command(
+              node.run_state[:suse_credentials]
+            )
+          end)
 end
 
 execute 'Clean up a system' do
@@ -20,4 +23,3 @@ execute 'Clean up a system' do
   command 'SUSEConnect --cleanup'
   ignore_failure true
 end
-

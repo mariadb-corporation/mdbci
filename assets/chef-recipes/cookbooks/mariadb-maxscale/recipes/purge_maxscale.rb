@@ -5,19 +5,18 @@ service 'maxscale' do
 end
 
 case node[:platform_family]
-when "debian", "ubuntu", "centos", "rhel", "almalinux", "oracle"
+when 'debian', 'ubuntu', 'centos', 'rhel', 'almalinux', 'oracle'
   package 'maxscale' do
     action :purge
   end
 
-when "suse", "opensuse"
+when 'suse', 'opensuse'
   execute 'zypper remove maxscale' do
-    command "zypper --non-interactive remove -u maxscale"
+    command 'zypper --non-interactive remove -u maxscale'
   end
 end
 
-
-%w(/var/log/maxscale /run/maxscale /etc/maxscale.modules.d/).each do |path|
+%w[/var/log/maxscale /run/maxscale /etc/maxscale.modules.d/].each do |path|
   directory path do
     action :delete
     recursive true

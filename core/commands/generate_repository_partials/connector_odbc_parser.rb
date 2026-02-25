@@ -19,13 +19,16 @@ module ConnectorOdbcParser
       extract_field(:version, /(\d.+)/)
     )
     releases = archive_directories.each_with_object([]) do |directory, releases|
-      archives_links = get_links(directory[:url], logger).filter { |link| link[:content].match?(/(x86_64)|(amd64)|(arm64)|(aarch64)/) && !link[:content].match?(/(\.deb)|(\.rpm)/) }
+      archives_links = get_links(directory[:url], logger).filter do |link|
+        link[:content].match?(/(x86_64)|(amd64)|(arm64)|(aarch64)/) && !link[:content].match?(/(\.deb)|(\.rpm)/)
+      end
       archives = get_releases_platform_info(archives_links)
       next unless !archives.nil? && !archives.empty?
+
       archives.each do |archive|
-        if archive[:repo].match(/(x86_64)|(amd64)/) 
+        if archive[:repo].match(/(x86_64)|(amd64)/)
           product_architecture = 'amd64'
-        elsif archive[:repo].match(/(arm64)|(aarch64)/) 
+        elsif archive[:repo].match(/(arm64)|(aarch64)/)
           product_architecture = 'aarch64'
         end
         releases.append(archive.merge({
@@ -43,11 +46,13 @@ module ConnectorOdbcParser
   def self.find_similar_rpm_releases(releases)
     rpm_platforms = %w[rhel centos rocky]
     rpm_releases = releases.filter { |release| rpm_platforms.include?(release[:platform]) }
-                     .group_by { |release| "#{release[:version]} #{release[:platform_version]}" }
+                           .group_by { |release| "#{release[:version]} #{release[:platform_version]}" }
     similar_releases = []
     rpm_releases.each do |_, founded_releases|
       missing_platforms = rpm_platforms - founded_releases.map { |release| release[:platform] }
-      similar_releases += missing_platforms.map { |platform| founded_releases.first.merge({ platform: platform }) }
+      similar_releases += missing_platforms.map do |platform|
+        founded_releases.first.merge({ platform: platform })
+      end
     end
     similar_releases
   end

@@ -21,7 +21,6 @@ require_relative '../../services/product_and_subscription_registry'
 require_relative '../../services/ssh_user'
 
 # The class generates the MDBCI configuration for use in pair with the Vagrant backend
-# rubocop:disable Metrics/ClassLength
 class VagrantConfigurationGenerator < BaseCommand
   CNF_PATH_FILE_NAME = 'cnf_path'
 
@@ -140,7 +139,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   end
   # rubocop:enable Metrics/MethodLength
 
-
   # Check for the box emptiness and existence of a box in the boxes list.
   #
   # @param box [String] name of the box
@@ -157,7 +155,9 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   def print_node_info(node_params, box)
     @ui.info("Requested memory #{node_params[:vm_mem]}")
     @ui.info("Requested number of CPUs #{node_params[:vm_cpu]}")
-    @ui.info("config.ssh.pty option is #{node_params[:ssh_pty]} for a box #{box}") unless node_params[:ssh_pty].nil?
+    return if node_params[:ssh_pty].nil?
+
+    @ui.info("config.ssh.pty option is #{node_params[:ssh_pty]} for a box #{box}")
   end
 
   # Generate a node definition for the Vagrantfile, depending on the provider
@@ -186,14 +186,15 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param path [String] path of the configuration file
   # @param cookbook_path [String] path of the cookbook
   # @return [Result<String>] node definition for the Vagrantfile.
-  # rubocop:disable Metrics/MethodLength
   # Further decomposition of the method will complicate the code.
   def node_definition(node, path, cookbook_path)
     box = node[1]['box'].to_s
     node_params = make_node_params(node, @boxes.get_box(box))
-    @configuration_generator.generate_node_info(node, node_params, @registry, @env.force_version).and_then do |info|
+    @configuration_generator.generate_node_info(node, node_params, @registry,
+                                                @env.force_version).and_then do |info|
       unless info[:node_params][:skip_configuration]
-        @configuration_generator.create_role_files(path, info[:node_params][:name], info[:role_file_content])
+        @configuration_generator.create_role_files(path, info[:node_params][:name],
+                                                   info[:role_file_content])
       end
       if box_valid?(info[:box])
         Result.ok(generate_node_defenition(info[:node_params], cookbook_path, path))
@@ -203,8 +204,6 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       end
     end
   end
-  # rubocop:enable Metrics/MethodLength
-
 
   # Make a hash list of node parameters by a node configuration and
   # information of the box parameters.
@@ -218,14 +217,16 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
       symbolic_box_params = override_box_params(node, symbolic_box_params)
     end
     if node[1].key?('public_network')
-      public_network = node[1]['public_network'].to_a.map {|key, value| "%{key}:\"%{value}\"" % {key: key, value: value}}.join(", ")
+      public_network = node[1]['public_network'].to_a.map do |key, value|
+        format('%<key>s:"%<value>s"', key: key, value: value)
+      end.join(', ')
     end
     {
       name: node[0].to_s,
       host: node[1]['hostname'].to_s,
       vm_mem: node[1]['memory_size'].nil? ? '1024' : node[1]['memory_size'].to_s,
       vm_cpu: (@env.cpu_count || node[1]['cpu_count'] || '1').to_s,
-      public_network: public_network.nil? ? nil : public_network,
+      public_network: public_network.nil? ? nil : public_network
     }.merge(symbolic_box_params)
   end
 
@@ -248,7 +249,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param cookbook_path [String] path of the cookbook.
   # rubocop:disable Metrics/MethodLength
   # The method performs a single function; decomposition of the method will complicate the code.
-  def generate_vagrant_file(path, config, provider, cookbook_path)
+  def generate_vagrant_file(path, config, _provider, cookbook_path)
     vagrant = File.open(File.join(path, 'Vagrantfile'), 'w')
     vagrant.puts vagrant_file_header, vagrant_config_header
     @ui.info('Generating libvirt/VirtualBox configuration')
@@ -292,7 +293,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
                     end
     @ui.info("Global cookbook_path = #{cookbook_path}")
     @ui.info("Nodes provider = #{provider}")
-    return ERROR_RESULT if generate_vagrant_file(path, config, provider, cookbook_path) == ERROR_RESULT
+    return ERROR_RESULT if generate_vagrant_file(path, config, provider,
+                                                 cookbook_path) == ERROR_RESULT
     return SUCCESS_RESULT unless File.size?(File.join(path, 'Vagrantfile')).nil?
 
     @ui.error('Generated Vagrantfile is empty! Please check configuration file and regenerate it.')
@@ -311,8 +313,8 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     raise 'Configuration \'provider\' file already exists' if File.exist?(provider_file)
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
 
-    File.open(provider_file, 'w') { |f| f.write(provider) }
-    File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
+    File.write(provider_file, provider)
+    File.write(template_file, File.expand_path(@env.template_file))
     SshUser.save_to_file(@ssh_users, path)
     @registry.save_registry(registry_path)
   end
@@ -330,7 +332,7 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     unique_providers = Set.new(providers)
     return true if unique_providers.size == 1
 
-    @ui.error("There are several node providers defined in the template: #{unique_providers.to_a.join(', ')}.\n"\
+    @ui.error("There are several node providers defined in the template: #{unique_providers.to_a.join(', ')}.\n" \
               'You can specify only nodes from one provider in the template.')
     false
   end
@@ -342,8 +344,10 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @param configs [Array] list of nodes specified in template
   # @return [Bool] true if the result of passing all checks successful, otherwise - false.
   def load_nodes_provider_and_check_it(configs)
-    nodes = configs.map { |node| %w[aws_config cookbook_path].include?(node[0]) ? nil : node }.compact.to_h
-    providers = nodes.map do |node_name, node_params|
+    nodes = configs.map do |node|
+      %w[aws_config cookbook_path].include?(node[0]) ? nil : node
+    end.compact.to_h
+    providers = nodes.map do |_node_name, node_params|
       box = node_params['box']
 
       begin
@@ -365,12 +369,10 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
   # @return libvirt_disks [Hash] list of shared disks and their attributes
   def fetch_libvirt_disks
     template_disks = @configuration_template
-      .instance_variable_get(:@disk_configurations)
+                     .instance_variable_get(:@disk_configurations)
     libvirt_disks = []
     template_disks.each do |disk|
-      if disk[1]['provider'] == 'libvirt'
-          libvirt_disks.append(disk)
-        end
+      libvirt_disks.append(disk) if disk[1]['provider'] == 'libvirt'
     end
     libvirt_disks
   end
@@ -404,7 +406,9 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     setup_command(name).and_then do |config|
       begin
         libvirt_disks = fetch_libvirt_disks
-        disks_to_create = libvirt_disks.select { |disk| disk[1]['image_path'].nil? && !disk[1]['size'].nil? }
+        disks_to_create = libvirt_disks.select do |disk|
+          disk[1]['image_path'].nil? && !disk[1]['size'].nil?
+        end
         create_disks_images(disks_to_create, @configuration_path)
       rescue Exception => e
         @ui.error("Failed to create libvirt disks images: #{e.message}")
@@ -422,4 +426,3 @@ DNSStubListener=yes" > /etc/systemd/resolved.conf
     end
   end
 end
-# rubocop:enable Metrics/ClassLength

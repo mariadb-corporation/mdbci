@@ -5,7 +5,6 @@ require_relative '../services/vagrant_service'
 
 # Command recreates the network configuration file
 class ShowNetworkConfigCommand < BaseCommand
-
   def show_help
     @ui.info <<-HELP
 The command regenerates the network information file for the given configuration. If the command
@@ -32,39 +31,38 @@ The last command currently will place only the configuration for the specified n
       show_help
       return SUCCESS_RESULT
     end
-    if parse_configuration != SUCCESS_RESULT
-      return ARGUMENT_ERROR_RESULT
-    end
+    return ARGUMENT_ERROR_RESULT if parse_configuration != SUCCESS_RESULT
+
     write_network_configuration
   end
 
   def parse_configuration
     if @args.size == 0
-      @ui.error("Please specify configuration to recreate the network configuration.")
+      @ui.error('Please specify configuration to recreate the network configuration.')
       return ARGUMENT_ERROR_RESULT
     end
     @configuration = Configuration.new(@args.first, @env.labels)
     SUCCESS_RESULT
-  rescue ArgumentError => error
-    @ui.error(error.message)
-    return ARGUMENT_ERROR_RESULT
+  rescue ArgumentError => e
+    @ui.error(e.message)
+    ARGUMENT_ERROR_RESULT
   end
 
   def write_network_configuration
     network_settings = NetworkSettings.new
     @configuration.node_configurations.keys.each do |node|
-      if VagrantService.node_running?(node, @ui, @configuration.path)
-        VagrantService.generate_ssh_settings(node, @ui, @configuration).and_then do |settings|
-          network_settings.add_network_configuration(node, settings)
-        end
+      next unless VagrantService.node_running?(node, @ui, @configuration.path)
+
+      VagrantService.generate_ssh_settings(node, @ui, @configuration).and_then do |settings|
+        network_settings.add_network_configuration(node, settings)
       end
     end
     network_settings.store_network_configuration(@configuration)
     @ui.info("Wrote network configuration file to #{@configuration.network_settings_file}")
     SUCCESS_RESULT
-  rescue RuntimeError => error
+  rescue RuntimeError => e
     @ui.error('Unable to create new network configuration file')
-    @ui.error(error.message)
+    @ui.error(e.message)
     ERROR_RESULT
   end
 end

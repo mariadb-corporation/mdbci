@@ -21,7 +21,8 @@ class GenerateCommand < BaseCommand
     setup_command.and_then do
       case @template_type
       when :docker
-        generator = DockerConfigurationGenerator.new(@configuration_path, @template_file, @template, @env, @ui)
+        generator = DockerConfigurationGenerator.new(@configuration_path, @template_file,
+                                                     @template, @env, @ui)
         generator.generate_config
       when :terraform
         generator = TerraformConfigurationGenerator.new(@args, @env, @ui)
@@ -49,7 +50,8 @@ class GenerateCommand < BaseCommand
     @configuration_path = File.expand_path(@args.first)
     if Dir.exist?(@configuration_path) && !@env.override
       return Result.error(
-          "The specified directory '#{@configuration_path}' already exist. Will not continue to generate.")
+        "The specified directory '#{@configuration_path}' already exist. Will not continue to generate."
+      )
     end
 
     FileUtils.rm_rf(@configuration_path)

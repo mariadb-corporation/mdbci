@@ -1,9 +1,7 @@
 platform_version = node[:platform_version].to_i
 
 package 'yum-utils' do
-  if platform?('redhat', 'centos', 'rocky', 'almalinux', 'oracle')
-    flush_cache({ before: true })
-  end
+  flush_cache({ before: true }) if platform?('redhat', 'centos', 'rocky', 'almalinux', 'oracle')
 end
 
 execute 'install epel-release' do

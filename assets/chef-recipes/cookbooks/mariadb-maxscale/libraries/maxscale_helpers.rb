@@ -15,6 +15,7 @@ module MaxScale
     loop do
       check = current_version_iterator.next <=> target_version_iterator.next
       next if check == 0
+
       return check < 0
     end
 

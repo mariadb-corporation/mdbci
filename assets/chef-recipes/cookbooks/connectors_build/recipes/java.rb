@@ -8,13 +8,12 @@ when 'debian', 'ubuntu'
     package 'openjdk-8-jdk'
   end
 when 'centos', 'redhat', 'rocky'
-  if node['connectors_build']['java_version'] == '7'
-    package 'java-1.7.0-openjdk-devel'
-  end
+  package 'java-1.7.0-openjdk-devel' if node['connectors_build']['java_version'] == '7'
   if node[:platform_version].to_i == 6
     package 'rh-maven33'
     execute 'enable maven' do
-      command "echo 'source /opt/rh/rh-maven33/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
+      command "echo 'source /opt/rh/rh-maven33/enable' >> #{Dir.home(ENV.fetch('SUDO_USER',
+                                                                               nil))}/.bashrc"
     end
   else
     package 'maven'
@@ -30,7 +29,9 @@ when 'suse', 'opensuseleap'
     command 'ln -s /opt/apache-maven-3.3.9 /usr/share/maven'
   end
   execute 'update .barshrc' do
-    command "echo '#{node['connectors_build']['maven_bashrc']}' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
+    command "echo '#{node['connectors_build']['maven_bashrc']}' >> #{Dir.home(ENV.fetch(
+                                                                                'SUDO_USER', nil
+                                                                              ))}/.bashrc"
   end
   package 'java-11-openjdk'
 end

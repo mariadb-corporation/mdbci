@@ -24,7 +24,8 @@ class TerraformCleaner
   #
   # @param configuration [Configuration] that we operate on
   def destroy_nodes_by_configuration(configuration)
-    destroy_nodes(configuration.node_names, configuration.path, configuration.provider, configuration.configuration_id)
+    destroy_nodes(configuration.node_names, configuration.path, configuration.provider,
+                  configuration.configuration_id)
   end
 
   # Destroy nodes
@@ -69,7 +70,8 @@ class TerraformCleaner
     when 'aws'
       @ui.info('Cleaning-up leftover additional resources using AWS EC2')
       @aws_service.delete_security_groups_by_config_id(configuration_id)
-      key_pair_name = TerraformAwsGenerator.generate_key_pair_name(configuration_id, configuration_path)
+      key_pair_name = TerraformAwsGenerator.generate_key_pair_name(configuration_id,
+                                                                   configuration_path)
       @aws_service.delete_key_pair(key_pair_name)
       @aws_service.delete_vpc_by_config_id(configuration_id) unless @aws_service.use_existing_vpc?
     when 'gcp'
@@ -81,7 +83,8 @@ class TerraformCleaner
       @gcp_service.delete_network(TerraformGcpGenerator.generate_network_name(configuration_id))
     when 'digitalocean'
       @ui.info('Cleaning-up leftover additional resources using Digital Ocean')
-      key_pair_name = TerraformDigitaloceanGenerator.generate_key_pair_name(configuration_id, configuration_path)
+      key_pair_name = TerraformDigitaloceanGenerator.generate_key_pair_name(configuration_id,
+                                                                            configuration_path)
       @digitalocean_service.delete_ssh_key(key_pair_name)
     when 'ibm'
       @ui.info('Cleaning-up leftover additional resources using IBM Cloud')
@@ -119,7 +122,8 @@ class TerraformCleaner
 
         @ui.info('Removing absent IBM resources from Terraform state file')
         TerraformService.state_rm('ibm_pi_instance', node, @ui, configuration_path)
-        TerraformService.state_rm('ibm_pi_network', public_network_resource, @ui, configuration_path)
+        TerraformService.state_rm('ibm_pi_network', public_network_resource, @ui,
+                                  configuration_path)
       else
         @ui.info('Terraform state file not found')
       end

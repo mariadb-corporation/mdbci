@@ -1,11 +1,11 @@
-package 'cmake' 
-package 'make' 
+package 'cmake'
+package 'make'
 package 'gcc'
 package 'git'
 package 'vim'
 package 'bison'
 case node[:platform]
-when "ubuntu", "debian"
+when 'ubuntu', 'debian'
   package 'mc'
   package 'libncurses5-dev'
   package 'g++'
@@ -26,7 +26,7 @@ when "ubuntu", "debian"
   package 'hardening-wrapper'
   package 'libaio-dev'
   package 'libjemalloc-dev'
-when "centos"
+when 'centos'
   package 'epel-release'
   package 'openssl-devel'
   package 'gcc-c++'

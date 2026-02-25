@@ -1,6 +1,6 @@
-template "/usr/bin/hetznerrouting.sh" do
-  source "hetznerrouting.erb"
-  variables(:gateway => node["public_network_gateway"], :dev => node["public_network_route_dev"])
+template '/usr/bin/hetznerrouting.sh' do
+  source 'hetznerrouting.erb'
+  variables(gateway: node['public_network_gateway'], dev: node['public_network_route_dev'])
   mode '755'
 end
 
@@ -15,5 +15,5 @@ systemd_unit 'hetznerrouting.service' do
   [Install]
   WantedBy=multi-user.target
   EOU
-  action [:create, :enable, :start]
+  action %i[create enable start]
 end

@@ -145,7 +145,10 @@ class Configuration
   end
 
   def initialize(spec, labels = nil, check_correctness = true)
-    raise ArgumentError, 'You must specify path to the mdbci configuration as a parameter.' if spec.nil?
+    if spec.nil?
+      raise ArgumentError,
+            'You must specify path to the mdbci configuration as a parameter.'
+    end
 
     if check_correctness
       initialize_with_check_correctness(spec, labels)
@@ -156,7 +159,10 @@ class Configuration
 
   def initialize_with_check_correctness(spec, labels)
     @path, node = parse_spec(spec)
-    raise ArgumentError, "Invalid path to the MDBCI configuration: #{spec}" unless self.class.config_directory?(@path)
+    unless self.class.config_directory?(@path)
+      raise ArgumentError,
+            "Invalid path to the MDBCI configuration: #{spec}"
+    end
 
     @name = File.basename(@path)
     @docker_network_name = "#{@name}_mdbci_config_bridge_network"
@@ -178,7 +184,6 @@ class Configuration
       @template_path = nil
     end
   end
-
 
   # Provide a path to the network settings configuration file.
   def network_settings_file
@@ -356,7 +361,10 @@ class Configuration
     end.keys
     raise(ArgumentError, 'Labels were not set in the template file') unless labels_set
 
-    raise(ArgumentError, "Unable to find nodes matching labels: #{@labels.join(', ')}") if node_names.empty?
+    if node_names.empty?
+      raise(ArgumentError,
+            "Unable to find nodes matching labels: #{@labels.join(', ')}")
+    end
 
     node_names
   end
@@ -380,7 +388,7 @@ class Configuration
     template.select do |_, element|
       element.instance_of?(Hash) &&
         element['type'] == 'disk'
-     end
+    end
   end
 
   # Read configuration id specified in the configuration.
@@ -405,7 +413,8 @@ class Configuration
 
     provider = File.read(provider_file_path).strip
     if provider == 'mdbci'
-      raise ArgumentError, 'You are using mdbci node template. Please generate valid one before running up command.'
+      raise ArgumentError,
+            'You are using mdbci node template. Please generate valid one before running up command.'
     end
 
     provider
@@ -441,7 +450,10 @@ class Configuration
   # @raise [ArgumentError] if the file does not exist
   # @return [Hash] data from the template JSON file
   def read_template(template_path)
-    raise ArgumentError, "The template #{template_path} does not exist." unless File.exist?(template_path)
+    unless File.exist?(template_path)
+      raise ArgumentError,
+            "The template #{template_path} does not exist."
+    end
 
     JSON.parse(File.read(template_path))
   end

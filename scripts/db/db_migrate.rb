@@ -24,11 +24,11 @@ require 'mysql2'
 
 begin
   client = Mysql2::Client.new(
-    :host => HOST,
-    :port => PORT,
-    :username => USER,
-    :password => PASSWORD,
-    :database => DB_NAME
+    host: HOST,
+    port: PORT,
+    username: USER,
+    password: PASSWORD,
+    database: DB_NAME
   )
 rescue Mysql2::Error => e
   puts e.message
@@ -43,6 +43,7 @@ begin
                   else
                     metadata_hash = client.query('SELECT version FROM db_metadata').to_a.first
                     raise(StandardError, 'Unknown current database version') if metadata_hash.nil?
+
                     metadata_hash['version'] + 1
                   end
 rescue StandardError => e
@@ -60,8 +61,8 @@ migration_count = Dir.glob('migration-*.sql').size
 if start_migrate < migration_count
   start_migrate.upto(migration_count - 1) do |version|
     puts "Apply migrate ##{version}"
-    system("mysql --port=#{PORT} --host=#{HOST} --user=#{USER} "\
-      "--password=#{PASSWORD} --database=#{DB_NAME} < migration-#{version}.sql")
+    system("mysql --port=#{PORT} --host=#{HOST} --user=#{USER} " \
+           "--password=#{PASSWORD} --database=#{DB_NAME} < migration-#{version}.sql")
   end
   puts 'Migration finished'
 else

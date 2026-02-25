@@ -16,7 +16,7 @@ if node[:platform] == 'redhat'
   end
 end
 
-user = ENV['SUDO_USER']
+user = ENV.fetch('SUDO_USER', nil)
 home_dir = Dir.home(user)
 
 # Download ClustrixDB installer
@@ -29,11 +29,11 @@ end
 directory File.join(home_dir, 'clustrix-installer')
 
 execute 'Unpack ClustrixDB installer' do
-  command "tar xvjf #{File.join(home_dir, 'clustrix-installer.tar.bz2')}"\
-          " -C #{File.join(home_dir, 'clustrix-installer')} --strip-components=1"
+  command "tar xvjf #{File.join(home_dir, 'clustrix-installer.tar.bz2')} " \
+          "-C #{File.join(home_dir, 'clustrix-installer')} --strip-components=1"
 end
 
-if node['clustrix']['provider']   == 'gcp'
+if node['clustrix']['provider'] == 'gcp'
   execute 'Format attached disk' do
     command 'mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb -F'
   end

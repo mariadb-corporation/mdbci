@@ -12,10 +12,11 @@ end
 
 execute 'Deregister the system if it has an old subscription' do
   not_if { node.run_state[:old_suse_credentials].empty? }
-  command lazy {
+  command(lazy do
     RegistrationHelpers.deregister_node_command(
-      node.run_state[:old_suse_credentials])
-  }
+      node.run_state[:old_suse_credentials]
+    )
+  end)
   ignore_failure true
 end
 
@@ -42,7 +43,7 @@ end
 
 execute 'Register system' do
   sensitive true
-  command lazy { RegistrationHelpers.register_node_command(node['suse-connect']) }
+  command(lazy { RegistrationHelpers.register_node_command(node['suse-connect']) })
 end
 
 ruby_block 'Get SUSE product information' do
@@ -55,7 +56,9 @@ ruby_block 'Get SUSE product information' do
     if node['platform_version'].to_i == 12
       products = SuseConnectHelpers.move_products_to_begin(['sle-sdk'], products)
     elsif node['platform_version'].to_i == 15
-      products = SuseConnectHelpers.move_products_to_begin(%w[sle-module-desktop-applications sle-module-development-tools], products)
+      products = SuseConnectHelpers.move_products_to_begin(
+        %w[sle-module-desktop-applications sle-module-development-tools], products
+      )
     end
     node.run_state[:products] = products
   end
@@ -67,12 +70,12 @@ bash 'Activate available products' do
   retries 3
   retry_delay 15
   ignore_failure true
-  code lazy {
+  code(lazy do
     node.run_state[:products].map do |product|
-      "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']}"\
-        " -p #{product['identifier']}/#{product['version']}/#{product['arch']}"
+      "SUSEConnect -r #{node['suse-connect']['key']} -e #{node['suse-connect']['email']} " \
+        "-p #{product['identifier']}/#{product['version']}/#{product['arch']}"
     end.join(' && ')
-  }
+  end)
 end
 
 ruby_block 'Get SUSE Connect Extensions' do
@@ -81,7 +84,7 @@ ruby_block 'Get SUSE Connect Extensions' do
     command.run_command
     all_extensions = SuseConnectHelpers.extract_extensions(command.stdout)
     node.run_state[:extensions] = SuseConnectHelpers
-                                    .filter_extensions(all_extensions, ['Package Hub'])
+                                  .filter_extensions(all_extensions, ['Package Hub'])
   end
   action :run
 end
@@ -90,9 +93,9 @@ bash 'Activate extensions and modules' do
   retries 3
   retry_delay 15
   ignore_failure true
-  code lazy {
+  code(lazy do
     node.run_state[:extensions].map do |extension|
       extension[:command]
     end.join(' && ')
-  }
+  end)
 end

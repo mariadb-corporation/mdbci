@@ -39,9 +39,9 @@ end
 
 total_finish_launches = 0
 puts "START\n------\n"
-client.query('SELECT * '\
-             'FROM test_run '\
-             'ORDER BY UNIX_TIMESTAMP(start_time) '\
+client.query('SELECT * ' \
+             'FROM test_run ' \
+             'ORDER BY UNIX_TIMESTAMP(start_time) ' \
              "LIMIT #{TEST_RUN_COUNT}").each do |test_run|
   test_run_id = test_run['id']
   launch = report_portal.start_launch(
@@ -54,8 +54,8 @@ client.query('SELECT * '\
   )
 
   max_test_time = 0.0
-  client.query('SELECT * '\
-               'FROM results '\
+  client.query('SELECT * ' \
+               'FROM results ' \
                "WHERE id = #{test_run_id}").each do |test_result|
     report_portal.add_root_test_item(
       launch,

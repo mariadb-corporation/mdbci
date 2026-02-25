@@ -32,11 +32,11 @@ selected_platforms = { libvirt: nil, aws: nil }
 
 # rubocop:disable Metrics/BlockLength
 OptionParser.new do |opts|
-  opts.banner = 'Special script to test whether MDBCI can setup several '\
+  opts.banner = 'Special script to test whether MDBCI can setup several ' \
                 'vagrant libvirt and vagrant aws driven machines'
 
   opts.on('-h', '--help', 'Show help and exit') do
-    puts "Example of usage:\n./test_mdbci_for_setup_several_machines --libvirt=2 "\
+    puts "Example of usage:\n./test_mdbci_for_setup_several_machines --libvirt=2 " \
          '--aws=1 -n3 --libvirt-box=centos_7_libvirt'
     puts opts
     exit
@@ -46,7 +46,8 @@ OptionParser.new do |opts|
     nodes_count = nodes.to_i
   end
 
-  opts.on('--libvirt=CONFIGS_COUNT', 'Number of generated libvirt configs.') do |libvirt_configs_count|
+  opts.on('--libvirt=CONFIGS_COUNT',
+          'Number of generated libvirt configs.') do |libvirt_configs_count|
     configs_count[:libvirt] = libvirt_configs_count.to_i
   end
 
@@ -72,10 +73,13 @@ FileUtils.rm_rf(vms_dir)
 FileUtils.mkdir_p(vms_dir)
 
 # rubocop:disable Metrics/ParameterLists
-def write_configuration(selected_platforms, platforms, template_path, config_id, nodes_count, provider)
+def write_configuration(selected_platforms, platforms, template_path, config_id, nodes_count,
+                        provider)
   configuration = Array.new(nodes_count).map do |node_num|
     name = "config_#{config_id}_node_#{node_num}"
-    [name, { hostname: name.delete('_'), box: selected_platforms[provider] || platforms[provider].sample }]
+    [name,
+     { hostname: name.delete('_'),
+       box: selected_platforms[provider] || platforms[provider].sample }]
   end.to_h
   File.write(template_path, JSON.pretty_generate(configuration))
 end

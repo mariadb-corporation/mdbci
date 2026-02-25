@@ -8,8 +8,10 @@ module DockerCookbook
     provides :docker_service
 
     # installation type and service_manager
-    property :install_method, %w(script package tarball none auto), default: 'auto', desired_state: false
-    property :service_manager, %w(execute sysvinit upstart systemd auto), default: 'auto', desired_state: false
+    property :install_method, %w[script package tarball none auto], default: 'auto',
+                                                                    desired_state: false
+    property :service_manager, %w[execute sysvinit upstart systemd auto], default: 'auto',
+                                                                          desired_state: false
 
     # docker_installation_script
     property :repo, desired_state: false
@@ -37,9 +39,7 @@ module DockerCookbook
       properties.each do |p|
         # If the property is set on from, and exists on to, set the
         # property on to
-        if to.class.properties.include?(p) && property_is_set?(p)
-          to.send(p, send(p))
-        end
+        to.send(p, send(p)) if to.class.properties.include?(p) && property_is_set?(p)
       end
     end
 
@@ -48,7 +48,8 @@ module DockerCookbook
         if new_resource.property_is_set?(:version) &&
            new_resource.install_method != 'package' &&
            new_resource.install_method != 'tarball'
-          raise Chef::Exceptions::ValidationFailed, 'Version property only supported for package and tarball installation methods'
+          raise Chef::Exceptions::ValidationFailed,
+                'Version property only supported for package and tarball installation methods'
         end
       end
 

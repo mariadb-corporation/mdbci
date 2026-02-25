@@ -80,7 +80,8 @@ class DigitaloceanService
     @client.sizes.all.select do |size|
       size.available && size.regions.include?(@digitalocean_config['region'])
     end.map do |size|
-      { ram: size.memory, cpu: size.vcpus, type: size.slug, disk: size.disk, price_hourly: size.price_hourly }
+      { ram: size.memory, cpu: size.vcpus, type: size.slug, disk: size.disk,
+        price_hourly: size.price_hourly }
     end
   end
 end

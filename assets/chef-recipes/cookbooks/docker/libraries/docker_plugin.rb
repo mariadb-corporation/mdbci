@@ -12,6 +12,7 @@ module DockerCookbook
 
     action :install do
       return if plugin_exists?(local_name)
+
       converge_by "Install plugin #{plugin_identifier} as #{local_name}" do
         install_plugin
         configure_plugin
@@ -19,15 +20,19 @@ module DockerCookbook
     end
 
     action :enable do
-      converge_by "Enable plugin #{local_name}" do
-        enable_plugin
-      end unless plugin_enabled?(local_name)
+      unless plugin_enabled?(local_name)
+        converge_by "Enable plugin #{local_name}" do
+          enable_plugin
+        end
+      end
     end
 
     action :disable do
-      converge_by "Disable plugin #{local_name}" do
-        disable_plugin
-      end if plugin_enabled?(local_name)
+      if plugin_enabled?(local_name)
+        converge_by "Disable plugin #{local_name}" do
+          disable_plugin
+        end
+      end
     end
 
     action :update do
@@ -45,6 +50,7 @@ module DockerCookbook
     declare_action_class.class_eval do
       def remote_name
         return new_resource.remote unless new_resource.remote.nil? || new_resource.remote.empty?
+
         new_resource.local_alias
       end
 
@@ -68,7 +74,7 @@ module DockerCookbook
       end
 
       def install_plugin
-        privileges = \
+        privileges =
           if new_resource.grant_privileges == true
             # user gave a blanket statement about privileges; fetch required privileges from Docker
             # we pass the identifier as both :name and :remote to accomodate different API versions
@@ -106,7 +112,8 @@ module DockerCookbook
           options_for_json.push("#{k}=#{v}")
         end
 
-        Docker.connection.post("/plugins/#{local_name}/set", {}, body: JSON.generate(options_for_json))
+        Docker.connection.post("/plugins/#{local_name}/set", {},
+                               body: JSON.generate(options_for_json))
       end
 
       def enable_plugin

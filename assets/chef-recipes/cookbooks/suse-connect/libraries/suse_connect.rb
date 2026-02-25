@@ -31,13 +31,12 @@ class Chef
         products.reject { |product| product['identifier'] == product_name }
       end
 
-
       # Parse the output of the SUSEConnect --list-extensions to find out available modules
       # and extensions.
       # @param command_output [String] the output of the command
       # @return [Array<Hash>] description of extensions
       def self.extract_extensions(command_output)
-        command_output.lines.each_cons(2).select do |first_line, second_line|
+        command_output.lines.each_cons(2).select do |_first_line, second_line|
           second_line.include?('SUSEConnect') &&
             (second_line.include?('Activate') || second_line.include?('Deactivate'))
         end.map do |first_line, second_line|

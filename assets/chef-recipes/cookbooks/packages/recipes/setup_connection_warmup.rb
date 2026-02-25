@@ -31,5 +31,5 @@ systemd_unit 'warmup_connection.timer' do
     [Install]
     WantedBy=networking.service
   CONTENT
-  action [:create, :enable, :start]
+  action %i[create enable start]
 end

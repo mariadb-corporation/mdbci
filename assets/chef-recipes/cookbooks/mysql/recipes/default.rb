@@ -7,6 +7,5 @@
 # All rights reserved - Do Not Redistribute
 #
 
-
 # run MariaDB install with mdbcrepos.rb recipe
-include_recipe "mysql::install_community"
+include_recipe 'mysql::install_community'

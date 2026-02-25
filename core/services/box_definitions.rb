@@ -23,13 +23,11 @@ class BoxDefinitions
 
     box_files = find_boxes_files(extra_path)
     @boxes = box_files.each_with_object({}) do |path, boxes|
-      begin
-        definitions = JSON.parse(File.read(path))
-        definitions.each_value { |definition| check_box_definition(definition) }
-        boxes.merge!(definitions)
-      rescue JSON::ParserError => error
-        raise "The boxes configuration file '#{path}' is not a valid JSON document. Error: #{error.message}"
-      end
+      definitions = JSON.parse(File.read(path))
+      definitions.each_value { |definition| check_box_definition(definition) }
+      boxes.merge!(definitions)
+    rescue JSON::ParserError => e
+      raise "The boxes configuration file '#{path}' is not a valid JSON document. Error: #{e.message}"
     end
   end
 
@@ -87,7 +85,10 @@ class BoxDefinitions
   private
 
   def check_box(box_name)
-    raise ArgumentError, "The specified box definition can not be found: #{box_name}" unless @boxes.key?(box_name)
+    return if @boxes.key?(box_name)
+
+    raise ArgumentError,
+          "The specified box definition can not be found: #{box_name}"
   end
 
   # @param extra_path [String] path to the
@@ -106,7 +107,8 @@ class BoxDefinitions
 
   AWS_KEYS = %w[ami user default_machine_type].freeze
   DEDICATED_KEYS = %w[host user ssh_key].freeze
-  DIGITALOCEAN_KEYS = %w[image user default_machine_type default_cpu_count default_memory_size].freeze
+  DIGITALOCEAN_KEYS = %w[image user default_machine_type default_cpu_count
+                         default_memory_size].freeze
   DOCKER_KEYS = %w[box].freeze
   GCP_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
   IBM_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
@@ -140,7 +142,7 @@ class BoxDefinitions
   # Gets the list of keys for the specified provider
   def keys_for_provider(provider)
     self.class.const_get(
-        "#{provider.upcase}_KEYS"
+      "#{provider.upcase}_KEYS"
     )
   rescue NameError
     raise "Provider '#{provider}'is not supported."

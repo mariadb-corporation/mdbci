@@ -1,7 +1,6 @@
 require_relative '../core/constants'
 
 class RakeTaskManager
-
   PATH_TO_RSPEC_SPEC_FOLDER = 'spec/'
   PATH_TO_INTEGRATION_TESTS_FOLDER = 'integration/'
   PATH_TO_UNIT_TESTS_FOLDER = 'unit/'
@@ -11,9 +10,9 @@ class RakeTaskManager
   PARAMETRIZED_CONFIG_PREFIX_ORIGIN = 'mdbci_param_test'
 
   PARAMETRIZED_CONFIGS = {
-      "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{DOCKER}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{DOCKER}",
-      "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{LIBVIRT}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{LIBVIRT}",
-      "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{DOCKER_FOR_PPC}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{DOCKER_FOR_PPC}"
+    "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{DOCKER}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{DOCKER}",
+    "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{LIBVIRT}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{LIBVIRT}",
+    "#{PARAMETRIZED_CONFIG_ENV_VAR_PREFIX_ORIGIN}_#{DOCKER_FOR_PPC}" => "#{PARAMETRIZED_CONFIG_PREFIX_ORIGIN}_#{DOCKER_FOR_PPC}"
   }
 
   attr_accessor :rspec_test_name
@@ -22,12 +21,12 @@ class RakeTaskManager
   attr_accessor :silent
   attr_accessor :tests_counter
 
-  @@failed_tests = Array.new
+  @@failed_tests = []
   @@tests_counter = 0
   @@failed_tests_counter = 0
 
   def initialize(task_name)
-    @silent = ENV['SILENT']
+    @silent = ENV.fetch('SILENT', nil)
     if @silent.nil? || @silent == 'true'
       @silent = true
     elsif @silent == 'false'
@@ -41,14 +40,10 @@ class RakeTaskManager
     match_regular_expression = 'Failed examples:'
     match_line_found = false
     @cmd.each_line do |line|
-      if !match_line_found
-        if line =~ /#{match_regular_expression}/
-          match_line_found = true
-        end
-      else
-        unless line == "\n"
-          @@failed_tests.push(line)
-        end
+      if match_line_found
+        @@failed_tests.push(line) unless line == "\n"
+      elsif line =~ /#{match_regular_expression}/
+        match_line_found = true
       end
     end
   end
@@ -56,9 +51,9 @@ class RakeTaskManager
   # executing rspec test, with cutting stderr application output
   def run
     @rspec_test_name = PATH_TO_RSPEC_SPEC_FOLDER + @rspec_test_name
-    unless File.exists?("#{@rspec_test_name}")
+    unless File.exist?("#{@rspec_test_name}")
       @@failed_tests.push("Test not exists: #{@rspec_test_name}")
-      @@failed_tests_counter +=1
+      @@failed_tests_counter += 1
       return 1
     end
     @cmd = `rspec #{@rspec_test_name}`
@@ -73,23 +68,22 @@ class RakeTaskManager
       @@failed_tests_counter += 1
     end
     puts "Running test: #{test_name} " + status
-    if !@silent || status == '...FAILED'
-      describe_test_output output
-    end
+    return unless !@silent || status == '...FAILED'
+
+    describe_test_output output
   end
 
   def describe_test_output(output)
     match_regular_expression = 'Finished in'
     lines_counter = 0
-    if output.include? match_regular_expression
-      output.each_line do |line|
-        if line =~ /#{match_regular_expression}/
-          break
-        end
-        lines_counter += 1
-      end
-      puts output.split("\n")[0..lines_counter-1]
+    return unless output.include? match_regular_expression
+
+    output.each_line do |line|
+      break if line =~ /#{match_regular_expression}/
+
+      lines_counter += 1
     end
+    puts output.split("\n")[0..lines_counter - 1]
   end
 
   def with_environment_variables(variables)
@@ -113,7 +107,7 @@ class RakeTaskManager
   end
 
   def self.rake_finalize(namespace_name_symbol)
-    namespace_name_all_tasks_sym = "#{namespace_name_symbol}_all".to_sym
+    namespace_name_all_tasks_sym = :"#{namespace_name_symbol}_all"
     custom_task :task_show_tests_info do
       RakeTaskManager.get_failed_tests_info
     end
@@ -139,5 +133,4 @@ class RakeTaskManager
       exit 1
     end
   end
-
 end

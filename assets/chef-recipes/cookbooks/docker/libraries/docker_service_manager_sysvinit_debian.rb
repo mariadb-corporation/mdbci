@@ -68,7 +68,7 @@ module DockerCookbook
         service docker_name do
           provider Chef::Provider::Service::Init::Debian
           supports restart: true, status: true
-          action [:enable, :start]
+          action %i[enable start]
         end
       end
     end

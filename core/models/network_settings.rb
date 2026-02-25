@@ -86,7 +86,7 @@ class NetworkSettings
   end
 
   def store_labels_information(configuration)
-    active_labels =  configuration.nodes_by_label.select do |_, nodes|
+    active_labels = configuration.nodes_by_label.select do |_, nodes|
       nodes.all? { |node| @settings.key?(node) }
     end.keys
     File.write(configuration.labels_information_file, active_labels.sort.join(','))
@@ -95,7 +95,8 @@ class NetworkSettings
   def generate_ssh_configuration(configuration)
     contents = []
     @settings.each do |key, value|
-      contents << self.class.generate_ssh_content(key, value['network'], value['whoami'], value['keyfile'])
+      contents << self.class.generate_ssh_content(key, value['network'], value['whoami'],
+                                                  value['keyfile'])
     end
     File.write(configuration.ssh_file, contents.join("\n"))
   end

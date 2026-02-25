@@ -11,11 +11,13 @@ class DeployCommand < BaseCommand
 
   def execute
     begin
-      @ui.info("Copying files to #{File.join(@env.working_dir, 'confs')} and #{File.join(@env.working_dir, 'scripts')}")
+      @ui.info("Copying files to #{File.join(@env.working_dir,
+                                             'confs')} and #{File.join(@env.working_dir,
+                                                                       'scripts')}")
       FileUtils.cp_r(File.join(@env.mdbci_dir, 'confs'), @env.working_dir)
       FileUtils.cp_r(File.join(@env.mdbci_dir, 'scripts'), @env.working_dir)
-    rescue StandardError => error
-      @ui.error("Unable to copy data. Error information: #{error.message}")
+    rescue StandardError => e
+      @ui.error("Unable to copy data. Error information: #{e.message}")
       return ERROR_RESULT
     end
     SUCCESS_RESULT

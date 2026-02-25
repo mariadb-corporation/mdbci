@@ -2,14 +2,14 @@ source 'https://rubygems.org'
 
 group :lint do
   gem 'foodcritic', '~> 4.0'
-  gem 'rubocop', '~> 0.18'
   gem 'rainbow', '< 2.0'
   gem 'rake'
+  gem 'rubocop', '~> 0.18'
 end
 
 group :unit do
-  gem 'berkshelf',   '~> 3.2'
-  gem 'chefspec',   '~> 4.2'
+  gem 'berkshelf', '~> 3.2'
+  gem 'chefspec', '~> 4.2'
 end
 
 group :kitchen_common do
@@ -17,12 +17,12 @@ group :kitchen_common do
 end
 
 group :development do
-  gem 'ruby_gntp'
   gem 'growl'
-  gem 'rb-fsevent'
   gem 'guard', '~> 2.4'
-  gem 'guard-kitchen'
   gem 'guard-foodcritic'
+  gem 'guard-kitchen'
   gem 'guard-rspec'
   gem 'guard-rubocop'
+  gem 'rb-fsevent'
+  gem 'ruby_gntp'
 end

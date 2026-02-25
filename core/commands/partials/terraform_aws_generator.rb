@@ -103,9 +103,9 @@ class TerraformAwsGenerator
   #
   # @param node_params [Hash] list of the node parameters
   def print_node_info(node_params)
-    @ui.info("AWS definition for host:#{node_params[:host]},"\
-             " ami:#{node_params[:ami]}, user:#{node_params[:user]},"\
-             " instance_type:#{node_params[:machine_type]}")
+    @ui.info("AWS definition for host:#{node_params[:host]}, " \
+             "ami:#{node_params[:ami]}, user:#{node_params[:user]}, " \
+             "instance_type:#{node_params[:machine_type]}")
   end
 
   def file_header
@@ -360,7 +360,9 @@ class TerraformAwsGenerator
     tags = @configuration_tags.merge(hostname: Socket.gethostname,
                                      username: Etc.getlogin,
                                      machinename: node_params[:name],
-                                     full_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
+                                     full_name: self.class.generate_instance_name(
+                                       @configuration_id, node_params[:name]
+                                     ),
                                      full_config_path: @configuration_path)
     node_params = node_params.merge({ tags: tags,
                                       key_file: @private_key_file_path,

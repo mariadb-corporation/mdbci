@@ -9,18 +9,18 @@ module DockerCookbook
 
     def connection
       @connection ||= begin
-                        opts = {}
-                        opts[:read_timeout] = read_timeout if read_timeout
-                        opts[:write_timeout] = write_timeout if write_timeout
+        opts = {}
+        opts[:read_timeout] = read_timeout if read_timeout
+        opts[:write_timeout] = write_timeout if write_timeout
 
-                        if host =~ /^tcp:/
-                          opts[:scheme] = 'https' if tls || !tls_verify.nil?
-                          opts[:ssl_ca_file] = tls_ca_cert if tls_ca_cert
-                          opts[:client_cert] = tls_client_cert if tls_client_cert
-                          opts[:client_key] = tls_client_key if tls_client_key
-                        end
-                        Docker::Connection.new(host || Docker.url, opts)
-                      end
+        if host =~ /^tcp:/
+          opts[:scheme] = 'https' if tls || !tls_verify.nil?
+          opts[:ssl_ca_file] = tls_ca_cert if tls_ca_cert
+          opts[:client_cert] = tls_client_cert if tls_client_cert
+          opts[:client_key] = tls_client_key if tls_client_key
+        end
+        Docker::Connection.new(host || Docker.url, opts)
+      end
     end
 
     def with_retries(&_block)
@@ -67,15 +67,19 @@ module DockerCookbook
     #
     ################
 
-    UnorderedArrayType = property_type(
-      is: [UnorderedArray, nil],
-      coerce: proc { |v| v.nil? ? nil : UnorderedArray.new(Array(v)) }
-    ) unless defined?(UnorderedArrayType)
+    unless defined?(UnorderedArrayType)
+      UnorderedArrayType = property_type(
+        is: [UnorderedArray, nil],
+        coerce: proc { |v| v.nil? ? nil : UnorderedArray.new(Array(v)) }
+      )
+    end
 
-    PartialHashType = property_type(
-      is: [PartialHash, nil],
-      coerce: proc { |v| v.nil? ? nil : PartialHash[v] }
-    ) unless defined?(PartialHashType)
+    unless defined?(PartialHashType)
+      PartialHashType = property_type(
+        is: [PartialHash, nil],
+        coerce: proc { |v| v.nil? ? nil : PartialHash[v] }
+      )
+    end
 
     #####################
     # Resource properties
@@ -97,11 +101,11 @@ module DockerCookbook
              desired_state: false
 
     property :tls, [TrueClass, FalseClass, nil],
-             default: lazy { ENV['DOCKER_TLS'] },
+             default: lazy { ENV.fetch('DOCKER_TLS', nil) },
              desired_state: false
 
     property :tls_verify, [TrueClass, FalseClass, nil],
-             default: lazy { ENV['DOCKER_TLS_VERIFY'] },
+             default: lazy { ENV.fetch('DOCKER_TLS_VERIFY', nil) },
              desired_state: false
 
     property :tls_ca_cert, [String, nil],
@@ -115,17 +119,19 @@ module DockerCookbook
              desired_state: false
 
     property :tls_client_cert, [String, nil],
-             default: lazy { ENV['DOCKER_CERT_PATH'] ? "#{ENV['DOCKER_CERT_PATH']}/cert.pem" : nil },
+             default: lazy {
+                        ENV['DOCKER_CERT_PATH'] ? "#{ENV['DOCKER_CERT_PATH']}/cert.pem" : nil
+                      },
              desired_state: false
 
     property :tls_client_key, [String, nil],
              default: lazy { ENV['DOCKER_CERT_PATH'] ? "#{ENV['DOCKER_CERT_PATH']}/key.pem" : nil },
              desired_state: false
 
-    alias_method :tlscacert, :tls_ca_cert
-    alias_method :tlscert, :tls_server_cert
-    alias_method :tlskey, :tls_server_key
-    alias_method :tlsverify, :tls_verify
+    alias tlscacert tls_ca_cert
+    alias tlscert tls_server_cert
+    alias tlskey tls_server_key
+    alias tlsverify tls_verify
 
     declare_action_class.class_eval do
       # https://github.com/docker/docker/blob/4fcb9ac40ce33c4d6e08d5669af6be5e076e2574/registry/auth.go#L231

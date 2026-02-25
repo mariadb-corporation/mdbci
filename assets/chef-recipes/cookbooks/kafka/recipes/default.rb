@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-user = ENV['SUDO_USER']
+user = ENV.fetch('SUDO_USER', nil)
 home_dir = Dir.home(user)
 
 remote_file File.join(home_dir, 'kafka.tgz') do
@@ -11,8 +11,8 @@ end
 directory File.join(home_dir, 'kafka')
 
 execute 'Untar Kafka archive' do
-  command "tar xf #{File.join(home_dir, 'kafka.tgz')}"\
-          " -C #{File.join(home_dir, 'kafka')} --strip-components=1"
+  command "tar xf #{File.join(home_dir, 'kafka.tgz')} " \
+          "-C #{File.join(home_dir, 'kafka')} --strip-components=1"
 end
 
 file File.join(home_dir, 'kafka.tgz') do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../models/command_result.rb'
+require_relative '../../models/command_result'
 require_relative '../../models/configuration'
 require_relative '../../models/return_codes'
 require_relative '../../services/shell_commands'

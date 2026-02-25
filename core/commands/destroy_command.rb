@@ -2,7 +2,7 @@
 
 require_relative 'base_command'
 require_relative '../models/configuration'
-require_relative '../models/command_result.rb'
+require_relative '../models/command_result'
 require_relative '../services/shell_commands'
 require_relative 'partials/docker_swarm_cleaner'
 require_relative 'partials/vagrant_cleaner'
@@ -28,7 +28,7 @@ class DestroyCommand < BaseCommand
   # @return [Boolean] whether parameters are good or not.
   def check_parameters
     if !@env.list && !@env.node_name && (@args.empty? || @args.first.nil?) &&
-        ((@env.json || @env.all) && @args.first.nil?)
+       ((@env.json || @env.all) && @args.first.nil?)
       @ui.error 'Please specify the node name or path to the mdbci configuration or configuration/node as a parameter.'
       show_help
       false
@@ -140,9 +140,9 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_gcp_vm_list = filter_nodes_by_name(gcp_vm_list, @env.node_name)
     filtered_digitalocean_vm_list = filter_nodes_by_name(digitalocean_vm_list, @env.node_name)
     summary_filtered_vm_list = filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list +
-      filtered_gcp_vm_list + filtered_digitalocean_vm_list
+                               filtered_gcp_vm_list + filtered_digitalocean_vm_list
     @ui.info("Next virtual machines will be destroyed: #{summary_filtered_vm_list}")
-    return unless @ui.confirmation("", 'Do you want to continue? [y/n]')
+    return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
 
     filtered_vagrant_vm_list.each do |provider, nodes|
       nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
@@ -150,7 +150,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_aws_vm_list.uniq.each { |node| @aws_service.terminate_instances_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
-    @ui.info("Virtual machines was successfully deleted")
+    @ui.info('Virtual machines was successfully deleted')
   end
 
   # Handle case when command calling with configuration.
@@ -166,7 +166,8 @@ Labels should be separated with commas, do not contain any whitespaces.
     @ui.error(network_settings_result.error) if network_settings_result.error?
     @ui.error(registry_result.error) if registry_result.error?
     if network_settings_result.success? && registry_result.success?
-      unsubscribe_from_subscriptions(configuration, network_settings_result.value, registry_result.value)
+      unsubscribe_from_subscriptions(configuration, network_settings_result.value,
+                                     registry_result.value)
       if configuration.dedicated_configuration?
         uninstall_products(configuration, network_settings_result.value, registry_result.value)
       end
@@ -178,7 +179,8 @@ Labels should be separated with commas, do not contain any whitespaces.
       docker_cleaner.destroy_stack(configuration)
       Result.ok('')
     elsif configuration.terraform_configuration?
-      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service, @env.digitalocean_service, @env.ibm_service)
+      terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service,
+                                               @env.digitalocean_service, @env.ibm_service)
       result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
       return result unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
 
@@ -202,14 +204,15 @@ Labels should be separated with commas, do not contain any whitespaces.
   # Withdraw all subscriptions that were not removed by Chef
   def cleanup_leftover_subscriptions(configuration_path)
     @ui.info('Cleaning up leftover systems subscriptions')
-    registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'], configuration_path, @ui)
+    registration_manager = RegistrationManager.new(@env.suse_config['registration_proxy_url'],
+                                                   configuration_path, @ui)
     registration_manager.cleanup_subscriptions
   end
 
   # Handle cases when command calling with --all option.
   def destroy_all_in_path(path)
     unless File.directory?(path)
-      @ui.error("Configuration directory does not exist.")
+      @ui.error('Configuration directory does not exist.')
       return Result.ok('')
     end
     Dir.children(path).map do |entry|
@@ -219,12 +222,14 @@ Labels should be separated with commas, do not contain any whitespaces.
     end.each do |directory|
       destroy_by_configuration(directory)
     end
-    FileUtils.rm_r(path) if Dir.children(path).empty?
+    FileUtils.rm_r(path) if Dir.empty?(path)
     Result.ok('')
   end
 
   def destroy_by_json(path)
-    return Result.error("The file #{path} does not exist or it is a directory") unless File.file?(path)
+    unless File.file?(path)
+      return Result.error("The file #{path} does not exist or it is a directory")
+    end
 
     json_info = JSON.parse(File.read(path))
     if json_info['aws'].class == Array
@@ -283,36 +288,35 @@ Labels should be separated with commas, do not contain any whitespaces.
   def generate_role_file_unsub(configuration, name, subscription)
     recipe_name = ["#{subscription}::unsubscription"]
     override_params = {}
-    if subscription == 'suse-connect'
-      override_params['suse-connect'] = @env.suse_config
-    end
+    override_params['suse-connect'] = @env.suse_config if subscription == 'suse-connect'
     generate_role_file(configuration, name, recipe_name, override_params)
   end
 
   # Create a role file to install the product from the chef
   def generate_role_file(configuration, name, recipe_names, override_params = {})
     role_file_path = "#{configuration.path}/#{name}.json"
-    role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_names, override_params)
+    role_json_file = ConfigurationGenerator.generate_role_json_description(name, recipe_names,
+                                                                           override_params)
     IO.write(role_file_path, role_json_file)
     role_file_path
   end
 
   def generate_role_file_remove(configuration, name, removal_products)
-  recipe_names = []
+    recipe_names = []
     removal_products.each do |product|
       recipe_names.push(ProductAttributes.recipe_name(product))
     end
-  generate_role_file(configuration, name, recipe_names)
+    generate_role_file(configuration, name, recipe_names)
   end
 
   # Update network_configuration and configured_labels files
   def update_configuration_files(configuration)
     network_settings = NetworkSettings.new
     configuration.node_configurations.keys.each do |node|
-      if VagrantService.node_running?(node, @ui, configuration.path)
-        VagrantService.generate_ssh_settings(node, @ui, configuration).and_then do |settings|
-          network_settings.add_network_configuration(node, settings)
-        end
+      next unless VagrantService.node_running?(node, @ui, configuration.path)
+
+      VagrantService.generate_ssh_settings(node, @ui, configuration).and_then do |settings|
+        network_settings.add_network_configuration(node, settings)
       end
     end
     network_settings.store_network_configuration(configuration)
@@ -340,7 +344,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     elsif !@args.first.nil?
       return destroy_by_configuration(@args.first)
     else
-      return Result.error('Incorrect use of the destroy command, please, provide the path to the configuration '\
+      return Result.error('Incorrect use of the destroy command, please, provide the path to the configuration ' \
                           'or use additional command parameters. See details via `mdbci destroy --help`')
     end
     SUCCESS_RESULT

@@ -1,9 +1,7 @@
 include_recipe 'kerberos::default'
 
 package 'rng-tools' do
-  if platform?('redhat', 'centos', 'rocky')
-    flush_cache({ before: true })
-  end
+  flush_cache({ before: true }) if platform?('redhat', 'centos', 'rocky')
 end
 
 if platform?('redhat', 'centos', 'rocky')

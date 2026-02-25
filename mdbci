@@ -24,7 +24,6 @@ Dir.chdir(current_dir)
 require 'English'
 require 'getoptlong'
 
-
 # Reading options
 opts = GetoptLong.new(
   ['--all', GetoptLong::NO_ARGUMENT],
@@ -232,7 +231,7 @@ out.info "mdbci called with: #{initial_arguments}"
 
 at_exit do
   session.cleanup
-  if $ERROR_INFO.nil? || $ERROR_INFO.is_a?(SystemExit) && $ERROR_INFO.success?
+  if $ERROR_INFO.nil? || ($ERROR_INFO.is_a?(SystemExit) && $ERROR_INFO.success?)
     out.debug('MDBCI success with code: 0')
   else
     code = $ERROR_INFO.is_a?(SystemExit) ? $ERROR_INFO.status : 1
@@ -252,8 +251,8 @@ end
 
 if exit_code.is_a?(Result::Base)
   exit_code = exit_code.match(
-    ok: -> (_) { 0 },
-    error: -> (message) do
+    ok: ->(_) { 0 },
+    error: lambda do |message|
       out.error(message)
       1
     end
