@@ -184,7 +184,6 @@ class TerraformGcpGenerator
     }
 
     provider "google" {
-      credentials = file("#{@gcp_config['credentials_file']}")
       project = "#{@gcp_config['project']}"
       region = "#{region}"
       zone = "#{zone}"
