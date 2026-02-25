@@ -2,7 +2,7 @@
 
 user_ulimit 'core_dump' do
   core_limit 'unlimited'
-  filehandle_limit 65536
+  filehandle_limit 65_536
   username '*'
   filename 'core.conf'
 end
@@ -22,7 +22,7 @@ sysctl 'fs.suid_dumpable' do
 end
 
 sysctl 'fs.file-max' do
-  value 65536
+  value 65_536
 end
 
 execute 'set_core_unlimited' do

@@ -7,7 +7,6 @@ require_relative '../../core/out'
 require_relative '../../core/services/repo_manager'
 
 describe 'Session.showBoxes' do
-
   before :all do
     $mdbci_exec_dir = File.absolute_path('.')
     $session = Session.new
@@ -27,35 +26,30 @@ describe 'Session.showBoxes' do
     exit_code = $session.showBoxes
     exit_code.should eq(0)
   end
-  #
   it 'show boxes ubuntu 7' do
     $session.boxPlatform = 'ubuntu'
     $session.boxPlatformVersion = '7'
     exit_code = $session.showBoxes
     exit_code.should eq(1)
   end
-  #
   it 'show boxes debian jessie' do
     $session.boxPlatform = 'debian'
     $session.boxPlatformVersion = 'jessie'
     exit_code = $session.showBoxes
     exit_code.should eq(0)
   end
-  #
   it 'show boxes centos 7' do
     $session.boxPlatform = 'centos'
     $session.boxPlatformVersion = '7'
     exit_code = $session.showBoxes
     exit_code.should eq(0)
   end
-  #
   it 'show boxes debian gessie' do
     $session.boxPlatform = 'debian'
     $session.boxPlatformVersion = 'gessie'
     exit_code = $session.showBoxes
     exit_code.should eq(1)
   end
-  #
   it 'show boxes centos 8' do
     $session.boxPlatform = 'centos'
     $session.boxPlatformVersion = '8'

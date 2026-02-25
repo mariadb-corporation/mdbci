@@ -21,9 +21,9 @@ CONFIG_FILENAME = ARGV.shift
 TEST_RUN_ID = if ARGV.length > 0
                 ARGV.shift
               elsif !ENV['LAST_WRITE_BUILD_RESULTS_ID'].nil?
-                ENV['LAST_WRITE_BUILD_RESULTS_ID']
+                ENV.fetch('LAST_WRITE_BUILD_RESULTS_ID', nil)
               else
-                puts "ERROR: arg TEST_RUN_ID and env var LAST_WRITE_BUILD_RESULTS_ID do not exist"
+                puts 'ERROR: arg TEST_RUN_ID and env var LAST_WRITE_BUILD_RESULTS_ID do not exist'
                 exit 0
               end
 

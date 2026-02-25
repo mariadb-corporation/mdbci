@@ -19,7 +19,6 @@ require_relative '../models/result'
 
 # This class allows to execute commands of Terraform-cli
 module TerraformService
-
   def self.resource_type(provider)
     case provider
     when 'aws' then Result.ok('aws_instance')
@@ -36,7 +35,8 @@ module TerraformService
 
   def self.apply(resources, logger, path = Dir.pwd)
     targets = make_targets(resources)
-    result = ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve #{targets}", path)
+    result = ShellCommands.run_command_in_dir(logger, "terraform apply -auto-approve #{targets}",
+                                              path)
     return Result.error(result[:output]) unless result[:value].success?
 
     Result.ok('')
@@ -44,7 +44,8 @@ module TerraformService
 
   def self.destroy(resources, logger, path = Dir.pwd)
     targets = make_targets(resources)
-    result = ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{targets}", path)
+    result = ShellCommands.run_command_in_dir(logger, "terraform destroy -auto-approve #{targets}",
+                                              path)
     return Result.error(result[:output]) unless result[:value].success?
 
     Result.ok('')
@@ -95,7 +96,8 @@ module TerraformService
   def self.resource_network(resource, logger, path = Dir.pwd)
     ShellCommands.run_command_in_dir(logger, 'terraform refresh', path)
     logger.info("Output network info: #{resource}_network")
-    result = ShellCommands.run_command_in_dir(logger, "terraform output -json #{resource}_network", path)
+    result = ShellCommands.run_command_in_dir(logger, "terraform output -json #{resource}_network",
+                                              path)
     return Result.error('Error of terraform output network command') unless result[:value].success?
 
     Result.ok(JSON.parse(result[:output]))
@@ -106,14 +108,13 @@ module TerraformService
   end
 
   def self.make_targets(resources)
-    if resources.is_a?(Hash)
-      resources = resources.values.flatten(1)
-    end
+    resources = resources.values.flatten(1) if resources.is_a?(Hash)
     resources.map { |resource| "-target=#{resource}" }.join(' ')
   end
 
   def self.state_rm(resource_type, resource, logger, path = Dir.pwd)
-    result = ShellCommands.run_command_in_dir(logger, "terraform state rm '#{resource_type}.#{resource}'", path)
+    result = ShellCommands.run_command_in_dir(logger,
+                                              "terraform state rm '#{resource_type}.#{resource}'", path)
     return Result.error(result[:output]) unless result[:value].success?
 
     Result.ok('')
@@ -143,7 +144,7 @@ module TerraformService
       { type: type, name: name }
     end
       .select { |resource| resource[:type] == resource_type }
-      .map { |resource| resource[:name] }
+                  .map { |resource| resource[:name] }
   end
 
   # Format string (only letters, numbers and hyphen).
@@ -152,9 +153,7 @@ module TerraformService
   # @return [String] formatted string.
   def self.format_string(string, max_length: -1)
     converted_string = string.gsub(/[^A-Za-z0-9]/, '-').gsub(/-+/, '-').gsub(/-$/, '').downcase
-    if max_length > 0
-      converted_string = converted_string.chars.first(max_length).join
-    end
+    converted_string = converted_string.chars.first(max_length).join if max_length > 0
     converted_string
   end
 end

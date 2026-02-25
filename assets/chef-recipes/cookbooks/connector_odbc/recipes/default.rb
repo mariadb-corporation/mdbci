@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 include_recipe 'connector_odbc::install_dependencies'
 
 directory '/odbc_package' do
@@ -16,7 +17,7 @@ end
 # Move libmaodbc library to make sure it always will be in the same directory
 execute 'move_libmaodbc' do
   command 'mv /odbc_package/lib64/mariadb/libmaodbc.so /odbc_package/lib/mariadb'
-  only_if { ::Dir.exist?('/odbc_package/lib64') }
+  only_if { Dir.exist?('/odbc_package/lib64') }
 end
 
 bash 'install_odbc' do

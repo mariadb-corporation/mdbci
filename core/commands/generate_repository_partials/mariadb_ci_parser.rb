@@ -12,11 +12,11 @@ module MariadbCiParser
     auth_mdbe_ci_repo = mdbe_ci_config['mdbe_ci_repo']
     releases = []
     releases.concat(
-      parse_mariadb_ci_rpm_repository(config['repo'], product_version, config['scan_mode'], 
+      parse_mariadb_ci_rpm_repository(config['repo'], product_version, config['scan_mode'],
                                       auth_mdbe_ci_repo, log, logger)
     )
     releases.concat(
-      parse_mariadb_ci_deb_repository(config['repo'], product_version, config['scan_mode'], 
+      parse_mariadb_ci_deb_repository(config['repo'], product_version, config['scan_mode'],
                                       auth_mdbe_ci_repo, log, logger)
     )
     releases

@@ -37,7 +37,9 @@ class DockerConfigurationGenerator
   def delete_configuration_directory
     @ui.info('Removing the configuration directory that contains errors')
     FileUtils.rm_rf(@configuration_path)
-    @ui.error("Unable to remove the destination directory '#{@configuration_path}'") if Dir.exist?(@configuration_path)
+    return unless Dir.exist?(@configuration_path)
+
+    @ui.error("Unable to remove the destination directory '#{@configuration_path}'")
   end
 
   def make_generation_steps
@@ -57,9 +59,9 @@ class DockerConfigurationGenerator
     @ui.info("Creating configuration directory '#{@configuration_path}'")
     FileUtils.mkdir_p(@configuration_path)
     SUCCESS_RESULT
-  rescue SystemCallError => error
+  rescue SystemCallError => e
     @ui.error("Unable to create configuration directory '#{@configuration_path}'.")
-    @ui.error("Error message: #{error.message}")
+    @ui.error("Error message: #{e.message}")
     ERROR_RESULT
   end
 
@@ -70,9 +72,9 @@ class DockerConfigurationGenerator
       return result unless result == SUCCESS_RESULT
     end
     SUCCESS_RESULT
-  rescue SystemCallError => error
+  rescue SystemCallError => e
     @ui.error('Error while copying configuration files')
-    @ui.error("Error message: #{error}")
+    @ui.error("Error message: #{e}")
     ERROR_RESULT
   end
 
@@ -136,7 +138,8 @@ class DockerConfigurationGenerator
       FileUtils.cp(File.join(File.expand_path(product['cnf_template_path'], File.dirname(@template_file)),
                              product['cnf_template']), result_file)
     elsif product.key?('cnf_template')
-      FileUtils.cp(File.expand_path(product['cnf_template'], File.dirname(@template_file)), result_file)
+      FileUtils.cp(File.expand_path(product['cnf_template'], File.dirname(@template_file)),
+                   result_file)
     else
       return SUCCESS_RESULT unless MUST_PROVIDE_CONFIGURATION.include?(product['name'])
 
@@ -204,9 +207,9 @@ class DockerConfigurationGenerator
     configuration_file = File.join(@configuration_path, 'docker-configuration.yaml')
     File.write(configuration_file, configuration_contents)
     SUCCESS_RESULT
-  rescue IOError => error
+  rescue IOError => e
     @ui.error("Unable to write configuration file '#{configuration_file}'.")
-    @ui.error("Error message: #{error.message}")
+    @ui.error("Error message: #{e.message}")
     ERROR_RESULT
   end
 
@@ -215,9 +218,9 @@ class DockerConfigurationGenerator
     File.write(Configuration.provider_path(@configuration_path), 'docker')
     File.write(Configuration.template_path(@configuration_path), @template_file)
     SUCCESS_RESULT
-  rescue IOError => error
+  rescue IOError => e
     @ui.error('Unable to create the required configuration files.')
-    @ui.error("Error message: #{error.message}")
+    @ui.error("Error message: #{e.message}")
     ERROR_RESULT
   end
 end

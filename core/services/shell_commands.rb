@@ -18,7 +18,7 @@
 # rubocop:disable Metrics/ModuleLength
 module ShellCommands
   PREFIX = 'OS_ENV_'
-  RUBY_PREFIXES = %w(GEM_ BUNDLE_ BUNDLER_ RUBY )
+  RUBY_PREFIXES = %w[GEM_ BUNDLE_ BUNDLER_ RUBY]
 
   # Extract host variables from APPIMAGE prefixed ones
   def self.host_environment
@@ -35,16 +35,16 @@ module ShellCommands
 
   # Remove GEM environment variables
   def self.gem_free_environment
-    ENV.to_h.delete_if do |key, value|
+    ENV.to_h.delete_if do |key, _value|
       RUBY_PREFIXES.any? { |prefix| key.start_with?(prefix) }
     end
   end
 
-  @env = if ENV['APPIMAGE'] != 'true'
-    self.gem_free_environment
-  else
-    self.host_environment
-  end
+  @env = if ENV['APPIMAGE'] == 'true'
+           host_environment
+         else
+           gem_free_environment
+         end
 
   # Get the environment for external service to run in
   def self.environment
@@ -104,7 +104,8 @@ module ShellCommands
   # rubocop:disable Metrics/ParameterLists
   def run_command_and_log(command, show_command = true, show_notifications = false, options = {}, logger = @ui,
                           env = ShellCommands.environment)
-    ShellCommands.run_command_and_log(logger, command, show_command, show_notifications, options, env)
+    ShellCommands.run_command_and_log(logger, command, show_command, show_notifications, options,
+                                      env)
   end
   # rubocop:enable Metrics/ParameterLists
 
@@ -186,9 +187,8 @@ module ShellCommands
       else
         acc[:value] = result[:value]
       end
-      if until_first_error
-        break acc unless result[:value].success?
-      end
+      break acc if until_first_error && !result[:value].success?
+
       acc
     end
   end
@@ -233,7 +233,8 @@ module ShellCommands
   # @param message [String] message to display in case of emergency
   # @param log [Boolean] whether to log command output or not
   # @param options [Hash] different options to pass to underlying implementation
-  def run_reliable_command(command, message = "Command #{command} failed.", log = true, options = {})
+  def run_reliable_command(command, message = "Command #{command} failed.", log = true,
+                           options = {})
     result = if log
                run_command_and_log(command, false, false, options)
              else
@@ -252,15 +253,13 @@ module ShellCommands
   # @param stream [IO] input stream to read data from.
   # @return [IO] stream or nil if stream has ended. Returning nil is crucial
   # as we do not have any other information on when stream has ended.
-  def self.read_stream(stream)
+  def self.read_stream(stream, &block)
     buf = ''
     loop do
       buf += stream.read_nonblock(10_000)
     end
   rescue IO::WaitReadable
-    buf.each_line do |line|
-      yield line
-    end
+    buf.each_line(&block)
     stream
   rescue EOFError
     nil

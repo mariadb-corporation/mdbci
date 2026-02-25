@@ -5,6 +5,4 @@ if platform?('debian', 'ubuntu')
   package 'odbcinst'
   package 'unixodbc'
 end
-if platform?('redhat', 'centos', 'suse', 'rocky')
-  package 'unixODBC'
-end
+package 'unixODBC' if platform?('redhat', 'centos', 'suse', 'rocky')

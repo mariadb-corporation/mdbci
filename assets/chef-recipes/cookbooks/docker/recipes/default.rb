@@ -1,4 +1,4 @@
-WARN_ABOUT_CURRENT_VERSION = 'This version of the docker to the platform is not considered, '\
+WARN_ABOUT_CURRENT_VERSION = 'This version of the docker to the platform is not considered, ' \
                              'Always install the newest version!'
 
 docker_version = node['docker']['version']
@@ -50,7 +50,7 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
   service 'docker' do
     action :start
   end
-elsif ['suse', 'linux', 'sles'].include?(node[:platform_family])
+elsif %w[suse linux sles].include?(node[:platform_family])
   Chef::Log.warn(WARN_ABOUT_CURRENT_VERSION)
   package 'libseccomp2' do
     action :upgrade
@@ -67,7 +67,7 @@ elsif ['suse', 'linux', 'sles'].include?(node[:platform_family])
   end
 end
 
-user = ENV['SUDO_USER']
+user = ENV.fetch('SUDO_USER', nil)
 home_dir = Dir.home(user)
 gnupg_dir = File.join(home_dir, '.gnupg')
 execute 'Chown ~.gnupg/ directory to sudo user' do

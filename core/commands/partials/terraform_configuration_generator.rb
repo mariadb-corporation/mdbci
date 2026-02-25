@@ -83,7 +83,6 @@ class TerraformConfigurationGenerator < BaseCommand
     node[1]['cnf_template_path'] || node[1]['product']&.fetch('cnf_template_path', nil)
   end
 
-
   # Generate a Terraform configuration file.
   #
   # @return [Result::Base] generation result.
@@ -92,7 +91,8 @@ class TerraformConfigurationGenerator < BaseCommand
     nodes_info = @configuration_template.map do |node|
       @ssh_users[node[0]] = node[1]['user']
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
-      node_info = @configuration_generator.generate_node_info(node, node_params, @registry, @env.force_version)
+      node_info = @configuration_generator.generate_node_info(node, node_params, @registry,
+                                                              @env.force_version)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -105,7 +105,8 @@ class TerraformConfigurationGenerator < BaseCommand
       nodes_info.each do |node_info|
         next if node_info[:node_params][:skip_configuration]
 
-        @configuration_generator.create_role_files(@configuration_path, node_info[:node_params][:name], node_info[:role_file_content])
+        @configuration_generator.create_role_files(@configuration_path,
+                                                   node_info[:node_params][:name], node_info[:role_file_content])
       end
       Result.ok('')
     end
@@ -125,14 +126,14 @@ class TerraformConfigurationGenerator < BaseCommand
     end
     symbolic_box_params.merge(
       {
-          name: node[0].to_s,
-          host: node[1]['hostname'].to_s,
-          machine_type: node[1]['machine_type']&.to_s,
-          memory_size: node[1]['memory_size']&.to_i,
-          cpu_count: node[1]['cpu_count']&.to_i,
-          preemptible: node[1]['preemptible'].nil? ? false : node[1]['preemptible'] == 'true',
-          attached_disk: need_attached_disk?(node),
-          additional_disk_size: retrieve_additional_disk_size(node)
+        name: node[0].to_s,
+        host: node[1]['hostname'].to_s,
+        machine_type: node[1]['machine_type']&.to_s,
+        memory_size: node[1]['memory_size']&.to_i,
+        cpu_count: node[1]['cpu_count']&.to_i,
+        preemptible: node[1]['preemptible'].nil? ? false : node[1]['preemptible'] == 'true',
+        attached_disk: need_attached_disk?(node),
+        additional_disk_size: retrieve_additional_disk_size(node)
       }
     )
   end
@@ -226,9 +227,9 @@ class TerraformConfigurationGenerator < BaseCommand
     raise 'Configuration \'template\' file already exists' if File.exist?(template_file)
     raise 'Configuration \'id\' file already exists' if File.exist?(configuration_id_file)
 
-    File.open(provider_file, 'w') { |f| f.write(@provider) }
-    File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
-    File.open(configuration_id_file, 'w') { |f| f.write(@configuration_id) }
+    File.write(provider_file, @provider)
+    File.write(template_file, File.expand_path(@env.template_file))
+    File.write(configuration_id_file, @configuration_id)
     SshUser.save_to_file(@ssh_users, @configuration_path)
     @registry.save_registry(registry_path)
   end
@@ -271,7 +272,10 @@ class TerraformConfigurationGenerator < BaseCommand
     generate_configuration_id
     ConfigurationTemplate.from_path(File.expand_path(@env.template_file)).and_then do |template|
       @configuration_template = template
-      return Result.error('Unable to identify the provider') unless check_nodes_boxes_and_setup_provider
+      unless check_nodes_boxes_and_setup_provider
+        return Result.error('Unable to identify the provider')
+      end
+
       Result.ok('Configuration complete')
     end
   end

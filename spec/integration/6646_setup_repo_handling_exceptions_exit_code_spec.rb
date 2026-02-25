@@ -1,24 +1,32 @@
 require 'rspec'
 require_relative '../spec_helper'
 
-CONF_DOCKER = ENV['mdbci_param_conf_docker']
-CONF_PPC = ENV['mdbci_param_conf_docker']
+CONF_DOCKER = ENV.fetch('mdbci_param_conf_docker', nil)
+CONF_PPC = ENV.fetch('mdbci_param_conf_docker', nil)
 
 ORIGIN_SNAP_NAME = 'origin_snap'
 
-def test_command (product, product_version, config_path)
+def test_command(product, product_version, config_path)
   product_name_parameter = ''
   product_version_parameter = ''
-  product_name_parameter = "--product #{product}" if product != nil
-  product_version_parameter = "--product-version #{product_version}" if product_version != nil
-  return "./mdbci setup_repo #{product_name_parameter} #{product_version_parameter} #{config_path}"
+  product_name_parameter = "--product #{product}" if !product.nil?
+  product_version_parameter = "--product-version #{product_version}" if !product_version.nil?
+  "./mdbci setup_repo #{product_name_parameter} #{product_version_parameter} #{config_path}"
 end
 
 describe nil do
-  execute_shell_commands_and_test_exit_code ([
-      {shell_command: test_command('mariadb', nil, "#{ENV['mdbci_param_conf_docker']}/node1"), exit_code: 1},
-      {shell_command: test_command(nil, '10.0', ENV['mdbci_param_conf_docker']), exit_code: 1},
-      {shell_command: test_command('mariadb', '10.0', nil), exit_code: 1},
-      {shell_command: test_command('mariadb', '10.0', 'TEST_MACHINE'), exit_code: 1}
-  ])
+  execute_shell_commands_and_test_exit_code([
+                                              { shell_command: test_command('mariadb', nil, "#{ENV.fetch('mdbci_param_conf_docker', nil)}/node1"),
+                                                exit_code: 1 },
+                                              { shell_command: test_command(nil, '10.0', ENV.fetch('mdbci_param_conf_docker', nil)),
+                                                exit_code: 1 },
+                                              {
+                                                shell_command: test_command('mariadb', '10.0',
+                                                                            nil), exit_code: 1
+                                              },
+                                              {
+                                                shell_command: test_command('mariadb', '10.0',
+                                                                            'TEST_MACHINE'), exit_code: 1
+                                              }
+                                            ])
 end

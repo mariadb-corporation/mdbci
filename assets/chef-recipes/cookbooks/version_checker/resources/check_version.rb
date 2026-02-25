@@ -8,43 +8,41 @@ property :version, String
 default_action :run
 
 action :run do
-  if !property_is_set?(:version)
-    raise 'You must specify the version of product to check'
-  end
+  raise 'You must specify the version of product to check' if !property_is_set?(:version)
 
   if platform_family?('debian')
-    if !property_is_set?(:deb_package_name)
-      Chef::Log.warn("No Debian version is set for a version checker.")
-    else
+    if property_is_set?(:deb_package_name)
       ruby_block 'Get Debian family version' do
         block do
           get_version(%W[dpkg-query --status #{new_resource.deb_package_name}])
         end
       end
+    else
+      Chef::Log.warn('No Debian version is set for a version checker.')
     end
   end
 
   if platform_family?('rhel')
-    if !property_is_set?(:rhel_package_name)
-      Chef::Log.warn("No RHEL version is set for a version checker.")
-    else
+    if property_is_set?(:rhel_package_name)
       ruby_block 'Get RHEL family package version' do
         block do
           get_version(%W[rpm -qi #{new_resource.rhel_package_name}])
         end
       end
+    else
+      Chef::Log.warn('No RHEL version is set for a version checker.')
     end
   end
 
   if platform_family?('suse')
-    if !property_is_set?(:suse_package_name)
-      Chef::Log.warn("No SUSE version is set for a version checker.")
-    else
+    if property_is_set?(:suse_package_name)
       ruby_block 'Get SUSE family package version' do
         block do
           get_version(%W[rpm -qi #{new_resource.suse_package_name}])
         end
       end
+    else
+      Chef::Log.warn('No SUSE version is set for a version checker.')
     end
   end
 
@@ -58,9 +56,8 @@ action :run do
       installed_version = node.run_state[:installed_version]
       Chef::Log.info("Target version to check: #{target_version}")
       Chef::Log.info("Installed version: #{installed_version}")
-      if !same_version?(target_version, installed_version)
-        raise 'The versions does not match'
-      end
+      raise 'The versions does not match' if !same_version?(target_version, installed_version)
+
       Chef::Log.info("Target version (#{target_version}) matches installed version (#{installed_version})")
     end
   end
@@ -89,14 +86,12 @@ VERSION_PART = /^(\d+).*$/.freeze
 
 def version_parts(version)
   parts = version
-    .strip
-    .split('.')
+          .strip
+          .split('.')
   non_version_part_index = parts.index do |part|
     !(VERSION_PART =~ part)
   end
-  if non_version_part_index
-    parts = parts.first(non_version_part_index)
-  end
+  parts = parts.first(non_version_part_index) if non_version_part_index
   parts.map do |part|
     VERSION_PART.match(part)[1]
   end

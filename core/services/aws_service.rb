@@ -15,19 +15,17 @@ require_relative '../constants'
 # This class allows to execute commands in accordance to the AWS EC2
 class AwsService
   def self.check_credentials(logger, credentials)
-    begin
-      service = AwsService.new(credentials, logger)
-      return false unless service.configured?
+    service = AwsService.new(credentials, logger)
+    return false unless service.configured?
 
-      service.describe_account_attributes
-    rescue Aws::EC2::Errors::DryRunOperation
-      true
-    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
-      logger.error(error.message)
-      false
-    else
-      true
-    end
+    service.describe_account_attributes
+  rescue Aws::EC2::Errors::DryRunOperation
+    true
+  rescue Aws::EC2::Errors::AuthFailure, StandardError => e
+    logger.error(e.message)
+    false
+  else
+    true
   end
 
   def initialize(aws_config, logger)
@@ -40,23 +38,23 @@ class AwsService
             aws_config['role_arn'], aws_config['authorization_type'], aws_config['vpc_id'],
             aws_config['subnet_id']].all?
       @configured = false
-      logger.warning("Missing AWS configuration: credentials or required parameters are absent in MDBCI config")
+      logger.warning('Missing AWS configuration: credentials or required parameters are absent in MDBCI config')
       return
     end
     @aws_config = aws_config
     begin
-      case @aws_config['authorization_type']
-      when AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
-        @client = create_authorized_client_web_identity
-      else
-        @client = Aws::EC2::Client.new(
-          access_key_id: @aws_config['access_key_id'],
-          secret_access_key: @aws_config['secret_access_key'],
-          region: @aws_config['region']
-        )
-      end
-    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
-      @logger.error("AWS authorization error: #{error.message}")
+      @client = case @aws_config['authorization_type']
+                when AWS_AUTHORIZATION_TYPE_WEB_IDENTITY
+                  create_authorized_client_web_identity
+                else
+                  Aws::EC2::Client.new(
+                    access_key_id: @aws_config['access_key_id'],
+                    secret_access_key: @aws_config['secret_access_key'],
+                    region: @aws_config['region']
+                  )
+                end
+    rescue Aws::EC2::Errors::AuthFailure, StandardError => e
+      @logger.error("AWS authorization error: #{e.message}")
       return
     end
     @configured = true
@@ -148,7 +146,7 @@ class AwsService
     node_name = fetch_instance_name(instance[:tags])
     path = fetch_instance_tag_value(instance[:tags], 'full_config_path')
     username = fetch_instance_tag_value(instance[:tags], 'username')
-    instance_info = {
+    {
       id: instance[:instance_id],
       type: instance[:instance_type],
       node_name: node_name,
@@ -157,7 +155,6 @@ class AwsService
       zone: instance[:placement][:availability_zone],
       username: username
     }
-    instance_info
   end
 
   # Extract node name from instance tags. 'full_name' tag is used if specified, 'machinename' tag otherwise.
@@ -179,7 +176,9 @@ class AwsService
     return [] unless configured?
 
     @client.describe_vpcs(filters: tags_to_filters(tags)).to_h[:vpcs].map do |vpc|
-      configuration_id = vpc[:tags].find { |tag| tag[:key] == 'configuration_id' }&.fetch(:value, nil)
+      configuration_id = vpc[:tags].find do |tag|
+                           tag[:key] == 'configuration_id'
+                         end&.fetch(:value, nil)
       { vpc_id: vpc[:vpc_id], configuration_id: configuration_id }
     end
   end
@@ -220,7 +219,7 @@ class AwsService
         name: volume[:volume_id],
         zone: volume[:availability_zone],
         attachments: volume[:attachments],
-        creation_date: DateTime.parse(volume[:create_time].to_s),
+        creation_date: DateTime.parse(volume[:create_time].to_s)
       }
     end
   end
@@ -464,7 +463,11 @@ class AwsService
       types += response.instance_types.to_a
       next_token = response.next_token
     end until next_token.nil?
-    types = types.select { |type| supported_types.include?(type.instance_type) } unless supported_types.nil?
+    unless supported_types.nil?
+      types = types.select do |type|
+        supported_types.include?(type.instance_type)
+      end
+    end
     types.map do |instance_type|
       { ram: instance_type.memory_info.size_in_mi_b,
         cpu: instance_type.v_cpu_info.default_v_cpus,
@@ -480,11 +483,11 @@ class AwsService
     end
 
     begin
-      token_file = File.new(token_file_path, "w")
+      token_file = File.new(token_file_path, 'w')
       write_identity_token_file(token_file)
       Result.ok('AWS token was successfully updated')
-    rescue Aws::EC2::Errors::AuthFailure, StandardError => error
-      Result.error("AWS authentication for Terraform failure: #{error.message}")
+    rescue Aws::EC2::Errors::AuthFailure, StandardError => e
+      Result.error("AWS authentication for Terraform failure: #{e.message}")
     end
   end
 

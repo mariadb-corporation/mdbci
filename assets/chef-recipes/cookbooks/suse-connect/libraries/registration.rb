@@ -10,16 +10,18 @@ class Chef
       # Read SUSE credentials from the node
       # @return [Hash] machine credentials in format {'username' : String, 'password' : String } or empty hash if no credentials found
       def self.load_credentials
-        return {} unless  File.exist?(SUBSCRIPTION_CREDENTIALS_FILE)
+        return {} unless File.exist?(SUBSCRIPTION_CREDENTIALS_FILE)
 
         cred_file = File.open(SUBSCRIPTION_CREDENTIALS_FILE)
         credentials = {}
         cred_file.readlines.map do |line|
-          key, value = *line.chomp.split("=")
+          key, value = *line.chomp.split('=')
           credentials[key] = value
         end
         credentials['url'] = read_registration_server_url
-        return {} if !%w[username password].all? { |key| credentials.key?(key)} || credentials['url'].nil?
+        return {} if !%w[username password].all? do |key|
+                       credentials.key?(key)
+                     end || credentials['url'].nil?
 
         credentials
       end
@@ -38,9 +40,10 @@ class Chef
         if use_proxy?(suse_connect_parameters)
           # Copying configuration script from the registration proxy requires HTTP protocol
           http_proxy_url = suse_connect_parameters['registration_proxy_url'].sub('https://', 'http://')
-          return "curl #{URI.join(http_proxy_url, '/tools/rmt-client-setup')} --output rmt-client-setup;"\
-                 " yes | sh rmt-client-setup #{suse_connect_parameters['registration_proxy_url']};"\
-                 " SUSEConnect -r #{suse_connect_parameters['key']} -e #{suse_connect_parameters['email']} --url #{suse_connect_parameters['registration_proxy_url']}"
+          return "curl #{URI.join(http_proxy_url,
+                                  '/tools/rmt-client-setup')} --output rmt-client-setup; " \
+                 "yes | sh rmt-client-setup #{suse_connect_parameters['registration_proxy_url']}; " \
+                 "SUSEConnect -r #{suse_connect_parameters['key']} -e #{suse_connect_parameters['email']} --url #{suse_connect_parameters['registration_proxy_url']}"
         end
 
         "SUSEConnect -r #{suse_connect_parameters['key']} -e #{suse_connect_parameters['email']} --url https://scc.suse.com"
@@ -50,7 +53,9 @@ class Chef
       # @param credentials [Hash] machine credentials in format {'username' : String, 'password' : String }
       # @param registration_proxy_url [String] URL for SUSE Registration Proxy server
       def self.deregister_node_command(credentials)
-        "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(credentials['url'], REGISTRATION_ENDPOINT)}"
+        "curl -k -X DELETE -u #{credentials['username']}:#{credentials['password']} #{URI.join(
+          credentials['url'], REGISTRATION_ENDPOINT
+        )}"
       end
 
       def self.use_proxy?(suse_connect_parameters)

@@ -12,7 +12,7 @@ when 'debian', 'ubuntu'
     recursive true
     action :create
   end
-  remote_file "/etc/apt/keyrings/connector.public" do
+  remote_file '/etc/apt/keyrings/connector.public' do
     source repo_key
     sensitive true
     action :create
@@ -21,7 +21,7 @@ when 'debian', 'ubuntu'
     uri repo_uri
     distribution repo_distribution
     components ['main']
-    options ["signed-by=/etc/apt/keyrings/connector.public"]
+    options ['signed-by=/etc/apt/keyrings/connector.public']
     sensitive true
   end
   apt_update
@@ -51,4 +51,3 @@ when 'sles', 'suse', 'opensuse'
     action :refresh
   end
 end
-

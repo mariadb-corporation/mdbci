@@ -131,10 +131,14 @@ class ShowCommand < BaseCommand
   #
   # @param path [String] path to configuration
   def show_box_name_in_configuration(path = nil)
-    return Result.error('Please specify the path to the nodes configuration as a parameter') if path.nil?
+    if path.nil?
+      return Result.error('Please specify the path to the nodes configuration as a parameter')
+    end
 
     Configuration.from_spec(path).and_then do |configuration|
-      return Result.error('Please specify the node to get configuration from') if configuration.node_names.size != 1
+      if configuration.node_names.size != 1
+        return Result.error('Please specify the node to get configuration from')
+      end
 
       @ui.out(configuration.box_names(configuration.node_names.first))
       Result.ok('')
@@ -161,7 +165,9 @@ class ShowCommand < BaseCommand
 
   # Check for undefined box platform
   def check_box_platform
-    some_box = @env.box_definitions.find { |_, definition| definition['platform'] == @env.boxPlatform }
+    some_box = @env.box_definitions.find do |_, definition|
+      definition['platform'] == @env.boxPlatform
+    end
     if some_box.nil?
       @ui.error("Platform #{@env.boxPlatform} is not supported!")
       return ARGUMENT_ERROR_RESULT
@@ -260,7 +266,7 @@ class ShowCommand < BaseCommand
 
     repository_manager = @env.repos
     repository_key = repository_manager.makeKey(@env.nodeProduct, @env.productVersion, @env.boxPlatform,
-      @env.boxPlatformVersion, @env.architecture)
+                                                @env.boxPlatformVersion, @env.architecture)
     @ui.out(JSON.pretty_generate(repository_manager.getRepo(repository_key)))
     Result.ok('')
   rescue RuntimeError => e

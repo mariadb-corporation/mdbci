@@ -7,10 +7,10 @@ require_relative '../../core/boxes_manager'
 require_relative '../../core/session'
 
 BOX_CONFIG = {
-    "provider"=>"libvirt",
-    "box"=>"baremettle/debian-7.5",
-    "platform"=>"debian",
-    "platform_version"=>"wheezy"
+  'provider' => 'libvirt',
+  'box' => 'baremettle/debian-7.5',
+  'platform' => 'debian',
+  'platform_version' => 'wheezy'
 }
 
 CONFIG = File.read('spec/configs/generated_config/6818_search_box_name_by_config/template')
@@ -20,7 +20,6 @@ NODE = 'node_000'
 JSON_BOX = BOX_CONFIG.to_json + "\n"
 
 describe 'BoxesManager' do
-
   before :all do
     $mdbci_exec_dir = File.absolute_path('.')
     $session = Session.new
@@ -36,12 +35,13 @@ describe 'BoxesManager' do
   end
 
   it '#getBoxByConfig return nil for wrong configPath' do
-    lambda {$session.boxes.getBoxByConfig('WRONG', NODE)}
-        .should(raise_error("Wrong config path or json implementation for WRONG"))
+    -> { $session.boxes.getBoxByConfig('WRONG', NODE) }
+      .should(raise_error('Wrong config path or json implementation for WRONG'))
   end
 
   it '#getBoxByConfig return nil for wrong nodeName' do
-    lambda {$session.boxes.getBoxByConfig(CONFIG, 'WRONG')}.should raise_error /Node WRONG is not found in .*/
+    lambda {
+      $session.boxes.getBoxByConfig(CONFIG, 'WRONG')
+    }.should raise_error(/Node WRONG is not found in .*/)
   end
-
 end

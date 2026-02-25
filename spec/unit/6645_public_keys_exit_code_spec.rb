@@ -5,7 +5,6 @@ require_relative '../../core/boxes_manager'
 require_relative '../../core/session'
 
 describe 'Session' do
-
   before :all do
     $mdbci_exec_dir = File.absolute_path('.')
     $session = Session.new
@@ -26,27 +25,29 @@ describe 'Session' do
   # that can be accessed through ssh
 
   it '#publicKeys should exit with zero code for concrete mdbci/ppc64 node' do
-    $session.publicKeys("#{ENV['mdbci_param_conf_ppc']}/node1").should(eql(0))
+    $session.publicKeys("#{ENV.fetch('mdbci_param_conf_ppc', nil)}/node1").should(eql(0))
   end
 
   it '#publicKeys should exit with zero code for all mdbci/ppc64 nodes' do
-    $session.publicKeys(ENV['mdbci_param_conf_ppc']).should(eql(0))
+    $session.publicKeys(ENV.fetch('mdbci_param_conf_ppc', nil)).should(eql(0))
   end
 
   it '#publicKeys should exit with zero code for all mdbci/ppc64 nodes (when mdbci node is wrong)' do
-    lambda{$session.publicKeys("#{ENV['mdbci_param_conf_ppc']}/NOT_EXISTS")}.should raise_error(/No such node with name .* in .*/)
+    lambda {
+      $session.publicKeys("#{ENV.fetch('mdbci_param_conf_ppc',
+                                       nil)}/NOT_EXISTS")
+    }.should raise_error(/No such node with name .* in .*/)
   end
 
   it '#publicKeys should exit with zero code for all libvirt nodes' do
-    $session.publicKeys(ENV['mdbci_param_conf_libvirt']).should(eql(0))
+    $session.publicKeys(ENV.fetch('mdbci_param_conf_libvirt', nil)).should(eql(0))
   end
 
   it '#publicKeys should exit with non-zero code (when argument is nil)' do
-    lambda{$session.publicKeys(nil)}.should raise_error('Configuration name is required')
+    -> { $session.publicKeys(nil) }.should raise_error('Configuration name is required')
   end
 
   it '#publicKeys should exit with non-zero code (when no such machine exists)' do
-    lambda{$session.publicKeys('NOT_EXISTS')}.should raise_error
+    -> { $session.publicKeys('NOT_EXISTS') }.should raise_error
   end
-
 end

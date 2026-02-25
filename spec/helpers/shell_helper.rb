@@ -68,6 +68,7 @@ module ShellHelper
   def mdbci_check_command(command, options = {})
     result = mdbci_run_command(command, options)
     raise "Unable to execute command: #{result}" unless result.success?
+
     result
   end
 

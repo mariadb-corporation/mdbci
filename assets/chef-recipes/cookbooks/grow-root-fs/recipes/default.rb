@@ -1,6 +1,6 @@
 require 'mixlib/shellout'
 
-DEVICE_REGEX = /\/dev\/[a-zA-Z0-9]+(\d+)/
+DEVICE_REGEX = %r{/dev/[a-zA-Z0-9]+(\d+)}
 
 ruby_block 'Get filesystem information' do
   block do
@@ -28,10 +28,10 @@ ruby_block 'Get filesystem information' do
     else
       node.run_state[:need_grow_root_fs] = true
       node.run_state[:fs_data] = {
-          device_name: device_name,
-          device_base_name: device_base_name,
-          device_number: device_name.match(DEVICE_REGEX).captures.first,
-          fs_type: fs_type
+        device_name: device_name,
+        device_base_name: device_base_name,
+        device_number: device_name.match(DEVICE_REGEX).captures.first,
+        fs_type: fs_type
       }
     end
   end
@@ -45,10 +45,10 @@ if node['platform'] == 'debian' && node['platform_version'].to_i == 11
   end
   execute 'PARTED_RESIZEPART' do
     only_if { node.run_state[:need_grow_root_fs] }
-    command lazy {
-      "parted ---pretend-input-tty #{node.run_state[:fs_data][:device_base_name]} unit % "\
+    command(lazy do
+      "parted ---pretend-input-tty #{node.run_state[:fs_data][:device_base_name]} unit % " \
         "resizepart #{node.run_state[:fs_data][:device_number]} Yes 100%"
-    }
+    end)
     returns [0, 1]
     live_stream true
     ignore_failure
@@ -66,9 +66,9 @@ else
   end
   execute 'GROWPART' do
     only_if { node.run_state[:need_grow_root_fs] }
-    command lazy {
+    command(lazy do
       "growpart #{node.run_state[:fs_data][:device_base_name]} #{node.run_state[:fs_data][:device_number]}"
-    }
+    end)
     returns [0, 1]
     live_stream true
     ignore_failure
@@ -94,9 +94,9 @@ end
 execute 'RESIZE2FS' do
   only_if { node.run_state[:need_grow_root_fs] }
   only_if { node.run_state[:fs_data][:fs_type].include?('ext') }
-  command lazy {
+  command(lazy do
     "resize2fs #{node.run_state[:fs_data][:device_name]}"
-  }
+  end)
   returns [0, 1]
   ignore_failure
 end

@@ -8,8 +8,10 @@ module MysqlParser
 
   def self.parse(config, product_version, log, logger)
     releases = []
-    releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], product_version, config['scan_mode'], log, logger))
-    releases.concat(parse_mysql_deb_repository(config['repo']['deb'], product_version, config['scan_mode'], log, logger))
+    releases.concat(parse_mysql_rpm_repository(config['repo']['rpm'], product_version,
+                                               config['scan_mode'], log, logger))
+    releases.concat(parse_mysql_deb_repository(config['repo']['deb'], product_version,
+                                               config['scan_mode'], log, logger))
     releases
   end
 

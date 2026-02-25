@@ -44,43 +44,45 @@ class BuildResultsWriter
   end
 
   def connect_mdb(default_file, db_name)
-    @client = Mysql2::Client.new(:default_file => "#{default_file}",  \
-      :database => "#{db_name}")
-    puts "Connection to db (:default_file => #{default_file}, "\
+    @client = Mysql2::Client.new(default_file: "#{default_file}", \
+                                 database: "#{db_name}")
+    puts "Connection to db (:default_file => #{default_file}, " \
          ":database => #{db_name} established successfuly"
   end
 
-  def write_test_run_table(jenkins_id, start_time, target, box, \
-    product, mariadb_version, test_code_commit_id, maxscale_commit_id, job_name, cmake_flags, maxscale_source,
-    logs_dir)
+  def write_test_run_table(jenkins_id, start_time, target, box,
+                           product, mariadb_version, test_code_commit_id, maxscale_commit_id, job_name, cmake_flags, maxscale_source,
+                           logs_dir)
 
-    test_runs_query = "INSERT INTO test_run (jenkins_id, "\
-    "start_time, target, box, product, mariadb_version, "\
-    "test_code_commit_id, maxscale_commit_id, job_name, "\
-    "cmake_flags, maxscale_source, logs_dir) "\
-    "VALUES ('#{jenkins_id}', '#{start_time}', '#{target}', '#{box}', '#{product}', "\
-    "'#{mariadb_version}', '#{test_code_commit_id}', '#{maxscale_commit_id}', '#{job_name}', "\
-    "'#{cmake_flags}', '#{maxscale_source}', '#{logs_dir}')"
+    test_runs_query = 'INSERT INTO test_run (jenkins_id, ' \
+                      'start_time, target, box, product, mariadb_version, ' \
+                      'test_code_commit_id, maxscale_commit_id, job_name, ' \
+                      'cmake_flags, maxscale_source, logs_dir) ' \
+                      "VALUES ('#{jenkins_id}', '#{start_time}', '#{target}', '#{box}', '#{product}', " \
+                      "'#{mariadb_version}', '#{test_code_commit_id}', '#{maxscale_commit_id}', '#{job_name}', " \
+                      "'#{cmake_flags}', '#{maxscale_source}', '#{logs_dir}')"
 
     @client.query(test_runs_query)
     id = @client.last_id
     puts "Performed insert (test_run, id = #{id}): #{test_runs_query}"
-    return id
+    id
   end
 
   def write_results_table(id, test, result, test_time, core_dump_path)
-    results_query = "INSERT INTO results (id, test, result, test_time, core_dump_path) VALUES ('#{id}', "\
-      "'#{test}', '#{result}', '#{test_time}', '#{core_dump_path}')"
+    results_query = "INSERT INTO results (id, test, result, test_time, core_dump_path) VALUES ('#{id}', " \
+                    "'#{test}', '#{result}', '#{test_time}', '#{core_dump_path}')"
     @client.query(results_query)
     puts "Performed insert (results): #{results_query}"
   end
 
   def find_core_dump_path(run_test_dir, test_name)
-    core_dump_path_regex = /.*\/run_test[^\/.+]+(\/.+)/
+    core_dump_path_regex = %r{.*/run_test[^/.+]+(/.+)}
     dir = "/home/vagrant/LOGS/#{run_test_dir}/LOGS/#{test_name}"
     return '' unless File.directory?(dir)
+
     result = `find #{dir} | grep core | sed -e 's|/[^/]*$|/*|g'`
     return '' if result.nil? || result.empty? || !(result =~ core_dump_path_regex)
+
     result.match(core_dump_path_regex).captures[0]
   end
 
@@ -91,13 +93,13 @@ class BuildResultsWriter
     box = results['box']
     product = results['product']
     mariadb_version = results['version']
-    test_code_commit_id = results['maxscale_system_test_commit'] #? what is that ?
+    test_code_commit_id = results['maxscale_system_test_commit'] # ? what is that ?
     maxscale_commit_id = results['maxscale_commit']
     job_name = results['job_name']
     cmake_flags = results['cmake_flags']
     maxscale_source = results['maxscale_source']
     logs_dir = results['logs_dir']
-    tests = Array.new
+    tests = []
     if results.has_key? 'tests'
       results['tests'].each do |test|
         tests.push({ TEST_NAME => test[TEST_NAME],
@@ -107,9 +109,9 @@ class BuildResultsWriter
     end
 
     # writing testrun results to db
-    id = write_test_run_table(jenkins_id, start_time, target, box, \
-    product, mariadb_version, test_code_commit_id, maxscale_commit_id, job_name, \
-    cmake_flags, maxscale_source, logs_dir)
+    id = write_test_run_table(jenkins_id, start_time, target, box,
+                              product, mariadb_version, test_code_commit_id, maxscale_commit_id, job_name,
+                              cmake_flags, maxscale_source, logs_dir)
 
     # writing tests results to db
     unless results.has_key? ERROR
@@ -117,9 +119,7 @@ class BuildResultsWriter
         puts "Preparing to write test=#{test} into results"
         name = test[TEST_NAME]
         result = 0
-        if test[TEST_SUCCESS] == FAILED
-          result = 1
-        end
+        result = 1 if test[TEST_SUCCESS] == FAILED
         test_time = test[TEST_TIME]
         core_dump_path = find_core_dump_path(logs_dir, name)
         write_results_table(id, name, result, test_time, core_dump_path)
@@ -130,12 +130,11 @@ class BuildResultsWriter
   end
 end
 
-
 def parse_options
   opts = GetoptLong.new(
-      [INPUT_FILE_OPTION, '-f', GetoptLong::REQUIRED_ARGUMENT],
-      [ENV_FILE_OPTION, '-e', GetoptLong::OPTIONAL_ARGUMENT],
-      [HELP_OPTION, '-h', GetoptLong::OPTIONAL_ARGUMENT]
+    [INPUT_FILE_OPTION, '-f', GetoptLong::REQUIRED_ARGUMENT],
+    [ENV_FILE_OPTION, '-e', GetoptLong::OPTIONAL_ARGUMENT],
+    [HELP_OPTION, '-h', GetoptLong::OPTIONAL_ARGUMENT]
   )
 
   input_file_path = nil
@@ -143,20 +142,20 @@ def parse_options
 
   opts.each do |opt, arg|
     case opt
-      when INPUT_FILE_OPTION
-        input_file_path = arg
-      when ENV_FILE_OPTION
-        env_file = arg
-      when HELP_OPTION
-        puts <<-EOT
+    when INPUT_FILE_OPTION
+      input_file_path = arg
+    when ENV_FILE_OPTION
+      env_file = arg
+    when HELP_OPTION
+      puts <<-EOT
 ./scripts/build_parser/write_build_results.rb -f parse_ctest_log.rb_results_json_path
-    [ -e ]                - ENVIRONMENT VARIABLES FILE, WHERE POSSIBLE DB_WRITING_ERROR CAN BE REPORTED 
+    [ -e ]                - ENVIRONMENT VARIABLES FILE, WHERE POSSIBLE DB_WRITING_ERROR CAN BE REPORTED#{' '}
     [ -h ]           - SHOW HELP
-        EOT
-        exit 0
+      EOT
+      exit 0
     end
   end
-  return input_file_path, env_file
+  [input_file_path, env_file]
 end
 
 def main
@@ -176,7 +175,6 @@ def main
       end
     end
   end
-
 end
 
 if File.identical?(__FILE__, $0)

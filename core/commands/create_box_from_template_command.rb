@@ -1,5 +1,5 @@
 require_relative 'base_command'
-require_relative 'partials/vagrant_box_manager.rb'
+require_relative 'partials/vagrant_box_manager'
 require_relative '../models/result'
 require_relative '../models/configuration'
 require_relative '../services/created_box_data_manager'
@@ -79,9 +79,7 @@ Generate a new box named "custom-box" based on the "template.json":
       return Result.error('Wrong box name')
     end
 
-    if read_template_type != :vagrant
-      return Result.error('Wrong configuration type')
-    end
+    return Result.error('Wrong configuration type') if read_template_type != :vagrant
 
     if ConfigurationTemplate.new(@env.template_file).node_count != 1
       return Result.error('Incorrect number of nodes in the configuration')

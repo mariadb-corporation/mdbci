@@ -27,8 +27,8 @@ group(:development) do
   gem 'rubocop'
 end
 
-gem "base64", "~> 0.2.0"
+gem 'base64', '~> 0.2.0'
 
-gem "ostruct", "~> 0.6.0"
+gem 'ostruct', '~> 0.6.0'
 
-gem "logger", "~> 1.6"
+gem 'logger', '~> 1.6'

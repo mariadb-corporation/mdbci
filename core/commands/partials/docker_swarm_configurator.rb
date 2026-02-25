@@ -195,7 +195,9 @@ class DockerSwarmConfigurator
         next if known_networks.key?(task[:container_id]) || !task.key?(:private_ip_address)
 
         result = run_command("docker network connect #{@config.docker_network_name} #{task[:container_id]}")
-        return Result.error("Unable to attach container '#{task[:container_id]}'") unless result[:value].success?
+        unless result[:value].success?
+          return Result.error("Unable to attach container '#{task[:container_id]}'")
+        end
       end
       @docker_commands.list_containers_ip(@config.docker_network_name)
     end.and_then do |known_networks|

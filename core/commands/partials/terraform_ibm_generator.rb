@@ -42,7 +42,7 @@ class TerraformIbmGenerator
     @ibm_service = ibm_service
   end
 
-    # Generate a Terraform configuration file.
+  # Generate a Terraform configuration file.
   # @param node_params [Array<Hash>] list of node params.
   # @param configuration_file_path [String] path to generated Terraform infrastructure file.
   # @return [Result::Base] generation result.
@@ -57,7 +57,7 @@ class TerraformIbmGenerator
     result = Result.ok('')
     node_params.each do |node|
       result = generate_instance_params(node).and_then do |instance_params|
-        if instance_params[:memory_size] != nil 
+        if !instance_params[:memory_size].nil?
           instance_params[:memory_size] = (instance_params[:memory_size].to_f / 1024).ceil
         end
         print_node_info(instance_params)
@@ -85,7 +85,7 @@ class TerraformIbmGenerator
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
   def print_node_info(node_params)
-    @ui.info("IBM Cloud definition for host: #{node_params[:host]}, "\
+    @ui.info("IBM Cloud definition for host: #{node_params[:host]}, " \
              "image:#{node_params[:image]}, machine_type:#{node_params[:machine_type]}")
   end
 
@@ -173,7 +173,7 @@ class TerraformIbmGenerator
       }
       depends_on = [ibm_pi_network.public_network_<%= name %>, ibm_pi_key.ssh_key_#{@configuration_id}]
     }
-    
+
     output "<%= name %>_network" {
       value = {
         user = "cloud-user"
@@ -204,8 +204,7 @@ class TerraformIbmGenerator
   # @param labels [Hash] list of labels in format { label_name: label_value }
   # @return [String] labels block definition.
   def labels_partial(labels)
-    template = ERB.new <<-PARTIAL
-    PARTIAL
+    template = ERB.new ''
     template.result(binding)
   end
 
@@ -220,8 +219,7 @@ class TerraformIbmGenerator
   # Returns generated new network tags if a new vpc resources need to be generated for the current
   # configuration, otherwise returns network tags configured in the mdbci configuration.
   # @return [Array<String>] list of instance tags.
-  def instance_tags
-  end
+  def instance_tags; end
 
   # Generate a instance params for the configuration file.
   # @param node_params [Hash] list of the node parameters
@@ -237,11 +235,10 @@ class TerraformIbmGenerator
       instance_name: self.class.generate_instance_name(@configuration_id, node_params[:name]),
 
       user: user,
-      key_file: private_key_file_path,
+      key_file: private_key_file_path
     )
-    Result.ok(node_params.merge(machine_type: "s1022",
-                                volume_type: "tier3",
+    Result.ok(node_params.merge(machine_type: 's1022',
+                                volume_type: 'tier3',
                                 volume_size: 1))
-
   end
 end

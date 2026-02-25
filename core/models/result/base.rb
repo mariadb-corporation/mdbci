@@ -16,7 +16,6 @@ module Result
     # Call an object or lambda depending on whether the Result
     # is Ok or an Error.
     #
-    # rubocop:disable Naming/UncommunicativeMethodParamName
     def match(ok:, error:)
       if success?
         ok.call(value)
@@ -24,6 +23,5 @@ module Result
         error.call(self.error)
       end
     end
-    # rubocop:enable Naming/UncommunicativeMethodParamName
   end
 end

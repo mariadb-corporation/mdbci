@@ -1,8 +1,14 @@
 # Class for load configuration from YAML-config file
 class Config
-  attr_reader :user, :password, :db_name, :project_name, :auth_token,
-              :test_run_count, :repository_url, :logs_dir_url,
-              :report_portal_url
+  attr_reader :user
+  attr_reader :password
+  attr_reader :db_name
+  attr_reader :project_name
+  attr_reader :auth_token
+  attr_reader :test_run_count
+  attr_reader :repository_url
+  attr_reader :logs_dir_url
+  attr_reader :report_portal_url
 
   require 'yaml'
 
@@ -49,17 +55,19 @@ class Config
       exit 1
     end
 
-    return database, report_portal
+    [database, report_portal]
   end
 
   def check_database_section(database)
     return false unless @sections.include?(:database)
+
     database['db_name'].nil? || database['user'].nil? ||
       database['password'].nil?
   end
 
   def check_report_portal_section(report_portal)
     return false unless @sections.include?(:report_portal)
+
     report_portal['project_name'].nil? || report_portal['auth_token'].nil? ||
       report_portal['repository_url'].nil? || report_portal['logs_dir_url'].nil? ||
       report_portal['url'].nil?

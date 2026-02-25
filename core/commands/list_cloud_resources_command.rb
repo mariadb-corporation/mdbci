@@ -27,7 +27,7 @@ The command ends with an error if any resource is present, no otherwise
     @ui.info(info)
   end
 
-  def initialize(args, env, logger, options = nil)
+  def initialize(args, env, logger, _options = nil)
     super(args, env, logger)
     threshold_days = @env.hours.to_i / 24.0
     @filter_unused = threshold_days.positive?
@@ -112,8 +112,7 @@ The command ends with an error if any resource is present, no otherwise
       key_pair[:launch_time] = DateTime.parse(key_pair[:launch_time]).new_offset(0.0 / 24)
     end
     all_key_pairs = select_by_time(all_key_pairs) unless @env.hours.nil?
-    all_key_pairs = time_to_string(all_key_pairs)
-    all_key_pairs
+    time_to_string(all_key_pairs)
   end
 
   # Renders a table with the disks that are not attached to any instance
@@ -264,7 +263,7 @@ The command ends with an error if any resource is present, no otherwise
     when 'ibm'
       header.concat(['PVM Instance ID'])
     when 'gcp', 'aws'
-      header.concat(['Zone', 'Path', 'User'])
+      header.concat(%w[Zone Path User])
     end
     table = TTY::Table.new(header: header)
     list.each do |instance|

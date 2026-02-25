@@ -34,7 +34,7 @@ tar xzf cmake-3.16.4-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
 rm cmake-3.16.4-Linux-x86_64.tar.gz'
     end
   else
-      package 'cmake'
+    package 'cmake'
   end
   package 'libcurl-devel'
   package 'libopenssl-devel'

@@ -86,7 +86,7 @@ class TerraformDigitaloceanGenerator
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
   def print_node_info(node_params)
-    @ui.info("Digital Ocean definition for host: #{node_params[:host]}, "\
+    @ui.info("Digital Ocean definition for host: #{node_params[:host]}, " \
              "image:#{node_params[:image]}, size:#{node_params[:machine_type]}")
   end
 

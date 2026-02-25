@@ -15,7 +15,7 @@ when 'debian', 'ubuntu'
     recursive true
     action :create
   end
-  remote_file "/etc/apt/keyrings/galera.public" do
+  remote_file '/etc/apt/keyrings/galera.public' do
     source repo_key
     sensitive true
     action :create
@@ -24,7 +24,7 @@ when 'debian', 'ubuntu'
     uri repo_uri
     distribution repo_distribution
     components node['galera_ci']['components']
-    options ["signed-by=/etc/apt/keyrings/galera.public"]
+    options ['signed-by=/etc/apt/keyrings/galera.public']
     sensitive true
   end
   apt_update

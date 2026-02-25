@@ -4,7 +4,7 @@ module DockerCookbook
 
     provides :docker_installation, os: 'linux'
 
-    property :repo, %w(main test experimental), default: 'main', desired_state: false
+    property :repo, %w[main test experimental], default: 'main', desired_state: false
     property :script_url, String, default: lazy { default_script_url }, desired_state: false
 
     default_action :create
@@ -38,7 +38,7 @@ module DockerCookbook
     end
 
     action :delete do
-      package %w(docker-ce docker-engine) do
+      package %w[docker-ce docker-engine] do
         action :remove
       end
     end

@@ -47,18 +47,17 @@ module SshUser
 
   def self.generate_user_info(node_name, user_name)
     {
-      'name': node_name,
-      'default_attributes': {
-      },
-      'override_attributes': {
-        'user_creation': {
-          'name': user_name
+      name: node_name,
+      default_attributes: {},
+      override_attributes: {
+        user_creation: {
+          name: user_name
         }
       },
-      'json_class': 'Chef::Role',
-      'description': '',
-      'chef_type': 'role',
-      'run_list': ['recipe[user_creation]']
+      json_class: 'Chef::Role',
+      description: '',
+      chef_type: 'role',
+      run_list: ['recipe[user_creation]']
     }
   end
 

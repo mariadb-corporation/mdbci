@@ -5,7 +5,9 @@ module DockerCookbook
     property :container_name, String, name_property: true
     property :repo, String, default: lazy { container_name }
     property :tag, String, default: 'latest'
-    property :command, [Array, String, nil], coerce: proc { |v| v.is_a?(String) ? ::Shellwords.shellwords(v) : v }
+    property :command, [Array, String, nil], coerce: proc { |v|
+                                                       v.is_a?(String) ? ::Shellwords.shellwords(v) : v
+                                                     }
     property :attach_stderr, [TrueClass, FalseClass], default: false, desired_state: false
     property :attach_stdin, [TrueClass, FalseClass], default: false, desired_state: false
     property :attach_stdout, [TrueClass, FalseClass], default: false, desired_state: false
@@ -20,20 +22,27 @@ module DockerCookbook
     property :dns, Array, default: []
     property :dns_search, Array, default: []
     property :domain_name, String, default: ''
-    property :entrypoint, [Array, String, nil], coerce: proc { |v| v.is_a?(String) ? ::Shellwords.shellwords(v) : v }
+    property :entrypoint, [Array, String, nil], coerce: proc { |v|
+                                                          v.is_a?(String) ? ::Shellwords.shellwords(v) : v
+                                                        }
     property :env, UnorderedArrayType, default: []
-    property :env_file, [Array, String], coerce: proc { |v| coerce_env_file(v) }, default: [], desired_state: false
+    property :env_file, [Array, String], coerce: proc { |v|
+                                                   coerce_env_file(v)
+                                                 }, default: [], desired_state: false
     property :extra_hosts, [Array, nil], coerce: proc { |v| Array(v).empty? ? nil : Array(v) }
     property :exposed_ports, PartialHashType, default: {}
     property :force, [TrueClass, FalseClass], default: false, desired_state: false
     property :health_check, Hash, default: {}
-    property :host, [String, nil], default: lazy { ENV['DOCKER_HOST'] }, desired_state: false
+    property :host, [String, nil], default: lazy {
+                                              ENV.fetch('DOCKER_HOST', nil)
+                                            }, desired_state: false
     property :hostname, String
     property :ipc_mode, String, default: ''
     property :kernel_memory, [String, Integer], coerce: proc { |v| coerce_to_bytes(v) }, default: 0
     property :labels, [String, Array, Hash], default: {}, coerce: proc { |v| coerce_labels(v) }
     property :links, UnorderedArrayType, coerce: proc { |v| coerce_links(v) }
-    property :log_driver, %w( json-file syslog journald gelf fluentd awslogs splunk etwlogs gcplogs none ), default: 'json-file', desired_state: false
+    property :log_driver,
+             %w[json-file syslog journald gelf fluentd awslogs splunk etwlogs gcplogs none], default: 'json-file', desired_state: false
     property :log_opts, [Hash, nil], coerce: proc { |v| coerce_log_opts(v) }, desired_state: false
     property :init, [TrueClass, FalseClass, nil]
     property :ip_address, String
@@ -88,19 +97,19 @@ module DockerCookbook
     # never kill the container.
     property :kill_after, [Integer, NilClass], default: nil, desired_state: false
 
-    alias_method :cmd, :command
-    alias_method :additional_host, :extra_hosts
-    alias_method :rm, :autoremove
-    alias_method :remove_automatically, :autoremove
-    alias_method :host_name, :hostname
-    alias_method :domainname, :domain_name
-    alias_method :dnssearch, :dns_search
-    alias_method :restart_maximum_retries, :restart_maximum_retry_count
-    alias_method :volume, :volumes
-    alias_method :binds, :volumes
-    alias_method :volume_from, :volumes_from
-    alias_method :destination, :outfile
-    alias_method :workdir, :working_dir
+    alias cmd command
+    alias additional_host extra_hosts
+    alias rm autoremove
+    alias remove_automatically autoremove
+    alias host_name hostname
+    alias domainname domain_name
+    alias dnssearch dns_search
+    alias restart_maximum_retries restart_maximum_retry_count
+    alias volume volumes
+    alias binds volumes
+    alias volume_from volumes_from
+    alias destination outfile
+    alias workdir working_dir
 
     ###################
     # Property helpers
@@ -124,6 +133,7 @@ module DockerCookbook
         v
       else
         return nil if v.empty?
+
         # Parse docker input of /source:/container_name/dest into source:dest
         DockerBase::UnorderedArray.new(Array(v)).map! do |link|
           if link =~ %r{^/(?<source>.+):/#{name}/(?<dest>.+)}
@@ -187,6 +197,7 @@ module DockerCookbook
 
     def coerce_ulimits(v)
       return v if v.nil?
+
       Array(v).map do |u|
         u = "#{u['Name']}=#{u['Soft']}:#{u['Hard']}" if u.is_a?(Hash)
         u
@@ -209,6 +220,7 @@ module DockerCookbook
         b = nil if b.empty?
         volumes_binds b
         return DockerBase::PartialHash.new if v.empty?
+
         v.each_with_object(DockerBase::PartialHash.new) { |volume, h| h[volume] = {} }
       end
     end
@@ -224,17 +236,20 @@ module DockerCookbook
       tries = running_wait_time
       tries.times do
         return if state['Running'] == v
+
         sleep 1
       end
       return if state['Running'] == v
 
       # Container failed to reach correct state: Throw an error
       desired_state_str = v ? 'running' : 'not running'
-      raise Docker::Error::TimeoutError, "Container #{container_name} failed to change to #{desired_state_str} state after #{tries} seconds"
+      raise Docker::Error::TimeoutError,
+            "Container #{container_name} failed to change to #{desired_state_str} state after #{tries} seconds"
     end
 
     def port(v = nil)
       return @port if v.nil?
+
       exposed_ports coerce_exposed_ports(v)
       port_bindings coerce_port_bindings(v)
       @port = v
@@ -265,17 +280,21 @@ module DockerCookbook
         host_port = (host_port[0]..host_port[1]).to_a
       end
       if container_port.count > 1
-        Chef::Log.fatal("FATAL: Invalid port range! #{container_port}") if container_port[0] > container_port[1]
+        if container_port[0] > container_port[1]
+          Chef::Log.fatal("FATAL: Invalid port range! #{container_port}")
+        end
         container_port = (container_port[0]..container_port[1]).to_a
       end
-      Chef::Log.fatal('FATAL: Port range size does not match!') if host_port.count > 1 && host_port.count != container_port.count
+      if host_port.count > 1 && host_port.count != container_port.count
+        Chef::Log.fatal('FATAL: Port range size does not match!')
+      end
       # qualify the port-binding protocol even when it is implicitly tcp #427.
       protocol = 'tcp' if protocol.nil?
       Array(container_port).map.with_index do |_, i|
         {
           'host_ip' => host_ip,
           'host_port' => host_port[i].to_s,
-          'container_port' => "#{container_port[i]}/#{protocol}",
+          'container_port' => "#{container_port[i]}/#{protocol}"
         }
       end
     end
@@ -304,7 +323,7 @@ module DockerCookbook
           h[y['container_port']] = [] unless h[y['container_port']]
           h[y['container_port']] << {
             'HostIp' => y['host_ip'],
-            'HostPort' => y['host_port'],
+            'HostPort' => y['host_port']
           }
         end
       end
@@ -312,6 +331,7 @@ module DockerCookbook
 
     def coerce_env_file(v)
       return v if v.empty?
+
       Array(v).map { |f| ::File.readlines(f).map(&:strip) }.flatten
     end
 
@@ -323,6 +343,7 @@ module DockerCookbook
         log_opts value['Config']
       end
       return @log_config if defined?(@log_config)
+
       def_logcfg = {}
       def_logcfg['Type'] = log_driver if property_is_set?(:log_driver)
       def_logcfg['Config'] = log_opts if property_is_set?(:log_opts)
@@ -426,7 +447,9 @@ module DockerCookbook
       restart_maximum_retry_count container.info['HostConfig']['RestartPolicy']['MaximumRetryCount']
       volumes_binds container.info['HostConfig']['Binds']
       ro_rootfs container.info['HostConfig']['ReadonlyRootfs']
-      ip_address ip_address_from_container_networks(container) unless ip_address_from_container_networks(container).nil?
+      unless ip_address_from_container_networks(container).nil?
+        ip_address ip_address_from_container_networks(container)
+      end
     end
 
     # Gets the ip address from the existing container
@@ -459,7 +482,8 @@ module DockerCookbook
     # Loads container specific labels excluding those of engine or image.
     # This insures idempotency.
     def load_container_labels
-      image_labels = Docker::Image.get(container.info['Image'], {}, connection).info['Config']['Labels'] || {}
+      image_labels = Docker::Image.get(container.info['Image'], {},
+                                       connection).info['Config']['Labels'] || {}
       engine_labels = Docker.info(connection)['Labels'] || {}
 
       labels = (container.info['Config']['Labels'] || {}).reject do |key, val|
@@ -485,91 +509,89 @@ module DockerCookbook
 
         with_retries do
           config = {
-            'name'            => new_resource.container_name,
-            'Image'           => "#{new_resource.repo}:#{new_resource.tag}",
-            'Labels'          => new_resource.labels,
-            'Cmd'             => to_shellwords(new_resource.command),
-            'AttachStderr'    => new_resource.attach_stderr,
-            'AttachStdin'     => new_resource.attach_stdin,
-            'AttachStdout'    => new_resource.attach_stdout,
-            'Domainname'      => new_resource.domain_name,
-            'Entrypoint'      => to_shellwords(new_resource.entrypoint),
-            'Env'             => new_resource.env + new_resource.env_file,
-            'ExposedPorts'    => new_resource.exposed_ports,
-            'Hostname'        => parsed_hostname,
-            'MacAddress'      => new_resource.mac_address,
+            'name' => new_resource.container_name,
+            'Image' => "#{new_resource.repo}:#{new_resource.tag}",
+            'Labels' => new_resource.labels,
+            'Cmd' => to_shellwords(new_resource.command),
+            'AttachStderr' => new_resource.attach_stderr,
+            'AttachStdin' => new_resource.attach_stdin,
+            'AttachStdout' => new_resource.attach_stdout,
+            'Domainname' => new_resource.domain_name,
+            'Entrypoint' => to_shellwords(new_resource.entrypoint),
+            'Env' => new_resource.env + new_resource.env_file,
+            'ExposedPorts' => new_resource.exposed_ports,
+            'Hostname' => parsed_hostname,
+            'MacAddress' => new_resource.mac_address,
             'NetworkDisabled' => new_resource.network_disabled,
-            'OpenStdin'       => new_resource.open_stdin,
-            'StdinOnce'       => new_resource.stdin_once,
-            'Tty'             => new_resource.tty,
-            'User'            => new_resource.user,
-            'Volumes'         => new_resource.volumes,
-            'WorkingDir'      => new_resource.working_dir,
-            'HostConfig'      => {
-              'Binds'           => new_resource.volumes_binds,
-              'CapAdd'          => new_resource.cap_add,
-              'CapDrop'         => new_resource.cap_drop,
-              'CgroupParent'    => new_resource.cgroup_parent,
-              'CpuShares'       => new_resource.cpu_shares,
-              'CpusetCpus'      => new_resource.cpuset_cpus,
-              'Devices'         => new_resource.devices,
-              'Dns'             => new_resource.dns,
-              'DnsSearch'       => new_resource.dns_search,
-              'ExtraHosts'      => new_resource.extra_hosts,
-              'IpcMode'         => new_resource.ipc_mode,
-              'Init'            => new_resource.init,
-              'KernelMemory'    => new_resource.kernel_memory,
-              'Links'           => new_resource.links,
-              'LogConfig'       => log_config,
-              'Memory'          => new_resource.memory,
-              'MemorySwap'      => new_resource.memory_swap,
+            'OpenStdin' => new_resource.open_stdin,
+            'StdinOnce' => new_resource.stdin_once,
+            'Tty' => new_resource.tty,
+            'User' => new_resource.user,
+            'Volumes' => new_resource.volumes,
+            'WorkingDir' => new_resource.working_dir,
+            'HostConfig' => {
+              'Binds' => new_resource.volumes_binds,
+              'CapAdd' => new_resource.cap_add,
+              'CapDrop' => new_resource.cap_drop,
+              'CgroupParent' => new_resource.cgroup_parent,
+              'CpuShares' => new_resource.cpu_shares,
+              'CpusetCpus' => new_resource.cpuset_cpus,
+              'Devices' => new_resource.devices,
+              'Dns' => new_resource.dns,
+              'DnsSearch' => new_resource.dns_search,
+              'ExtraHosts' => new_resource.extra_hosts,
+              'IpcMode' => new_resource.ipc_mode,
+              'Init' => new_resource.init,
+              'KernelMemory' => new_resource.kernel_memory,
+              'Links' => new_resource.links,
+              'LogConfig' => log_config,
+              'Memory' => new_resource.memory,
+              'MemorySwap' => new_resource.memory_swap,
               'MemorySwappiness' => new_resource.memory_swappiness,
               'MemoryReservation' => new_resource.memory_reservation,
-              'NetworkMode'     => new_resource.network_mode,
-              'OomKillDisable'  => new_resource.oom_kill_disable,
-              'OomScoreAdj'     => new_resource.oom_score_adj,
-              'Privileged'      => new_resource.privileged,
-              'PidMode'         => new_resource.pid_mode,
-              'PortBindings'    => new_resource.port_bindings,
+              'NetworkMode' => new_resource.network_mode,
+              'OomKillDisable' => new_resource.oom_kill_disable,
+              'OomScoreAdj' => new_resource.oom_score_adj,
+              'Privileged' => new_resource.privileged,
+              'PidMode' => new_resource.pid_mode,
+              'PortBindings' => new_resource.port_bindings,
               'PublishAllPorts' => new_resource.publish_all_ports,
-              'RestartPolicy'   => {
-                'Name'              => new_resource.restart_policy,
-                'MaximumRetryCount' => new_resource.restart_maximum_retry_count,
+              'RestartPolicy' => {
+                'Name' => new_resource.restart_policy,
+                'MaximumRetryCount' => new_resource.restart_maximum_retry_count
               },
-              'ReadonlyRootfs'  => new_resource.ro_rootfs,
-              'Runtime'         => new_resource.runtime,
-              'SecurityOpt'     => new_resource.security_opt,
-              'ShmSize'         => new_resource.shm_size,
-              'Sysctls'         => new_resource.sysctls,
-              'Ulimits'         => ulimits_to_hash,
-              'UsernsMode'      => new_resource.userns_mode,
-              'UTSMode'         => new_resource.uts_mode,
-              'VolumesFrom'     => new_resource.volumes_from,
-              'VolumeDriver'    => new_resource.volume_driver,
-            },
+              'ReadonlyRootfs' => new_resource.ro_rootfs,
+              'Runtime' => new_resource.runtime,
+              'SecurityOpt' => new_resource.security_opt,
+              'ShmSize' => new_resource.shm_size,
+              'Sysctls' => new_resource.sysctls,
+              'Ulimits' => ulimits_to_hash,
+              'UsernsMode' => new_resource.userns_mode,
+              'UTSMode' => new_resource.uts_mode,
+              'VolumesFrom' => new_resource.volumes_from,
+              'VolumeDriver' => new_resource.volume_driver
+            }
           }
-          net_config = {
-            'NetworkingConfig' => {
-              'EndpointsConfig' => {
-                new_resource.network_mode => {
-                  'IPAMConfig' => {
-                    'IPv4Address' => new_resource.ip_address,
-                  },
-                  'Aliases' => new_resource.network_aliases,
-                },
-              },
-            },
-          } if new_resource.network_mode
+          if new_resource.network_mode
+            net_config = {
+              'NetworkingConfig' => {
+                'EndpointsConfig' => {
+                  new_resource.network_mode => {
+                    'IPAMConfig' => {
+                      'IPv4Address' => new_resource.ip_address
+                    },
+                    'Aliases' => new_resource.network_aliases
+                  }
+                }
+              }
+            }
+          end
           config.merge! net_config
 
           # Remove any options not supported in windows
-          if platform?('windows')
-            config['HostConfig'].delete('MemorySwappiness')
-          end
+          config['HostConfig'].delete('MemorySwappiness') if platform?('windows')
 
-          unless new_resource.health_check.empty?
-            config['Healthcheck'] = new_resource.health_check
-          end
+          config['Healthcheck'] = new_resource.health_check unless new_resource.health_check.empty?
 
           # Store the state of the options and create the container
           new_resource.create_options = config
@@ -581,6 +603,7 @@ module DockerCookbook
     action :start do
       return if state['Restarting']
       return if state['Running']
+
       converge_by "starting #{new_resource.container_name}" do
         with_retries do
           current_resource.container.start
@@ -595,21 +618,22 @@ module DockerCookbook
 
     action :stop do
       return unless state['Running']
+
       kill_after_str = "(will kill after #{new_resource.kill_after}s)" if new_resource.kill_after
       converge_by "stopping #{new_resource.container_name} #{kill_after_str}" do
-        begin
-          with_retries do
-            current_resource.container.stop!('timeout' => new_resource.kill_after)
-            wait_running_state(false)
-          end
-        rescue Docker::Error::TimeoutError
-          raise Docker::Error::TimeoutError, "Container failed to stop, consider adding kill_after to the container #{new_resource.container_name}"
+        with_retries do
+          current_resource.container.stop!('timeout' => new_resource.kill_after)
+          wait_running_state(false)
         end
+      rescue Docker::Error::TimeoutError
+        raise Docker::Error::TimeoutError,
+              "Container failed to stop, consider adding kill_after to the container #{new_resource.container_name}"
       end
     end
 
     action :kill do
       return unless state['Running']
+
       converge_by "killing #{new_resource.container_name}" do
         with_retries { current_resource.container.kill(signal: new_resource.signal) }
       end
@@ -617,11 +641,13 @@ module DockerCookbook
 
     action :run_if_missing do
       return if current_resource
+
       call_action(:run)
     end
 
     action :pause do
       return if state['Paused']
+
       converge_by "pausing #{new_resource.container_name}" do
         with_retries { current_resource.container.pause }
       end
@@ -629,13 +655,16 @@ module DockerCookbook
 
     action :unpause do
       return if current_resource && !state['Paused']
+
       converge_by "unpausing #{new_resource.container_name}" do
         with_retries { current_resource.container.unpause }
       end
     end
 
     action :restart do
-      kill_after_str = " (will kill after #{new_resource.kill_after}s)" if new_resource.kill_after != -1
+      if new_resource.kill_after != -1
+        kill_after_str = " (will kill after #{new_resource.kill_after}s)"
+      end
       converge_by "restarting #{new_resource.container_name} #{kill_after_str}" do
         current_resource ? current_resource.container.restart('timeout' => new_resource.kill_after) : call_action(:run)
       end
@@ -658,10 +687,14 @@ module DockerCookbook
 
     action :delete do
       return unless current_resource
+
       call_action(:unpause)
       call_action(:stop)
       converge_by "deleting #{new_resource.container_name}" do
-        with_retries { current_resource.container.delete(force: new_resource.force, v: new_resource.remove_volumes) }
+        with_retries do
+          current_resource.container.delete(force: new_resource.force,
+                                            v: new_resource.remove_volumes)
+        end
       end
     end
 
@@ -673,16 +706,24 @@ module DockerCookbook
       converge_by "committing #{new_resource.container_name}" do
         with_retries do
           new_image = current_resource.container.commit
-          new_image.tag('repo' => new_resource.repo, 'tag' => new_resource.tag, 'force' => new_resource.force)
+          new_image.tag('repo' => new_resource.repo, 'tag' => new_resource.tag,
+                        'force' => new_resource.force)
         end
       end
     end
 
     action :export do
-      raise "Please set outfile property on #{new_resource.container_name}" if new_resource.outfile.nil?
+      if new_resource.outfile.nil?
+        raise "Please set outfile property on #{new_resource.container_name}"
+      end
+
       converge_by "exporting #{new_resource.container_name}" do
         with_retries do
-          ::File.open(new_resource.outfile, 'w') { |f| current_resource.container.export { |chunk| f.write(chunk) } }
+          ::File.open(new_resource.outfile, 'w') do |f|
+            current_resource.container.export do |chunk|
+              f.write(chunk)
+            end
+          end
         end
       end
     end
@@ -694,11 +735,13 @@ module DockerCookbook
            new_resource.restart_policy != 'always' &&
            new_resource.restart_policy != 'unless-stopped' &&
            new_resource.restart_policy != 'on-failure'
-          raise Chef::Exceptions::ValidationFailed, 'restart_policy must be either no, always, unless-stopped, or on-failure.'
+          raise Chef::Exceptions::ValidationFailed,
+                'restart_policy must be either no, always, unless-stopped, or on-failure.'
         end
 
         if new_resource.autoremove == true && (new_resource.property_is_set?(:restart_policy) && restart_policy != 'no')
-          raise Chef::Exceptions::ValidationFailed, 'Conflicting options restart_policy and autoremove.'
+          raise Chef::Exceptions::ValidationFailed,
+                'Conflicting options restart_policy and autoremove.'
         end
 
         if new_resource.detach == true &&
@@ -708,7 +751,8 @@ module DockerCookbook
              new_resource.attach_stdout == true ||
              new_resource.stdin_once == true
            )
-          raise Chef::Exceptions::ValidationFailed, 'Conflicting options detach, attach_stderr, attach_stdin, attach_stdout, stdin_once.'
+          raise Chef::Exceptions::ValidationFailed,
+                'Conflicting options detach, attach_stderr, attach_stdin, attach_stdout, stdin_once.'
         end
 
         if new_resource.network_mode == 'host' &&
@@ -716,7 +760,8 @@ module DockerCookbook
              !(new_resource.hostname.nil? || new_resource.hostname.empty?) ||
              !(new_resource.mac_address.nil? || new_resource.mac_address.empty?)
            )
-          raise Chef::Exceptions::ValidationFailed, 'Cannot specify hostname or mac_address when network_mode is host.'
+          raise Chef::Exceptions::ValidationFailed,
+                'Cannot specify hostname or mac_address when network_mode is host.'
         end
 
         if new_resource.network_mode == 'container' &&
@@ -731,12 +776,14 @@ module DockerCookbook
                !(new_resource.publish_all_ports.nil? || new_resource.publish_all_ports.empty?) ||
                !new_resource.port.nil?
            )
-          raise Chef::Exceptions::ValidationFailed, 'Cannot specify hostname, dns, dns_search, mac_address, extra_hosts, exposed_ports, port_bindings, publish_all_ports, port when network_mode is container.'
+          raise Chef::Exceptions::ValidationFailed,
+                'Cannot specify hostname, dns, dns_search, mac_address, extra_hosts, exposed_ports, port_bindings, publish_all_ports, port when network_mode is container.'
         end
       end
 
       def parsed_hostname
         return nil if new_resource.network_mode == 'host'
+
         new_resource.hostname
       end
 
@@ -751,6 +798,7 @@ module DockerCookbook
 
       def ulimits_to_hash
         return nil if new_resource.ulimits.nil?
+
         new_resource.ulimits.map do |u|
           name = u.split('=')[0]
           soft = u.split('=')[1].split(':')[0]

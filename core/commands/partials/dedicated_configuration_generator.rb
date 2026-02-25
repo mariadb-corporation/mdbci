@@ -49,7 +49,8 @@ class DedicatedConfigurationGenerator < BaseCommand
     nodes_info = @configuration_template.map do |node|
       @ssh_users[node[0]] = node[1]['user']
       node_params = make_node_params(node, @boxes.get_box(node[1]['box']))
-      node_info = @configuration_generator.generate_node_info(node, node_params, @registry, @env.force_version)
+      node_info = @configuration_generator.generate_node_info(node, node_params, @registry,
+                                                              @env.force_version)
       return Result.error(node_info.error) if node_info.error?
 
       node_info.value
@@ -93,8 +94,8 @@ class DedicatedConfigurationGenerator < BaseCommand
     provider_file = Configuration.provider_path(@configuration_path)
     template_file = Configuration.template_path(@configuration_path)
     registry_path = Configuration.registry_path(@configuration_path)
-    File.open(provider_file, 'w') { |f| f.write('dedicated') }
-    File.open(template_file, 'w') { |f| f.write(File.expand_path(@env.template_file)) }
+    File.write(provider_file, 'dedicated')
+    File.write(template_file, File.expand_path(@env.template_file))
     @registry.save_registry(registry_path)
     SshUser.save_to_file(@ssh_users, @configuration_path)
   end

@@ -14,7 +14,6 @@ end
 
 package 'chrony'
 
-
 link '/etc/localtime' do
   to '/usr/share/zoneinfo/Europe/Paris'
 end

@@ -18,4 +18,3 @@ RSpec.describe 'Docker Swarm configuration', :benchmark do
     end
   end
 end
-

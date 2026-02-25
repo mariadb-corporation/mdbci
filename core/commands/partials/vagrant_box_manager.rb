@@ -43,7 +43,7 @@ class VagrantBoxManager
   def destroy_box(box_name)
     return unless @boxes.box_exists?(box_name)
 
-    VagrantService.box_remove(@boxes.get_box(box_name)["box"], @ui, @config.path)
+    VagrantService.box_remove(@boxes.get_box(box_name)['box'], @ui, @config.path)
     @created_box_data_manager.delete_box(@env.boxName)
   end
 end

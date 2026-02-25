@@ -1,5 +1,5 @@
 require_relative 'base_command'
-require_relative 'partials/vagrant_box_manager.rb'
+require_relative 'partials/vagrant_box_manager'
 require_relative '../models/result'
 require_relative '../models/configuration'
 require_relative '../services/created_box_data_manager'
@@ -42,12 +42,12 @@ class CreateBoxFromNodeCommand < BaseCommand
   end
 
   def chek_node_run
-    if !run_command("LC_ALL=C virsh list")[:output].split("\n").grep(/#{@config.node_names.first}\s+running$/).empty?
+    if !run_command('LC_ALL=C virsh list')[:output].split("\n").grep(/#{@config.node_names.first}\s+running$/).empty?
       @ui.info('Node is running')
       return true
     end
     @ui.info('Node is not running')
-    return false
+    false
   end
 
   def execute
@@ -58,9 +58,9 @@ class CreateBoxFromNodeCommand < BaseCommand
 
     begin
       setup_command
-    rescue ArgumentError => error
-      @ui.error(error.message)
-      @ui.error(error.backtrace.join("\n"))
+    rescue ArgumentError => e
+      @ui.error(e.message)
+      @ui.error(e.backtrace.join("\n"))
       return ARGUMENT_ERROR_RESULT
     end
 
@@ -75,24 +75,19 @@ class CreateBoxFromNodeCommand < BaseCommand
       return Result.error('Wrong box name')
     end
 
-    if !@config.vagrant_configuration?
-      return Result.error('Wrong configuration type')
-    end
+    return Result.error('Wrong configuration type') if !@config.vagrant_configuration?
 
-    if @config.node_names.length != 1
-      return Result.error('Wrong path to node. Count nodes over 1')
-    end
+    return Result.error('Wrong path to node. Count nodes over 1') if @config.node_names.length != 1
 
     node_running = chek_node_run
 
-    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config, @ui)
+    vagrant_box_manager = VagrantBoxManager.new(@env, @boxes, @created_box_data_manager, @config,
+                                                @ui)
     exit_code = vagrant_box_manager.create_box(@config.node_names.first)
     return exit_code unless exit_code.success?
 
-    if node_running
-      VagrantService.up(@config.provider, @config.node_names.first, @ui, @config.path)
-    end
+    VagrantService.up(@config.provider, @config.node_names.first, @ui, @config.path) if node_running
 
-    return SUCCESS_RESULT
+    SUCCESS_RESULT
   end
 end

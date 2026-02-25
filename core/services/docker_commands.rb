@@ -57,7 +57,7 @@ class DockerCommands
     return Result.error('Could not browse for the network name') unless result[:value].success?
 
     if result[:output].empty? || result[:output].lines.any? { |line| line == network_name }
-      @ui.info("Creating the bridge network")
+      @ui.info('Creating the bridge network')
       result = run_command("docker network create #{network_name}")
       return Result.error('Could not create the bridge network') unless result[:value].success?
     else
@@ -68,7 +68,9 @@ class DockerCommands
 
   def list_containers_ip(network_name)
     result = run_command("docker network inspect #{network_name}")
-    return Result.error("Unable to get information about the network #{network_name}") unless result[:value].success?
+    unless result[:value].success?
+      return Result.error("Unable to get information about the network #{network_name}")
+    end
 
     network_info = JSON.parse(result[:output])[0]
     network_data = network_info['Containers'].map do |container_id, info|
@@ -140,12 +142,13 @@ class DockerCommands
   def get_task_description(task_id)
     docker_inspect(task_id, 'task').and_then do |task_data|
       task_info = {
-         id: task_data.dig('ID'),
-         container_id: task_data.dig('Status', 'ContainerStatus', 'ContainerID'),
-         service_id: task_data.dig('ServiceID'),
-         updated_at: task_data.dig('UpdatedAt'),
-         private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses', 0)&.split('/')&.first,
-         status_state: task_data.dig('Status', 'State')
+        id: task_data.dig('ID'),
+        container_id: task_data.dig('Status', 'ContainerStatus', 'ContainerID'),
+        service_id: task_data.dig('ServiceID'),
+        updated_at: task_data.dig('UpdatedAt'),
+        private_ip_address: task_data.dig('NetworksAttachments', 0, 'Addresses',
+                                          0)&.split('/')&.first,
+        status_state: task_data.dig('Status', 'State')
       }
       if task_info.values.any? { |value| value.nil? || value.empty? }
         Result.error('Task has not been filled with data yet')

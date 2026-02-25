@@ -92,7 +92,7 @@ module DockerCookbook
       service docker_name do
         provider Chef::Provider::Service::Systemd
         supports status: true
-        action [:enable, :start]
+        action %i[enable start]
         only_if { ::File.exist?("/lib/systemd/system/#{docker_name}.service") }
         retries 1
       end
@@ -103,7 +103,7 @@ module DockerCookbook
       service docker_name do
         provider Chef::Provider::Service::Systemd
         supports status: true
-        action [:disable, :stop]
+        action %i[disable stop]
         only_if { ::File.exist?("/lib/systemd/system/#{docker_name}.service") }
       end
     end

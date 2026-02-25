@@ -5,7 +5,5 @@ packages = if platform?('redhat', 'centos', 'rocky')
            end
 
 package packages do
-  if platform?('redhat', 'centos', 'rocky')
-    flush_cache({ before: true })
-  end
+  flush_cache({ before: true }) if platform?('redhat', 'centos', 'rocky')
 end

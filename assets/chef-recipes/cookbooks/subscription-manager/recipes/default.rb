@@ -6,10 +6,10 @@ end
 
 execute 'Register the system' do
   sensitive true
-  command 'subscription-manager register '\
-          "--username #{node['subscription-manager']['username']} "\
-          "--password #{node['subscription-manager']['password']} "\
-	        "--force"
+  command 'subscription-manager register ' \
+          "--username #{node['subscription-manager']['username']} " \
+          "--password #{node['subscription-manager']['password']} " \
+          '--force'
   returns [0, 70]
 end
 
@@ -32,14 +32,14 @@ end
 platform_version = node[:platform_version].to_i
 
 enable_repositories = ["rhel-#{platform_version}-for-$(arch)-baseos-rpms",
-                         "rhel-#{platform_version}-for-$(arch)-supplementary-rpms",
-                         "rhel-#{platform_version}-for-$(arch)-appstream-rpms",
-                         "codeready-builder-for-rhel-#{platform_version}-$(arch)-rpms",
-                         "codeready-builder-for-rhel-#{platform_version}-$(arch)-debug-rpms",
-                         "codeready-builder-for-rhel-#{platform_version}-$(arch)-source-rpms"]
+                       "rhel-#{platform_version}-for-$(arch)-supplementary-rpms",
+                       "rhel-#{platform_version}-for-$(arch)-appstream-rpms",
+                       "codeready-builder-for-rhel-#{platform_version}-$(arch)-rpms",
+                       "codeready-builder-for-rhel-#{platform_version}-$(arch)-debug-rpms",
+                       "codeready-builder-for-rhel-#{platform_version}-$(arch)-source-rpms"]
 
-enable_repositories_rhel_7 = ["rhel-7-server-rpms",
-                              "rhel-7-server-supplementary-rpms"]
+enable_repositories_rhel_7 = ['rhel-7-server-rpms',
+                              'rhel-7-server-supplementary-rpms']
 
 if node[:platform_version].to_i == 7
   enable_repositories_rhel_7.each do |repo|

@@ -36,10 +36,10 @@ The command ends with an error if instances are present, no otherwise
       return SUCCESS_RESULT
     end
     show_list
-    if @number_instances != 0
-      Result.error('Old instances are present!')
-    else
+    if @number_instances == 0
       SUCCESS_RESULT
+    else
+      Result.error('Old instances are present!')
     end
   end
 
@@ -173,11 +173,11 @@ The command ends with an error if instances are present, no otherwise
 
     header = ['Launch time', 'Node name']
     header.concat(['PVM Instance ID']) if provider == 'ibm'
-    header.concat(['Zone' ,'Path', 'User']) if with_user_info
+    header.concat(%w[Zone Path User]) if with_user_info
     table = TTY::Table.new(header: header)
     list.each do |instance|
       info = [instance[:launch_time], instance[:node_name]]
-      info.concat([instance[:zone] ,instance[:path], instance[:username]]) if with_user_info
+      info.concat([instance[:zone], instance[:path], instance[:username]]) if with_user_info
       info.concat([instance[:instance_id]]) if provider == 'ibm'
       table << info
     end

@@ -9,10 +9,12 @@ module MariadbStagingParser
   def self.parse(config, product_version, log, logger)
     releases = []
     releases.concat(
-      parse_mariadb_staging_rpm_repository(config['repo']['rpm'], product_version, config['scan_mode'], log, logger)
+      parse_mariadb_staging_rpm_repository(config['repo']['rpm'], product_version,
+                                           config['scan_mode'], log, logger)
     )
     releases.concat(
-      parse_mariadb_staging_deb_repository(config['repo']['deb'], product_version, config['scan_mode'], log, logger)
+      parse_mariadb_staging_deb_repository(config['repo']['deb'], product_version,
+                                           config['scan_mode'], log, logger)
     )
     releases
   end
@@ -49,7 +51,7 @@ module MariadbStagingParser
       lambda do |release, _|
         release[:version] = release[:version].delete('mariadb-')
         release[:repo] = release[:repo_url]
-        release[:components] = ["main"]
+        release[:components] = ['main']
         release
       end
     )

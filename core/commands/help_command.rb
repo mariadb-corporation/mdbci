@@ -29,7 +29,7 @@ class HelpCommand < BaseCommand
     'Show information about MDBCI tool and it commands.'
   end
 
-  HELP_TEMPLATE_FILE = File.expand_path('../../../docs/help.erb', __FILE__)
+  HELP_TEMPLATE_FILE = File.expand_path('../../docs/help.erb', __dir__)
 
   COMMANDS = {
     'check_relevance' => CheckRelevanceCommand.synopsis,

@@ -7,16 +7,16 @@ require_relative '../services/shell_commands'
 # Class that creates configuration file for MDBCI. Currently it consists of AWS support.
 class ConfigureCommand < BaseCommand
   SUPPORTED_PRODUCTS = {
-      'aws' =>'AWS',
-      'gcp' => 'Google Cloud Platform',
-      'digitalocean' => 'Digital Ocean',
-      'rhel' => 'RHEL subscription',
-      'suse' => 'SUSE subscription',
-      'mdbe' => 'MariaDB Enterprise',
-      'mdbe_ci' => 'MariaDB Enterprise CI repository',
-      'docker' => 'MaxScale CI Docker Registry subscription',
-      'force' => 'force flag',
-      'mdbci' => 'MDBCI self-upgrade address'
+    'aws' => 'AWS',
+    'gcp' => 'Google Cloud Platform',
+    'digitalocean' => 'Digital Ocean',
+    'rhel' => 'RHEL subscription',
+    'suse' => 'SUSE subscription',
+    'mdbe' => 'MariaDB Enterprise',
+    'mdbe_ci' => 'MariaDB Enterprise CI repository',
+    'docker' => 'MaxScale CI Docker Registry subscription',
+    'force' => 'force flag',
+    'mdbci' => 'MDBCI self-upgrade address'
   }
 
   def self.synopsis
@@ -24,7 +24,7 @@ class ConfigureCommand < BaseCommand
   end
 
   def initialize(arg, env, logger)
-    super(arg, env, logger)
+    super
     @configuration = @env.tool_config
   end
 
@@ -51,7 +51,7 @@ Use the following short product names to configure them:
     end
 
     configure_results = SUPPORTED_PRODUCTS.keys.map do |name|
-      send("configure_#{name}".to_sym) if need_configure_product?(name)
+      send(:"configure_#{name}") if need_configure_product?(name)
     end.compact
     return ERROR_RESULT if configure_results.include?(ERROR_RESULT)
 
@@ -71,8 +71,8 @@ Use the following short product names to configure them:
   end
 
   def check_dock_credentials(docker_credentials)
-    cmd = "docker login --username #{docker_credentials['username']}" \
-          " --password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
+    cmd = "docker login --username #{docker_credentials['username']} " \
+          "--password '#{docker_credentials['password']}' #{docker_credentials['ci-server']}"
     out = ShellCommands.run_command_and_log(@ui, cmd, false)
     out[:value].success?
   end
@@ -145,8 +145,10 @@ Use the following short product names to configure them:
 
   def input_mdbci
     {
-      'image_address' => read_topic('URL for MDBCI self-upgrade', @configuration.dig('mdbci', 'image_address')),
-      'mdbci_directory' => read_topic('Full path to the mdbci directory', @configuration.dig('mdbci', 'mdbci_directory'))
+      'image_address' => read_topic('URL for MDBCI self-upgrade',
+                                    @configuration.dig('mdbci', 'image_address')),
+      'mdbci_directory' => read_topic('Full path to the mdbci directory',
+                                      @configuration.dig('mdbci', 'mdbci_directory'))
     }
   end
 
@@ -177,12 +179,13 @@ Use the following short product names to configure them:
       'project' => read_topic('Please input name of the Google Cloud Platform project',
                               @configuration.dig('gcp', 'project')),
       'default_region' => read_topic('Please input name of the Google Cloud Platform region that will be used by default',
-                              @configuration.dig('gcp', 'default_region')),
+                                     @configuration.dig('gcp', 'default_region')),
       'regions' => read_topic('Please input Google Cloud Platform regions with a space',
-                           @configuration.dig('gcp', 'regions')).split(' '),
+                              @configuration.dig('gcp', 'regions')).split(' '),
       'use_existing_network' => false
     }
-    return settings unless read_topic('Use existing network for Google Compute instances?', 'y').casecmp('y').zero?
+    return settings unless read_topic('Use existing network for Google Compute instances?',
+                                      'y').casecmp('y').zero?
 
     settings.merge(
       'use_existing_network' => true,
@@ -190,22 +193,31 @@ Use the following short product names to configure them:
                               @configuration.dig('gcp', 'network')),
       'tags' => read_topic('Please input Google Cloud Platform network tags with a space',
                            @configuration.dig('gcp', 'tags').join(' ')).split(' '),
-      'use_only_private_ip' => read_topic('Use only private ip and do not generate external ip for Google Compute instances?', 'y')
-                                   .casecmp('y').zero?)
+      'use_only_private_ip' => read_topic(
+        'Use only private ip and do not generate external ip for Google Compute instances?', 'y'
+      )
+                                   .casecmp('y').zero?
+    )
   end
 
   def input_digitalocean_settings
     {
-      'region' => read_topic('Please input Digital Ocean region', @configuration.dig('digitalocean', 'region')),
-      'token' => read_topic('Please input Digital Ocean token', @configuration.dig('digitalocean', 'token'))
+      'region' => read_topic('Please input Digital Ocean region',
+                             @configuration.dig('digitalocean', 'region')),
+      'token' => read_topic('Please input Digital Ocean token',
+                            @configuration.dig('digitalocean', 'token'))
     }
   end
 
   def input_suse_subscription_credentials
     {
-        'email' => read_topic('Please input email for SUSEConnect', @configuration.dig('suse', 'email')),
-        'key' => read_topic('Please input key for SUSEConnect', @configuration.dig('suse', 'key')),
-        'registration_proxy_url' => read_topic('Please input the URL of the SUSE Registration Proxy server', @configuration.dig('suse', 'registration_proxy_url'))
+      'email' => read_topic('Please input email for SUSEConnect',
+                            @configuration.dig('suse', 'email')),
+      'key' => read_topic('Please input key for SUSEConnect', @configuration.dig('suse', 'key')),
+      'registration_proxy_url' => read_topic(
+        'Please input the URL of the SUSE Registration Proxy server', @configuration.dig('suse',
+                                                                                         'registration_proxy_url')
+      )
     }
   end
 
@@ -222,7 +234,8 @@ Use the following short product names to configure them:
   end
 
   def input_mdbe_settings
-    { 'key' => read_topic('Please input the private key for MariaDB Enterprise', @configuration.dig('mdbe', 'key')) }
+    { 'key' => read_topic('Please input the private key for MariaDB Enterprise',
+                          @configuration.dig('mdbe', 'key')) }
   end
 
   def configure_mdbe_ci
@@ -235,14 +248,22 @@ Use the following short product names to configure them:
 
   def input_mdbe_ci_settings
     {
-        'mdbe_ci_repo' => {
-            'username' => read_topic('Please input the username for MDBE CI (mdbe-ci-repo) repository', @configuration.dig('mdbe_ci', 'mdbe_ci_repo', 'username')),
-            'password' => read_topic('Please input the password for MDBE CI (mdbe-ci-repo) repository', @configuration.dig('mdbe_ci', 'mdbe_ci_repo', 'password'))
-        },
-        'es_repo' => {
-            'username' => read_topic('Please input the username for MDBE CI (es-repo) repository', @configuration.dig('mdbe_ci', 'es_repo', 'username')),
-            'password' => read_topic('Please input the password for MDBE CI (es-repo) repository', @configuration.dig('mdbe_ci', 'es_repo', 'password'))
-        }
+      'mdbe_ci_repo' => {
+        'username' => read_topic(
+          'Please input the username for MDBE CI (mdbe-ci-repo) repository', @configuration.dig('mdbe_ci',
+                                                                                                'mdbe_ci_repo', 'username')
+        ),
+        'password' => read_topic(
+          'Please input the password for MDBE CI (mdbe-ci-repo) repository', @configuration.dig('mdbe_ci',
+                                                                                                'mdbe_ci_repo', 'password')
+        )
+      },
+      'es_repo' => {
+        'username' => read_topic('Please input the username for MDBE CI (es-repo) repository',
+                                 @configuration.dig('mdbe_ci', 'es_repo', 'username')),
+        'password' => read_topic('Please input the password for MDBE CI (es-repo) repository',
+                                 @configuration.dig('mdbe_ci', 'es_repo', 'password'))
+      }
     }
   end
 
@@ -295,11 +316,11 @@ Use the following short product names to configure them:
     return settings unless read_topic('Use existing VPC for AWS instances?', 'y').casecmp('y').zero?
 
     settings.merge(
-        'use_existing_vpc' => true,
-        'vpc_id' => read_topic('Please input existing AWS VPC id',
-                                @configuration.dig('aws', 'vpc_id')),
-        'subnet_id' => read_topic('Please input existing AWS VPC subnet id (public)',
-                             @configuration.dig('aws', 'subnet_id'))
+      'use_existing_vpc' => true,
+      'vpc_id' => read_topic('Please input existing AWS VPC id',
+                             @configuration.dig('aws', 'vpc_id')),
+      'subnet_id' => read_topic('Please input existing AWS VPC subnet id (public)',
+                                @configuration.dig('aws', 'subnet_id'))
     )
   end
 

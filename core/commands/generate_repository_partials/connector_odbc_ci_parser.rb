@@ -26,7 +26,9 @@ module ConnectorOdbcCiParser
       save_as_field(:architecture)
     )
     releases.each_with_object([]) do |release, result|
-      archive = get_links(release[:url], logger, auth).find { |link| /connector-odbc.*tar\.gz/ =~ link[:content] }
+      archive = get_links(release[:url], logger, auth).find do |link|
+        /connector-odbc.*tar\.gz/ =~ link[:content]
+      end
       next if archive.nil?
 
       release[:architecture] = determine_architecture(release[:architecture])

@@ -1,5 +1,5 @@
 case node[:platform_family]
-when "debian", "ubuntu"
+when 'debian', 'ubuntu'
   directory '/etc/apt/keyrings' do
     owner 'root'
     group 'root'
@@ -7,7 +7,7 @@ when "debian", "ubuntu"
     recursive true
     action :create
   end
-  remote_file "/etc/apt/keyrings/mema_agent.public" do
+  remote_file '/etc/apt/keyrings/mema_agent.public' do
     source node['mema_agent']['repo_key']
     sensitive true
     action :create
@@ -15,17 +15,17 @@ when "debian", "ubuntu"
   apt_repository 'mema_agent' do
     uri node['mema_agent']['repo']
     components node['mema_agent']['components']
-    options ["signed-by=/etc/apt/keyrings/mema_agent.public"]
+    options ['signed-by=/etc/apt/keyrings/mema_agent.public']
     sensitive true
   end
-when "rhel", "centos", "almalinux", "oracle"
+when 'rhel', 'centos', 'almalinux', 'oracle'
   yum_repository 'mema_agent' do
     baseurl node['mema_agent']['repo']
     gpgkey node['mema_agent']['repo_key']
     gpgcheck true
     sensitive true
   end
-when "suse", "opensuse", "sles"
+when 'suse', 'opensuse', 'sles'
   zypper_repository 'mema_agent' do
     baseurl node['mema_agent']['repo']
     gpgkey node['mema_agent']['repo_key']
@@ -33,6 +33,6 @@ when "suse", "opensuse", "sles"
     sensitive true
   end
   execute 'Update zypper cache' do
-    command "zypper refresh"
+    command 'zypper refresh'
   end
 end

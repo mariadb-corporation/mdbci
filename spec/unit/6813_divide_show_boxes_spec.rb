@@ -7,7 +7,6 @@ require_relative '../../core/out'
 require_relative '../../core/services/repo_manager'
 
 describe 'BoxesManager#showBoxesget' do
-
   before :all do
     $mdbci_exec_dir = File.absolute_path('.')
     $session = Session.new
@@ -21,8 +20,9 @@ describe 'BoxesManager#showBoxesget' do
   end
 
   it 'get boxes list ubuntu trusty' do
-    boxesList = Array.new
-    boxesList = ["ubuntu_trusty_libvirt", "ubuntu_trusty_docker", "ubuntu_trusty_vbox", "ubuntu_trusty_aws"]
+    boxesList = []
+    boxesList = %w[ubuntu_trusty_libvirt ubuntu_trusty_docker ubuntu_trusty_vbox
+                   ubuntu_trusty_aws]
     BoxesManager.getBoxesList('ubuntu', 'trusty')
     $session.boxes.boxesList.sort.should eq(boxesList.sort)
   end
@@ -38,8 +38,9 @@ describe 'BoxesManager#showBoxesget' do
   end
 
   it 'print boxes list ubuntu trusty exit_code' do
-    boxesList = Array.new
-    boxesList = ["ubuntu_trusty_libvirt", "ubuntu_trusty_docker", "ubuntu_trusty_vbox", "ubuntu_trusty_aws"]
+    boxesList = []
+    boxesList = %w[ubuntu_trusty_libvirt ubuntu_trusty_docker ubuntu_trusty_vbox
+                   ubuntu_trusty_aws]
     $session.boxPlatform = 'ubuntu'
     $session.boxPlatformVersion = 'trusty'
     exit_code = BoxesManager.printBoxes(boxesList)
@@ -47,8 +48,8 @@ describe 'BoxesManager#showBoxesget' do
   end
 
   it 'get boxes list centos 7' do
-    boxesList = Array.new
-    boxesList = ["centos_7_libvirt", "centos_7_docker", "centos_7_aws", "centos_7_aws_large"]
+    boxesList = []
+    boxesList = %w[centos_7_libvirt centos_7_docker centos_7_aws centos_7_aws_large]
     exit_code = BoxesManager.getBoxesList('centos', '7')
     $session.boxes.boxesList.sort.should eq(boxesList.sort)
   end
@@ -64,8 +65,8 @@ describe 'BoxesManager#showBoxesget' do
   end
 
   it 'print boxes list centos 7 exit_code' do
-    boxesList = Array.new
-    boxesList = ["centos_7_libvirt", "centos_7_docker", "centos_7_aws", "centos_7_aws_large"]
+    boxesList = []
+    boxesList = %w[centos_7_libvirt centos_7_docker centos_7_aws centos_7_aws_large]
     $session.boxPlatform = 'centos'
     $session.boxPlatformVersion = '7'
     exit_code = BoxesManager.printBoxes(boxesList)
@@ -73,7 +74,6 @@ describe 'BoxesManager#showBoxesget' do
   end
 
   before :each do
-    $session.boxes.boxesList = Array.new
+    $session.boxes.boxesList = []
   end
-
 end

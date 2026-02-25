@@ -70,6 +70,7 @@ class SnapshotCommand < BaseCommand
     @node_name = @env.node_name
     @snapshot_name = @env.snapshot_name
     raise PATH_TO_NODES_OPTION_REQUIRED if @path_to_nodes.to_s.empty?
+
     @nodes_directory_name = @path_to_nodes.to_s.split('/')[-1]
     @provider = File.read("#{@path_to_nodes}/provider")
     @nodes = get_nodes
@@ -82,8 +83,10 @@ class SnapshotCommand < BaseCommand
   # @return [String] name of the action.
   def check_and_get_action
     raise SNAPSHOT_ACTION_REQUIRED if @args.empty?
+
     action = @args[0]
     raise "Unknown action '#{action}'" unless KNOWN_ACTIONS.include?(action)
+
     action
   end
 
@@ -113,6 +116,7 @@ class SnapshotCommand < BaseCommand
       if @node_name.to_s.empty? || @snapshot_name.to_s.empty?
         raise SNAPSHOT_NAME_AND_NODE_NAME_OPTIONS_REQUIRED
       end
+
       remove_snapshot(@node_name, @snapshot_name)
     when ACTION_LIST
       list_snapshots node_name
@@ -129,6 +133,7 @@ class SnapshotCommand < BaseCommand
       end
     end
     raise NODES_NOT_FOUND_ERROR if nodes.empty?
+
     nodes
   end
 
@@ -136,10 +141,9 @@ class SnapshotCommand < BaseCommand
   def get_docker_containers_ids
     container_ids = {}
     @nodes.each do |node_name|
-      begin
-        container_ids[node_name] = File.read("#{@path_to_nodes}/.vagrant/machines/#{node_name}/docker/id")
-      rescue Errno::ENOENT
-      end
+      container_ids[node_name] =
+        File.read("#{@path_to_nodes}/.vagrant/machines/#{node_name}/docker/id")
+    rescue Errno::ENOENT
     end
     container_ids
   end
@@ -187,6 +191,7 @@ class SnapshotCommand < BaseCommand
   def change_current_docker_snapshot(node_name, snapshot_name)
     snapshots = get_docker_snapshots node_name
     raise "#{snapshot_name} #{DOCKER_SNAPSHOT_NOT_FOUND}" unless snapshots.include? snapshot_name
+
     snapshot_information = JSON.parse(File.read("#{@path_to_nodes}/#{node_name}/snapshots"))
     snapshot_information[node_name]['current_snapshot'] = snapshot_name
     File.open("#{@path_to_nodes}/#{node_name}/snapshots", 'w') do |f|
@@ -206,6 +211,7 @@ class SnapshotCommand < BaseCommand
       wait_thr.value
     end
     raise "#{cmd} #{NON_ZERO_BASH_EXIT_CODE_ERROR} #{process_status}" unless process_status.success?
+
     output
   end
 
@@ -217,20 +223,21 @@ class SnapshotCommand < BaseCommand
   # no arguments => all nodes
   def get_snapshots(node_name)
     raise NODE_NAME_OPTIONS_REQUIRED if node_name.to_s.empty?
+
     case @provider
     when LIBVIRT
-      output = run_reliable_command("virsh -q snapshot-list --domain #{@nodes_directory_name}_#{node_name} | awk '{print $1}'",
-                                    log = false)[:output].strip
-      return output
+      run_reliable_command("virsh -q snapshot-list --domain #{@nodes_directory_name}_#{node_name} | awk '{print $1}'",
+                           log = false)[:output].strip
+
     when DOCKER
-      return get_docker_snapshots(node_name)
+      get_docker_snapshots(node_name)
     else
       current_dir = Dir.pwd
       Dir.chdir @path_to_nodes
       output = run_reliable_command("vagrant snap list #{node_name} | grep +.* | awk '{print $2}'",
                                     log = false)[:output].strip
       Dir.chdir current_dir
-      return output
+      output
     end
   end
 
@@ -244,17 +251,22 @@ class SnapshotCommand < BaseCommand
     full_snapshot_name = "#{SNAPSHOT_GLOBAL_PREFIX}_#{snapshot_name}_#{@nodes_directory_name}_#{node_name}"
     @ui.info "Taking snapshot of #{node_name} to #{full_snapshot_name}"
     raise SNAPSHOT_ALREADY_EXISTS if get_snapshots(node_name).include? full_snapshot_name
+
     case @provider
     when LIBVIRT
       run_reliable_command("virsh snapshot-create-as --domain #{@nodes_directory_name}_#{node_name} --name #{full_snapshot_name}")
     when DOCKER
       raise DOCKER_IMAGE_NAME_EXISTS if get_docker_images.include? full_snapshot_name
+
       unless full_snapshot_name == full_snapshot_name.to_s.downcase
         @ui.warning DOCKER_SNAPSHOT_NAME_MUST_BE_DOWNCASE
         full_snapshot_name = full_snapshot_name.to_s.downcase
       end
       docker_containers_ids = get_docker_containers_ids
-      raise "#{node_name} #{DOCKER_MACHINE_NOT_CREATED}" unless docker_containers_ids.include? node_name
+      unless docker_containers_ids.include? node_name
+        raise "#{node_name} #{DOCKER_MACHINE_NOT_CREATED}"
+      end
+
       run_reliable_command("docker commit -p #{docker_containers_ids[node_name]} #{full_snapshot_name}")
       add_docker_snapshot_information(node_name, full_snapshot_name)
     else
@@ -281,7 +293,8 @@ class SnapshotCommand < BaseCommand
     case @provider
     when LIBVIRT
       run_reliable_command("virsh snapshot-revert --domain #{@nodes_directory_name}_#{node_name} --snapshotname #{full_snapshot_name}")
-      raise VIRSH_CAN_NOT_SNAPSHOT_REVERT unless VagrantService.node_running?(node_name, @ui, @path_to_nodes)
+      raise VIRSH_CAN_NOT_SNAPSHOT_REVERT unless VagrantService.node_running?(node_name, @ui,
+                                                                              @path_to_nodes)
 
       pwd = Dir.pwd
       Dir.chdir @path_to_nodes
@@ -313,6 +326,7 @@ class SnapshotCommand < BaseCommand
     @ui.info "Removing snapshot #{full_snapshot_name} for node #{node_name}"
     raise SNAPSHOTS_NOT_FOUND if get_snapshots(node_name).empty?
     raise SNAPSHOT_NOT_EXISTS unless get_snapshots(node_name).include? full_snapshot_name
+
     case @provider
     when LIBVIRT
       run_reliable_command("virsh snapshot-delete --domain #{@nodes_directory_name}_#{node_name} --snapshotname #{full_snapshot_name}")
@@ -320,8 +334,13 @@ class SnapshotCommand < BaseCommand
       if (get_docker_initial_snapshot(node_name) == full_snapshot_name) || (get_docker_current_snapshot(node_name) == full_snapshot_name)
         raise "#{full_snapshot_name} #{DOCKER_SNAPSHOT_INITIAL_OR_IN_USE_NO_DELETION}"
       end
-      raise "#{node_name} #{DOCKER_MACHINE_NOT_CREATED}" unless get_docker_containers_ids.include? node_name
-      raise "#{full_snapshot_name} #{DOCKER_SNAPSHOT_EXISTS}" unless get_docker_snapshots(node_name).include? full_snapshot_name
+      unless get_docker_containers_ids.include? node_name
+        raise "#{node_name} #{DOCKER_MACHINE_NOT_CREATED}"
+      end
+      unless get_docker_snapshots(node_name).include? full_snapshot_name
+        raise "#{full_snapshot_name} #{DOCKER_SNAPSHOT_EXISTS}"
+      end
+
       run_reliable_command("docker rmi #{full_snapshot_name}")
       remove_docker_snapshot_information(node_name, full_snapshot_name)
     else

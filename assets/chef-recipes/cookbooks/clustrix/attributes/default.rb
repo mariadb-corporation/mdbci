@@ -3,9 +3,7 @@
 # attributes/default.rb
 
 # Path for ClustrixDB installer
-if node['clustrix']['repo'].nil?
-  default['clustrix']['repo'] = node['clustrix']['version']
-end
+default['clustrix']['repo'] = node['clustrix']['version'] if node['clustrix']['repo'].nil?
 
 # Path for ClustrixDB installer
 default['clustrix']['license'] = "set global license='{}';"

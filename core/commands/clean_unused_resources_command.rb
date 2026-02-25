@@ -2,7 +2,6 @@
 
 require_relative 'base_command'
 
-
 # Command that destroys unused or lost additional cloud resources
 class CleanUnusedResourcesCommand < BaseCommand
   include ShellCommands
@@ -37,7 +36,6 @@ Add the --resources-list FILENAME flag with the path to the resources report.
       delete_security_groups
       @ui.info('Resources successfully destroyed')
       SUCCESS_RESULT
-
     rescue StandardError => e
       Result.error(e.message)
     end

@@ -38,7 +38,6 @@ class VagrantConfigurator
     Workers.pool.resize(@threads_count)
   end
 
-
   # Bring up whole configuration or a machine up.
   #
   # @param provider [String] name of the provider to use.
@@ -47,7 +46,7 @@ class VagrantConfigurator
   # the whole configuration up.
   # @return result of the run_command_and_log()
   def bring_up_machine(provider, logger, node = '')
-    logger.info("Bringing up #{(node.empty? ? 'configuration ' : 'node ')} #{@specification}")
+    logger.info("Bringing up #{node.empty? ? 'configuration ' : 'node '} #{@specification}")
     VagrantService.up(provider, node, logger, @config.path)
   end
 
@@ -77,28 +76,25 @@ class VagrantConfigurator
     image_dir_path = "#{@config.path}/images"
     disk_dev_name = 'a'
     @node_configurations[node]['disks'].each do |disk|
-      if disk['dev_name'] != 'a'
+      if disk['dev_name'] == 'a'
+        @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
+      else
         disk_dev_name = disk_dev_name.succ
         selected_disk = @disk_configurations.find { |id, _| id == disk['id'] }&.last
         if selected_disk
           @ui.info("Attaching shared disk [#{disk['id']}] to node [#{node}]")
-          if selected_disk['image_path']
-            image_path = selected_disk['image_path']
-          else
-            image_path = "#{image_dir_path}/#{disk['id']}.img"
-          end
+          image_path = selected_disk['image_path'] || "#{image_dir_path}/#{disk['id']}.img"
           ShellCommands.run_command_in_dir(
-            @ui, 
+            @ui,
             "virsh attach-disk #{vm_name} --source #{image_path} --target vd#{disk_dev_name} --cache none --driver qemu --subdriver raw --serial #{disk['id']} --shareable",
             image_dir_path
           )
           device_id = "/dev/disk/by-id/virtio-#{disk['id']}"
-          @machine_configurator.run_command(network_settings, "echo \"#{disk['id']} -> $(realpath #{device_id})\" >> shared-disks")
+          @machine_configurator.run_command(network_settings,
+                                            "echo \"#{disk['id']} -> $(realpath #{device_id})\" >> shared-disks")
         else
           @ui.warning("Disk defined in node parameters was not found in the configuration. Skipped [#{disk['id']}].")
         end
-      else
-        @ui.warning("Block device name /dev/vda is reserved for system purposes. Skipped [#{disk['id']}].")
       end
     end
   end
@@ -123,7 +119,8 @@ class VagrantConfigurator
       settings_result = VagrantService.generate_ssh_settings(node, @ui, @config)
       next if settings_result.error?
 
-      settings = SshUser.create_user(@machine_configurator, node, settings_result.value, @config.path, logger)
+      settings = SshUser.create_user(@machine_configurator, node, settings_result.value,
+                                     @config.path, logger)
       @network_settings.add_network_configuration(node, settings)
       next if NetworkChecker.resources_available?(@machine_configurator, settings, logger).error?
 
@@ -133,7 +130,8 @@ class VagrantConfigurator
 
       configuration_result = ChefConfigurationGenerator.configure_with_chef(
         node, logger, @network_settings.node_settings(node),
-        @config, @ui, @machine_configurator)
+        @config, @ui, @machine_configurator
+      )
       return configuration_result if configuration_result.success?
     rescue Net::SSH::Exception => e
       @ui.error("SSH exception: #{e.message}")

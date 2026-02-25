@@ -72,7 +72,7 @@ module DockerCookbook
       def create_service
         service docker_name do
           supports restart: true, status: true
-          action [:enable, :start]
+          action %i[enable start]
         end
       end
     end

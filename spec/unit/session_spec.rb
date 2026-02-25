@@ -44,7 +44,7 @@ describe 'Session' do
         [nil, { Session::PLATFORM => platform }]
       end
       allow(fake_box_manager).to receive(:each).and_yield(boxes[0])
-        .and_yield(boxes[1]).and_yield(boxes[2])
+                                               .and_yield(boxes[1]).and_yield(boxes[2])
       allow(fake_box_manager).to receive(:empty?).and_return(false)
       fake_boxes = double
       allow(fake_boxes).to receive(:boxesManager).and_return(fake_box_manager)
@@ -111,7 +111,7 @@ describe 'Session' do
 
   context '#sudo' do
     it 'should exit with non-zero code for aws/vbox nodes nodes (no such machine exists)' do
-      lambda{$session.sudo('TEST_MACHINE')}.should raise_error(RuntimeError)
+      -> { $session.sudo('TEST_MACHINE') }.should raise_error(RuntimeError)
     end
   end
 end

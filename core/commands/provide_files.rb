@@ -52,19 +52,27 @@ class ProvideFiles < BaseCommand
     end
 
     parse_files_arguments
-  rescue ArgumentError => error
-    Result.error(error.message)
+  rescue ArgumentError => e
+    Result.error(e.message)
   end
 
   def parse_files_arguments
     @transfer_spec = @args.drop(1).map do |file_spec|
       paths = file_spec.split(':')
-      return Result.error("You must provide path separated by ':'. Error in spec: '#{file_spec}'") if paths.size != 2
+      if paths.size != 2
+        return Result.error("You must provide path separated by ':'. Error in spec: '#{file_spec}'")
+      end
 
       local_file, remote_file = paths
-      return Result.error("Local file '#{local_file}' does not exist.") unless File.exist?(local_file)
-      return Result.error("Local file '#{local_file}' must not be empty!") if File.stat(local_file).size.zero?
-      return Result.error("Remote file '#{remote_file}' must be absolute.") unless remote_file[0] == '/'
+      unless File.exist?(local_file)
+        return Result.error("Local file '#{local_file}' does not exist.")
+      end
+      if File.stat(local_file).size.zero?
+        return Result.error("Local file '#{local_file}' must not be empty!")
+      end
+      unless remote_file[0] == '/'
+        return Result.error("Remote file '#{remote_file}' must be absolute.")
+      end
 
       {
         local_file: File.expand_path(local_file),

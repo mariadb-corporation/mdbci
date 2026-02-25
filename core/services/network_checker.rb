@@ -25,7 +25,9 @@ module NetworkChecker
       table[resource] = check_resource?(tool, machine_configurator, machine, resource, logger)
     end
     print_table(availability_table, logger)
-    return Result.error('Network resources are not available.') unless test_result(availability_table)
+    unless test_result(availability_table)
+      return Result.error('Network resources are not available.')
+    end
 
     logger.debug('Network resources are available.')
     Result.ok(machine)

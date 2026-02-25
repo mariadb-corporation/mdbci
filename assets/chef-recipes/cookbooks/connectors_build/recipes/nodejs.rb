@@ -16,7 +16,8 @@ when 'centos', 'redhat', 'rocky'
     package 'nodejs'
     package 'v8314-runtime'
     execute 'enable nodejs' do
-      command "echo 'source /opt/rh/nodejs010/enable' >> #{Dir.home(ENV['SUDO_USER'])}/.bashrc"
+      command "echo 'source /opt/rh/nodejs010/enable' >> #{Dir.home(ENV.fetch('SUDO_USER',
+                                                                              nil))}/.bashrc"
     end
   else
     execute 'intall repo' do

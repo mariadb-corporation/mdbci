@@ -39,7 +39,9 @@ module DockerCookbook
     property :group, String, default: 'docker'
     property :host, [String, Array], coerce: proc { |v| coerce_host(v) }, desired_state: false
     property :icc, [TrueClass, FalseClass]
-    property :insecure_registry, [Array, String, nil], coerce: proc { |v| coerce_insecure_registry(v) }
+    property :insecure_registry, [Array, String, nil], coerce: proc { |v|
+                                                                 coerce_insecure_registry(v)
+                                                               }
     property :ip, [IPV4_ADDR, IPV6_ADDR, nil]
     property :ip_forward, [TrueClass, FalseClass]
     property :ipv4_forward, [TrueClass, FalseClass], default: true
@@ -48,9 +50,11 @@ module DockerCookbook
     property :iptables, [TrueClass, FalseClass]
     property :ipv6, [TrueClass, FalseClass]
     property :default_ip_address_pool, String
-    property :log_level, %w(debug info warn error fatal)
-    property :labels, [String, Array], coerce: proc { |v| coerce_daemon_labels(v) }, desired_state: false
-    property :log_driver, %w(json-file syslog journald gelf fluentd awslogs splunk none)
+    property :log_level, %w[debug info warn error fatal]
+    property :labels, [String, Array], coerce: proc { |v|
+                                                 coerce_daemon_labels(v)
+                                               }, desired_state: false
+    property :log_driver, %w[json-file syslog journald gelf fluentd awslogs splunk none]
     property :log_opts, [String, Array], coerce: proc { |v| v.nil? ? nil : Array(v) }
     property :mount_flags, String
     property :mtu, String
@@ -87,13 +91,14 @@ module DockerCookbook
 
     allowed_actions :start, :stop, :restart
 
-    alias_method :label, :labels
-    alias_method :run_group, :group
-    alias_method :graph, :data_root
+    alias label labels
+    alias run_group group
+    alias graph data_root
 
     declare_action_class.class_eval do
       def libexec_dir
         return '/usr/libexec/docker' if node['platform_family'] == 'rhel'
+
         '/usr/lib/docker'
       end
 

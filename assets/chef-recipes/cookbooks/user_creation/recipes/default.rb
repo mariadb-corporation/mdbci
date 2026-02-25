@@ -19,7 +19,7 @@ directory File.join(home_dir, '.ssh') do
   action :create
 end
 
-user = ENV['SUDO_USER']
+user = ENV.fetch('SUDO_USER', nil)
 execute 'copy ssh files' do
   command "cp -r #{File.join('/home', user, '.ssh')} #{home_dir}"
   not_if { user == node['user_creation']['name'] }

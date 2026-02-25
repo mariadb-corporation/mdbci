@@ -75,9 +75,9 @@ Labels should be separated with commas and should not contain any whitespaces.
     end
     begin
       setup_command
-    rescue ArgumentError => error
-      @ui.error(error.message)
-      @ui.error(error.backtrace.join("\n"))
+    rescue ArgumentError => e
+      @ui.error(e.message)
+      @ui.error(e.backtrace.join("\n"))
       return ARGUMENT_ERROR_RESULT
     end
     bring_up_nodes

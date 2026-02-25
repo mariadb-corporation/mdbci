@@ -17,10 +17,12 @@ module CloudServices
   # @return [Result::Base] instance type name.
   def self.instance_type_by_preferences(machine_types_list, cpu, ram)
     type = machine_types_list
-               .sort_by{ |t| [t[:cpu], t[:ram]] }
-               .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }
-               .first
-    return Result.error('The type of machine that meets the specified parameters can not be found') if type.nil?
+           .sort_by { |t| [t[:cpu], t[:ram]] }
+           .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }
+           .first
+    if type.nil?
+      return Result.error('The type of machine that meets the specified parameters can not be found')
+    end
 
     Result.ok(type[:type])
   end

@@ -31,6 +31,7 @@ class ReportPortal
       'share' => true
     )
     return dashboard_id unless dashboard_id.nil?
+
     JSON.parse(response.body.to_s).to_hash['id']
   end
 
@@ -51,7 +52,8 @@ class ReportPortal
     JSON.parse(response.body.to_s).to_hash['id']
   end
 
-  def create_widget(name, description, type, gadget, filter_id, options = {}, content_fields = [], widget_id = nil)
+  def create_widget(name, description, type, gadget, filter_id, options = {}, content_fields = [],
+                    widget_id = nil)
     if widget_id.nil?
       url = "#{@host}/#{@project_name}/widget"
       method = :post
@@ -65,7 +67,7 @@ class ReportPortal
       'content_parameters' => {
         'type' => type,
         'gadget' => gadget,
-        'metadata_fields' => %w(name number start_time),
+        'metadata_fields' => %w[name number start_time],
         'itemsCount' => 50,
         'widgetOptions' => options,
         'content_fields' => content_fields
@@ -77,6 +79,7 @@ class ReportPortal
     )
 
     return widget_id unless widget_id.nil?
+
     JSON.parse(response.body.to_s).to_hash['id']
   end
 
@@ -98,6 +101,7 @@ class ReportPortal
     )
     launch = JSON.parse(response.body.to_s).to_hash['content'].first
     return nil if launch.nil?
+
     launch['id']
   end
 
@@ -110,6 +114,7 @@ class ReportPortal
     )
     test = JSON.parse(response.body.to_s).to_hash['content'].first
     return nil if test.nil?
+
     test['id']
   end
 
@@ -162,7 +167,8 @@ class ReportPortal
     )
   end
 
-  def add_root_test_item(launch_id, name, description, params, start_time, type, tags = [], status, end_time)
+  def add_root_test_item(launch_id, name, description, params, start_time, type, tags = [], status,
+                         end_time)
     test_id = get_test_id(launch_id, name)
     unless test_id.nil?
       update_test(test_id, description, tags)
@@ -193,7 +199,8 @@ class ReportPortal
     item_id
   end
 
-  def add_child_test_item(launch_id, parent_item, name, description, params, start_time, type, unique_id, tags = [])
+  def add_child_test_item(launch_id, parent_item, name, description, params, start_time, type,
+                          unique_id, tags = [])
     url = "#{@host}/#{@project_name}/item/#{parent_item}"
     response = make_response(
       :post, url,
@@ -236,10 +243,9 @@ class ReportPortal
   def all_standard_filters
     url = "#{@host}/#{@project_name}/filter"
     response = make_get_response(url)
-    standard_filters = JSON.parse(response.body.to_s).to_h['content'].keep_if do |filter|
+    JSON.parse(response.body.to_s).to_h['content'].keep_if do |filter|
       filter['description'].include?(STANDARD_FILTER_TAG)
     end
-    standard_filters
   end
 
   def delete_standard_filters
@@ -247,9 +253,7 @@ class ReportPortal
     response = make_get_response(url)
     standard_filters_ids = []
     JSON.parse(response.body.to_s).to_h['content'].each do |filter|
-      if filter['description'].include?(STANDARD_FILTER_TAG)
-        standard_filters_ids << filter['id']
-      end
+      standard_filters_ids << filter['id'] if filter['description'].include?(STANDARD_FILTER_TAG)
     end
     standard_filters_ids.each { |filter_id| delete_filter(filter_id) }
   end
@@ -261,6 +265,7 @@ class ReportPortal
       dashboard['name'] == name
     end
     return nil if dashboard_res.nil?
+
     dashboard_res['id']
   end
 
@@ -269,6 +274,7 @@ class ReportPortal
     response = make_get_response(url)
     widget = JSON.parse(response.body.to_s)
     return false if widget.nil? || widget.to_h['description'].nil?
+
     widget.to_h['description'].include?(STANDARD_WIDGET_TAG)
   end
 
@@ -282,6 +288,7 @@ class ReportPortal
     response = make_get_response(url)
     widgets = JSON.parse(response.body.to_s).to_h['widgets']
     return if widgets.nil?
+
     widgets.each do |widget|
       if standard_widget?(widget['widgetId'])
         delete_widget_from_dashboard(dashboard_id, widget['widgetId'])

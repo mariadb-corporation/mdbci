@@ -5,7 +5,6 @@ require_relative '../../core/boxes_manager'
 require_relative '../../core/session'
 
 describe 'Session' do
-
   box_should_be_removed = nil
 
   before :all do
@@ -30,7 +29,6 @@ describe 'Session' do
   end
 
   it '#setup should exit with non-zero exit code when parameter is wrong or shell command failed' do
-    lambda{$session.setup('')}.should raise_error /Cannot setup .*/
+    -> { $session.setup('') }.should raise_error(/Cannot setup .*/)
   end
-
 end

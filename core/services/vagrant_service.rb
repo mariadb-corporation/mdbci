@@ -8,38 +8,39 @@ module VagrantService
   include ReturnCodes
 
   def self.set_access_rights_for_ubuntu_or_mint(logger)
-    return true unless self.chek_distro_is_ubuntu_or_mint
-    return true if self.chek_right_vmlinuz
+    return true unless chek_distro_is_ubuntu_or_mint
+    return true if chek_right_vmlinuz
 
-    if self.chek_need_pass_for_sudo(logger)
+    if chek_need_pass_for_sudo(logger)
       if $stdin.tty?
         logger.info('To create box, you need to add the ability to read /boot/vmlinuz* files using the sudo chmod o+r /boot/vmlinuz* command. To continue, enter the password.')
-        return false unless self.choose_continue
+        return false unless choose_continue
       else
         logger.info('It is impossible to continue the process of creating the box due to the lack of necessary access rights for /boot/vmlinuz*.')
         return false
       end
     end
-    ShellCommands.run_command(logger, "sudo chmod o+r /boot/vmlinuz*")[:value].success?
+    ShellCommands.run_command(logger, 'sudo chmod o+r /boot/vmlinuz*')[:value].success?
 
-    return true
+    true
   end
 
   def self.choose_continue
-    $stdout.print("Are you sure you want to continue? [yes/no]: ")
+    $stdout.print('Are you sure you want to continue? [yes/no]: ')
     while (input = gets.strip)
       return true if ['yes', 'y', ''].include?(input.downcase)
-      return false if ['no', 'n'].include?(input.downcase)
+      return false if %w[no n].include?(input.downcase)
+
       $stdout.print('Please enter [yes/no]: ')
     end
   end
 
   def self.chek_need_pass_for_sudo(logger)
-    !ShellCommands.run_command(logger, "sudo -n true 2>/dev/null")[:value].success?
+    !ShellCommands.run_command(logger, 'sudo -n true 2>/dev/null')[:value].success?
   end
 
   def self.chek_right_vmlinuz
-    Dir.glob("/boot/vmlinuz*").each do |file|
+    Dir.glob('/boot/vmlinuz*').each do |file|
       stat = File.stat(file)
       return (stat.mode & 0o004) != 0
     end
@@ -49,8 +50,10 @@ module VagrantService
     distribution_regex = /^ID=\W*(\w+)\W*/
     File.open('/etc/os-release') do |release_file|
       release_file.each do |line|
-        return ['ubuntu',
-                'mint'].include?(line.match(distribution_regex)[1].downcase) if line =~ distribution_regex
+        if line =~ distribution_regex
+          return %w[ubuntu
+                    mint].include?(line.match(distribution_regex)[1].downcase)
+        end
       end
     end
   end
@@ -60,7 +63,7 @@ module VagrantService
   end
 
   def self.package(node_name, box_name, logger, path = Dir.pwd)
-    unless self.set_access_rights_for_ubuntu_or_mint(logger)
+    unless set_access_rights_for_ubuntu_or_mint(logger)
       return Result.error('Error when trying to configure permissions for vmlinuz. Further box creation is not possible.
       Please run command setup-dependencies with the --product libvirt arg.')
     end

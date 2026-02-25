@@ -1,16 +1,16 @@
-include_recipe "mysql::mdbcrepos"
+include_recipe 'mysql::mdbcrepos'
 
 # Install packages
 case node[:platform_family]
-when "suse"
-  execute "install" do
-    command "zypper -n install --from mysql mysql-community-client mysql-community-server"
+when 'suse'
+  execute 'install' do
+    command 'zypper -n install --from mysql mysql-community-client mysql-community-server'
   end
-when "debian"
+when 'debian'
   package 'mysql-server'
   package 'mysql-client'
-when "windows"
-  windows_package "MariaDB" do
+when 'windows'
+  windows_package 'MariaDB' do
     source "#{Chef::Config[:file_cache_path]}/mysql.msi"
     installer_type :msi
     action :install
