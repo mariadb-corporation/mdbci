@@ -173,6 +173,11 @@ class TerraformGcpGenerator
 
   # Generate provider resource.
   def provider_resource(region, zone)
+    credentials = if @gcp_config['credentials_file']
+                    "credentials = file(\"#{@gcp_config['credentials_file']}\")"
+                  else
+                    ''
+                  end
     <<-PROVIDER
     terraform {
       required_providers {
@@ -184,6 +189,7 @@ class TerraformGcpGenerator
     }
 
     provider "google" {
+      #{credentials}
       project = "#{@gcp_config['project']}"
       region = "#{region}"
       zone = "#{zone}"
