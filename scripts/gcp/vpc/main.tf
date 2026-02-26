@@ -1,5 +1,6 @@
 provider "google" {
   version     = "~> 3.1"
+  credentials = var.credentials_file_path != null ? file(var.credentials_file_path) : null
   project     = var.project
   region      = var.region
   zone        = var.zone

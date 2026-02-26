@@ -18,6 +18,7 @@ variable "zone" {
 variable "credentials_file_path" {
   type = string
   description = "Path to the Google Cloud Platform json credentials file"
+  default = null
 }
 
 variable "vpc_name" {

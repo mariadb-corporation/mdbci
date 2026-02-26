@@ -67,6 +67,7 @@ terraform {
 }
 
 provider "google" {
+  credentials = file("<path to GCP credentials file>")
   project     = "<project name>"
 }
 
