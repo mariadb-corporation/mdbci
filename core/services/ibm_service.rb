@@ -98,9 +98,29 @@ class IbmService
     if public_network_exists?(instance_name)
       public_network_id = fetch_public_network_id(instance_name)
       uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/cloud-instances/#{@cloud_instance_id}/networks/#{public_network_id}")
-      send_delete_request(uri)
+      send_delete_public_network_request(uri, public_network_id)
     else
       @logger.error("IBM Cloud PVM instance #{instance_name} public network was not found. Manual deletion skipped.")
+    end
+  end
+
+  def send_delete_public_network_request(uri, public_network_id, max_retries = 5, timeout = 15)
+    retries = 0
+    loop do
+      response = send_delete_request(uri)
+      if response
+        @logger.info("Successfully deleted public network #{public_network_id}")
+        break
+      else
+        retries += 1
+        if retries <= max_retries
+          @logger.info("Network #{public_network_id} still in use, retry #{retries}/#{max_retries} in #{timeout} seconds")
+          sleep timeout
+        else
+          @logger.error("Failed to delete public network #{public_network_id}. Manual deletion skipped.")
+          break
+        end
+      end
     end
   end
 
@@ -130,8 +150,7 @@ class IbmService
   end
 
   def fetch_public_network_id(network_name)
-    network_data = fetch_public_network_data(network_name)
-    network_data['networkID']
+    fetch_public_network_data(network_name)&.[]('networkID')
   end
 
   def fetch_public_network_data(network_name)
@@ -141,7 +160,12 @@ class IbmService
 
   def fetch_pvm_instance_id(instance_name)
     instance_data = fetch_pvm_instance_data(instance_name)
-    instance_data['pvmInstanceID']
+    if instance_data.nil?
+      logger.warning("Missing pvmInstanceID of #{instance_name}")
+      nil
+    else
+      instance_data['pvmInstanceID']
+    end
   end
 
   def fetch_pvm_instance_data(instance_name)
@@ -183,6 +207,10 @@ class IbmService
     Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
       res = http.request(req)
       return res.body if res.is_a?(Net::HTTPSuccess)
+
+      @logger.error("HTTP #{res.code} #{res.message} for #{uri}")
+      @logger.error("Response: #{res.body}") if res.body
+      return nil
     end
   end
 end
