@@ -95,3 +95,4 @@ Each box name usually consists of distribution name, version and box provider
 
 * `configure_subscription_manager` - boolean flag for RedHat system registration. When the flag is set MDBCI registers the system via [RHSM](https://access.redhat.com/products/red-hat-subscription-management) and attaches it to an available subscription on the machine creation and unsubscribes and de-registers on the destruction.
 * `configure_suse_connect` - boolean flag for SLES system registration. When the flag is set MDBCI activates the system via SUSEConnect on the machine creation and deactivates it on the destruction.
+* `skip_default_packages_installation` - boolean flag. When the flag is set MDBCI will not install the `packages`, `chrony` recipes during the machine creation.

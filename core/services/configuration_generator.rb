@@ -176,7 +176,7 @@ class ConfigurationGenerator
       product_configs.merge!('suse-connect': @suse_config.merge({ provider: provider }))
     end
 
-    recipe_names << 'packages'
+    recipe_names << 'packages' unless node_params[:skip_default_packages_installation] == 'true'
 
     if node_params[:public_network_gateway]
       recipe_names << 'public_network'
@@ -186,7 +186,11 @@ class ConfigurationGenerator
                              })
     end
 
-    recipe_names << 'grow-root-fs' if %w[aws gcp].include?(provider)
+    if !(node_params[:skip_default_packages_installation] == 'true') && %w[aws
+                                                                           gcp].include?(provider)
+
+      recipe_names << 'grow-root-fs'
+    end
     Result.ok({ product_configs: product_configs, recipe_names: recipe_names })
   end
   # rubocop:enable Metrics/MethodLength
