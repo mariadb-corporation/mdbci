@@ -17,7 +17,7 @@ require_relative '../models/result'
 
 # Module for executing commands on the remote machine using ssh package
 module SshCommands
-  ARGUMENTS = '-q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=5'
+  ARGUMENTS = '-q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=30'
 
   # Run command on the remote machine, using ssh command on the local machine
   # @param machine [Hash] information about machine to connect
@@ -33,13 +33,34 @@ module SshCommands
   # @param machine [Hash] information about machine to connect
   # @param source [String] path to the file on the local machine
   # @param target [String] path to the file on the remote machine
-  # @param recursive [Boolean] use recursive copying or not
   # @return result of the command execution with stdout or stderr output
-  def self.copy_with_scp(machine, source, target, recursive = true)
-    target_dir = File.dirname(target)
-    execute_command_with_ssh(machine, "mkdir -p #{target_dir}")
+  def self.copy_with_scp(machine, source, target)
+    if File.directory?(source)
+      execute_command_with_ssh(machine, "mkdir -p #{target}")
+
+      Dir[File.join(source, '**', '*')].each do |file|
+        next if File.directory?(file)
+
+        relative_path = file.sub(source + '/', '')
+        dest_path = File.join(target, relative_path)
+        dest_dir = File.dirname(dest_path)
+
+        execute_command_with_ssh(machine, "mkdir -p #{dest_dir}").and_then do
+          result = execute_scp_command(machine, file, dest_path)
+          return result unless result.success?
+        end
+      end
+      Result.ok("Directory #{source} uploaded successfully")
+    else
+      target_dir = File.dirname(target)
+      execute_command_with_ssh(machine, "mkdir -p #{target_dir}")
+      execute_scp_command(machine, source, target)
+    end
+  end
+
+  def self.execute_scp_command(machine, source, target)
     ssh_login = "#{machine['whoami']}@#{machine['network']}"
-    command = "scp #{ARGUMENTS} -i '#{machine['keyfile']}' #{recursive ? ' -r ' : ''} '#{source}' '#{ssh_login}:#{target}'"
+    command = "scp #{ARGUMENTS} -i '#{machine['keyfile']}' '#{source}' '#{ssh_login}:#{target}'"
     execute_command(command)
   end
 
