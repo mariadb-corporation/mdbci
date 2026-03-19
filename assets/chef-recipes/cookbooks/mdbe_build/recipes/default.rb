@@ -687,6 +687,7 @@ ruby_block 'get cmake version' do
   node.run_state['cmake_flag'] = false
   block do
     cmd = Mixlib::ShellOut.new('cmake --version')
+    cmd.run_command
     if cmd.error?
       node.run_state['cmake_flag'] = true
     else
