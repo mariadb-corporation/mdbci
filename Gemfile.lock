@@ -1,8 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.8.0)
-      public_suffix (>= 2.0.2, < 5.0)
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.2)
     aws-eventstream (1.2.0)
     aws-partitions (1.661.0)
@@ -100,7 +100,7 @@ GEM
     pry-doc (1.5.0)
       pry (~> 0.11)
       yard (~> 0.9.11)
-    public_suffix (4.0.6)
+    public_suffix (7.0.5)
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
