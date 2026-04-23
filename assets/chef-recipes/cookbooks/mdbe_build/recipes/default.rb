@@ -273,23 +273,6 @@ centos_packages = %w[
   yum-utils
 ]
 
-centos_7_packages = %w[
-  devtoolset-10-gcc*
-  Judy-devel
-  perl-Test-Base
-  policycoreutils-python
-  python-devel
-  python-pip
-  redhat-lsb-core
-  scons
-  subversion
-  java-1.8.0-openjdk
-  java-1.8.0-openjdk-devel
-  jemalloc
-  jemalloc-devel
-  mhash-devel
-]
-
 centos_8_packages = %w[
   gcc-toolset-10-gcc*
   Judy-devel
@@ -520,19 +503,6 @@ when 'ubuntu'
   end
 when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
   case node[:platform_version].to_i
-  when 7 # CentOS 7
-    packages = general_packages.concat(centos_packages).concat(centos_7_packages)
-    if node[:platform] == 'centos'
-      execute 'add scl meta-package' do
-        command 'yum install -y centos-release-scl'
-      end
-    end
-    execute 'yum groups' do
-      command 'yum groups mark convert'
-    end
-    execute 'install development tools' do
-      command "yum -y groupinstall 'Development Tools'"
-    end
   when 8 # CentOS 8
     packages = general_packages.concat(centos_packages).concat(centos_8_packages)
     if node.attributes['kernel']['machine'] == 'aarch64'
@@ -720,8 +690,8 @@ rm cmake-#{cmake_path}.tar.gz"
 end
 
 if %w[centos redhat rocky almalinux
-      oracle].include?(node[:platform]) && [7, 8].include?(node[:platform_version].to_i)
-  devtoolset_name = node[:platform_version].to_i == 7 ? 'devtoolset-10' : 'gcc-toolset-10'
+      oracle].include?(node[:platform]) && node[:platform_version].to_i == 8
+  devtoolset_name = 'gcc-toolset-10'
   execute 'Enable devtoolset-10' do
     command "scl enable #{devtoolset_name} bash"
   end

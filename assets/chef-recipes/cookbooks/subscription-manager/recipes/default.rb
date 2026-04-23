@@ -38,20 +38,9 @@ enable_repositories = ["rhel-#{platform_version}-for-$(arch)-baseos-rpms",
                        "codeready-builder-for-rhel-#{platform_version}-$(arch)-debug-rpms",
                        "codeready-builder-for-rhel-#{platform_version}-$(arch)-source-rpms"]
 
-enable_repositories_rhel_7 = ['rhel-7-server-rpms',
-                              'rhel-7-server-supplementary-rpms']
-
-if node[:platform_version].to_i == 7
-  enable_repositories_rhel_7.each do |repo|
-    execute "Enable #{repo} repo" do
-      command "subscription-manager repos --enable \"#{repo}\""
-    end
-  end
-else
-  enable_repositories.each do |repo|
-    execute "Enable #{repo} repo" do
-      command "subscription-manager repos --enable \"#{repo}\""
-    end
+enable_repositories.each do |repo|
+  execute "Enable #{repo} repo" do
+    command "subscription-manager repos --enable \"#{repo}\""
   end
 end
 

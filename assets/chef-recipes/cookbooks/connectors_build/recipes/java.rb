@@ -9,15 +9,7 @@ when 'debian', 'ubuntu'
   end
 when 'centos', 'redhat', 'rocky'
   package 'java-1.7.0-openjdk-devel' if node['connectors_build']['java_version'] == '7'
-  if node[:platform_version].to_i == 6
-    package 'rh-maven33'
-    execute 'enable maven' do
-      command "echo 'source /opt/rh/rh-maven33/enable' >> #{Dir.home(ENV.fetch('SUDO_USER',
-                                                                               nil))}/.bashrc"
-    end
-  else
-    package 'maven'
-  end
+  package 'maven'
 when 'suse', 'opensuseleap'
   remote_file '/tmp/maven.tar.gz' do
     source 'http://ftp.byfly.by/pub/apache.org/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz'

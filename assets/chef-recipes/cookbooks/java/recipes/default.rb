@@ -3,7 +3,6 @@ platform_version = node[:platform_version].to_i
 platform = node[:platform]
 
 if %w[rhel rocky centos almalinux oracle].include?(platform)
-  java_version = 11 if java_version == 'latest' && platform_version == 7
 
   if [8, 9].include?(platform_version)
     execute 'install epel-release' do

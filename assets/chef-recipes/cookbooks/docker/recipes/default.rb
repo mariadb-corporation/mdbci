@@ -4,7 +4,7 @@ WARN_ABOUT_CURRENT_VERSION = 'This version of the docker to the platform is not 
 docker_version = node['docker']['version']
 
 # Install Docker
-if (node[:platform_family] == 'rhel' && (node[:platform_version].to_i == 7 || node[:platform_version].to_i == 9)) || node[:platform_family] == 'debian'
+if (node[:platform_family] == 'rhel' && node[:platform_version].to_i == 9) || node[:platform_family] == 'debian'
   docker_installation_package 'default' do
     version docker_version unless docker_version.nil?
     action :create
@@ -33,16 +33,6 @@ elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 8
   Chef::Log.warn(WARN_ABOUT_CURRENT_VERSION)
   execute 'Install docker-ce package' do
     command 'sudo yum install docker-ce -y --nobest --skip-broken'
-  end
-  service 'docker' do
-    action :enable
-  end
-  service 'docker' do
-    action :start
-  end
-elsif node[:platform_family] == 'rhel' && node[:platform_version].to_i == 6
-  execute 'Install docker package' do
-    command 'sudo yum install -y https://get.docker.com/rpm/1.7.0/centos-6/RPMS/x86_64/docker-engine-1.7.0-1.el6.x86_64.rpm'
   end
   service 'docker' do
     action :enable

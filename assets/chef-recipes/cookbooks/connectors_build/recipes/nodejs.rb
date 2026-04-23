@@ -12,19 +12,11 @@ when 'debian', 'ubuntu'
 when 'centos', 'redhat', 'rocky'
   package 'gcc-c++'
   package 'make'
-  if node[:platform_version].to_i == 6
-    package 'nodejs'
-    package 'v8314-runtime'
-    execute 'enable nodejs' do
-      command "echo 'source /opt/rh/nodejs010/enable' >> #{Dir.home(ENV.fetch('SUDO_USER',
-                                                                              nil))}/.bashrc"
-    end
-  else
-    execute 'intall repo' do
-      command 'curl -sL https://rpm.nodesource.com/setup_14.x | bash -'
-    end
-    package 'nodejs'
+
+  execute 'intall repo' do
+    command 'curl -sL https://rpm.nodesource.com/setup_14.x | bash -'
   end
+  package 'nodejs'
 when 'suse', 'opensuseleap'
   package 'nodejs12'
 end
