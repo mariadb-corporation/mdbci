@@ -30,11 +30,6 @@ end
 
 package 'netcat' if platform_family?('debian')
 
-# Install socat package
-if (node[:platform_family] == 'centos' || node[:platform_family] == 'rhel') &&
-   node['platform_version'].to_f < 7
-  package 'epel-release'
-end
 package 'socat'
 
 install_iptables 'Install iptables'

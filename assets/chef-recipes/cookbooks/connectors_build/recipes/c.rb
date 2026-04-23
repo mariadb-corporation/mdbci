@@ -15,14 +15,6 @@ when 'centos', 'redhat', 'rocky'
   package 'curl-devel'
   package 'openssl-devel'
   package 'unixODBC-devel'
-  if node[:platform_version].to_i == 7
-    package 'wget'
-    execute 'install cmake' do
-      command 'wget -q https://github.com/Kitware/CMake/releases/download/v3.16.4/cmake-3.16.4-Linux-x86_64.tar.gz --no-check-certificate &&
-tar xzf cmake-3.16.4-Linux-x86_64.tar.gz -C /usr/ --strip-components=1 &&
-rm cmake-3.16.4-Linux-x86_64.tar.gz'
-    end
-  end
   package 'cmake' if node[:platform_version].to_i == 8
 
 when 'suse', 'opensuseleap'
