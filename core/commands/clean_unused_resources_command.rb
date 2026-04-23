@@ -12,7 +12,7 @@ class CleanUnusedResourcesCommand < BaseCommand
 
   def show_help
     info = <<-HELP
-The command destroys the additional cloud resources: disks (volumes), security groups, key pairs on GCP and AWS providers specified in a given JSON file.
+The command destroys the additional cloud resources: disks (volumes), security groups, key pairs on GCP, AWS and IBM providers specified in a given JSON file.
 Add the --resources-list FILENAME flag with the path to the resources report.
     HELP
     @ui.info(info)
@@ -34,6 +34,7 @@ Add the --resources-list FILENAME flag with the path to the resources report.
       delete_disks
       delete_key_pairs
       delete_security_groups
+      delete_public_networks
       @ui.info('Resources successfully destroyed')
       SUCCESS_RESULT
     rescue StandardError => e
@@ -48,6 +49,7 @@ Add the --resources-list FILENAME flag with the path to the resources report.
     instances = @resources_list[:instances]
     aws_instances = instances.fetch(:aws, [])
     gcp_instances = instances.fetch(:gcp, [])
+    ibm_instances = instances.fetch(:ibm, [])
     aws_instances.each do |instance|
       @ui.info("Destroying instance: #{instance[:node_name]}")
       @env.aws_service.terminate_instances_by_name(instance[:node_name])
@@ -55,6 +57,10 @@ Add the --resources-list FILENAME flag with the path to the resources report.
     gcp_instances.each do |instance|
       @ui.info("Destroying instance: #{instance[:node_name]}")
       @env.gcp_service.delete_instance(instance[:node_name])
+    end
+    ibm_instances.each do |instance|
+      @ui.info("Destroying instance: #{instance[:node_name]}")
+      @env.ibm_service.delete_instance(instance[:node_name])
     end
   end
 
@@ -92,6 +98,13 @@ Add the --resources-list FILENAME flag with the path to the resources report.
     @resources_list[:security_groups].each do |security_group|
       @ui.info("Destroying security group: #{security_group[:group_id]}")
       @env.aws_service.delete_security_group(security_group[:group_id])
+    end
+  end
+
+  def delete_public_networks
+    @resources_list[:ibm_public_networks].each do |public_network|
+      @ui.info("Destroying IBM public network: #{public_network[:name]}")
+      @env.ibm_service.delete_public_network(public_network[:name])
     end
   end
 
