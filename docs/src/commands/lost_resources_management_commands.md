@@ -3,11 +3,12 @@
 ## General description
 
 MDBCI can find and destroy unused cloud resources, such as:
-- GCP and AWS instances
+- GCP, AWS and IBM instances
 - GCP disks
 - AWS volumes
 - AWS security groups
 - AWS key pairs
+- IBM public network
 
 ## List unused resources
 
@@ -56,6 +57,13 @@ This command destroys the cloud resources.
         "path": "/path/to/config",
         "username": "username"
       }
+    ],
+    "ibm":[
+      {
+        "launch_time": "2026-04-23T09:01:27+00:00",
+        "node_name": "mdbci-spd2la66-1776934777-node901", // Required to destroy
+        "instance_id": "7efa0863-45f0-4675-9e37-d74857cbfda8"
+      }
     ]
   },
 
@@ -88,6 +96,13 @@ This command destroys the cloud resources.
       "group_id": "sg-0228b331c2a7be875", // Required to destroy
       "configuration_id": "mdbci-ezmlb5cv-1661161923",
       "creation_date": "2022-11-02T08:29:31-07:00"
+    }
+  ],
+
+  "ibm_public_networks":[
+    {
+      "name": "public_mdbci-spd2la66-1776934777-node901", // Required to destroy
+      "network_id": "5f155f4a-08a8-4fe3-a5d0-c39da08b4b20"
     }
   ]
 }
