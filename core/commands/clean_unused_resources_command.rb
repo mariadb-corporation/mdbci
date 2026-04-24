@@ -102,6 +102,8 @@ Add the --resources-list FILENAME flag with the path to the resources report.
   end
 
   def delete_public_networks
+    return unless @resources_list.key?(:ibm_public_networks)
+
     @resources_list[:ibm_public_networks].each do |public_network|
       @ui.info("Destroying IBM public network: #{public_network[:name]}")
       @env.ibm_service.delete_public_network(public_network[:name])
