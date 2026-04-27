@@ -132,15 +132,18 @@ Labels should be separated with commas, do not contain any whitespaces.
     aws_vm_list = @aws_service.instances_names_list
     digitalocean_vm_list = @digitalocean_service.instances_names_list
     gcp_vm_list = @gcp_service.instances_list
+    ibm_vm_list = @ibm_service.instances_list
 
     filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
       [provider, filter_nodes_by_name(nodes, @env.node_name)]
     end.to_h
     filtered_aws_vm_list = filter_nodes_by_name(aws_vm_list, @env.node_name)
     filtered_gcp_vm_list = filter_nodes_by_name(gcp_vm_list, @env.node_name)
+    filtered_ibm_vm_list = filter_nodes_by_name(ibm_vm_list, @env.node_name)
     filtered_digitalocean_vm_list = filter_nodes_by_name(digitalocean_vm_list, @env.node_name)
     summary_filtered_vm_list = filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list +
-                               filtered_gcp_vm_list + filtered_digitalocean_vm_list
+                               filtered_gcp_vm_list + filtered_ibm_vm_list +
+                               filtered_digitalocean_vm_list
     @ui.info("Next virtual machines will be destroyed: #{summary_filtered_vm_list}")
     return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
 
@@ -149,6 +152,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
     filtered_aws_vm_list.uniq.each { |node| @aws_service.terminate_instances_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
+    filtered_ibm_vm_list.each { |node| @ibm_service.delete_instance(node) }
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
     @ui.info('Virtual machines was successfully deleted')
   end
@@ -331,6 +335,7 @@ Labels should be separated with commas, do not contain any whitespaces.
 
     @aws_service = @env.aws_service
     @gcp_service = @env.gcp_service
+    @ibm_service = @env.ibm_service
     @digitalocean_service = @env.digitalocean_service
     if @env.all
       destroy_all_in_path(@args.first)

@@ -52,6 +52,15 @@ class IbmService
       .reverse
   end
 
+  def instances_list
+    return [] unless configured?
+
+    list_instances['pvmInstances']
+      .map do |instance|
+      instance['serverName']
+    end
+  end
+
   def generate_instance_info(instance)
     {
       launch_time: instance['creationDate'],
