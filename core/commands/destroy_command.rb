@@ -11,6 +11,7 @@ require_relative 'partials/registration_manager'
 require_relative '../models/network_settings'
 require_relative '../services/vagrant_service'
 require_relative '../services/product_and_subscription_registry'
+require_relative 'partials/terraform_ibm_generator'
 
 require 'fileutils'
 require 'json'
@@ -27,7 +28,7 @@ class DestroyCommand < BaseCommand
   #
   # @return [Boolean] whether parameters are good or not.
   def check_parameters
-    if !@env.list && !@env.node_name && (@args.empty? || @args.first.nil?) &&
+    if !@env.list && !@env.public_network_name && !@env.node_name && (@args.empty? || @args.first.nil?) &&
        ((@env.json || @env.all) && @args.first.nil?)
       @ui.error 'Please specify the node name or path to the mdbci configuration or configuration/node as a parameter.'
       show_help
@@ -70,6 +71,10 @@ For the Docker-based configuration only the destruction of the whole configurati
 You can destroy nodes by name without the need for configuration file.
 As a name you can use any part of node name or regular expression:
   mdbci destroy --node-name name
+
+You can destroy IBM Cloud public network by name.
+Sometimes it's needed if usual destruction fails:
+  mdbci destroy --public-network-name name
 
 You can view a list of all the virtual machines of all providers:
   mdbci destroy --list
@@ -152,9 +157,20 @@ Labels should be separated with commas, do not contain any whitespaces.
     end
     filtered_aws_vm_list.uniq.each { |node| @aws_service.terminate_instances_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
-    filtered_ibm_vm_list.each { |node| @ibm_service.delete_instance(node) }
+    filtered_ibm_vm_list.each do |node|
+      @ibm_service.delete_instance(node)
+      network_name = TerraformIbmGenerator.generate_public_network_name(node)
+      @ui.info("Next IBM public network name will be destroyed: #{network_name}")
+      @ibm_service.delete_public_network(network_name)
+    end
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
     @ui.info('Virtual machines was successfully deleted')
+  end
+
+  # Handle cases when command calling with --public-network-name option.
+  def destroy_public_network_name
+    @ui.info("Next IBM public network name will be destroyed: #{@env.public_network_name}")
+    @ibm_service.delete_public_network(@env.public_network_name)
   end
 
   # Handle case when command calling with configuration.
@@ -346,6 +362,8 @@ Labels should be separated with commas, do not contain any whitespaces.
       destroy_by_node_name
     elsif @env.list
       display_all_nodes
+    elsif @env.public_network_name
+      destroy_public_network_name
     elsif !@args.first.nil?
       return destroy_by_configuration(@args.first)
     else
