@@ -72,6 +72,7 @@ class Session
   attr_accessor :boxPlatformVersion
   attr_accessor :path_to_nodes
   attr_accessor :node_name
+  attr_accessor :public_network_name
   attr_accessor :snapshot_name
   attr_accessor :ipv6
   attr_accessor :json
