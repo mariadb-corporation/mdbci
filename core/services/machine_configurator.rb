@@ -120,6 +120,7 @@ class MachineConfigurator
 
   def install_tgz_chef(machine, chef_version, architecture, logger)
     download_command = prepare_tgz_download_command(machine, chef_version, architecture, logger)
+    pp "download_command #{download_command}"
     CHEF_INSTALLATION_ATTEMPTS.times do
       sudo_exec(machine, download_command, logger).and_then do
         check_and_install_tar(machine, logger)
@@ -149,6 +150,8 @@ class MachineConfigurator
           sudo_exec(machine, 'yum install -y tar', logger)
         elsif sys_info.include?('debian')
           sudo_exec(machine, 'apt-get update && apt-get install -y tar', logger)
+        elsif sys_info.include?('sles') || sys_info.include?('suse')
+          sudo_exec(machine, 'zypper install -y tar', logger)
         end
       end
     end
