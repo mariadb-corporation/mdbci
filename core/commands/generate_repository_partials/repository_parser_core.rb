@@ -111,7 +111,8 @@ module RepositoryParserCore
     '1804' => 'bionic',
     '2004' => 'focal',
     '2204' => 'jammy',
-    '2404' => 'noble'
+    '2404' => 'noble',
+    '2604' => 'resolute'
   }.freeze
   def add_platform_and_version(platform)
     lambda do |release, links|
@@ -177,6 +178,7 @@ module RepositoryParserCore
   end
 
   DEB_PLATFORMS = {
+    'resolute' => 'ubuntu',
     'noble' => 'ubuntu',
     'jammy' => 'ubuntu',
     'bionic' => 'ubuntu',
@@ -209,6 +211,7 @@ module RepositoryParserCore
     when 'focal' then 'ubu2004'
     when 'bionic' then 'ubu1804'
     when 'noble' then 'ubu2404'
+    when 'resolute' then 'ubu2604'
     when 'bullseye' then 'deb11'
     when 'bookworm' then 'deb12'
     when 'trixie' then 'deb13'
@@ -564,9 +567,17 @@ module RepositoryParserCore
       platform: 'ubuntu',
       platform_version: 'noble'
     },
+    'ubuntu26.04' => {
+      platform: 'ubuntu',
+      platform_version: 'resolute'
+    },
     'sles15' => {
       platform: 'sles',
       platform_version: '15'
+    },
+    'sles16' => {
+      platform: 'sles',
+      platform_version: '16'
     },
     'sles12' => {
       platform: 'sles',
