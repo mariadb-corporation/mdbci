@@ -120,7 +120,6 @@ class MachineConfigurator
 
   def install_tgz_chef(machine, chef_version, architecture, logger)
     download_command = prepare_tgz_download_command(machine, chef_version, architecture, logger)
-    pp "download_command #{download_command}"
     CHEF_INSTALLATION_ATTEMPTS.times do
       sudo_exec(machine, download_command, logger).and_then do
         check_and_install_tar(machine, logger)
