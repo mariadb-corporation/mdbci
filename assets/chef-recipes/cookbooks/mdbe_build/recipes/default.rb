@@ -226,6 +226,26 @@ ubuntu_noble_packages = %w[
   netcat-openbsd
 ]
 
+ubuntu_resolute_packages = %w[
+  bison
+  chrpath
+  debhelper
+  default-jdk
+  dh-apparmor
+  dh-package-notes
+  gnutls-dev
+  libasan8
+  libcurl4-openssl-dev
+  libjemalloc2
+  libncurses-dev
+  libpcre2-dev
+  psmisc
+  python-dev-is-python3
+  python3-dev
+  unixodbc
+  netcat-openbsd
+]
+
 centos_packages = %w[
   bison
   boost-program-options
@@ -339,8 +359,6 @@ suse_and_sles_packages = %w[
   flex
   gcc-c++
   gzip
-  java-1_8_0-openjdk
-  java-1_8_0-openjdk-devel
   krb5-devel
   libaio-devel
   libcurl-devel
@@ -348,7 +366,6 @@ suse_and_sles_packages = %w[
   libgcrypt-devel
   libgnutls-devel
   libgpg-error-devel
-  libopenssl-devel
   libpmem-devel
   libtool
   libxml2-devel
@@ -376,6 +393,9 @@ suse_packages = %w[
   jemalloc-devel
   libsepol1
   scons
+  java-1_8_0-openjdk
+  java-1_8_0-openjdk-devel
+  libopenssl-devel
 ]
 
 sles_12_packages = %w[
@@ -384,6 +404,9 @@ sles_12_packages = %w[
   libopenssl-1_0_0-devel
   libsepol1
   scons
+  java-1_8_0-openjdk
+  java-1_8_0-openjdk-devel
+  libopenssl-devel
 ]
 
 sles_15_packages = %w[
@@ -393,6 +416,20 @@ sles_15_packages = %w[
   ncurses-devel
   perl-Data-Dump
   libsepol2
+  java-1_8_0-openjdk
+  java-1_8_0-openjdk-devel
+  libopenssl-devel
+]
+
+sles_16_packages = %w[
+  jemalloc
+  jemalloc-devel
+  libxml2-devel
+  ncurses-devel
+  perl-Data-Dump
+  libsepol2
+  java-17-openjdk
+  java-17-openjdk-devel
 ]
 
 case node[:platform]
@@ -477,6 +514,11 @@ when 'ubuntu'
     end
   when 24.04 # Ubuntu Noble
     packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_noble_packages)
+    execute 'enable apt sources' do
+      command "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
+    end
+  when 26.04 # Ubuntu Resolute
+    packages = general_packages.concat(debian_and_ubuntu_packages).concat(ubuntu_packages).concat(ubuntu_resolute_packages)
     execute 'enable apt sources' do
       command "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
     end
@@ -633,6 +675,28 @@ when 'suse'
     execute 'install libboost-devel' do
       command "zypper -n install --force --repo SLE-Module-Basesystem15-SP#{minor_platform_version}-Pool libboost_*-devel"
     end
+  when 16 # Sles 16
+    packages = general_packages.concat(suse_and_sles_packages).concat(sles_16_packages)
+    minor_platform_version = node[:platform_version].to_s.split('.').last
+    execute 'Switch on the PackageHub module' do
+      command "SUSEConnect -p PackageHub/16.#{minor_platform_version}/#{node.attributes['kernel']['machine']}"
+    end
+    execute 'install libopenssl-devel' do
+      command 'zypper --non-interactive install --auto-agree-with-licenses --force-resolution libopenssl-devel'
+    end
+    package 'libressl-devel' do
+      action :remove
+      only_if 'rpm -q libressl-devel'
+      ignore_failure true
+    end
+
+    package 'python313-pip' do
+      action :install
+    end
+    execute 'install_scons_via_pip' do
+      command 'pip3 install scons==4.8.1'
+    end
+    packages.delete('libpmem-devel') if node.attributes['kernel']['machine'] == 'aarch64'
   end
 end
 
@@ -672,6 +736,8 @@ ruby_block 'get cmake version' do
         node.run_state['cmake_flag'] = true
       end
     end
+  rescue Errno::ENOENT
+    node.run_state['cmake_flag'] = true
   end
 end
 
