@@ -51,7 +51,7 @@ class BoxDefinitions
     check_box(box_name)
     box = @boxes[box_name]
     platform = determine_platform(box)
-    "#{platform}^#{box['platform_version'].to_f}_#{box['architecture']}"
+    "#{platform}^#{box['platform_version']}_#{box['architecture']}"
   end
 
   # Get the list of unique values for the specified field
