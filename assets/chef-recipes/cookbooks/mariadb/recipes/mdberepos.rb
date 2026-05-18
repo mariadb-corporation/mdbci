@@ -40,18 +40,24 @@ when 'debian', 'ubuntu'
     end
 
     repo_keys.each_with_index do |key_url, index|
-      filename = "mariadb-#{index}.public"
+      armored_filename = "mariadb-#{index}.public"
+      binary_filename = "mariadb-#{index}.gpg"
 
-      remote_file "/etc/apt/keyrings/#{filename}" do
+      remote_file "/etc/apt/keyrings/#{armored_filename}" do
         source key_url
         sensitive true
         action :create
       end
+
+      execute "convert gpg key #{index}" do
+        command "gpg --dearmor -o /etc/apt/keyrings/#{binary_filename} < /etc/apt/keyrings/#{armored_filename}"
+        creates "/etc/apt/keyrings/#{binary_filename}"
+        action :run
+      end
     end
 
     key_files = repo_keys.map.with_index do |_, index|
-      filename = "mariadb-#{index}.public"
-      "/etc/apt/keyrings/#{filename}"
+      "/etc/apt/keyrings/mariadb-#{index}.gpg"
     end
 
     apt_repository repo_file_name do
