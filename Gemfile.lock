@@ -37,7 +37,7 @@ GEM
       virtus (~> 1.0.3)
     ed25519 (1.2.4)
     equalizer (0.0.11)
-    faraday (2.14.1)
+    faraday (2.14.2)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -67,7 +67,7 @@ GEM
     iniparse (1.5.0)
     ipaddress (0.8.3)
     jmespath (1.6.1)
-    json (2.7.2)
+    json (2.19.5)
     jwt (2.3.0)
     kartograph (0.2.8)
     language_server-protocol (3.17.0.3)
