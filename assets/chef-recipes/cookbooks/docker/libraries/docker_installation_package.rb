@@ -34,13 +34,41 @@ module DockerCookbook
             enabled true
           end
         elsif platform_family?('debian')
-          apt_repository 'Docker' do
-            components Array(new_resource.repo_channel)
-            uri "https://download.docker.com/linux/#{node['platform']}"
-            arch arch_alias(architecture)
-            keyserver 'keyserver.ubuntu.com'
-            key "https://download.docker.com/linux/#{node['platform']}/gpg"
-            action :add
+          if noble? || resolute?
+            # https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+            execute 'Download Docker GPG key' do
+              command "curl -fsSL https://download.docker.com/linux/#{node['platform']}/gpg -o /etc/apt/keyrings/docker.asc"
+              not_if { ::File.exist?('/etc/apt/keyrings/docker.asc') }
+            end
+
+            execute 'Set permissions on Docker GPG key' do
+              command 'chmod a+r /etc/apt/keyrings/docker.asc'
+              only_if { ::File.exist?('/etc/apt/keyrings/docker.asc') }
+            end
+
+            file '/etc/apt/sources.list.d/docker.sources' do
+              content <<~EOF
+                Types: deb
+                URIs: https://download.docker.com/linux/#{node['platform']}
+                Suites: #{node['lsb']['codename']}
+                Components: #{new_resource.repo_channel}
+                Architectures: #{arch_alias(architecture)}
+                Signed-By: /etc/apt/keyrings/docker.asc
+              EOF
+            end
+
+            execute 'apt-get update' do
+              command 'apt-get update'
+            end
+          else
+            apt_repository 'Docker' do
+              components Array(new_resource.repo_channel)
+              uri "https://download.docker.com/linux/#{node['platform']}"
+              arch arch_alias(architecture)
+              keyserver 'keyserver.ubuntu.com'
+              key "https://download.docker.com/linux/#{node['platform']}/gpg"
+              action :add
+            end
           end
         else
           Chef::Log.warn("Cannot setup the Docker repo for platform #{node['platform']}. Skipping.")
@@ -153,6 +181,14 @@ module DockerCookbook
       node['platform'] == 'ubuntu' && node['platform_version'] == '22.04'
     end
 
+    def resolute?
+      node['platform'] == 'ubuntu' && node['platform_version'] == '26.04'
+    end
+
+    def noble?
+      node['platform'] == 'ubuntu' && node['platform_version'] == '24.04'
+    end
+
     def amazon?
       return true if node['platform'] == 'amazon'
 
@@ -200,6 +236,10 @@ module DockerCookbook
                    'focal'
                  elsif jammy?
                    'jammy'
+                 elsif noble?
+                   'noble'
+                 elsif resolute?
+                   'resolute'
                  end
 
       # https://github.com/seemethere/docker-ce-packaging/blob/9ba8e36e8588ea75209d813558c8065844c953a0/deb/gen-deb-ver#L16-L20
