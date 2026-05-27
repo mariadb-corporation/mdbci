@@ -27,12 +27,21 @@ when 'debian', 'ubuntu'
     options ["signed-by=#{key_files.join(',')}"]
     sensitive true
   end
+  apt_preference 'cmapi_ci' do
+    pin "origin \"#{URI.parse(node['cmapi_ci']['repo']).host}\""
+    pin_priority '900'
+    package_name 'mariadb-columnstore-cmapi'
+  end
+  apt_update
 when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
   yum_repository 'cmapi_ci' do
     baseurl node['cmapi_ci']['repo']
     gpgcheck true
     gpgkey repo_keys
-    options({ 'module_hotfixes' => '1' })
+    options({
+      'module_hotfixes' => '1',
+      'priority' => '900'
+    })
     sensitive true
   end
 when 'suse', 'opensuse', 'sles'
@@ -51,6 +60,7 @@ when 'suse', 'opensuse', 'sles'
     baseurl node['cmapi_ci']['repo']
     gpgkey repo_keys
     gpgcheck true
+    priority 900
     sensitive true
   end
 
