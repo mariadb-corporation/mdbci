@@ -152,9 +152,28 @@ module MdbeCiParser
   def self.parse_cs_repos(url, yum_key, auth_mdbe_ci_repo, logger)
     releases = []
     retrive_stable_branches(url, auth_mdbe_ci_repo).each do |branch_dir|
-      retrive_s3_versions(url, auth_mdbe_ci_repo, branch_dir).each do |version|
-        releases.concat(generate_cspkg_latest_repositories(url, branch_dir, version,
-                                                           yum_key, auth_mdbe_ci_repo, logger))
+      # pp "!!!", url, branch_dir
+      # pp "___"
+      versions = retrive_versions(url, auth_mdbe_ci_repo, branch_dir)
+      # pp "!!!", versions
+      # pp "___"
+      if versions.include?("latest")
+        # pp 'versions.include?("latest")'
+        # pp 'url, auth_mdbe_ci_repo, branch_dir', url, auth_mdbe_ci_repo, branch_dir
+        retrive_latest_versions(url, auth_mdbe_ci_repo, branch_dir).each do |version|
+          # pp version
+          releases.concat(generate_cspkg_latest_repositories(url, branch_dir, version,
+                                                            yum_key, auth_mdbe_ci_repo, logger))
+        end
+      end
+      # pp "___"
+      if versions.include?("pull_request")
+        # pp 'versions.include?("pull_request")'
+        # pp "url, branch_dir", url, branch_dir
+        retrive_pull_request_versions(url, auth_mdbe_ci_repo, branch_dir).each do |pull_request_version|
+          releases.concat(generate_cspkg_pull_request_repositories(url, branch_dir, pull_request_version,
+                                                            yum_key, auth_mdbe_ci_repo, logger))
+        end
       end
     end
     releases
@@ -166,8 +185,17 @@ module MdbeCiParser
     end
   end
 
-  def self.retrive_s3_versions(url, auth, branch)
+  def self.retrive_latest_versions(url, auth, branch)
     perform_span_parsing("#{url}/#{branch}/latest/", auth)
+  end
+
+  def self.retrive_pull_request_versions(url, auth, branch)
+    perform_span_parsing("#{url}/#{branch}/pull_request/", auth)
+  end
+
+  def self.retrive_versions(url, auth, branch)
+    # # pp "#{url}/#{branch}/"
+    perform_span_parsing("#{url}/#{branch}/", auth)
   end
 
   ARCHITECTURE_DIRECTORIES = {
@@ -178,6 +206,7 @@ module MdbeCiParser
   DEB_PLATFORMS = %w[debian ubuntu].freeze
 
   def self.generate_cspkg_latest_repositories(repo_url, branch, s3_version, yum_key, auth, logger)
+     # pp "generate_cspkg_latest_repositories repo_url, branch, s3_version #{repo_url}, #{branch}, #{s3_version}"
     releases = []
     archs = retrive_archs("#{repo_url}#{branch}/latest/#{s3_version}/", auth)
     archs.each do |arch|
@@ -196,6 +225,31 @@ module MdbeCiParser
     releases
   end
 
+  def self.generate_cspkg_pull_request_repositories(repo_url, branch, pull_request_version, yum_key, auth, logger)
+    #  # pp "generate_cspkg_pull_request_repositories repo_url, branch, pull_request_version #{repo_url}, #{branch}, #{pull_request_version}"
+    releases = []
+    s3_versions = perform_span_parsing("#{repo_url}/#{branch}/pull_request/#{pull_request_version}/", auth)
+    # # pp "s3_versions #{s3_versions}"
+    s3_versions.each do |s3_version|
+      archs = retrive_archs("#{repo_url}#{branch}/pull_request/#{pull_request_version}/#{s3_version}/", auth)
+      # # pp "archs #{archs}"
+      archs.each do |arch|
+        platforms = retrive_platforms("#{repo_url}#{branch}/pull_request/#{pull_request_version}/#{s3_version}/#{arch}/", auth)
+        platforms.each do |platform|
+          platform, platform_feature = platform.split('_')
+          platform_info = get_mdbe_platforms[platform]
+          if platform_info.nil?
+            logger.write("Unknown platform #{platform}, skipped.")
+            next
+          end
+          releases.append(form_repo_info(platform_info, repo_url, branch, platform, platform_feature,
+                                        arch, s3_version, yum_key, auth))
+        end
+      end
+    end
+    releases
+  end
+
   def self.retrive_archs(link, auth)
     perform_span_parsing(link, auth)
   end
@@ -205,10 +259,32 @@ module MdbeCiParser
   end
 
   def self.perform_span_parsing(link, auth)
-    doc = Nokogiri.HTML(URI.open(link,
-                                 http_basic_authentication: [auth['username'],
-                                                             auth['password']]))
-    doc.css('span.name').map { |document| document.text.sub('/', '') }
+    retries = 0
+    begin
+      uri = URI(link)
+      response = nil
+
+      Net::HTTP.start(uri.host, uri.port,
+                      use_ssl: uri.scheme == 'https',
+                      read_timeout: 60,
+                      open_timeout: 30) do |http|
+        request = Net::HTTP::Get.new(uri)
+        request.basic_auth(auth['username'], auth['password'])
+        response = http.request(request)
+      end
+
+      doc = Nokogiri.HTML(response.body)
+      doc.css('span.name').map { |document| document.text.sub('/', '') }
+    rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNRESET => e
+      retries += 1
+      if retries <= 3
+        sleep(5)
+        retry
+      else
+        puts "Failed after 3 retries: #{e.message}"
+        []
+      end
+    end
   end
 
   def self.form_repo_info(platform_info, repo_url, branch, platform, platform_feature, arch, s3_version, yum_key, auth)
