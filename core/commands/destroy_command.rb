@@ -138,6 +138,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     digitalocean_vm_list = @digitalocean_service.instances_names_list
     gcp_vm_list = @gcp_service.instances_list
     ibm_vm_list = @ibm_service.instances_list
+    failed = false
 
     filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
       [provider, filter_nodes_by_name(nodes, @env.node_name)]
@@ -158,13 +159,14 @@ Labels should be separated with commas, do not contain any whitespaces.
     filtered_aws_vm_list.uniq.each { |node| @aws_service.terminate_instances_by_name(node) }
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
     filtered_ibm_vm_list.each do |node|
-      @ibm_service.delete_instance(node)
+      failed = false unless @ibm_service.delete_instance(node)
       network_name = TerraformIbmGenerator.generate_public_network_name(node)
       @ui.info("Next IBM public network name will be destroyed: #{network_name}")
-      @ibm_service.delete_public_network(network_name)
+      failed = false unless @ibm_service.delete_public_network(network_name)
     end
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
     @ui.info('Virtual machines was successfully deleted')
+    failed
   end
 
   # Handle cases when command calling with --public-network-name option.
@@ -359,7 +361,8 @@ Labels should be separated with commas, do not contain any whitespaces.
       result = destroy_by_json(@args.first)
       return result if result.error?
     elsif @env.node_name
-      destroy_by_node_name
+      result = destroy_by_node_name
+      return ERROR_RESULT if !result.nil? && !result
     elsif @env.list
       display_all_nodes
     elsif @env.public_network_name
