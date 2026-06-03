@@ -119,7 +119,7 @@ class IbmService
       response = send_delete_request(uri)
       if response
         @logger.info("Successfully deleted public network #{public_network_id}")
-        break
+        return true
       else
         retries += 1
         if retries <= max_retries
@@ -127,7 +127,7 @@ class IbmService
           sleep timeout
         else
           @logger.error("Failed to delete public network #{public_network_id}. Manual deletion skipped.")
-          break
+          return false
         end
       end
     end
@@ -137,7 +137,14 @@ class IbmService
     if instance_exists?(instance_name)
       pvm_instance_id = fetch_pvm_instance_id(instance_name)
       uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/cloud-instances/#{@cloud_instance_id}/pvm-instances/#{pvm_instance_id}")
-      send_delete_request(uri)
+      response = send_delete_request(uri)
+      if response
+        @logger.info("Successfully delete_instance")
+        true
+      else
+        @logger.error("Failed to delete_instance")
+        false
+      end
     else
       @logger.error("IBM Cloud PVM instance #{instance_name} was not found. Manual deletion skipped.")
     end

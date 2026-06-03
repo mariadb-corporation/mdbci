@@ -46,12 +46,14 @@ class TerraformCleaner
     result = TerraformService.resource_type(provider).and_then do |resource_type|
       resources = TerraformService.nodes_to_resources(nodes, resource_type).values
       TerraformService.destroy(resources, @ui, path)
-      cleanup_nodes(configuration_id, path, nodes, provider)
+      cleanup_node_res = cleanup_nodes(configuration_id, path, nodes, provider)
       unless TerraformService.has_running_resources_type?(resource_type, @ui, path)
         TerraformService.destroy_all(@ui, path)
         cleanup_additional_resources(path, configuration_id, provider)
       end
-      return Result.ok('')
+      return Result.ok('') if cleanup_node_res
+
+      return Result.error('Error occurs during node destroying')
     end
     @ui.error(result.error)
     result
@@ -60,9 +62,13 @@ class TerraformCleaner
   private
 
   def cleanup_nodes(configuration_id, configuration_path, nodes, provider)
+    destroy_result = true
     nodes.each do |node|
-      destroy_machine(configuration_id, configuration_path, node, provider)
+      unless destroy_machine(configuration_id, configuration_path, node, provider)
+        destroy_result = false
+      end
     end
+    destroy_result
   end
 
   def cleanup_additional_resources(configuration_path, configuration_id, provider)
