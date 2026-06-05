@@ -2,7 +2,7 @@
     "ppc64le_rhel_9_ibm": {
       "provider": "ibm",
       "architecture": "ppc64le",
-      "image": "RHEL9-SP4",
+      "image": "7d552648-3075-4834-bd9a-6905133a73a9",
       "platform": "rhel",
       "platform_version": "9",
       "default_cpu_count": "1",
