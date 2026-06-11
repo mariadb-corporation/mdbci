@@ -177,7 +177,7 @@ class IbmService
   def fetch_pvm_instance_id(instance_name)
     instance_data = fetch_pvm_instance_data(instance_name)
     if instance_data.nil?
-      logger.warning("Missing pvmInstanceID of #{instance_name}")
+      @logger.warning("Missing pvmInstanceID of #{instance_name}")
       nil
     else
       instance_data['pvmInstanceID']
