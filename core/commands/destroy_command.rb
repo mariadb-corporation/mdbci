@@ -138,7 +138,6 @@ Labels should be separated with commas, do not contain any whitespaces.
     digitalocean_vm_list = @digitalocean_service.instances_names_list
     gcp_vm_list = @gcp_service.instances_list
     ibm_vm_list = @ibm_service.instances_list
-    failed = false
 
     filtered_vagrant_vm_list = vagrant_vm_list.map do |provider, nodes|
       [provider, filter_nodes_by_name(nodes, @env.node_name)]
@@ -150,29 +149,59 @@ Labels should be separated with commas, do not contain any whitespaces.
     summary_filtered_vm_list = filtered_vagrant_vm_list.values.flatten + filtered_aws_vm_list +
                                filtered_gcp_vm_list + filtered_ibm_vm_list +
                                filtered_digitalocean_vm_list
+    return Result.error('Virtual machines are not found') if summary_filtered_vm_list.empty?
+
     @ui.info("Next virtual machines will be destroyed: #{summary_filtered_vm_list}")
     return unless @ui.confirmation('', 'Do you want to continue? [y/n]')
 
     filtered_vagrant_vm_list.each do |provider, nodes|
       nodes.each { |node| vagrant_cleaner.destroy_node_by_name(node, provider) }
     end
+    destroy_aws_by_node_name(filtered_aws_vm_list)
+    destroy_gcp_by_node_name(filtered_gcp_vm_list)
+    destroy_ibm_by_node_name_result = destroy_ibm_by_node_name(filtered_ibm_vm_list)
+    destroy_digitalocean_by_node_name(filtered_digitalocean_vm_list)
+    if destroy_ibm_by_node_name_result
+      @ui.info('Virtual machines was successfully deleted')
+      Result.ok('Virtual machines was successfully deleted')
+    else
+      @ui.info('Virtual machines was not deleted')
+      Result.error('Virtual machines was not deleted')
+    end
+  end
+
+  def destroy_aws_by_node_name(filtered_aws_vm_list)
     filtered_aws_vm_list.uniq.each { |node| @aws_service.terminate_instances_by_name(node) }
+  end
+
+  def destroy_gcp_by_node_name(filtered_gcp_vm_list)
     filtered_gcp_vm_list.each { |node| @gcp_service.delete_instance(node) }
+  end
+
+  def destroy_ibm_by_node_name(filtered_ibm_vm_list)
+    result = true
     filtered_ibm_vm_list.each do |node|
-      failed = false unless @ibm_service.delete_instance(node)
+      result &&= @ibm_service.delete_instance(node)
       network_name = TerraformIbmGenerator.generate_public_network_name(node)
       @ui.info("Next IBM public network name will be destroyed: #{network_name}")
-      failed = false unless @ibm_service.delete_public_network(network_name)
+      result &&= @ibm_service.delete_public_network(network_name)
     end
+      pp "in filtered_ibm_vm_list result = #{result}"
+    result
+  end
+
+  def destroy_digitalocean_by_node_name(filtered_digitalocean_vm_list)
     filtered_digitalocean_vm_list.each { |node| @digitalocean_service.delete_instance(node) }
-    @ui.info('Virtual machines was successfully deleted')
-    failed
   end
 
   # Handle cases when command calling with --public-network-name option.
   def destroy_public_network_name
     @ui.info("Next IBM public network name will be destroyed: #{@env.public_network_name}")
-    @ibm_service.delete_public_network(@env.public_network_name)
+    if @ibm_service.delete_public_network(@env.public_network_name)
+      Result.ok('')
+    else
+      Result.error('')
+    end
   end
 
   # Handle case when command calling with configuration.
@@ -203,10 +232,7 @@ Labels should be separated with commas, do not contain any whitespaces.
     elsif configuration.terraform_configuration?
       terraform_cleaner = TerraformCleaner.new(@ui, @env.aws_service, @env.gcp_service,
                                                @env.digitalocean_service, @env.ibm_service)
-      result = terraform_cleaner.destroy_nodes_by_configuration(configuration)
-      return result unless @env.labels.nil? && Configuration.config_directory?(configuration_path)
-
-      result
+      terraform_cleaner.destroy_nodes_by_configuration(configuration)
     elsif configuration.vagrant_configuration?
       vagrant_cleaner = VagrantCleaner.new(@env, @ui)
       vagrant_cleaner.destroy_nodes_by_configuration(configuration)
@@ -362,11 +388,11 @@ Labels should be separated with commas, do not contain any whitespaces.
       return result if result.error?
     elsif @env.node_name
       result = destroy_by_node_name
-      return ERROR_RESULT if !result.nil? && !result
+      return result if !result.nil? && result.error?
     elsif @env.list
       display_all_nodes
     elsif @env.public_network_name
-      destroy_public_network_name
+      return destroy_public_network_name
     elsif !@args.first.nil?
       return destroy_by_configuration(@args.first)
     else
