@@ -110,6 +110,7 @@ class IbmService
       send_delete_public_network_request(uri, public_network_id)
     else
       @logger.error("IBM Cloud PVM instance #{instance_name} public network was not found. Manual deletion skipped.")
+      false
     end
   end
 
@@ -139,10 +140,10 @@ class IbmService
       uri = URI("https://#{@ibm_region}.power-iaas.cloud.ibm.com/pcloud/v1/cloud-instances/#{@cloud_instance_id}/pvm-instances/#{pvm_instance_id}")
       response = send_delete_request(uri)
       if response
-        @logger.info("Successfully delete_instance")
+        @logger.info('Successfully delete_instance')
         true
       else
-        @logger.error("Failed to delete_instance")
+        @logger.error('Failed to delete_instance')
         false
       end
     else
