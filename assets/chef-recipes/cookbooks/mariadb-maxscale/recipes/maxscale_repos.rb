@@ -21,26 +21,39 @@ when 'debian', 'ubuntu'
     recursive true
     action :create
   end
-  repo_keys.each_with_index do |key_url, index|
-    filename = "maxscale-#{index}.public"
 
-    remote_file "/etc/apt/keyrings/#{filename}" do
+  repo_keys.each_with_index do |key_url, index|
+    armored_filename = "maxscale-#{index}.public"
+    binary_filename = "maxscale-#{index}.gpg"
+
+    remote_file "/etc/apt/keyrings/#{armored_filename}" do
       source key_url
       sensitive true
       action :create
     end
+
+    execute "convert gpg key #{index}" do
+      command "gpg --dearmor -o /etc/apt/keyrings/#{binary_filename} < /etc/apt/keyrings/#{armored_filename}"
+      creates "/etc/apt/keyrings/#{binary_filename}"
+      action :run
+    end
   end
 
-  key_files = repo_keys.each_with_index.map do |_, index|
-    filename = "maxscale-#{index}.public"
-    "/etc/apt/keyrings/#{filename}"
+  key_files = repo_keys.map.with_index do |_, index|
+    "/etc/apt/keyrings/maxscale-#{index}.gpg"
   end
 
+  repo_distribution = node['maxscale']['repo_distribution'] || node['lsb']['codename']
   apt_repository 'maxscale' do
     uri node['maxscale']['repo']
+    distribution repo_distribution
     components node['maxscale']['components']
     options ["signed-by=#{key_files.join(',')}"]
     sensitive true
+  end
+
+  apt_update do
+    action :update
   end
 when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
   if node[:platform_family] == 'rhel' && node[:platform_version].to_f >= 9.0
