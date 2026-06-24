@@ -519,7 +519,7 @@ module RepositoryParserCore
     if has_mariadb_dir
       pool_url = URI.join(pool_url, 'm/').to_s
     else
-      error_and_log("The 'MariaDB' directory not found in repo #{pool_url}. Url is skipped.", log, logger)
+      error_and_log("The 'MariaDB' directory is not found in repo #{pool_url}. Url is skipped.", log, logger)
     end
     package_list_url = get_directory_links(pool_url, scan_mode, logger, auth).first
     URI.join(pool_url, package_list_url[:href]).to_s
