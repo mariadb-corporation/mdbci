@@ -152,27 +152,17 @@ module MdbeCiParser
   def self.parse_cs_repos(url, yum_key, auth_mdbe_ci_repo, logger)
     releases = []
     retrive_stable_branches(url, auth_mdbe_ci_repo).each do |branch_dir|
-      # pp "!!!", url, branch_dir
-      # pp "___"
       versions = retrive_versions(url, auth_mdbe_ci_repo, branch_dir)
-      # pp "!!!", versions
-      # pp "___"
       if versions.include?("latest")
-        # pp 'versions.include?("latest")'
-        # pp 'url, auth_mdbe_ci_repo, branch_dir', url, auth_mdbe_ci_repo, branch_dir
         retrive_latest_versions(url, auth_mdbe_ci_repo, branch_dir).each do |version|
-          # pp version
           releases.concat(generate_cspkg_latest_repositories(url, branch_dir, version,
-                                                            yum_key, auth_mdbe_ci_repo, logger))
+                                                             yum_key, auth_mdbe_ci_repo, logger))
         end
       end
-      # pp "___"
       if versions.include?("pull_request")
-        # pp 'versions.include?("pull_request")'
-        # pp "url, branch_dir", url, branch_dir
         retrive_pull_request_versions(url, auth_mdbe_ci_repo, branch_dir).each do |pull_request_version|
           releases.concat(generate_cspkg_pull_request_repositories(url, branch_dir, pull_request_version,
-                                                            yum_key, auth_mdbe_ci_repo, logger))
+                                                                   yum_key, auth_mdbe_ci_repo, logger))
         end
       end
     end
@@ -194,7 +184,6 @@ module MdbeCiParser
   end
 
   def self.retrive_versions(url, auth, branch)
-    # # pp "#{url}/#{branch}/"
     perform_span_parsing("#{url}/#{branch}/", auth)
   end
 
@@ -206,7 +195,6 @@ module MdbeCiParser
   DEB_PLATFORMS = %w[debian ubuntu].freeze
 
   def self.generate_cspkg_latest_repositories(repo_url, branch, s3_version, yum_key, auth, logger)
-     # pp "generate_cspkg_latest_repositories repo_url, branch, s3_version #{repo_url}, #{branch}, #{s3_version}"
     releases = []
     archs = retrive_archs("#{repo_url}#{branch}/latest/#{s3_version}/", auth)
     archs.each do |arch|
@@ -226,13 +214,10 @@ module MdbeCiParser
   end
 
   def self.generate_cspkg_pull_request_repositories(repo_url, branch, pull_request_version, yum_key, auth, logger)
-    #  # pp "generate_cspkg_pull_request_repositories repo_url, branch, pull_request_version #{repo_url}, #{branch}, #{pull_request_version}"
     releases = []
     s3_versions = perform_span_parsing("#{repo_url}/#{branch}/pull_request/#{pull_request_version}/", auth)
-    # # pp "s3_versions #{s3_versions}"
     s3_versions.each do |s3_version|
       archs = retrive_archs("#{repo_url}#{branch}/pull_request/#{pull_request_version}/#{s3_version}/", auth)
-      # # pp "archs #{archs}"
       archs.each do |arch|
         platforms = retrive_platforms("#{repo_url}#{branch}/pull_request/#{pull_request_version}/#{s3_version}/#{arch}/", auth)
         platforms.each do |platform|
@@ -242,8 +227,10 @@ module MdbeCiParser
             logger.write("Unknown platform #{platform}, skipped.")
             next
           end
-          releases.append(form_repo_info(platform_info, repo_url, branch, platform, platform_feature,
-                                        arch, s3_version, yum_key, auth))
+          releases.append(form_pull_request_repo_info(platform_info, repo_url, branch,
+                                                      platform_feature, platform,
+                                                      arch, s3_version, yum_key,
+                                                      auth, pull_request_version))
         end
       end
     end
@@ -260,6 +247,7 @@ module MdbeCiParser
 
   def self.perform_span_parsing(link, auth)
     retries = 0
+    tries_limit = 3
     begin
       uri = URI(link)
       response = nil
@@ -277,11 +265,12 @@ module MdbeCiParser
       doc.css('span.name').map { |document| document.text.sub('/', '') }
     rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNRESET => e
       retries += 1
-      if retries <= 3
+      if retries <= tries_limit
+        puts "Timeout #{retries}/#{tries_limit} occurred for #{link}"
         sleep(5)
         retry
       else
-        puts "Failed after 3 retries: #{e.message}"
+        puts "Failed for #{link} after #{tries_limit} retries: #{e.message}"
         []
       end
     end
@@ -300,6 +289,26 @@ module MdbeCiParser
     platform_info.merge({
                           repo: repo,
                           version: "columnstore/#{branch}/latest#{platform_feature}/#{s3_version}",
+                          product: 'mdbe_ci',
+                          architecture: arch,
+                          repo_key: yum_key,
+                          disable_gpgcheck: true
+                        })
+  end
+
+  def self.form_pull_request_repo_info(platform_info, repo_url, branch, platform_feature, platform, arch, s3_version, yum_key, auth, pull_request_version)
+    url = URI(repo_url)
+    repo_url = "#{url.scheme}://#{auth['username']}:#{auth['password']}@#{url.host}#{url.path}"
+    base_repo_link = "#{repo_url}#{branch}/pull_request/#{pull_request_version}/#{s3_version}/#{arch}"
+    repo = if DEB_PLATFORMS.include?(platform_info[:platform])
+             "#{base_repo_link}/ #{platform}/"
+           else
+             "#{base_repo_link}/#{platform}/"
+           end
+    platform_feature = "-#{platform_feature}" if platform_feature
+    platform_info.merge({
+                          repo: repo,
+                          version: "columnstore/#{branch}/pull_request#{platform_feature}/#{pull_request_version}/#{s3_version}",
                           product: 'mdbe_ci',
                           architecture: arch,
                           repo_key: yum_key,
