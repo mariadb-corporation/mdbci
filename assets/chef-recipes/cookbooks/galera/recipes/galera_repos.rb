@@ -13,29 +13,43 @@ end
 
 case node[:platform_family]
 when 'debian', 'ubuntu'
-  if node['galera']['repo_key'] =~ URI::DEFAULT_PARSER.make_regexp
-    remote_file File.join('tmp', 'apt.key') do
-      source node['galera']['repo_key']
-      sensitive true
-      action :create
-    end
-    execute 'Import apt key' do
-      command 'apt-key add /tmp/apt.key && rm -f /tmp/apt.key'
-    end
-    key = nil
-  else
-    key = node['galera']['repo_key']
+  directory '/etc/apt/keyrings' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
   end
-  uri, repo_distribution = node['galera']['repo'].split(/\s+/)
+
+  armored_filename = 'galera.public'
+  binary_filename = 'galera.gpg'
+
+  remote_file "/etc/apt/keyrings/#{armored_filename}" do
+    source node['galera']['repo_key']
+    sensitive true
+    action :create
+  end
+
+  execute 'convert galera gpg key' do
+    command "gpg --dearmor -o /etc/apt/keyrings/#{binary_filename} < /etc/apt/keyrings/#{armored_filename}"
+    creates "/etc/apt/keyrings/#{binary_filename}"
+    action :run
+  end
+
+  repo_uri = node['galera']['repo_uri'] || node['galera']['repo']
+  repo_distribution = node['lsb']['codename']
+
   apt_repository 'galera' do
-    uri uri
-    components ['main']
+    uri repo_uri
     distribution repo_distribution
-    key key unless key.nil?
-    keyserver 'keyserver.ubuntu.com'
+    components ['main']
+    options ["signed-by=/etc/apt/keyrings/#{binary_filename}"]
     sensitive true
   end
-  apt_update
+
+  apt_update do
+    action :update
+  end
 when 'rhel', 'fedora', 'centos', 'almalinux', 'oracle'
   remote_file File.join('tmp', 'rpm.key') do
     source node['galera']['repo_key']
