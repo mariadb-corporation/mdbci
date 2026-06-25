@@ -7,18 +7,24 @@ repo_keys = [node['cmapi_ci']['repo_key']].flatten
 case node[:platform_family]
 when 'debian', 'ubuntu'
   repo_keys.each_with_index do |key_url, index|
-    filename = "cmapi_ci-#{index}.public"
+    armored_filename = "cmapi_ci-#{index}.public"
+    binary_filename = "cmapi_ci-#{index}.gpg"
 
-    remote_file "/etc/apt/keyrings/#{filename}" do
+    remote_file "/etc/apt/keyrings/#{armored_filename}" do
       source key_url
       sensitive true
       action :create
     end
+
+    execute "convert gpg key #{index}" do
+      command "gpg --dearmor -o /etc/apt/keyrings/#{binary_filename} < /etc/apt/keyrings/#{armored_filename}"
+      creates "/etc/apt/keyrings/#{binary_filename}"
+      action :run
+    end
   end
 
-  key_files = repo_keys.each_with_index.map do |_, index|
-    filename = "cmapi_ci-#{index}.public"
-    "/etc/apt/keyrings/#{filename}"
+  key_files = repo_keys.map.with_index do |_, index|
+    "/etc/apt/keyrings/cmapi_ci-#{index}.gpg"
   end
 
   apt_repository 'cmapi_ci' do
