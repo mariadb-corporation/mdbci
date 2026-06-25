@@ -28,7 +28,7 @@ provider = node['galera']['provider']
   package pkg
 end
 
-package 'netcat' if platform_family?('debian')
+package 'netcat-openbsd' if platform_family?('debian')
 
 package 'socat'
 
