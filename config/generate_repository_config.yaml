@@ -75,7 +75,8 @@ mdbe_ci:
   repo:
     mdbe_ci_repo:
       path: https://mdbe-ci-repo.mariadb.net/MariaDBEnterprise/
-      key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+      auth_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
+      keys: ["https://supplychain.mariadb.com/MariaDB-MaxScale-GPG-KEY", "https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY", "https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025"]
     es_repo:
       path: https://es-repo.mariadb.net/jenkins/
       key: https://es-repo.mariadb.net/jenkins/MDBE.public

@@ -53,7 +53,8 @@ module MdbeCiParser
       scan_mode,
       log, logger,
       save_as_field(:version),
-      save_key(logger, auth, add_auth_to_url(config['key'], auth)),
+      save_key(logger, auth, add_auth_to_url(config['auth_key'], auth)),
+      add_keys_with_no_auth([config['keys']]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
       append_url(%w[x86_64 aarch64 ppc64le], :architecture),
@@ -62,6 +63,13 @@ module MdbeCiParser
         release
       end
     )
+  end
+
+  def self.add_keys_with_no_auth(keys)
+    lambda do |release, _|
+      release[:repo_key] = [release[:repo_key], *keys]
+      release
+    end
   end
 
   def self.parse_mdbe_ci_rpm_repository_yum(config, product_version, scan_mode, auth, log, logger)
@@ -73,7 +81,8 @@ module MdbeCiParser
       scan_mode,
       log, logger,
       save_as_field(:version),
-      save_key(logger, auth, add_auth_to_url(config['key'], auth)),
+      save_key(logger, auth, add_auth_to_url(config['auth_key'], auth)),
+      add_keys_with_no_auth([config['keys']]),
       append_url(%w[yum]),
       split_rpm_platforms,
       extract_field(:platform_version, %r{^(\p{Digit}+)/?$}),
@@ -92,7 +101,8 @@ module MdbeCiParser
       ->(url, _) { generate_mariadb_ci_deb_full_url(url, scan_mode, logger, log, auth) },
       ->(package, _) { /#{package}/ }, scan_mode, log, logger,
       save_as_field(:version),
-      save_key(logger, auth, add_auth_to_url(config['key'], auth)),
+      save_key(logger, auth, add_auth_to_url(config['auth_key'], auth)),
+      add_keys_with_no_auth([config['keys']]),
       append_url(%w[apt], nil, true),
       append_url(%w[dists]),
       extract_deb_platforms,
