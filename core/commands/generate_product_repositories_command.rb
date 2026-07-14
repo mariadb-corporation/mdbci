@@ -298,7 +298,7 @@ In order to specify the number of retries for repository configuration use --att
       true
     rescue StandardError => e
       error_and_log("Error message: #{e.message}")
-      error_and_log("Error message: #{e.backtrace.reverse.join('\n'")})
+      error_and_log("Error message: #{e.backtrace.reverse.join('\n')}")
       error_and_log("#{product} was not generated.")
       false
     end
