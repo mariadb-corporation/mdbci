@@ -77,12 +77,6 @@ mdbe_ci:
       path: https://mdbe-ci-repo.mariadb.net/MariaDBEnterprise/
       auth_key: https://mdbe-ci-repo.mariadb.net/MDBE.public
       keys: ["https://supplychain.mariadb.com/MariaDB-MaxScale-GPG-KEY", "https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY", "https://supplychain.mariadb.com/MariaDB-Enterprise-GPG-KEY-2025"]
-    es_repo:
-      path: https://es-repo.mariadb.net/jenkins/
-      key: https://es-repo.mariadb.net/jenkins/MDBE.public
-    cs_repo:
-      path: https://pergamon.columnstore.mariadb.net/viewer/cspkg/
-      yum_key: http://yum.mariadb.org/
   scan_mode: follow-only-sublinks
 galera_3_community:
   repo:
