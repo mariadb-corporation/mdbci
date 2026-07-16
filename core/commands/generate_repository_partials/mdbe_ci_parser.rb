@@ -213,7 +213,7 @@ module MdbeCiParser
         platform, platform_feature = platform.split('_')
         platform_info = get_mdbe_platforms[platform]
         if platform_info.nil?
-          logger.write("Unknown platform #{platform}, skipped.")
+          logger.warn("Unknown platform #{platform}, skipped.")
           next
         end
         releases.append(form_repo_info(platform_info, repo_url, branch, platform, platform_feature,
@@ -234,7 +234,7 @@ module MdbeCiParser
           platform, platform_feature = platform.split('_')
           platform_info = get_mdbe_platforms[platform]
           if platform_info.nil?
-            logger.write("Unknown platform #{platform}, skipped.")
+            logger.warn("Unknown platform #{platform}, skipped.")
             next
           end
           releases.append(form_pull_request_repo_info(platform_info, repo_url, branch,
