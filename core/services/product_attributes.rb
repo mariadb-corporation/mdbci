@@ -86,6 +86,7 @@ module ProductAttributes
     },
     'cmapi_ci' => {
       recipe: 'cmapi_ci::default',
+      repo_recipe: 'cmapi_ci::cmapi_ci_repos',
       name: 'cmapi_ci',
       repository: 'cmapi_ci',
       repo_file_name: 'cmapi_ci',
