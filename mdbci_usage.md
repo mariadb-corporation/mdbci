@@ -150,10 +150,11 @@ cookbook_name/
 
 ## Как добавить новый дистрибутив (OS / архитектура)
 
-1. Добавьте новую платформу в файл `core/commands/generate_repository_partials/repository_parser_core.rb` в:
+1. Добавьте новую платформу в файл [`core/commands/generate_repository_partials/repository_parser_core.rb`](core/commands/generate_repository_partials/repository_parser_core.rb) в:
 	- В список `PLATFORMS`.
 	- В список `DEB_VERSIONS` (при необходимости).
 	- В список `RPM_PLATFORMS` (при необходимости).
+  - В метод `platform_to_repo_name`.
 2. В файле `config/generate_repository_config.yaml` в продукты mdbe, mdbe_staging.
 3. Во все рецепты в `assets/chef-recipes/cookbooks/`. В рецептах может потребоваться:
 	- Выбор дистрибутива:
@@ -171,7 +172,8 @@ cookbook_name/
 		node.attributes['kernel']['machine'] == 'aarch64'
 		```
 4. При необходимости добавьте новый бокс.
-5. Пройтись поиском по проекту по названию старых дистрибутивов, например 'resolute', и при необходимости обновить найденные проверки.
+5. Пройтись по рецептам и убедиться, что подукты ставятся на новый дистрибутив.
+6. Пройтись поиском по проекту по названию старых дистрибутивов, например 'resolute', и при необходимости обновить найденные проверки.
 
 ## Добавление нового бокса
 
