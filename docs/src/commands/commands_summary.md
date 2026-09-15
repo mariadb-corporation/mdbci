@@ -131,7 +131,7 @@ More about [create-box-from-template command](create-box-from-template.md)
 
 Creates a new user on the VM.
 
-### deploy-examples
+### deploy
 
 Deploy examples from AppImage to the current working directory.
 

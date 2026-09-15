@@ -22,10 +22,10 @@ MDBCI also supports:
 MDBCI currently provides support for the following distributions:
 
 * CentOS 8, 9;
-* Debian 10 (Buster), 11 (Bullseye), 12 (Bookworm);
-* RHEL 8, 9;
-* Rocky Linux 8, 9;
-* SLES 12, 15;
-* Ubuntu 18.04 (Bionic Beaver), 20.04 (Focal Fossa), 22.04 (Jammy Jellyfish), 24.04 (Noble Numbat);
+* Debian 10 (Buster), 11 (Bullseye), 12 (Bookworm), 13 (Trixie);
+* RHEL 8, 9, 10;
+* Rocky Linux 8, 9, 10;
+* SLES 12, 15, 16;
+* Ubuntu 18.04 (Bionic Beaver), 20.04 (Focal Fossa), 22.04 (Jammy Jellyfish), 24.04 (Noble Numbat), 26.04 (Resolute);
 * Windows Server 2019 via Google Cloud Platform. [Read more](using_windows_machines.md);
 * Oracle Linux 8, 9, 10 which needs manual installation. [Read more](oracle_box_installation.md).
