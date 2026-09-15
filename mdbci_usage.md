@@ -1,13 +1,13 @@
 # mdbci
-Репозиторий: https://github.com/mariadb-corporation/mdbci
-Документация: https://mdbe-ci-repo.mariadb.net/MDBCI/doc/index.html
+Repository: https://github.com/mariadb-corporation/mdbci
+Documentation: https://mdbe-ci-repo.mariadb.net/MDBCI/doc/index.html
 
-## Окружение
-Версия ruby: 3.3.10
-Для упрощения установки нужной версии можно использовать утилиту [chruby](https://github.com/postmodern/chruby?ysclid=mrsz0hvbb7887987193).
-Работу над приложением удобно выполнять в IDE [VS Code](https://code.visualstudio.com/).
+## Dev environment
+Ruby version: 3.3.10
+To simplify Ruby installation: [chruby](https://github.com/postmodern/chruby?ysclid=mrsz0hvbb7887987193).
+Convinient IDE [VS Code](https://code.visualstudio.com/).
 
-В `~/config/mdbci/config.yaml` нужно поместить ключи:
+Keys should be put into `~/config/mdbci/config.yaml`:
 ```
 ---
 rhel:
@@ -39,23 +39,21 @@ mdbci:
   mdbci_directory: mdbci_directory
 ```
 
-Ключи требуется запросить у менеджера.
+## Build
+1. Clone repository https://github.com/mariadb-corporation/mdbci
+2. cd mdbci
+3. Install gem bundler: `gem install bundler`. (run ones)
+4. Install dependecies: `bundler install`. (run ones or after dependency changes)
 
-## Сборка
-1. Загрузить репозиторий https://github.com/mariadb-corporation/mdbci
-2. Перейти в директорию mdbci
-3. Установить gem bundler: `gem install bundler`. (Делается один раз)
-4. Загрузить зависимости: `bundler install`. (Делается один раз и при каждом обновлении зависимостей)
+## Usage expample
 
-## Пример использования
-
-Для примера рассмотрим развёртывание виртуальной машины и установку продукта.
-Для установки продукта сначала нужно запустить сканер. В корне проекта нужно выполнить команду
+Virtual machine deployment and MariaDB Enterprise installation example:
+First, run repository scanning. Run following command in the project root directory
 ```
 ./mdbci generate-product-repositories --product mdbe
 ```
-Далее нужно развернуть виртуальную машину.
-Для этого нужно создать в корне проекта директорию `vms` и добавить туда конфигурационный файл в формате json. Например, создадим файл `libvirt_rhel_10.json` с содержимым:
+Next, vertual machine deployment:
+Create `vms` in the project root directory. Create a machine description json file, e.g. `libvirt_rhel_10.json`:
 ```
 {
   "node012":
@@ -66,55 +64,54 @@ mdbci:
   }
 }
 ```
-Название бокса нужно брать [отсюда](https://github.com/mariadb-corporation/mdbci/tree/integration/config/boxes), в зависимости от целевой платформы и архитектуры.
+The list of boxes is available [here](https://github.com/mariadb-corporation/mdbci/tree/integration/config/boxes).
 
-Создадим машину и поднимем её:
+Generate virtual machine and start it:
 ```
 ./mdbci generate --template vms/libvirt_rhel_10.json vms/libvirt_rhel_10
 ./mdbci up vms/libvirt_rhel_10
 ```
 
-Установим продукт:
+Install MariaDB Enterprise:
 ```
 ./mdbci install_product --product 'mdbe' --product-version latest vms/libvirt_rhel_10/node012
 ```
 
-Когда машина больше не нужна удаляем её:
+Vertual machine destroying:
 ```
 ./mdbci destroy --keep-template vms/libvirt_rhel_10
 ```
 
-## Релиз обновления mdbeci
-После слития изменений в основную ветку следует выложить обновления на сервер. Для этого нужно в gcloud выполнить:
-1. Перейти https://mdbe-buildbot.mariadb.net/#/builders?tags=%2Bmaintenance
-2. Выбрать build_mdbci
-3. Нажать Force в правом верхнем углу и дождаться окончания
-4. на gcloud вызвать ./mdbci-devel/andrey/mdbci-update-script/update.sh
-5. При необходимости обновить файлы конфигураций на серверах hetzner через ssh:
+## MDBCI release process
+1. Select 'Maintanance' tab in the BuildBot https://mdbe-buildbot.mariadb.net/#/builders?tags=%2Bmaintenance
+2. Select build_mdbci BuildBot task
+3. Press "Force" button and wait for the task completion
+4. Run MDBCI self upgrade on the target server ./mdbci-devel/andrey/mdbci-update-script/update.sh
+5. Run MDBCI upgrade on all other servers (e.g. Hetzner over ssh):
 csadmin@116.202.194.94
 csadmin@116.202.197.17
 csadmin@116.202.197.12
 
 
-## Ключевые директории и файлы
+## Main source code directories and files
 
-| Директория / файл | Назначение |
+| Directory / file | Purpose |
 |-------------------|------------|
-| [`core/commands/`](core/commands) | Реализация CLI-команд |
-| [`core/commands/generate_repository_partials/`](core/commands/generate_repository_partials/) | Парсеры, которые сканируют удалённые репозитории продуктов и формируют JSON-конфигурации в каталоге `repo.d`. |
-| [`core/commands/generate_product_repositories_command.rb`](core/commands/generate_product_repositories_command.rb) | Диспетчер, который разбирает команду `generate-product-repositories`, определяет продукт, вызывает нужный парсер |
-| [`assets/chef-recipes/cookbooks/mariadb/recipes/mdberepos.rb`](assets/chef-recipes/cookbooks/mariadb/recipes/mdberepos.rb) | Chef-рецепт добавления репозитория и импорта GPG-ключей |
-| [`assets/chef-recipes/cookbooks/`](assets/chef-recipes/cookbooks/) | Все Chef-рецепты |
-| [`config/generate_repository_config.yaml`](config/generate_repository_config.yaml) | Основной конфиг для команды `generate-product-repositories`. Задаёт описание путей и ключей для каждого продукта |
-| [`core/session.rb`](core/session.rb) | Диспетчер CLI-команд |
-| [`core/commands/partials/`](core/commands/partials/) | Генераторы и конфигураторы инфраструктуры: Vagrant, Terraform (AWS/GCP/IBM/DigitalOcean) и др. |
-| [`config/boxes/`](config/boxes/) | JSON-файлы с описанием виртуальных машин для разных провайдеров |
-| [`core/services/`](core/services/) | Сервисы взаимодействия с облаками, репозиториями, генерация конфигураций |
+| [`core/commands/`](core/commands) | CLI-commands implementations |
+| [`core/commands/generate_repository_partials/`](core/commands/generate_repository_partials/) | Repository parsers (scanners) - tools that create `repo.d` (list of all available products versions). |
+| [`core/commands/generate_product_repositories_command.rb`](core/commands/generate_product_repositories_command.rb) | Dispatcher of `generate-product-repositories` command: detect product, select and call proper parser |
+| [`assets/chef-recipes/cookbooks/mariadb/recipes/mdberepos.rb`](assets/chef-recipes/cookbooks/mariadb/recipes/mdberepos.rb) | Chef-recipe to add repository and import GPG-keys |
+| [`assets/chef-recipes/cookbooks/`](assets/chef-recipes/cookbooks/) | Все Chef- recipes |
+| [`config/generate_repository_config.yaml`](config/generate_repository_config.yaml) | Repository parsers configuration `generate-product-repositories`. Defines URLs and keys for all supported products |
+| [`core/session.rb`](core/session.rb) | CLI-commands dispatcher |
+| [`core/commands/partials/`](core/commands/partials/) | infrastructure configurators: install and configure Vagrant, Terraform (AWS/GCP/IBM/DigitalOcean) etc. |
+| [`config/boxes/`](config/boxes/) | JSON-descriptions of virtual machines from different providers |
+| [`core/services/`](core/services/) | Clouds and repositories operations, generation of virtual machine configurations |
 
 
-## Как добавить новый сканер
+## New scanner implementation
 
-1. В `config/generate_repository_config.yaml` добавьте конфиг продукта по примеру других продуктов, например, так:
+1. Add new configuration into `config/generate_repository_config.yaml`, e.g.:
 ```yaml
 new_product:
   repo:
@@ -122,66 +119,66 @@ new_product:
     auth_key: new_product_auth
     keys: [https://repo.mariadb.net/new_product/GPG-KEY]
 ```
-2. В `core/commands/generate_repository_partials/` создать файл парсера (имя = lowercase + `_parser.rb`) и добавьте реализацию:
-	- Наследуйте `RepositoryParserCore`
-	- Реализуйте `self.parse(config, product_version, product_config, log, logger)`
-	- Используйте методы из `RepositoryParserCore`: `parse_repository(...)`, `parse_repository_recursive(...)`, `append_url(...)`
+2. Create a new parser: in put a new parser code into `core/commands/generate_repository_partials/`  (name = lowercase + `_parser.rb`):
+	- inherite `RepositoryParserCore`
+	- immplement `self.parse(config, product_version, product_config, log, logger)`
+	- use methods from `RepositoryParserCore`: `parse_repository(...)`, `parse_repository_recursive(...)`, `append_url(...)`
 
-В качестве примера можно смотреть на [`mdbe_ci_parser.rb `](core/commands/generate_repository_partials/mdbe_ci_parser.rb) или другие парсеры.
+A good parser example [`mdbe_ci_parser.rb `](core/commands/generate_repository_partials/mdbe_ci_parser.rb).
 
-3. В файле `core/commands/generate_product_repositories_command.rb` зарегистрируйте парсер. Обновите:
-	- метод `parse_repository`
-	- список `PRODUCTS_DIR_NAMES`
+3. Register parser in the `core/commands/generate_product_repositories_command.rb` file. Update:
+	- `parse_repository` method
+	- `PRODUCTS_DIR_NAMES` list
 
-## Как добавить новый продукт
+## New product inplementation
 
-1. В `assets/chef-recipes/cookbooks` создайте директорию с названием продукта и структурой:
+1. Create directory in the `assets/chef-recipes/cookbooks` with following structure:
 ```
 cookbook_name/
-├── recipes/          # Ruby-рецепты (install, purge, repos и т.д.)
-└── metadata.rb       # Метаданные cookbook (название, версия, автор, зависимости, список рецептов)
+├── recipes/          # Chef- recipes (install, purge, repos и т.д.)
+└── metadata.rb       # cookbook metadata (name, versions, author, dependency, list of recipes)
 ```
-Для примера можно ориентироваться на рецепт [`mariadb`](assets/chef-recipes/cookbooks/mariadb)
+Recipe example [`mariadb`](assets/chef-recipes/cookbooks/mariadb)
 
-2. В `recipes/` в файле new_product_install.rb реализуйте шаги по установке продукта. При необходимости выделяйте специфичные под каждый дистрибутив шаги.
-В `recipes/` new_product_repos.rb при необходимости реализуйте настройку сертификатов и ключей для репозитория, в зависимости от системы.
+2. In the `recipes/` directory the file new_product_install.rb implements product installation. If needed, the specific steps can be defined separately for every Linux distribution.
+The file new_product_repos.rb implements certificates and keys setup.
 
-3. Зарегистрируйте продукт в файле [`core/services/product_attributes.rb`](core/services/product_attributes.rb).
+3. Register product in the [`core/services/product_attributes.rb`](core/services/product_attributes.rb) file.
 
-## Как добавить новый дистрибутив (OS / архитектура)
+## New distrubition (OS / architecture) implementation (add a new platform)
 
-1. Добавьте новую платформу в файл [`core/commands/generate_repository_partials/repository_parser_core.rb`](core/commands/generate_repository_partials/repository_parser_core.rb) в:
-	- В список `PLATFORMS`.
-	- В список `DEB_VERSIONS` (при необходимости).
-	- В список `RPM_PLATFORMS` (при необходимости).
-  - В метод `platform_to_repo_name`.
-2. В файле `config/generate_repository_config.yaml` в продукты mdbe, mdbe_staging.
-3. Во все рецепты в `assets/chef-recipes/cookbooks/`. В рецептах может потребоваться:
-	- Выбор дистрибутива:
+1. Add platform to [`core/commands/generate_repository_partials/repository_parser_core.rb`](core/commands/generate_repository_partials/repository_parser_core.rb):
+	- into `PLATFORMS` list.
+	- into `DEB_VERSIONS` list (in needed).
+	- into `RPM_PLATFORMS` list (in needed).
+  - into `platform_to_repo_name` method.
+2. in the file `config/generate_repository_config.yaml` into products mdbe, mdbe_staging, etc.
+3. into all recipes in `assets/chef-recipes/cookbooks/`. Typical code templates for recipes:
+	- Distribution selection:
 		```ruby
 		case node[:platform]
 			`when 'debian'`,
 		```
-	- Выбор версии дистрибутива:
+	- Distribution version selection:
 		```ruby
 		case node[:platform_version].to_i
 		  when 8
 		```
-	- Выбор архитектуры:
+	- Architecture selection:
 		```ruby
 		node.attributes['kernel']['machine'] == 'aarch64'
 		```
-4. При необходимости добавьте новый бокс.
-5. Пройтись по рецептам и убедиться, что подукты ставятся на новый дистрибутив.
-6. Пройтись поиском по проекту по названию старых дистрибутивов, например 'resolute', и при необходимости обновить найденные проверки.
+4. Add a new box.
+5. Test products installation on the new platform.
+6. Grep all files for old distributions names and check if updates are needed.
 
-## Добавление нового бокса
+## Add a new box
 
-Новый бокс добавляется в файлы в `config/boxes/` в зависимости от архитектуры и провайдера.
+Add a new virtual machine description into `config/boxes/`
 
-## Что делать, если появились проблемы с сертификатами/ключами?
+## Certificates and keys problems solving
 
-Проблемы с ключами обычно можно определить по появлению в логе фрагмента, похожего на этот:
+Check logs for keys errors, e.g.:
 ```
 2026-07-07T07:50:21 DEBUG: ssh:       ================================================================================
 2026-07-07T07:50:21 DEBUG: ssh:       Error executing action `update` on resource 'apt_update[mariadb]'
@@ -205,14 +202,13 @@ cookbook_name/
 2026-07-07T07:50:21 DEBUG: ssh:       Ran ["apt-get", "-q", "update"] returned 100
 ```
 
-Для решения проблемы, нужно:
-1. Убедиться, что в файле `config/generate_repository_config.yaml` у соответствующего продукта актуальный ключ.
-2. Убедиться, что в файле `*_repos.rb` продукта ключи поставляются на машину в правильном формате. Для debian-подобных систем в виде `*.gpg`.
+To solve:
+1. Check `config/generate_repository_config.yaml` file for new product keys, check that keys are up to date.
+2. Check `*_repos.rb` product file for keys format. E.g. for Debian-like systems it should be `*.gpg`.
 
-## Как понять, где проблема?
+## Finding problems?
 
-В логе обычно указывается команда/метод, который вызывает падение.
-Например, в логе:
+The place uin the code taht caused problem usually is visible from the log, e.g.
 ```
 Error executing action `create` on resource 'docker_installation_package[default]'
 ================================================================================
@@ -227,7 +223,6 @@ Cookbook Trace: (most recent call first)
 
 Resource Declaration:
 ```
-видно, что у продукта Docker на этапе apt_repository пошло что-то не так. Ищем место в коде и исправляем, как [тут](https://github.com/mariadb-corporation/mdbci/pull/826/changes#diff-be95af79b788274a5d5272bc8b1207b8aa6ecf16a6bb9982258a4bea5c1a894dL37)
+In this log fragment: Docker the step "apt_repository" for Dcoker product failed. [Fix example](https://github.com/mariadb-corporation/mdbci/pull/826/changes#diff-be95af79b788274a5d5272bc8b1207b8aa6ecf16a6bb9982258a4bea5c1a894dL37)
 
-Иногда бывают проблемы с приоритетом репозиториев. Обычно проявляется тем, что ставится не указанная версия продукта, а другая.
-В этом случае следует зайти на машину и проверить приоритеты репозиториев. Если действительно они сбиты, то поправить можно [следующим способом](https://github.com/mariadb-corporation/mdbci/pull/827/changes#diff-cb3fc0c5e408d1b50295871bed9b15c9c73710dfc7c224d162f4421f90c7fa13R30).
+Ocassionally, the repository priority problem can appear: a wrong version of the product is being installed (usually from the distribution system repositories): [Fix example](https://github.com/mariadb-corporation/mdbci/pull/827/changes#diff-cb3fc0c5e408d1b50295871bed9b15c9c73710dfc7c224d162f4421f90c7fa13R30).
