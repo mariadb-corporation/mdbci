@@ -87,13 +87,19 @@ class TerraformGcpGenerator
 
     all_regions_quotas.value.each do |regional_quotas|
       region = regional_quotas[:region_name]
+      @ui.info("Checking region #{region}")
       instances_configuration = select_zone_and_generate_config(region, node_params)
-      next if instances_configuration.error?
+      if instances_configuration.error?
+        @ui.info(instances_configuration.error)
+        next
+      end
 
+      zone = instances_configuration.value[:zone]
       if @gcp_service.meets_quota?(instances_configuration, regional_quotas)
-        @ui.info("Selected region: #{region}")
+        @ui.info("Selected region: #{region}, zone: #{zone}")
         return Result.ok(instances_configuration)
       end
+      log_exceeded_quota(region, zone, instances_configuration.value[:instances], regional_quotas)
     end
     Result.error('Cannot select the region. CPU quota for all available regions will be exceeded')
   end
@@ -105,6 +111,7 @@ class TerraformGcpGenerator
   def select_zone_and_generate_config(region, node_params)
     zones = @gcp_service.list_region_zones(region)
     zones.each do |zone|
+      @ui.info("Checking zone #{zone} of region #{region}")
       generate_instances_configuration_for_zone(zone,
                                                 node_params).and_then do |instances_configuration|
         return Result.ok(
@@ -125,8 +132,12 @@ class TerraformGcpGenerator
     instances_configuration = []
     node_params.each do |node|
       result = generate_instance_params(node, zone)
-      return Result.error('Cannot launch the machines in the given zone') if result.error?
+      if result.error?
+        @ui.info("Cannot launch node #{node[:name]} in zone #{zone}: #{result.error}")
+        return Result.error("Cannot launch the machines in zone #{zone}")
+      end
 
+      @ui.info("Selected machine type #{result.value[:machine_type]} for node #{node[:name]} in zone #{zone}")
       instances_configuration << result
     end
     Result.ok(instances_configuration)
@@ -155,6 +166,20 @@ class TerraformGcpGenerator
   end
 
   private
+
+  # Log the CPUs required by the configuration and the CPUs available in each quota pool of the region.
+  # @param region [String] region name
+  # @param zone [String] zone name
+  # @param instances [Array<Result::Base>] instances configuration
+  # @param regional_quotas [Hash] CPU quotas of the region
+  def log_exceeded_quota(region, zone, instances, regional_quotas)
+    required = @gcp_service.count_required_cpus(instances, zone)
+                           .map { |pool, cpus| "#{pool}=#{cpus}" }.join(', ')
+    available = regional_quotas[:quotas]
+                .map { |quota| "#{quota[:pool_name]}=#{quota[:limit] - quota[:usage]}" }.join(', ')
+    @ui.info("CPU quota of region #{region} would be exceeded in zone #{zone}. " \
+             "Required CPUs: #{required}. Available CPUs: #{available}")
+  end
 
   # Log the information about the main parameters of the node.
   # @param node_params [Hash] list of the node parameters.
