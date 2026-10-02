@@ -14,13 +14,28 @@ module CloudServices
   # @param machine_types_list [Array<Hash>] list of machine types in format { cpu, ram, type }
   # @param cpu [Number] the number of virtual CPUs that are available to the instance
   # @param ram [Number] the amount of physical memory available to the instance, defined in MB
+  # @param available_cpus [Hash] optional, the number of CPUs that can still be allocated for each machine
+  #   type name. Machine types that do not fit are skipped and machine types of the same size are ordered
+  #   by the number of available CPUs. Machine types missing from the hash are not checked.
   # @return [Result::Base] instance type name.
-  def self.instance_type_by_preferences(machine_types_list, cpu, ram)
+  def self.instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus = {})
     candidates = machine_types_list
-           .sort_by { |t| [t[:cpu], t[:ram]] }
-           .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }
+                 .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }
     if candidates.empty?
       return Result.error('The type of machine that meets the specified parameters can not be found')
+    end
+
+    candidates = candidates.reject do |machine_type|
+      available = available_cpus[machine_type[:type]]
+      !available.nil? && available < machine_type[:cpu]
+    end
+    if candidates.empty?
+      return Result.error('The CPU quota is exceeded for all machine types that meet the specified parameters')
+    end
+
+    candidates = candidates.sort_by do |machine_type|
+      available = available_cpus.fetch(machine_type[:type], 0)
+      [machine_type[:cpu], machine_type[:ram], -available]
     end
 
     offset = ENV.fetch('MDBCI_MACHINE_TYPE_OFFSET', '0').to_i.clamp(0, candidates.length - 1)
@@ -30,20 +45,21 @@ module CloudServices
   # Selects the type of machine depending on the node parameters.
   # @param machine_types_list [Array<Hash>] list of machine types in format { cpu, ram, type }
   # @param node [Hash] node parameters
+  # @param available_cpus [Hash] optional, see instance_type_by_preferences
   # @return [Result::Base] instance type name.
-  def self.choose_instance_type(machine_types_list, node)
+  def self.choose_instance_type(machine_types_list, node, available_cpus = {})
     if node[:machine_type].nil? && node[:cpu_count].nil? && node[:memory_size].nil?
       if machine_type_available?(machine_types_list, node[:default_machine_type])
         Result.ok(node[:default_machine_type])
       else
         cpu = node[:default_cpu_count].to_i
         ram = node[:default_memory_size].to_i
-        instance_type_by_preferences(machine_types_list, cpu, ram)
+        instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus)
       end
     elsif node[:machine_type].nil?
       cpu = node[:cpu_count]&.to_i || node[:default_cpu_count].to_i
       ram = node[:memory_size]&.to_i || node[:default_memory_size].to_i
-      instance_type_by_preferences(machine_types_list, cpu, ram)
+      instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus)
     elsif machine_type_available?(machine_types_list, node[:machine_type])
       Result.ok(node[:machine_type])
     else
