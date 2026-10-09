@@ -226,6 +226,35 @@ class GcpService
     @logger.error(e.message)
   end
 
+  # Delete the given instances of a configuration, found with a single aggregated
+  # listing filtered by the configuration_id label instead of listing every zone.
+  # @param configuration_id [String] value of the configuration_id label of the instances.
+  # @param instance_names [Array<String>] names of the instances to delete.
+  def delete_configuration_instances(configuration_id, instance_names)
+    return if !configured? || instance_names.empty?
+
+    filter = "labels.configuration_id = \"#{configuration_id}\""
+    page_token = nil
+    loop do
+      response = @service.aggregated_list_instances(@gcp_config['project'], filter: filter, page_token: page_token)
+      (response.items || {}).each do |zone, scoped_list|
+        (scoped_list.instances || []).each do |instance|
+          next unless instance_names.include?(instance.name)
+
+          begin
+            @service.delete_instance(@gcp_config['project'], zone.split('/').last, instance.name)
+          rescue StandardError => e
+            @logger.error(e.message)
+          end
+        end
+      end
+      page_token = response.next_page_token
+      break if page_token.nil? || page_token.empty?
+    end
+  rescue StandardError => e
+    @logger.error(e.message)
+  end
+
   # Delete network specified by its name
   # @param network_name [String] name of the network to delete.
   def delete_network(network_name)
