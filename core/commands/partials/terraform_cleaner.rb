@@ -66,6 +66,13 @@ class TerraformCleaner
   private
 
   def cleanup_nodes(configuration_id, configuration_path, nodes, provider)
+    if provider == 'gcp'
+      @ui.info("Cleaning-up leftover machines using Google Cloud #{nodes}")
+      instance_names = nodes.map { |node| TerraformGcpGenerator.generate_instance_name(configuration_id, node) }
+      @gcp_service.delete_configuration_instances(configuration_id, instance_names)
+      return Result.ok('')
+    end
+
     destroy_result = []
     nodes.each do |node|
       destroy_machine_res = destroy_machine(configuration_id, configuration_path, node, provider)
