@@ -236,7 +236,7 @@ class GcpService
     filter = "labels.configuration_id = \"#{configuration_id}\""
     page_token = nil
     loop do
-      response = @service.aggregated_list_instances(@gcp_config['project'], filter: filter, page_token: page_token)
+      response = @service.list_aggregated_instances(@gcp_config['project'], filter: filter, page_token: page_token)
       (response.items || {}).each do |zone, scoped_list|
         (scoped_list.instances || []).each do |instance|
           next unless instance_names.include?(instance.name)
