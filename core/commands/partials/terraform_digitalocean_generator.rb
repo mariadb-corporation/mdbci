@@ -198,7 +198,7 @@ class TerraformDigitaloceanGenerator
       }
     )
     CloudServices
-      .choose_instance_type(@digitalocean_service.machine_types_list, node_params)
+      .choose_instance_type(@digitalocean_service.machine_types_list, node_params, logger: @ui)
       .and_then { |machine_type| Result.ok(node_params.merge({ machine_type: machine_type })) }
   end
 end

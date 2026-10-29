@@ -369,7 +369,8 @@ class TerraformAwsGenerator
                                       subnet_id: subnet_id,
                                       use_existing_vpc: use_existing_vpc? })
     machine_types = @aws_service.machine_types_list(node_params[:supported_instance_types])
-    CloudServices.choose_instance_type(machine_types, node_params).and_then do |machine_type|
+    CloudServices.choose_instance_type(machine_types, node_params,
+                                       logger: @ui).and_then do |machine_type|
       Result.ok(node_params.merge(machine_type: machine_type))
     end
   end

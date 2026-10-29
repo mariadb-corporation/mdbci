@@ -17,8 +17,10 @@ module CloudServices
   # @param available_cpus [Hash] optional, the number of CPUs that can still be allocated for each machine
   #   type name. Machine types that do not fit are skipped and machine types of the same size are ordered
   #   by the number of available CPUs. Machine types missing from the hash are not checked.
+  # @param logger [Out] optional, logger for the list of candidates and the selected offset
   # @return [Result::Base] instance type name.
-  def self.instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus = {})
+  def self.instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus = {},
+                                        logger: nil)
     candidates = machine_types_list
                  .select { |machine_type| (machine_type[:cpu] >= cpu) && (machine_type[:ram] >= ram) }
     if candidates.empty?
@@ -38,28 +40,46 @@ module CloudServices
       [machine_type[:cpu], machine_type[:ram], -available]
     end
 
-    offset = ENV.fetch('MDBCI_MACHINE_TYPE_OFFSET', '0').to_i.clamp(0, candidates.length - 1)
+    requested_offset = ENV.fetch('MDBCI_MACHINE_TYPE_OFFSET', '0').to_i
+    offset = requested_offset.clamp(0, candidates.length - 1)
+    log_candidates(logger, candidates, available_cpus, requested_offset, offset)
     Result.ok(candidates[offset][:type])
+  end
+
+  # Logs the sorted machine type candidates up to two past the selected offset and the offset itself.
+  def self.log_candidates(logger, candidates, available_cpus, requested_offset, offset)
+    return if logger.nil?
+
+    shown = candidates.first(offset + 3)
+    list = shown.map do |machine_type|
+      type = machine_type[:type]
+      available_cpus.key?(type) ? "#{type} (quota: #{available_cpus[type]})" : type
+    end
+    list << "... #{candidates.length - shown.length} more" if candidates.length > shown.length
+    logger.info("Machine type candidates: #{list.join(', ')}")
+    logger.info("MDBCI_MACHINE_TYPE_OFFSET=#{requested_offset}, selected candidate #{offset}: " \
+                "#{candidates[offset][:type]}")
   end
 
   # Selects the type of machine depending on the node parameters.
   # @param machine_types_list [Array<Hash>] list of machine types in format { cpu, ram, type }
   # @param node [Hash] node parameters
   # @param available_cpus [Hash] optional, see instance_type_by_preferences
+  # @param logger [Out] optional, see instance_type_by_preferences
   # @return [Result::Base] instance type name.
-  def self.choose_instance_type(machine_types_list, node, available_cpus = {})
+  def self.choose_instance_type(machine_types_list, node, available_cpus = {}, logger: nil)
     if node[:machine_type].nil? && node[:cpu_count].nil? && node[:memory_size].nil?
       if machine_type_available?(machine_types_list, node[:default_machine_type])
         Result.ok(node[:default_machine_type])
       else
         cpu = node[:default_cpu_count].to_i
         ram = node[:default_memory_size].to_i
-        instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus)
+        instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus, logger: logger)
       end
     elsif node[:machine_type].nil?
       cpu = node[:cpu_count]&.to_i || node[:default_cpu_count].to_i
       ram = node[:memory_size]&.to_i || node[:default_memory_size].to_i
-      instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus)
+      instance_type_by_preferences(machine_types_list, cpu, ram, available_cpus, logger: logger)
     elsif machine_type_available?(machine_types_list, node[:machine_type])
       Result.ok(node[:machine_type])
     else
