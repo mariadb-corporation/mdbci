@@ -438,7 +438,7 @@ class TerraformGcpGenerator
     )
     available_cpus = available_cpus_by_machine_type(supported_machine_types, regional_quotas)
     CloudServices.choose_instance_type(supported_machine_types, node_params,
-                                       available_cpus).and_then do |machine_type|
+                                       available_cpus, logger: @ui).and_then do |machine_type|
       Result.ok(node_params.merge(machine_type: machine_type))
     end
   end
