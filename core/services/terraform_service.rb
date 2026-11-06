@@ -128,7 +128,7 @@ module TerraformService
   # @param resource_type [String] resource type of nodes, for example: `aws_instance`
   # @return [Hash] Hash in format { 'node_1' => 'aws_instance.node_1', 'node_2' => 'aws_instance.node_2' }.
   def self.nodes_to_resources(nodes, resource_type)
-    nodes.map { |node| [node, "#{resource_type}.#{node}"] }.to_h
+    Array(nodes).map { |node| [node, "#{resource_type}.#{node}"] }.to_h
   end
 
   # Select resource names from list by it type.
