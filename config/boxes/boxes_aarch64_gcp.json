@@ -1,15 +1,4 @@
 {
-  "aarch64_debian_bullseye_gcp": {
-    "provider": "gcp",
-    "architecture": "aarch64",
-    "image": "debian-cloud/debian-11-arm64",
-    "platform": "debian",
-    "platform_version": "bullseye",
-    "default_machine_type": "t2a-standard-1",
-    "default_cpu_count": "1",
-    "default_memory_size": "4096",
-    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
-  },
   "aarch64_debian_bookworm_gcp": {
     "provider": "gcp",
     "architecture": "aarch64",
@@ -65,17 +54,77 @@
     "default_memory_size": "4096",
     "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
   },
-  "aarch64_ubuntu_focal_gcp": {
+  "aarch64_alma_8_gcp": {
     "provider": "gcp",
     "architecture": "aarch64",
-    "image": "ubuntu-os-cloud/ubuntu-2004-lts-arm64",
-    "platform": "ubuntu",
-    "platform_version": "focal",
+    "image": "almalinux-cloud/almalinux-8-arm64",
+    "platform": "alma",
+    "platform_version": "8",
     "default_machine_type": "t2a-standard-1",
     "default_cpu_count": "1",
     "default_memory_size": "4096",
     "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
   },
+  "aarch64_alma_9_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "almalinux-cloud/almalinux-9-arm64",
+    "platform": "alma",
+    "platform_version": "9",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+  "aarch64_alma_10_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "almalinux-cloud/almalinux-10-arm64",
+    "platform": "alma",
+    "platform_version": "10",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+
+  "aarch64_rhel_8_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "rhel-cloud/rhel-8-arm64",
+    "platform": "rhel",
+    "platform_version": "8",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "configure_subscription_manager": "false",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+  "aarch64_rhel_9_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "rhel-cloud/rhel-9-arm64",
+    "platform": "rhel",
+    "platform_version": "9",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "configure_subscription_manager": "false",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+  "aarch64_rhel_10_gcp": {
+    "provider": "gcp",
+    "architecture": "aarch64",
+    "image": "rhel-cloud/rhel-10-arm64",
+    "platform": "rhel",
+    "platform_version": "10",
+    "default_machine_type": "t2a-standard-1",
+    "default_cpu_count": "1",
+    "default_memory_size": "4096",
+    "configure_subscription_manager": "false",
+    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
+  },
+
   "aarch64_ubuntu_jammy_gcp": {
     "provider": "gcp",
     "architecture": "aarch64",
@@ -138,18 +187,6 @@
     "architecture": "aarch64",
     "image": "suse-cloud/sles-15-sp5-arm64",
     "platform": "sles",
-    "platform_version": "15",
-    "default_machine_type": "t2a-standard-1",
-    "default_cpu_count": "1",
-    "default_memory_size": "4096",
-    "configure_suse_connect": "true",
-    "supported_instance_types": ["t2a-standard-1", "t2a-standard-16", "t2a-standard-2", "t2a-standard-32", "t2a-standard-4", "t2a-standard-48", "t2a-standard-8"]
-  },
-  "aarch64_suse_15_gcp": {
-    "provider": "gcp",
-    "architecture": "aarch64",
-    "image": "opensuse-leap-15-6-v20250408-arm64",
-    "platform": "opensuse",
     "platform_version": "15",
     "default_machine_type": "t2a-standard-1",
     "default_cpu_count": "1",

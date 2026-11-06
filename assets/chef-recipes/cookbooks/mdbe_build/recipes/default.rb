@@ -415,7 +415,6 @@ sles_15_packages = %w[
   libxml2-devel
   ncurses-devel
   perl-Data-Dump
-  libsepol2
   java-1_8_0-openjdk
   java-1_8_0-openjdk-devel
   libopenssl-devel
@@ -562,6 +561,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
     end
+
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
@@ -570,20 +570,32 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --set-enabled powertools'
       end
     end
+    if %w[rhel redhat].include? node[:platform]
+      execute 'Enable CodeReady Builder repository' do
+        command 'REPO_ID=$(dnf repolist --all | grep -oE "^(rhui-)?codeready-builder-for-rhel-8-(x86_64-|aarch64-)?rhui-rpms" | head -n 1) && dnf config-manager --set-enabled "${REPO_ID}"'
+      end
+    end
     if node[:platform] == 'oracle'
       execute 'Enable PowerTools repository' do
         command 'dnf config-manager --set-enabled ol8_codeready_builder'
-      end
-    end
-    if node[:platform] == 'redhat'
-      execute 'Enable CodeReady Builder repository' do
-        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
       end
     end
     if %w[almalinux rocky redhat].include? node[:platform]
       execute 'Enable mariadb-devel module' do
         command 'dnf -y module enable mariadb-devel'
       end
+    end
+    package 'openssl' do
+      action :upgrade
+    end
+    package %w[openssh openssh-clients openssh-server] do
+      action :upgrade
+      notifies :restart, 'service[sshd]', :delayed
+    end
+
+    service 'sshd' do
+      supports status: true, restart: true, reload: true
+      action :nothing
     end
   when 9 # RHEL 9 / AlmaLinux 9 / Oracle Linux 9
     packages = general_packages.concat(centos_packages).concat(rhel_9_packages)
@@ -605,11 +617,26 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     end
     if %w[rhel redhat].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
-        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-9-rhui-rpms'
+        command 'REPO_ID=$(dnf repolist --all | grep -oE "^(rhui-)?codeready-builder-for-rhel-9-(x86_64-|aarch64-)?rhui-rpms" | head -n 1) && dnf config-manager --set-enabled "${REPO_ID}"'
       end
+    end
+    package 'openssl' do
+      action :upgrade
+    end
+    package %w[openssh openssh-clients openssh-server] do
+      action :upgrade
+      notifies :restart, 'service[sshd]', :delayed
+    end
+
+    service 'sshd' do
+      supports status: true, restart: true, reload: true
+      action :nothing
     end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
+    execute 'Enable EPEL repository' do
+      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
+    end
     case node[:platform]
     when 'almalinux', 'rocky'
       execute 'Enable CodeReady Builder repository' do
@@ -622,18 +649,28 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
       end
     when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
-        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpms'
+        command 'REPO_ID=$(dnf repolist --all | grep -oE "^(rhui-)?codeready-builder-for-rhel-10-(x86_64-|aarch64-)?rhui-rpms" | head -n 1) && dnf config-manager --set-enabled "${REPO_ID}"'
       end
     end
-    execute 'install epel-release' do
-      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
-    end
     package 'openssl' do
+      action :upgrade
+    end
+    package 'openssh' do
       action :upgrade
     end
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
+    packages.delete('libpmem-devel') if node.attributes['kernel']['machine'] == 'aarch64'
+    package %w[openssh openssh-clients openssh-server] do
+      action :upgrade
+      notifies :restart, 'service[sshd]', :delayed
+   end
+
+   service 'sshd' do
+     supports status: true, restart: true, reload: true
+     action :nothing
+   end
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
@@ -644,6 +681,7 @@ when 'suse'
   when 15 # Sles 15
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_15_packages)
     minor_platform_version = node[:platform_version].to_s.split('.').last
+    packages << (minor_platform_version.to_f <= 5 ? 'libsepol1' : 'libsepol2')
     if minor_platform_version.to_f >= 7
       execute 'Switch on the sle-module-legacy module' do
         command "SUSEConnect -p sle-module-legacy/15.#{minor_platform_version}/#{node.attributes['kernel']['machine']}"
@@ -666,7 +704,7 @@ when 'suse'
         action :add
         gpgcheck false
         if node.attributes['kernel']['machine'] == 'aarch64'
-          baseurl "https://download.opensuse.org/repositories/devel:/tools:/building/#{node[:platform_version]}/"
+          baseurl "https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/"
         else
           baseurl "https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/"
         end
@@ -705,7 +743,10 @@ packages.each do |package_name|
     case node[:platform]
     when 'redhat', 'centos'
       flush_cache({ before: true })
+    when 'suse', 'opensuseleap' 
+      options '--force-resolution --oldpackage'
     end
+    not_if { package_name == 'libpmem-devel' && node['kernel']['machine'] == 'aarch64' }
     ignore_failure node.attributes['kernel']['machine'] == 'aarch64'
   end
 end

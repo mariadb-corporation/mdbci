@@ -8,6 +8,17 @@ action :install do
   package 'iptables' if platform_family?('suse')
 end
 
+case node[:platform]
+when 'alma'
+  case node[:platform_version].to_i
+  when 9
+    action :install do
+      package 'nftables'
+    end
+  end
+end
+
+
 action_class do
   def install_for_debian_based
     execute 'Install iptables-persistent' do
