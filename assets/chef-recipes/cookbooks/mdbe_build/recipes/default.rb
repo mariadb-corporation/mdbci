@@ -562,12 +562,18 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install epel-release' do
       command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
     end
+
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
     if %w[almalinux rocky centos].include? node[:platform]
       execute 'Enable PowerTools repository' do
         command 'dnf config-manager --set-enabled powertools'
+      end
+    end
+    if %w[rhel redhat].include? node[:platform]
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
       end
     end
     if node[:platform] == 'oracle'
@@ -598,6 +604,11 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --enable ol9_codeready_builder'
       end
     end
+    if %w[rhel redhat].include? node[:platform]
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
+      end
+    end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
     case node[:platform]
@@ -611,8 +622,11 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --set-enabled ol10_codeready_builder'
       end
     when 'rhel', 'redhat'
-      execute 'Enable CodeReady Builder repository' do
+      execute 'Enable EPEL repository' do
         command 'sudo dnf install -y https://fedoraproject.org'
+      end
+      execute 'Enable CodeReady Builder repository' do
+        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
       end
     end
     package 'openssl' do
