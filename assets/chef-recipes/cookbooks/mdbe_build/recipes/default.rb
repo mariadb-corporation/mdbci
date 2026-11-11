@@ -575,11 +575,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --set-enabled ol8_codeready_builder'
       end
     end
-    if node[:platform] == 'redhat'
-      execute 'Enable CodeReady Builder repository' do
-        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms'
-      end
-    end
     if %w[almalinux rocky redhat].include? node[:platform]
       execute 'Enable mariadb-devel module' do
         command 'dnf -y module enable mariadb-devel'
@@ -603,11 +598,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --enable ol9_codeready_builder'
       end
     end
-    if %w[rhel redhat].include? node[:platform]
-      execute 'Enable CodeReady Builder repository' do
-        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-9-rhui-rpms'
-      end
-    end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
     case node[:platform]
@@ -622,11 +612,8 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
       end
     when 'rhel', 'redhat'
       execute 'Enable CodeReady Builder repository' do
-        command 'dnf config-manager --set-enabled codeready-builder-for-rhel-10-rhui-rpms'
+        command 'sudo dnf install -y https://fedoraproject.org'
       end
-    end
-    execute 'install epel-release' do
-      command 'dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
     end
     package 'openssl' do
       action :upgrade
