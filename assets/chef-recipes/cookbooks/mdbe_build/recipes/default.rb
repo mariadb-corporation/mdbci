@@ -573,7 +573,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     end
     if %w[rhel redhat].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
+        command 'sudo dnf config-manager --set-enabled rhui-codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
       end
     end
     if node[:platform] == 'oracle'
@@ -606,7 +606,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     end
     if %w[rhel redhat].include? node[:platform]
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
+        command 'sudo dnf config-manager --set-enabled rhui-codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
       end
     end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
@@ -626,7 +626,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'sudo dnf install -y https://fedoraproject.org'
       end
       execute 'Enable CodeReady Builder repository' do
-        command 'sudo dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
+        command 'sudo dnf config-manager --set-enabled rhui-codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
       end
     end
     package 'openssl' do
