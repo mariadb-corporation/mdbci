@@ -623,7 +623,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
       end
     when 'rhel', 'redhat'
       execute 'Enable EPEL repository' do
-        command 'sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
+        command 'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
       end
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled rhui-codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
