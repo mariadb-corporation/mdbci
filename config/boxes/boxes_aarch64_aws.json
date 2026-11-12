@@ -108,7 +108,7 @@
   "aarch64_sles_15_aws": {
     "provider": "aws",
     "architecture": "aarch64",
-    "ami": "ami-033017e02e11906c7",
+    "ami": "ami-0ee24561ff22c5f98",
     "user": "ec2-user",
     "platform": "sles",
     "platform_version": "15",
