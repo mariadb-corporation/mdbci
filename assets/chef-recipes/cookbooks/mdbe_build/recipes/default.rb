@@ -663,12 +663,8 @@ when 'suse'
       end
       packages.delete('libpmem-devel') if node.attributes['kernel']['machine'] == 'aarch64'
     else
-      cookbook_file '/etc/zypp/repos.d/scons.repo' do
-        source 'scons.repo' # Optional: or use a template, or write via a bash block
-        action :nothing
-      end
       execute 'add scons repository' do
-        command "zypper addrepo --refresh https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/ 'scons'"
+        command "zypper --non-interactive addrepo --refresh https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/ scons"
         not_if 'zypper lr | grep -q scons'
       end
     end
