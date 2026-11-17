@@ -707,6 +707,9 @@ packages.each do |package_name|
     when 'redhat', 'centos'
       flush_cache({ before: true })
     end
+    when 'suse', 'opensuseleap'
+      options '--force-resolution'
+    end
     ignore_failure node.attributes['kernel']['machine'] == 'aarch64'
   end
 end
