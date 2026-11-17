@@ -611,6 +611,9 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     end
   when 10 # RHEL 10 / AlmaLinux 10 / Oracle Linux 10
     packages = general_packages.concat(centos_packages).concat(rhel_10_packages)
+    execute 'Enable EPEL repository' do
+      command 'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
+    end
     case node[:platform]
     when 'almalinux', 'rocky'
       execute 'Enable CodeReady Builder repository' do
@@ -622,9 +625,6 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
         command 'dnf config-manager --set-enabled ol10_codeready_builder'
       end
     when 'rhel', 'redhat'
-      execute 'Enable EPEL repository' do
-        command 'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm'
-      end
       execute 'Enable CodeReady Builder repository' do
         command 'sudo dnf config-manager --set-enabled rhui-codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rhui-rpms'
       end
