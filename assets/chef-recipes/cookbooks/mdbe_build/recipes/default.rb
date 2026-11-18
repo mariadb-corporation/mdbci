@@ -361,6 +361,7 @@ suse_and_sles_packages = %w[
   gzip
   krb5-devel
   libaio-devel
+  #libcurl-devel
   libevent-devel
   libgcrypt-devel
   libgnutls-devel
