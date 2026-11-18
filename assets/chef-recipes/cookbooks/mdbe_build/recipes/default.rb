@@ -361,7 +361,7 @@ suse_and_sles_packages = %w[
   gzip
   krb5-devel
   libaio-devel
-  #libcurl-devel
+  libcurl-devel
   libevent-devel
   libgcrypt-devel
   libgnutls-devel
@@ -672,9 +672,6 @@ when 'suse'
           baseurl "https://download.opensuse.org/distribution/leap/#{node[:platform_version]}/repo/oss/"
         end
       end
-    end
-    execute 'install libcurl-devel' do
-      command 'echo -e "1\n" | script -q -c "zypper install --no-recommends libcurl-devel" /dev/null'
     end
     execute 'install libboost-devel' do
       command "zypper -n install --force --repo SLE-Module-Basesystem15-SP#{minor_platform_version}-Pool libboost_*-devel"
