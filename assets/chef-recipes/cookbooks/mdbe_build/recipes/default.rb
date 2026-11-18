@@ -367,7 +367,6 @@ suse_and_sles_packages = %w[
   libgpg-error-devel
   libpmem-devel
   libtool
-  libxml2-devel
   lsb-release
   lzo-devel
   ncurses-devel
@@ -674,6 +673,9 @@ when 'suse'
     end
     execute 'install libcurl-devel' do
       command 'echo -e "1\n" | script -q -c "zypper install --no-recommends libcurl-devel" /dev/null'
+    end
+    execute 'install libxml2-devel' do
+      command 'echo -e "1\n" | script -q -c "zypper install --no-recommends libxml2-devel" /dev/null'
     end
     execute 'install libboost-devel' do
       command "zypper -n install --force --repo SLE-Module-Basesystem15-SP#{minor_platform_version}-Pool libboost_*-devel"
