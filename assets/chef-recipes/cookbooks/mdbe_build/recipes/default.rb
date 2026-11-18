@@ -415,7 +415,6 @@ sles_15_packages = %w[
   libxml2-devel
   ncurses-devel
   perl-Data-Dump
-  libsepol2
   java-1_8_0-openjdk
   java-1_8_0-openjdk-devel
   libopenssl-devel
@@ -645,6 +644,7 @@ when 'suse'
   when 15 # Sles 15
     packages = general_packages.concat(suse_and_sles_packages).concat(sles_15_packages)
     minor_platform_version = node[:platform_version].to_s.split('.').last
+    packages << (minor_platform_version.to_F <= 5 ? 'libsepol1' : 'libsepol2')
     if minor_platform_version.to_f >= 7
       execute 'Switch on the sle-module-legacy module' do
         command "SUSEConnect -p sle-module-legacy/15.#{minor_platform_version}/#{node.attributes['kernel']['machine']}"
