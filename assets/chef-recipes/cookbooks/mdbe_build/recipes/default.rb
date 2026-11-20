@@ -634,6 +634,7 @@ when 'centos', 'redhat', 'rocky', 'almalinux', 'oracle'
     execute 'install development tools' do
       command "dnf -y groupinstall 'Development Tools'"
     end
+    packages.delete('libpmem-devel') if node.attributes['kernel']['machine'] == 'aarch64'
   end
 when 'opensuseleap' # Suse 15
   packages = general_packages.concat(suse_and_sles_packages).concat(suse_packages)
