@@ -710,6 +710,7 @@ packages.each do |package_name|
     when 'suse', 'opensuseleap' 
       options '--force-resolution --oldpackage'
     end
+    not_if { package_name == 'libpmem-devel' && node['kernel']['machine'] == 'aarch64' }
     ignore_failure node.attributes['kernel']['machine'] == 'aarch64'
   end
 end
